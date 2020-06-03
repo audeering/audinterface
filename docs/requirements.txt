@@ -1,0 +1,4 @@
+audeer
+sphinx
+sphinx-audeering-theme
+sphinx-autodoc-typehints
