@@ -7,7 +7,7 @@ import pandas as pd
 import audeer
 import audsp
 
-import audinterface.core.utils as utils
+from audinterface.core import utils
 
 
 class Process:
@@ -22,6 +22,12 @@ class Process:
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
         resample: if ``True`` enforces given sampling rate by resampling
+        num_workers: number of parallel jobs or 1 for sequential
+            processing. If ``None`` will be set to the number of
+            processors on the machine multiplied by 5 in case of
+            multithreading and number of processors in case of
+            multiprocessing
+        multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
         kwargs: additional keyword arguments to the processing function
 
@@ -35,6 +41,8 @@ class Process:
             process_func: typing.Callable[..., typing.Any] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            num_workers: typing.Optional[int] = 1,
+            multiprocessing: bool = False,
             verbose: bool = False,
             **kwargs,
     ):
@@ -43,6 +51,8 @@ class Process:
                 'sampling_rate has to be provided for resample = True.'
             )
         self.sampling_rate = sampling_rate
+        self.num_workers = num_workers
+        self.multiprocessing = multiprocessing
         self.verbose = verbose
         if process_func is None:
             def process_func(signal, _):
@@ -69,9 +79,9 @@ class Process:
 
         Args:
             file: file path
-            channel: channel number
             start: start processing at this position
             end: end processing at this position
+            channel: channel number
 
         Returns:
             Output of process function
@@ -110,24 +120,28 @@ class Process:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
-        data = [None] * len(files)
-        with audeer.progress_bar(
-                files,
-                total=len(files),
-                disable=not self.verbose,
-        ) as pbar:
-            for idx, file in enumerate(pbar):
-                desc = audeer.format_display_message(file, pbar=True)
-                pbar.set_description(desc, refresh=True)
-                data[idx] = self.process_file(file, channel=channel)
-        return pd.Series(data, index=pd.Index(files, name='file'))
+        params = [
+            (
+                (audeer.safe_path(file), ),
+                {'channel': channel},
+            ) for file in files
+        ]
+        y = utils.run_tasks(
+            self.process_file,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(files)} files',
+        )
+        return pd.Series(y, index=pd.Index(files, name='file'))
 
     def process_folder(
             self,
             root: str,
             *,
-            filetype: str = 'wav',
             channel: int = None,
+            filetype: str = 'wav',
     ) -> pd.Series:
         r"""Process files in a folder.
 
@@ -135,8 +149,8 @@ class Process:
 
         Args:
             root: root folder
-            filetype: file extension
             channel: channel number
+            filetype: file extension
 
         Returns:
             Dictionary mapping files to output of process function
@@ -215,7 +229,6 @@ class Process:
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
-            sampling_rate:
             index: a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
@@ -226,21 +239,23 @@ class Process:
         """
         utils.check_index(index)
 
-        y = [None] * len(index)
+        if index.empty:
+            return pd.Series(None, index=index)
 
-        with audeer.progress_bar(
-                index,
-                total=len(index),
-                disable=not self.verbose,
-        ) as pbar:
-            for idx, (start, end) in enumerate(pbar):
-                desc = audeer.format_display_message(
-                    'f{start} - {end}',
-                    pbar=True,
-                )
-                pbar.set_description(desc, refresh=True)
-                y[idx] = self.process_signal(signal, sampling_rate,
-                                             start=start, end=end)
+        params = [
+            (
+                (signal, sampling_rate, ),
+                {'start': start, 'end': end, },
+            ) for start, end in index
+        ]
+        y = utils.run_tasks(
+            self.process_signal,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
 
         return pd.Series(y, index=index)
 
@@ -257,7 +272,7 @@ class Process:
 
         Args:
             index: index with segment information
-            channel: channel number (default 0)
+            channel: channel number
 
         Returns:
             Series with processed segments in the Unified Format
@@ -273,21 +288,26 @@ class Process:
 
 
         """
-        if not index.names == ('file', 'start', 'end'):
-            raise ValueError('Not a segmented index conform to Unified Format')
+        utils.check_index(index)
 
-        y = [None] * len(index)
+        if index.empty:
+            return pd.Series(None, index=index)
 
-        with audeer.progress_bar(
-                index,
-                total=len(index),
-                disable=not self.verbose,
-        ) as pbar:
-            for idx, (file, start, end) in enumerate(pbar):
-                desc = audeer.format_display_message(file, pbar=True)
-                pbar.set_description(desc, refresh=True)
-                y[idx] = self.process_file(file, channel=channel, start=start,
-                                           end=end)
+        params = [
+            (
+                (audeer.safe_path(file), ),
+                {'start': start, 'end': end, 'channel': channel, },
+            )
+            for file, start, end in index
+        ]
+        y = utils.run_tasks(
+            self.process_file,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
 
         return pd.Series(y, index=index)
 
@@ -396,8 +416,6 @@ class ProcessWithContext:
                 and sampling_rate != self.sampling_rate
         ):
             if self.resample is not None:
-                # TODO: support stereo, see
-                # https://gitlab.audeering.com/tools/pyaudsp/-/issues/20
                 signal = self.resample(signal, sampling_rate)
                 signal = np.atleast_2d(signal)
                 sampling_rate = self.sampling_rate
@@ -419,13 +437,12 @@ class ProcessWithContext:
     def process_unified_format_index(
             self,
             index: pd.MultiIndex,
-            *,
             channel: int = None) -> pd.Series:
         r"""Process from a segmented index conform to the `Unified Format`_.
 
         Args:
             index: index with segment information
-            channel: channel number (default 0)
+            channel: channel number
 
         Returns:
             Series with processed segments in the Unified Format

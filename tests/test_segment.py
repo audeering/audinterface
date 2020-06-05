@@ -36,11 +36,21 @@ def test_file(tmpdir):
     assert all(result.levels[2] == index.levels[1] + pd.to_timedelta('1s'))
 
 
-def test_folder(tmpdir):
+@pytest.mark.parametrize(
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+def test_folder(tmpdir, num_workers, multiprocessing):
     model = audinterface.Segment(
         segment_func=lambda s, sr: index,
         sampling_rate=None,
         resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
         verbose=False,
     )
     path = str(tmpdir.mkdir('wav'))

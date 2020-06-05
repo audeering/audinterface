@@ -6,7 +6,7 @@ import pandas as pd
 
 import audeer
 
-import audinterface.core.utils as utils
+from audinterface.core import utils
 from audinterface.core.process import Process
 
 
@@ -27,6 +27,12 @@ class Segment:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
+        num_workers: number of parallel jobs or 1 for sequential
+            processing. If ``None`` will be set to the number of
+            processors on the machine multiplied by 5 in case of
+            multithreading and number of processors in case of
+            multiprocessing
+        multiprocessing: use multiprocessing instead of multithreading
         resample: if ``True`` enforces given sampling rate by resampling
         verbose: show debug messages
         kwargs: additional keyword arguments to the processing function
@@ -41,6 +47,8 @@ class Segment:
             segment_func: typing.Callable[..., pd.MultiIndex] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            num_workers: typing.Optional[int] = 1,
+            multiprocessing: bool = False,
             verbose: bool = False,
             **kwargs,
     ):
@@ -50,11 +58,15 @@ class Segment:
                     [pd.to_timedelta([]), pd.to_timedelta([])],
                     names=['start', 'end']
                 )
-        self.process = Process(process_func=segment_func,
-                               sampling_rate=sampling_rate,
-                               resample=resample,
-                               verbose=verbose,
-                               **kwargs)
+        self.process = Process(
+            process_func=segment_func,
+            sampling_rate=sampling_rate,
+            resample=resample,
+            num_workers=num_workers,
+            multiprocessing=multiprocessing,
+            verbose=verbose,
+            **kwargs,
+        )
 
     def segment_file(
             self,
@@ -79,8 +91,9 @@ class Segment:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
-        index = self.process.process_file(file, start=start,
-                                          end=end, channel=channel)
+        index = self.process.process_file(
+            file, start=start, end=end, channel=channel,
+        )
         files = [file] * len(index)
         if start is not None:
             starts = index.levels[0] + start
@@ -133,8 +146,8 @@ class Segment:
             self,
             root: str,
             *,
-            filetype: str = 'wav',
             channel: int = None,
+            filetype: str = 'wav',
     ) -> pd.MultiIndex:
         r"""Segment files in a folder.
 
@@ -142,8 +155,8 @@ class Segment:
 
         Args:
             root: root folder
-            filetype: file extension
             channel: channel number
+            filetype: file extension
 
         Returns:
             Segmented index in the Unified Format
@@ -180,7 +193,7 @@ class Segment:
 
         """
         index = self.process.process_signal(
-            signal, sampling_rate, start=start, end=end
+            signal, sampling_rate, start=start, end=end,
         )
         utils.check_index(index)
         if start is not None:

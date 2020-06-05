@@ -22,6 +22,7 @@ Example:
     1.0
 
 """
+from audinterface import utils
 from audinterface.core.process import (
     Process,
     ProcessWithContext,

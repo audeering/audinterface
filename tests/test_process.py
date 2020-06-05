@@ -26,7 +26,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 
 @pytest.mark.parametrize(
-    'process_func,signal,selected_channel,expected_output',
+    'process_func, signal, selected_channel, expected_output',
     [
         (
             signal_max,
@@ -82,11 +82,21 @@ def test_channel(
     np.testing.assert_almost_equal(output, expected_output, decimal=4)
 
 
-def test_folder(tmpdir):
+@pytest.mark.parametrize(
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+def test_folder(tmpdir, num_workers, multiprocessing):
     model = audinterface.Process(
         process_func=lambda signal, sampling_rate: signal,
         sampling_rate=None,
         resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
         verbose=False,
     )
     sampling_rate = 8000
@@ -110,8 +120,8 @@ def test_folder(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'process_func,process_func_kwargs,signal,sampling_rate,'
-    'start,end,expected_signal',
+    'process_func, process_func_kwargs, signal, sampling_rate,'
+    'start, end, expected_signal',
     [
         (
             None,
@@ -218,7 +228,15 @@ def test_process_signal(
 
 
 @pytest.mark.parametrize(
-    'process_func,signal,sampling_rate,index',
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+@pytest.mark.parametrize(
+    'process_func, signal, sampling_rate, index',
     [
         (
             None,
@@ -306,6 +324,8 @@ def test_process_signal(
     ],
 )
 def test_process_signal_from_index(
+        num_workers,
+        multiprocessing,
         process_func,
         signal,
         sampling_rate,
@@ -315,6 +335,8 @@ def test_process_signal_from_index(
         process_func=process_func,
         sampling_rate=None,
         resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
         verbose=False,
     )
     result = model.process_signal_from_index(signal, sampling_rate, index)
@@ -341,7 +363,7 @@ def test_read_audio(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'signal_sampling_rate,model_sampling_rate,resample',
+    'signal_sampling_rate, model_sampling_rate, resample',
     [
         pytest.param(
             44100,
@@ -387,12 +409,22 @@ def test_sampling_rate_mismatch(
     model.process_signal(signal, signal_sampling_rate)
 
 
-def test_unified_format_index(tmpdir):
+@pytest.mark.parametrize(
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+def test_unified_format_index(tmpdir, num_workers, multiprocessing):
 
     model = audinterface.Process(
         process_func=None,
         sampling_rate=None,
         resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
         verbose=False,
     )
     sampling_rate = 8000
@@ -430,8 +462,33 @@ def test_unified_format_index(tmpdir):
         np.testing.assert_equal(signal, value)
 
     # bad index
-    index = pd.MultiIndex(levels=[[], [], []],
-                          codes=[[], [], []],
-                          names=['no', 'unified', 'format'])
+    index = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            pd.to_timedelta([1, 2, 3], unit='s'),
+            pd.to_timedelta([2, 3, 4], unit='s'),
+        ],
+        names=['no', 'unified', 'format'],
+    )
+    with pytest.raises(ValueError):
+        model.process_unified_format_index(index)
+    index = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            [1, 2, 3],
+            pd.to_timedelta([2, 3, 4], unit='s'),
+        ],
+        names=['file', 'start', 'end'],
+    )
+    with pytest.raises(ValueError):
+        model.process_unified_format_index(index)
+    index = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            pd.to_timedelta([1, 2, 3], unit='s'),
+            [2, 3, 4],
+        ],
+        names=['file', 'start', 'end'],
+    )
     with pytest.raises(ValueError):
         model.process_unified_format_index(index)

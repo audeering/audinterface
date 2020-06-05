@@ -1,23 +1,35 @@
+import concurrent.futures
 import typing
 
 import numpy as np
 import pandas as pd
 
+import audeer
 import audiofile as af
 
 
 def check_index(
         index: pd.MultiIndex
 ):
-    if not len(index.levels) == 2:
+    if len(index.levels) == 2:
+        if not index.levels[0].dtype == 'timedelta64[ns]':
+            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
+                             f', expected timedelta64[ns].')
+        if not index.levels[1].dtype == 'timedelta64[ns]':
+            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
+                             f', expected timedelta64[ns].')
+    elif len(index.levels) == 3:
+        if not index.names == ('file', 'start', 'end'):
+            raise ValueError('Not a segmented index conform to Unified Format')
+        if not index.levels[1].dtype == 'timedelta64[ns]':
+            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
+                             f', expected timedelta64[ns].')
+        if not index.levels[2].dtype == 'timedelta64[ns]':
+            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
+                             f', expected timedelta64[ns].')
+    else:
         raise ValueError(f'Index has {len(index.levels)} levels, '
-                         f'expected 2.')
-    if not index.levels[0].dtype == 'timedelta64[ns]':
-        raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                         f', expected timedelta64[ns].')
-    if not index.levels[1].dtype == 'timedelta64[ns]':
-        raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                         f', expected timedelta64[ns].')
+                         f'expected 2 or 3.')
 
 
 def read_audio(
@@ -26,8 +38,19 @@ def read_audio(
         end: pd.Timedelta = None,
         channel: int = None,
 ) -> typing.Tuple[np.ndarray, int]:
-    """Load audio using audiofile."""
+    """Reads (segment of an) audio file.
 
+    Args:
+        path: path to audio file
+        start: read from this position
+        end: read until this position
+        channel: channel number
+
+    Returns:
+        signal: array with signal values in shape ``(channels, samples)``
+        sampling_rate: sampling rate in Hz
+
+    """
     if start is not None:
         offset = start.total_seconds()
     else:
@@ -56,6 +79,86 @@ def read_audio(
         signal = signal[channel, :]
 
     return signal, sampling_rate
+
+
+def run_tasks(
+        task_fun: typing.Callable,
+        params: typing.Sequence[
+            typing.Tuple[
+                typing.Sequence[typing.Any],
+                typing.Dict[str, typing.Any],
+            ]
+        ],
+        *,
+        num_workers: int = None,
+        multiprocessing: bool = False,
+        progress_bar: bool = False,
+        task_description: str = None
+) -> typing.Sequence[typing.Any]:
+    r"""Run parallel tasks using multprocessing.
+
+    .. note:: Result values are returned in order of ``params``.
+
+    Args:
+        task_fun: task function with one or more
+            parameters, e.g. ``x, y, z``, and optionally returning a value
+        params: sequence of tuples holding parameters for each task.
+            Each tuple contains a sequence of positional arguments and a
+            dictionary with keyword arguments, e.g.:
+            ``[((x1, y1), {'z': z1}), ((x2, y2), {'z': z2}), ...]``
+        num_workers: number of parallel jobs or 1 for sequential
+            processing. If ``None`` will be set to the number of
+            processors on the machine multiplied by 5 in case of
+            multithreading and number of processors in case of
+            multiprocessing
+        multiprocessing: use multiprocessing instead of multithreading
+        progress_bar: show a progress bar
+        task_description: task description
+            that will be displayed next to progress bar
+
+    Example:
+        >>> power = lambda x, n: x ** n
+        >>> params = [([2, n], {}) for n in range(10)]
+        >>> run_tasks(power, params, num_workers=3)
+        [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+
+    """
+    num_tasks = max(1, len(params))
+    results = [None] * num_tasks
+
+    if num_workers == 1:  # sequential
+
+        with audeer.progress_bar(
+            params,
+            total=len(params),
+            desc=task_description,
+            disable=not progress_bar,
+        ) as pbar:
+            for index, param in enumerate(pbar):
+                results[index] = task_fun(*param[0], **param[1])
+
+    else:  # parallel
+
+        if multiprocessing:
+            executor = concurrent.futures.ProcessPoolExecutor
+        else:
+            executor = concurrent.futures.ThreadPoolExecutor
+        with executor(max_workers=num_workers) as pool:
+            with audeer.progress_bar(
+                    total=len(params),
+                    desc=task_description,
+                    disable=not progress_bar,
+            ) as pbar:
+                futures = []
+                for param in params:
+                    future = pool.submit(task_fun, *param[0], **param[1])
+                    future.add_done_callback(lambda p: pbar.update())
+                    futures.append(future)
+                for idx, future in enumerate(futures):
+                    result = future.result()
+                    results[idx] = result
+
+    return results
 
 
 def segment_to_indices(
