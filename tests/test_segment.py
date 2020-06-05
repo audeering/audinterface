@@ -18,7 +18,7 @@ index = pd.MultiIndex.from_arrays(
 
 def test_file(tmpdir):
     model = audinterface.Segment(
-        segment_func=lambda s, sr: index,
+        process_func=lambda s, sr: index,
         sampling_rate=None,
         resample=False,
         verbose=False,
@@ -26,11 +26,11 @@ def test_file(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
     af.write(file, signal, sampling_rate)
-    result = model.segment_file(file)
+    result = model.process_file(file)
     assert all(result.levels[0] == file)
     assert all(result.levels[1] == index.levels[0])
     assert all(result.levels[2] == index.levels[1])
-    result = model.segment_file(file, start=pd.to_timedelta('1s'))
+    result = model.process_file(file, start=pd.to_timedelta('1s'))
     assert all(result.levels[0] == file)
     assert all(result.levels[1] == index.levels[0] + pd.to_timedelta('1s'))
     assert all(result.levels[2] == index.levels[1] + pd.to_timedelta('1s'))
@@ -46,7 +46,7 @@ def test_file(tmpdir):
 )
 def test_folder(tmpdir, num_workers, multiprocessing):
     model = audinterface.Segment(
-        segment_func=lambda s, sr: index,
+        process_func=lambda s, sr: index,
         sampling_rate=None,
         resample=False,
         num_workers=num_workers,
@@ -57,7 +57,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
     files = [f'{path}/file{n}.wav' for n in range(3)]
     for file in files:
         af.write(file, signal, sampling_rate)
-    result = model.segment_folder(path)
+    result = model.process_folder(path)
     assert all(result.levels[0] == files)
     assert all(result.levels[1] == index.levels[0])
     assert all(result.levels[2] == index.levels[1])
@@ -133,9 +133,9 @@ def test_folder(tmpdir, num_workers, multiprocessing):
 )
 def test_signal(signal, segment_func, start, end, result):
     model = audinterface.Segment(
-        segment_func=segment_func,
+        process_func=segment_func,
     )
-    index = model.segment_signal(signal, sampling_rate, start=start, end=end)
+    index = model.process_signal(signal, sampling_rate, start=start, end=end)
     pd.testing.assert_index_equal(index, result)
 
 
@@ -144,7 +144,7 @@ def test_signal_kwargs():
         assert arg1 == 'foo'
         assert arg2 == 'bar'
     audinterface.Segment(
-        segment_func=segment_func,
+        process_func=segment_func,
         arg1='foo',
         arg2='bar',
     )

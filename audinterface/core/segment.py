@@ -17,7 +17,7 @@ class Segment:
     e.g. a voice activity model that detects speech regions.
 
     Args:
-        segment_func: segmentation function,
+        process_func: segmentation function,
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
             and any number of additional keyword arguments.
@@ -44,7 +44,7 @@ class Segment:
     def __init__(
             self,
             *,
-            segment_func: typing.Callable[..., pd.MultiIndex] = None,
+            process_func: typing.Callable[..., pd.MultiIndex] = None,
             sampling_rate: int = None,
             resample: bool = False,
             num_workers: typing.Optional[int] = 1,
@@ -52,14 +52,14 @@ class Segment:
             verbose: bool = False,
             **kwargs,
     ):
-        if segment_func is None:
-            def segment_func(signal, sr, **kwargs):
+        if process_func is None:
+            def process_func(signal, sr, **kwargs):
                 return pd.MultiIndex.from_arrays(
                     [pd.to_timedelta([]), pd.to_timedelta([])],
                     names=['start', 'end']
                 )
         self.process = Process(
-            process_func=segment_func,
+            process_func=process_func,
             sampling_rate=sampling_rate,
             resample=resample,
             num_workers=num_workers,
@@ -68,7 +68,7 @@ class Segment:
             **kwargs,
         )
 
-    def segment_file(
+    def process_file(
             self,
             file: str,
             *,
@@ -108,7 +108,7 @@ class Segment:
             names=['file', 'start', 'end']
         )
 
-    def segment_files(
+    def process_files(
             self,
             files: typing.Sequence[str],
             *,
@@ -142,7 +142,7 @@ class Segment:
             names=['file', 'start', 'end']
         )
 
-    def segment_folder(
+    def process_folder(
             self,
             root: str,
             *,
@@ -167,9 +167,9 @@ class Segment:
         """
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
-        return self.segment_files(files, channel=channel)
+        return self.process_files(files, channel=channel)
 
-    def segment_signal(
+    def process_signal(
             self,
             signal: np.ndarray,
             sampling_rate: int,

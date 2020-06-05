@@ -82,7 +82,7 @@ def read_audio(
 
 
 def run_tasks(
-        task_fun: typing.Callable,
+        task_func: typing.Callable,
         params: typing.Sequence[
             typing.Tuple[
                 typing.Sequence[typing.Any],
@@ -100,7 +100,7 @@ def run_tasks(
     .. note:: Result values are returned in order of ``params``.
 
     Args:
-        task_fun: task function with one or more
+        task_func: task function with one or more
             parameters, e.g. ``x, y, z``, and optionally returning a value
         params: sequence of tuples holding parameters for each task.
             Each tuple contains a sequence of positional arguments and a
@@ -135,7 +135,7 @@ def run_tasks(
             disable=not progress_bar,
         ) as pbar:
             for index, param in enumerate(pbar):
-                results[index] = task_fun(*param[0], **param[1])
+                results[index] = task_func(*param[0], **param[1])
 
     else:  # parallel
 
@@ -151,7 +151,7 @@ def run_tasks(
             ) as pbar:
                 futures = []
                 for param in params:
-                    future = pool.submit(task_fun, *param[0], **param[1])
+                    future = pool.submit(task_func, *param[0], **param[1])
                     future.add_done_callback(lambda p: pbar.update())
                     futures.append(future)
                 for idx, future in enumerate(futures):
