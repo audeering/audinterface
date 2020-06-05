@@ -1,0 +1,417 @@
+import os
+import typing
+
+import audiofile as af
+import numpy as np
+import pandas as pd
+
+import audeer
+
+from audinterface.core.process import Process
+
+
+class Feature:
+    r"""Feature extraction interface.
+
+    The features are returned as a :class:`pd.DataFrame`.
+    If your input signal is of size ``(num_channels, num_time_steps)``,
+    the returned dataframe will have ``num_channels * num_features``
+    columns.
+    It will have one row per file or signal.
+    If ``win_dur`` is specified
+    and the features are extracted using a sliding window,
+    each window will be stored as one row,
+    and the resulting ``start`` and ``end`` indices
+    are referred from the original ``start`` and ``end`` arguments
+    and the window positions.
+
+    Args:
+        name: name of feature extractor, e.g. ``'stft'``
+        feature_names: features are stored as columns in a data frame,
+            this defines the names of the columns
+        feature_params: important parameters used with feature extractor,
+            e.g. ``{'win_size': 512, 'hop_size': 256}``.
+            With the parameters you can differentiate between
+            different settings of the same feature extarctor
+        process_func: feature extraction function,
+            which expects the two positional arguments ``signal``
+            and ``sampling_rate``
+            and any number of additional keyword arguments.
+            The function must return features in the shape of
+            ``(num_channels, num_features)``
+            or ``(num_channels, num_features, num_time_steps)``.
+        sampling_rate: sampling rate in Hz.
+            If ``None`` it will call ``process_func`` with the actual
+            sampling rate of the signal.
+        num_channels: the expected number of channels
+        win_dur: window size in ``unit``,
+            if features are extracted with a sliding window
+        hop_dur: hop size in ``unit``,
+            if features are extracted with a sliding window.
+            This defines the shift between two windows.
+            Defaults to ``win_dur / 2``.
+        unit: unit of ``win_dur`` and ``hop_dur``.
+            Can be ``'samples'``,
+            or any unit supported by :class:`pd.timedelta`
+        resample: if ``True`` enforces given sampling rate by resampling
+        num_workers: number of parallel jobs or 1 for sequential
+            processing. If ``None`` will be set to the number of
+            processors on the machine multiplied by 5 in case of
+            multithreading and number of processors in case of
+            multiprocessing
+        multiprocessing: use multiprocessing instead of multithreading
+        verbose: show debug messages
+        kwargs: additional keyword arguments to the processing function
+
+    Raises:
+        ValueError: if ``unit == 'samples'`` and ``sampling_rate is None``
+        ValueError: if ``hop_dur`` is specified, but not ``win_dur``
+
+    """
+    def __init__(
+            self,
+            name: str,
+            feature_names: typing.Sequence[str],
+            *,
+            feature_params: typing.Dict = {},
+            process_func: typing.Callable[..., np.ndarray] = None,
+            sampling_rate: int = None,
+            num_channels: int = 1,
+            win_dur: typing.Union[int, float] = None,
+            hop_dur: typing.Union[int, float] = None,
+            unit: str = 'seconds',
+            resample: bool = False,
+            num_workers: typing.Optional[int] = 1,
+            multiprocessing: bool = False,
+            verbose: bool = False,
+            **kwargs,
+    ):
+        if unit == 'samples' and sampling_rate is None:
+            raise ValueError(
+                "You have specified 'samples' as unit, "
+                "but haven't provided a sampling rate"
+            )
+        if win_dur is None and hop_dur is not None:
+            raise ValueError(
+                "You have to specify 'win_dur' if 'hop_dur' is given"
+            )
+
+        if process_func is None:
+            def process_func(signal, _):
+                return np.zeros(
+                    (num_channels, len(feature_names)),
+                    dtype=np.float,
+                )
+        self.process = Process(
+            process_func=process_func,
+            sampling_rate=sampling_rate,
+            resample=resample,
+            num_workers=num_workers,
+            multiprocessing=multiprocessing,
+            verbose=verbose,
+            **kwargs,
+        )
+        self.name = name
+        self.feature_params = feature_params
+        self.num_channels = num_channels
+        self.num_features = len(feature_names)
+        self.feature_names = list(feature_names)
+        if num_channels > 1:
+            self.column_names = []
+            for channel in range(num_channels):
+                self.column_names.extend(
+                    [f'{name}-{channel}' for name in feature_names]
+                )
+        else:
+            self.column_names = self.feature_names
+        if win_dur is None:
+            self.win_dur = None
+            self.hop_dur = None
+        else:
+            if hop_dur is None:
+                hop_dur = win_dur // 2 if unit == 'samples' else win_dur / 2
+            if unit == 'samples':
+                unit = 'seconds'
+                win_dur = win_dur / sampling_rate
+                hop_dur = hop_dur / sampling_rate
+            self.win_dur = pd.to_timedelta(win_dur, unit=unit)
+            self.hop_dur = pd.to_timedelta(hop_dur, unit=unit)
+        self.verbose = verbose
+
+    def process_file(
+            self,
+            file: str,
+            *,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
+            channel: int = None,
+    ) -> pd.DataFrame:
+        r"""Extract features from an audio file.
+
+        Args:
+            file: file path
+            channel: channel number
+            start: start processing at this position
+            end: end processing at this position
+
+        Raises:
+            RuntimeError: if sampling rates of feature extracted
+                and signal do not match
+            RuntimeError: if number of channels do not match
+
+        """
+        features = self.process.process_file(
+            file, start=start, end=end, channel=channel,
+        )
+        return self._features_to_frame(
+            features, file=file, start=start, end=end,
+        )
+
+    def process_files(
+            self,
+            files: typing.Sequence[str],
+            *,
+            channel: int = None,
+    ) -> pd.DataFrame:
+        r"""Extract features for a list of files.
+
+        Args:
+            files: list of file paths
+            channel: channel number
+
+        Raises:
+            RuntimeError: if sampling rates of feature extracted
+                and signal do not match
+            RuntimeError: if number of channels do not match
+
+        """
+        series = self.process.process_files(files, channel=channel)
+        frames = [None] * len(files)
+        for idx, (file, features) in enumerate(series.items()):
+            frames[idx] = self._features_to_frame(features, file=file)
+        return pd.concat(frames, axis='index')
+
+    def process_folder(
+            self,
+            root: str,
+            *,
+            filetype: str = 'wav',
+            channel: int = None,
+    ) -> pd.DataFrame:
+        r"""Extract features from files in a folder.
+
+        .. note:: At the moment does not scan in sub-folders!
+
+        Args:
+            root: root folder
+            filetype: file extension
+            channel: channel number
+
+        Raises:
+            RuntimeError: if sampling rates of feature extracted
+                and signal do not match
+            RuntimeError: if number of channels do not match
+
+        """
+        files = audeer.list_file_names(root, filetype=filetype)
+        return self.process_files(files, channel=channel)
+
+    def process_signal(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            *,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
+    ) -> pd.DataFrame:
+        r"""Extract features for an audio signal.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+            start: start processing at this position
+            end: end processing at this position
+
+        Raises:
+            RuntimeError: if sampling rates of feature extractor
+                and signal do not match
+            RuntimeError: if dimension of extracted features
+                is greater than three
+            RuntimeError: if feature extractor uses sliding window,
+                but ``self.win_dur`` is not specified
+            RuntimeError: ifnumber of features does not match
+                number of feature names
+            RuntimeError: if number of channels do not match
+
+        """
+        features = self.process.process_signal(
+            signal,
+            sampling_rate,
+            start=start,
+            end=end,
+        )
+        return self._features_to_frame(features, start=start, end=end)
+
+    def process_signal_from_index(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            index: pd.MultiIndex,
+    ) -> pd.DataFrame:
+        r"""Split a signal into segments and extract features for each segment.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+            index: a :class:`pandas.MultiIndex` with two levels
+                named `start` and `end` that hold start and end
+                positions as :class:`pandas.Timedelta` objects.
+
+        Raises:
+            RuntimeError: if sampling rates of feature extracted
+                and signal do not match
+            RuntimeError: if number of channels do not match
+            ValueError: if given index has wrong format
+
+        """
+        series = self.process.process_signal_from_index(
+            signal, sampling_rate, index,
+        )
+        frames = [None] * len(index)
+        for idx, ((start, end), features) in enumerate(series.items()):
+            frames[idx] = self._features_to_frame(
+                features, start=start, end=end,
+            )
+        return pd.concat(frames, axis='index')
+
+    def process_unified_format_index(
+            self,
+            index: pd.MultiIndex,
+            *,
+            channel: int = None,
+    ) -> pd.DataFrame:
+        r"""Extract features from a `Unified Format`_ segmented index.
+
+        .. note:: Currently expects a segmented index. In the future it is
+            planned to support other index types (e.g. filewise), too. Until
+            then you can use audata.util.to_segmented_frame_ for conversion
+
+        Args:
+            index: index with segment information
+            channel: channel number (default 0)
+
+        Raises:
+            RuntimeError: if sampling rates of feature extractor
+                and signal do not match
+            RuntimeError: if number of channels do not match
+            ValueError: if index is not conform to the `Unified Format`_
+
+        .. _`Unified Format`: http://tools.pp.audeering.com/audata/
+             data-tables.html
+
+        .. _audata.util.to_segmented_frame: http://tools.pp.audeering.com/
+            audata/api-utils.html#to-segmented-frame
+
+
+        """
+        series = self.process.process_unified_format_index(
+            index, channel=channel,
+        )
+        frames = [None] * len(index)
+        for idx, ((file, start, end), features) in enumerate(series.items()):
+            frames[idx] = self._features_to_frame(
+                features, file=file, start=start, end=end,
+            )
+        return pd.concat(frames, axis='index')
+
+    def to_numpy(
+            self,
+            frame: pd.DataFrame,
+    ) -> np.ndarray:
+        r"""Return feature values as a :class:`numpy.ndarray` in original
+        shape, i.e. ``(channels, features, time)``.
+
+        Args:
+            frame: feature frame
+
+        """
+        return frame.values.T.reshape(self.num_channels, self.num_features, -1)
+
+    def _features_to_frame(
+            self,
+            features: np.ndarray,
+            *,
+            file: str = None,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
+    ) -> pd.DataFrame:
+
+        # Convert features to a pd.DataFrame
+        # Assumed format
+        # [n_channels, n_features, n_time_steps]
+        # or
+        # [n_channels, n_features]
+
+        # Force third time step dimension
+        features = np.atleast_3d(features)
+        if features.ndim > 3:
+            raise RuntimeError(
+                f'Dimension of extracted features must be not greater than 3. '
+                f'Yours is {features.ndim}'
+            )
+        n_channels = features.shape[0]
+        n_features = features.shape[1]
+        n_time_steps = features.shape[2]
+
+        # n_features + 1 as we added 'channel' to feature names
+        if n_channels != self.num_channels:
+            raise RuntimeError(
+                f'Channel number {n_channels} does not match '
+                f'number of expected channels: {self.num_channels}'
+            )
+        if n_features * n_channels != len(self.column_names):
+            raise RuntimeError(
+                f'Feature names {self.column_names} do not match '
+                f'number of extracted features: {n_features * n_channels}'
+            )
+        if n_time_steps > 1 and self.win_dur is None:
+            raise RuntimeError(
+                'Features are extracted with a sliding window, '
+                "but no 'win_dur' is specified."
+            )
+
+        # Reshape features and store channel number as first feature
+        # [n_channels, n_features, n_time_steps] =>
+        # [n_channels * n_features + 1, n_time_steps]
+        new_shape = (n_channels * n_features, n_time_steps)
+        features = features.reshape(new_shape).T
+
+        if start is None:
+            start = pd.to_timedelta(0)
+        if end is None:
+            end = pd.to_timedelta(np.NaN)
+
+        if n_time_steps > 1:
+            starts = pd.timedelta_range(
+                start,
+                freq=self.hop_dur,
+                periods=n_time_steps,
+            )
+            ends = starts + self.win_dur
+        else:
+            starts = [start]
+            ends = [end]
+
+        if file is None:
+            index = pd.MultiIndex.from_arrays(
+                [starts, ends],
+                names=['start', 'end'],
+            )
+        else:
+            files = [file] * len(starts)
+            index = pd.MultiIndex.from_arrays(
+                [files, starts, ends],
+                names=['file', 'start', 'end'],
+            )
+
+        return pd.DataFrame(features, index, columns=self.column_names)

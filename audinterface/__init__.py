@@ -1,15 +1,26 @@
 r"""Generic processing interfaces.
 
-Collection of wrapper classes that provide a common set of methods to
-apply them to signals or files, e.g.:
+:mod:`audinterface` provides you classes
+to apply user provided functions to signals or files.
+This is very handy
+if you want to design a user interface for your model.
+You can just use :class:`audinterface.Process`
+and provide your :meth:`model.predict` method
+as ``process_func`` argument.
 
-* :func:`process_signal`
-* :func:`process_file`
-* :func:`process_files`
-* :func:`process_folder`
+The :mod:`audinterface` classes implement all
+or a selection of the following methods:
 
-:mod:`audinterface` provides you classes that you can inherit or just
-instantiate to get some standard implementations of those methods.
+* :meth:`process_file`
+* :meth:`process_files`
+* :meth:`process_folder`
+* :meth:`process_signal`
+* :meth:`process_signal_from_index`
+* :meth:`process_unified_format_index`
+
+You can inherit from the classes
+or just instantiate them
+to get some standard implementations of those methods.
 
 Example:
     >>> import numpy as np
@@ -23,6 +34,9 @@ Example:
 
 """
 from audinterface import utils
+from audinterface.core.feature import (
+    Feature,
+)
 from audinterface.core.process import (
     Process,
     ProcessWithContext,

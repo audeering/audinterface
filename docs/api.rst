@@ -3,6 +3,12 @@ audinterface
 
 .. automodule:: audinterface
 
+Feature
+-------
+
+.. autoclass:: Feature
+    :members:
+
 Process
 -------
 
