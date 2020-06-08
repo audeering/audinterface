@@ -70,7 +70,6 @@ class Feature:
     """
     def __init__(
             self,
-            name: str,
             feature_names: typing.Sequence[str],
             *,
             feature_params: typing.Dict = {},
@@ -111,7 +110,6 @@ class Feature:
             verbose=verbose,
             **kwargs,
         )
-        self.name = name
         self.feature_params = feature_params
         self.num_channels = num_channels
         self.num_features = len(feature_names)

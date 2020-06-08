@@ -31,7 +31,6 @@ def test_feature():
     # You have to specify sampling rate with unit == 'samples'
     with pytest.raises(ValueError):
         audinterface.Feature(
-            name='ones',
             feature_names=('o1', 'o2', 'o3'),
             sampling_rate=None,
             unit='samples',
@@ -39,12 +38,10 @@ def test_feature():
     # Only hop_dur is given
     with pytest.raises(ValueError):
         audinterface.Feature(
-            name='ones',
             feature_names=('o1', 'o2', 'o3'),
             hop_dur=0.1,
         )
     audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         win_dur=2048,
         unit='samples',
@@ -54,7 +51,6 @@ def test_feature():
 
 def test_file(tmpdir):
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
         sampling_rate=None,
@@ -84,7 +80,6 @@ def test_file(tmpdir):
 
 def test_folder(tmpdir):
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
         sampling_rate=None,
@@ -169,7 +164,6 @@ def test_folder(tmpdir):
 )
 def test_signal(signal, process_func, start, end, expected_features):
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=process_func,
         num_channels=NUM_CHANNELS,
@@ -187,7 +181,6 @@ def test_signal_sliding_window():
     # Test sliding window with two time steps
     expected_features = np.ones((NUM_CHANNELS, 2 * NUM_FEATURES))
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=features_extractor_sliding_window,
         num_channels=NUM_CHANNELS,
@@ -220,7 +213,6 @@ def test_signal_sliding_window():
 )
 def test_process_signal_from_index(index, expected_features):
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
         num_channels=NUM_CHANNELS,
@@ -247,7 +239,6 @@ def test_process_unified_format_index(tmpdir):
     )
     expected_features = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
         num_channels=NUM_CHANNELS,
@@ -261,7 +252,6 @@ def test_process_unified_format_index(tmpdir):
 def test_to_numpy():
     expected_features = np.ones((NUM_CHANNELS, NUM_FEATURES, 1))
     extractor = audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
         num_channels=NUM_CHANNELS,
@@ -279,7 +269,6 @@ def test_signal_kwargs():
         assert arg1 == 'foo'
         assert arg2 == 'bar'
     audinterface.Feature(
-        name='ones',
         feature_names=('o1', 'o2', 'o3'),
         process_func=process_func,
         arg1='foo',
