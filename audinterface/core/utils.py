@@ -13,25 +13,33 @@ def check_index(
 ):
     if len(index.levels) == 2:
         if not index.empty:
-            if not index.levels[0].dtype == 'timedelta64[ns]':
+            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
+                    index.levels[0]
+            ):
                 raise ValueError(f'Level 0 has type '
                                  f'{type(index.levels[0].dtype)}'
                                  f', expected timedelta64[ns].')
-            if not index.levels[1].dtype == 'timedelta64[ns]':
-                raise ValueError(f'Level 0 has type '
-                                 f'{type(index.levels[0].dtype)}'
+            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
+                    index.levels[1]
+            ):
+                raise ValueError(f'Level 1 has type '
+                                 f'{type(index.levels[1].dtype)}'
                                  f', expected timedelta64[ns].')
     elif len(index.levels) == 3:
         if not index.names == ('file', 'start', 'end'):
             raise ValueError('Not a segmented index conform to Unified Format')
         if not index.empty:
-            if not index.levels[1].dtype == 'timedelta64[ns]':
-                raise ValueError(f'Level 0 has type '
-                                 f'{type(index.levels[0].dtype)}'
+            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
+                    index.levels[1]
+            ):
+                raise ValueError(f'Level 1 has type '
+                                 f'{type(index.levels[1].dtype)}'
                                  f', expected timedelta64[ns].')
-            if not index.levels[2].dtype == 'timedelta64[ns]':
-                raise ValueError(f'Level 0 has type '
-                                 f'{type(index.levels[0].dtype)}'
+            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
+                    index.levels[2]
+            ):
+                raise ValueError(f'Level 2 has type '
+                                 f'{type(index.levels[2].dtype)}'
                                  f', expected timedelta64[ns].')
     else:
         raise ValueError(f'Index has {len(index.levels)} levels, '
