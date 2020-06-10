@@ -8,13 +8,28 @@ import pytest
 import audinterface
 
 
-# Different process_func
 def signal_duration(signal, sampling_rate):
     return signal.shape[1] / sampling_rate
 
 
 def signal_max(signal, sampling_rate):
     return np.max(signal)
+
+
+SEGMENT = audinterface.Segment(
+    process_func=lambda x, sr:
+        pd.MultiIndex.from_arrays(
+            [
+                [
+                    pd.to_timedelta(0),
+                ],
+                [
+                    pd.to_timedelta(x.shape[1] / sr, unit='sec'),
+                ],
+            ],
+            names=['start', 'end'],
+        )
+)
 
 
 def signal_modification(signal, sampling_rate, subtract=False):
@@ -26,34 +41,46 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 
 @pytest.mark.parametrize(
-    'process_func, signal, selected_channel, expected_output',
+    'process_func, segment, signal, selected_channel, expected_output',
     [
         (
             signal_max,
+            None,
             np.ones((1, 3)),
             None,
             1,
         ),
         (
             signal_max,
+            SEGMENT,
+            np.ones((1, 8000)),
+            None,
+            1,
+        ),
+        (
+            signal_max,
+            None,
             np.ones(3),
             0,
             1,
         ),
         (
             signal_max,
+            None,
             np.array([[0., 0., 0.], [1., 1., 1.]]),
             0,
             0,
         ),
         (
             signal_max,
+            None,
             np.array([[0., 0., 0.], [1., 1., 1.]]),
             1,
             1,
         ),
         pytest.param(
             signal_max,
+            None,
             np.ones((1, 3)),
             1,
             1,
@@ -61,73 +88,122 @@ def signal_modification(signal, sampling_rate, subtract=False):
         ),
     ],
 )
-def test_channel(
-        tmpdir,
-        process_func,
-        signal,
-        selected_channel,
-        expected_output,
+def test_process_file(
+    tmpdir,
+    process_func,
+    segment,
+    signal,
+    selected_channel,
+    expected_output,
 ):
     sampling_rate = 8000
     model = audinterface.Process(
         process_func=process_func,
         sampling_rate=sampling_rate,
         resample=False,
+        segment=segment,
         verbose=False,
     )
     path = str(tmpdir.mkdir('wav'))
     filename = f'{path}/channel.wav'
     af.write(filename, signal, sampling_rate)
     output = model.process_file(filename, channel=selected_channel)
-    np.testing.assert_almost_equal(output, expected_output, decimal=4)
+    np.testing.assert_almost_equal(
+        output.values, expected_output, decimal=4,
+    )
 
 
 @pytest.mark.parametrize(
-    'num_workers, multiprocessing',
+    'num_files, segment, num_workers, multiprocessing',
     [
-        (1, False, ),
-        (2, False, ),
-        (None, False, ),
+        (3, None, 1, False, ),
+        (3, None, 2, False, ),
+        (3, None, None, False, ),
+        (3, SEGMENT, 1, False, ),
     ]
 )
-def test_folder(tmpdir, num_workers, multiprocessing):
+def test_process_folder(
+        tmpdir,
+        num_files,
+        segment,
+        num_workers,
+        multiprocessing,
+):
     model = audinterface.Process(
-        process_func=lambda signal, sampling_rate: signal,
+        process_func=None,
         sampling_rate=None,
         resample=False,
+        segment=segment,
         num_workers=num_workers,
         multiprocessing=multiprocessing,
         verbose=False,
     )
     sampling_rate = 8000
     path = str(tmpdir.mkdir('wav'))
-    files = [f'{path}/file{n}.wav' for n in range(3)]
+    files = [f'{path}/file{n}.wav' for n in range(num_files)]
     rel_path = os.path.relpath(path)
-    rel_files = [f'{rel_path}/file{n}.wav' for n in range(3)]
+    rel_files = [f'{rel_path}/file{n}.wav' for n in range(num_files)]
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)
     result = model.process_folder(path)
     rel_result = model.process_folder(rel_path)
-    for idx in range(3):
-        signal, sampling_rate = model.read_audio(
-            files[idx]
-        )
-        np.testing.assert_equal(result[idx], signal)
-        np.testing.assert_equal(result[files[idx]], signal)
-        np.testing.assert_equal(rel_result[idx], signal)
-        np.testing.assert_equal(rel_result[rel_files[idx]], signal)
+    for idx, (index, values) in enumerate(result.iteritems()):
+        file = index[0] if isinstance(index, tuple) else index
+        assert file == files[idx]
+        signal, sampling_rate = model.read_audio(file)
+        np.testing.assert_equal(values, signal)
+    for idx, (index, values) in enumerate(rel_result.iteritems()):
+        file = index[0] if isinstance(index, tuple) else index
+        assert file == rel_files[idx]
+        signal, sampling_rate = model.read_audio(file)
+        np.testing.assert_equal(values, signal)
 
 
 @pytest.mark.parametrize(
-    'process_func, process_func_kwargs, signal, sampling_rate,'
-    'start, end, expected_signal',
+    'process_func, process_func_kwargs, segment, signal, sampling_rate,'
+    'file, start, end, expected_signal',
     [
         (
             None,
             {},
+            None,
             np.array([1., 2., 3.]),
             44100,
+            None,
+            None,
+            None,
+            np.array([1., 2., 3.]),
+        ),
+        (
+            None,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            44100,
+            'file',
+            None,
+            None,
+            np.array([1., 2., 3.]),
+        ),
+        (
+            None,
+            {},
+            SEGMENT,
+            np.array([1., 2., 3.]),
+            44100,
+            None,
+            None,
+            None,
+            np.array([1., 2., 3.]),
+        ),
+        (
+            None,
+            {},
+            SEGMENT,
+            np.array([1., 2., 3.]),
+            44100,
+            'file',
             None,
             None,
             np.array([1., 2., 3.]),
@@ -135,8 +211,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_max,
             {},
+            None,
             np.array([1., 2., 3.]),
             44100,
+            None,
             None,
             None,
             3.0,
@@ -144,8 +222,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_duration,
             {},
+            None,
             np.array([1., 2., 3.]),
             3,
+            None,
             None,
             None,
             1.0,
@@ -153,8 +233,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_duration,
             {},
+            None,
             np.array([1., 2., 3.]),
             1,
+            None,
             pd.to_timedelta('2s'),
             None,
             1.0,
@@ -162,8 +244,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_duration,
             {},
+            None,
             np.array([1., 2., 3.]),
             1,
+            None,
             None,
             pd.to_timedelta('1s'),
             1.0,
@@ -171,8 +255,21 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_duration,
             {},
+            None,
             np.array([1., 2., 3.]),
             1,
+            None,
+            pd.to_timedelta('1s'),
+            pd.to_timedelta('2s'),
+            1.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
+            'file',
             pd.to_timedelta('1s'),
             pd.to_timedelta('2s'),
             1.0,
@@ -180,8 +277,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_modification,
             {},
+            None,
             np.array([1., 1., 1.]),
             44100,
+            None,
             None,
             None,
             np.array([[1.1, 1.1, 1.1]]),
@@ -189,8 +288,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_modification,
             {'subtract': False},
+            None,
             np.array([1., 1., 1.]),
             44100,
+            None,
             None,
             None,
             np.array([[1.1, 1.1, 1.1]]),
@@ -198,8 +299,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         (
             signal_modification,
             {'subtract': True},
+            None,
             np.array([1., 1., 1.]),
             44100,
+            None,
             None,
             None,
             np.array([[0.9, 0.9, 0.9]]),
@@ -209,8 +312,10 @@ def test_folder(tmpdir, num_workers, multiprocessing):
 def test_process_signal(
         process_func,
         process_func_kwargs,
+        segment,
         signal,
         sampling_rate,
+        file,
         start,
         end,
         expected_signal,
@@ -219,12 +324,35 @@ def test_process_signal(
         process_func=process_func,
         sampling_rate=None,
         resample=False,
+        segment=segment,
         verbose=False,
         **process_func_kwargs,
     )
-    predicted_signal = model.process_signal(signal, sampling_rate,
-                                            start=start, end=end)
-    np.array_equal(predicted_signal, expected_signal)
+    x = model.process_signal(
+        signal, sampling_rate, file=file, start=start, end=end,
+    )
+    signal = np.atleast_2d(signal)
+    if start is None or pd.isna(start):
+        start = pd.to_timedelta(0)
+    if end is None or pd.isna(end):
+        end = pd.to_timedelta(
+            signal.shape[1] / sampling_rate, unit='sec',
+        )
+    if file is None:
+        y = pd.Series(
+            [expected_signal],
+            index=pd.MultiIndex.from_arrays(
+                [[start], [end]], names=['start', 'end']
+            ),
+        )
+    else:
+        y = pd.Series(
+            [expected_signal],
+            index=pd.MultiIndex.from_arrays(
+                [[file], [start], [end]], names=['file', 'start', 'end']
+            ),
+        )
+    pd.testing.assert_series_equal(x, y)
 
 
 @pytest.mark.parametrize(
@@ -340,10 +468,20 @@ def test_process_signal_from_index(
         verbose=False,
     )
     result = model.process_signal_from_index(signal, sampling_rate, index)
-    for (start, end), y in result.items():
-        np.testing.assert_equal(
-            y,
+    expected = []
+    for start, end in index:
+        expected.append(
             model.process_signal(signal, sampling_rate, start=start, end=end)
+        )
+    if not expected:
+        pd.testing.assert_series_equal(
+            result,
+            pd.Series([], index),
+        )
+    else:
+        pd.testing.assert_series_equal(
+            result,
+            pd.concat(expected, names=['start', 'end']),
         )
 
 
@@ -465,8 +603,8 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
     index = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
-            pd.to_timedelta([1, 2, 3], unit='s'),
-            pd.to_timedelta([2, 3, 4], unit='s'),
+            pd.to_timedelta([1, 2, 3], unit='sec'),
+            pd.to_timedelta([2, 3, 4], unit='sec'),
         ],
         names=['no', 'unified', 'format'],
     )
@@ -476,7 +614,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         [
             [file] * 3,
             [1, 2, 3],
-            pd.to_timedelta([2, 3, 4], unit='s'),
+            pd.to_timedelta([2, 3, 4], unit='sec'),
         ],
         names=['file', 'start', 'end'],
     )
@@ -485,7 +623,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
     index = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
-            pd.to_timedelta([1, 2, 3], unit='s'),
+            pd.to_timedelta([1, 2, 3], unit='sec'),
             [2, 3, 4],
         ],
         names=['file', 'start', 'end'],

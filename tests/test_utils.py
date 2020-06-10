@@ -29,11 +29,10 @@ def power(a: int = 0, *, b: int = 1):
         (power, [([x], {'b': x}) for x in range(5)]),
     ]
 )
-def test(multiprocessing, num_workers, task_fun, params):
+def test_run_tasks(multiprocessing, num_workers, task_fun, params):
     expected = [
         task_fun(*param[0], **param[1]) for param in params
     ]
-    print(expected)
     results = audinterface.utils.run_tasks(
         task_fun,
         params,

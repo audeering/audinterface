@@ -6,34 +6,34 @@ import pytest
 import audinterface
 
 
-sampling_rate = 8000
-signal = np.ones((10, sampling_rate))
-starts = pd.timedelta_range('0s', '10s', 3)
-ends = starts + pd.to_timedelta('1s')
-index = pd.MultiIndex.from_arrays(
-    [starts, ends],
+SAMPLING_RATE = 8000
+SIGNAL = np.ones((10, SAMPLING_RATE))
+STARTS = pd.timedelta_range('0s', '10s', 3)
+ENDS = STARTS + pd.to_timedelta('1s')
+INDEX = pd.MultiIndex.from_arrays(
+    [STARTS, ENDS],
     names=['start', 'end']
 )
 
 
 def test_file(tmpdir):
     model = audinterface.Segment(
-        process_func=lambda s, sr: index,
+        process_func=lambda s, sr: INDEX,
         sampling_rate=None,
         resample=False,
         verbose=False,
     )
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
-    af.write(file, signal, sampling_rate)
+    af.write(file, SIGNAL, SAMPLING_RATE)
     result = model.process_file(file)
     assert all(result.levels[0] == file)
-    assert all(result.levels[1] == index.levels[0])
-    assert all(result.levels[2] == index.levels[1])
+    assert all(result.levels[1] == INDEX.levels[0])
+    assert all(result.levels[2] == INDEX.levels[1])
     result = model.process_file(file, start=pd.to_timedelta('1s'))
     assert all(result.levels[0] == file)
-    assert all(result.levels[1] == index.levels[0] + pd.to_timedelta('1s'))
-    assert all(result.levels[2] == index.levels[1] + pd.to_timedelta('1s'))
+    assert all(result.levels[1] == INDEX.levels[0] + pd.to_timedelta('1s'))
+    assert all(result.levels[2] == INDEX.levels[1] + pd.to_timedelta('1s'))
 
 
 @pytest.mark.parametrize(
@@ -46,7 +46,7 @@ def test_file(tmpdir):
 )
 def test_folder(tmpdir, num_workers, multiprocessing):
     model = audinterface.Segment(
-        process_func=lambda s, sr: index,
+        process_func=lambda s, sr: INDEX,
         sampling_rate=None,
         resample=False,
         num_workers=num_workers,
@@ -56,53 +56,59 @@ def test_folder(tmpdir, num_workers, multiprocessing):
     path = str(tmpdir.mkdir('wav'))
     files = [f'{path}/file{n}.wav' for n in range(3)]
     for file in files:
-        af.write(file, signal, sampling_rate)
+        af.write(file, SIGNAL, SAMPLING_RATE)
     result = model.process_folder(path)
     assert all(result.levels[0] == files)
-    assert all(result.levels[1] == index.levels[0])
-    assert all(result.levels[2] == index.levels[1])
+    assert all(result.levels[1] == INDEX.levels[0])
+    assert all(result.levels[2] == INDEX.levels[1])
 
 
 @pytest.mark.parametrize(
     'signal,segment_func,start,end,result',
     [
         (
-            signal,
+            SIGNAL,
             None,
             None,
             None,
             pd.MultiIndex.from_arrays(
-                [pd.to_timedelta([]), pd.to_timedelta([])],
+                [
+                    pd.to_timedelta([]),
+                    pd.to_timedelta([])
+                ],
                 names=['start', 'end']
             ),
         ),
         (
-            signal,
-            lambda x, sr: index,
+            SIGNAL,
+            lambda x, sr: INDEX,
             None,
             None,
             pd.MultiIndex.from_arrays(
-                [starts, ends],
+                [
+                    STARTS,
+                    ENDS
+                ],
                 names=['start', 'end'],
             )
         ),
         (
-            signal,
-            lambda x, sr: index,
+            SIGNAL,
+            lambda x, sr: INDEX,
             pd.to_timedelta('1s'),
             pd.to_timedelta('10s'),
             pd.MultiIndex.from_arrays(
                 [
-                    starts + pd.to_timedelta('1s'),
-                    ends + pd.to_timedelta('1s')
+                    STARTS + pd.to_timedelta('1s'),
+                    ENDS + pd.to_timedelta('1s')
                 ],
                 names=['start', 'end'],
             )
         ),
         pytest.param(
-            signal,
+            SIGNAL,
             lambda x, sr: pd.MultiIndex.from_arrays(
-                [starts],
+                [STARTS],
             ),
             None,
             None,
@@ -110,9 +116,9 @@ def test_folder(tmpdir, num_workers, multiprocessing):
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
-            signal,
+            SIGNAL,
             lambda x, sr: pd.MultiIndex.from_arrays(
-                [['wrong', 'data', 'type'], ends],
+                [['wrong', 'data', 'type'], ENDS],
             ),
             None,
             None,
@@ -120,9 +126,9 @@ def test_folder(tmpdir, num_workers, multiprocessing):
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
-            signal,
+            SIGNAL,
             lambda x, sr: pd.MultiIndex.from_arrays(
-                [starts, ['wrong', 'data', 'type']],
+                [STARTS, ['wrong', 'data', 'type']],
             ),
             None,
             None,
@@ -135,7 +141,7 @@ def test_signal(signal, segment_func, start, end, result):
     model = audinterface.Segment(
         process_func=segment_func,
     )
-    index = model.process_signal(signal, sampling_rate, start=start, end=end)
+    index = model.process_signal(signal, SAMPLING_RATE, start=start, end=end)
     pd.testing.assert_index_equal(index, result)
 
 

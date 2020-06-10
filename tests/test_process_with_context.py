@@ -136,12 +136,21 @@ def test_process_signal_from_index(
     result = model_with_context.process_signal_from_index(
         signal, sampling_rate, index,
     )
-    for (start, end), y in result.items():
-        np.testing.assert_equal(
-            y,
-            model.process_signal(
-                signal, sampling_rate, start=start, end=end,
-            )
+
+    expected = []
+    for start, end in index:
+        expected.append(
+            model.process_signal(signal, sampling_rate, start=start, end=end)
+        )
+    if not expected:
+        pd.testing.assert_series_equal(
+            result,
+            pd.Series([], index),
+        )
+    else:
+        pd.testing.assert_series_equal(
+            result,
+            pd.concat(expected, names=['start', 'end']),
         )
 
 

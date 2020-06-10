@@ -30,7 +30,9 @@ Example:
     >>> model = Process(process_func=process_func)
     >>> signal = np.array([1., 2., 3.])
     >>> model.process_signal(signal, sampling_rate=3)
-    1.0
+    start   end
+    0 days  00:00:01    1.0
+    dtype: float64
 
 """
 from audinterface import utils

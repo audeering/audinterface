@@ -12,21 +12,27 @@ def check_index(
         index: pd.MultiIndex
 ):
     if len(index.levels) == 2:
-        if not index.levels[0].dtype == 'timedelta64[ns]':
-            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                             f', expected timedelta64[ns].')
-        if not index.levels[1].dtype == 'timedelta64[ns]':
-            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                             f', expected timedelta64[ns].')
+        if not index.empty:
+            if not index.levels[0].dtype == 'timedelta64[ns]':
+                raise ValueError(f'Level 0 has type '
+                                 f'{type(index.levels[0].dtype)}'
+                                 f', expected timedelta64[ns].')
+            if not index.levels[1].dtype == 'timedelta64[ns]':
+                raise ValueError(f'Level 0 has type '
+                                 f'{type(index.levels[0].dtype)}'
+                                 f', expected timedelta64[ns].')
     elif len(index.levels) == 3:
         if not index.names == ('file', 'start', 'end'):
             raise ValueError('Not a segmented index conform to Unified Format')
-        if not index.levels[1].dtype == 'timedelta64[ns]':
-            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                             f', expected timedelta64[ns].')
-        if not index.levels[2].dtype == 'timedelta64[ns]':
-            raise ValueError(f'Level 0 has type {type(index.levels[0].dtype)}'
-                             f', expected timedelta64[ns].')
+        if not index.empty:
+            if not index.levels[1].dtype == 'timedelta64[ns]':
+                raise ValueError(f'Level 0 has type '
+                                 f'{type(index.levels[0].dtype)}'
+                                 f', expected timedelta64[ns].')
+            if not index.levels[2].dtype == 'timedelta64[ns]':
+                raise ValueError(f'Level 0 has type '
+                                 f'{type(index.levels[0].dtype)}'
+                                 f', expected timedelta64[ns].')
     else:
         raise ValueError(f'Index has {len(index.levels)} levels, '
                          f'expected 2 or 3.')
@@ -63,7 +69,7 @@ def read_audio(
 
     # load raw audio
     signal, sampling_rate = af.read(
-        path,
+        audeer.safe_path(path),
         always_2d=True,
         offset=offset,
         duration=duration,
@@ -168,16 +174,10 @@ def segment_to_indices(
         end: pd.Timedelta,
 ) -> typing.Tuple[int, int]:
     max_i = signal.shape[-1]
-    if start is not None:
-        start_i = int(round(start.total_seconds() * sampling_rate))
-        start_i = min(start_i, max_i)
-    else:
-        start_i = 0
-    if end is not None and not pd.isna(end):
-        end_i = int(round(end.total_seconds() * sampling_rate))
-        end_i = min(end_i, max_i)
-    else:
-        end_i = max_i
+    start_i = int(round(start.total_seconds() * sampling_rate))
+    start_i = min(start_i, max_i)
+    end_i = int(round(end.total_seconds() * sampling_rate))
+    end_i = min(end_i, max_i)
     return start_i, end_i
 
 

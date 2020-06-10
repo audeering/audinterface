@@ -8,6 +8,7 @@ import audeer
 import audsp
 
 from audinterface.core import utils
+from audinterface.core.segment import Segment
 
 
 class Process:
@@ -22,6 +23,9 @@ class Process:
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
         resample: if ``True`` enforces given sampling rate by resampling
+        segment: when a :class:`audinterface.Segment` object is provided,
+            it will be used to find a segmentation of the input signal.
+            Afterwards processing is applied to each segment
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -41,6 +45,7 @@ class Process:
             process_func: typing.Callable[..., typing.Any] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            segment: Segment = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -51,6 +56,7 @@ class Process:
                 'sampling_rate has to be provided for resample = True.'
             )
         self.sampling_rate = sampling_rate
+        self.segment = segment
         self.num_workers = num_workers
         self.multiprocessing = multiprocessing
         self.verbose = verbose
@@ -67,6 +73,33 @@ class Process:
         else:
             self.resample = None
 
+    def _process_file(
+            self,
+            file: str,
+            *,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
+            channel: int = None,
+    ) -> pd.Series:
+        signal, sampling_rate = self.read_audio(
+            file,
+            channel=channel,
+            start=start,
+            end=end,
+        )
+        y = self._process_signal(
+            signal,
+            sampling_rate,
+            file=file,
+        )
+        if start is not None:
+            y.index = y.index.set_levels(
+                [
+                    y.index.levels[1] + start,
+                    y.index.levels[2] + start,
+                ], [1, 2])
+        return y
+
     def process_file(
             self,
             file: str,
@@ -74,7 +107,7 @@ class Process:
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
             channel: int = None,
-    ) -> typing.Any:
+    ) -> pd.Series:
         r"""Process the content of an audio file.
 
         Args:
@@ -84,27 +117,33 @@ class Process:
             channel: channel number
 
         Returns:
-            Output of process function
+            Series with processed file in the Unified Format
 
         Raises:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
-        signal, sampling_rate = self.read_audio(
-            file,
-            channel=channel,
-            start=start,
-            end=end,
-        )
-        return self.process_signal(
-            signal,
-            sampling_rate,
-        )
+        if self.segment is not None:
+            index = self.segment.process_file(
+                file,
+                start=start,
+                end=end,
+                channel=channel,
+            )
+            return self.process_unified_format_index(
+                index=index, channel=channel,
+            )
+        else:
+            return self._process_file(
+                file, start=start, end=end, channel=channel,
+            )
 
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
+            starts: typing.Sequence[pd.Timedelta] = None,
+            ends: typing.Sequence[pd.Timedelta] = None,
             channel: int = None,
     ) -> pd.Series:
         r"""Process a list of files.
@@ -112,19 +151,26 @@ class Process:
         Args:
             files: list of file paths
             channel: channel number
+            starts: list with start positions
+            ends: list with end positions
 
         Returns:
-            Dictionary mapping files to output of process function
+            Series with processed files in the Unified Format
 
         Raises:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
+        if starts is None:
+            starts = [None] * len(files)
+        if ends is None:
+            ends = [None] * len(files)
+
         params = [
             (
-                (audeer.safe_path(file), ),
-                {'channel': channel},
-            ) for file in files
+                (file, ),
+                {'start': start, 'end': end, 'channel': channel},
+            ) for file, start, end in zip(files, starts, ends)
         ]
         y = utils.run_tasks(
             self.process_file,
@@ -134,7 +180,7 @@ class Process:
             progress_bar=self.verbose,
             task_description=f'Process {len(files)} files',
         )
-        return pd.Series(y, index=pd.Index(files, name='file'))
+        return pd.concat(y)
 
     def process_folder(
             self,
@@ -153,7 +199,7 @@ class Process:
             filetype: file extension
 
         Returns:
-            Dictionary mapping files to output of process function
+            Series with processed files in the Unified Format
 
         Raises:
             RuntimeError: if sampling rates of model and signal do not match
@@ -163,30 +209,16 @@ class Process:
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files, channel=channel)
 
-    def process_signal(
+    def _process_signal(
             self,
             signal: np.ndarray,
             sampling_rate: int,
             *,
+            file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-    ) -> typing.Any:
-        r"""Process audio signal and return result.
+    ) -> pd.Series:
 
-        Args:
-            signal: signal values
-            sampling_rate: sampling rate in Hz
-            start: start processing at this position
-            end: end processing at this position
-
-        Returns:
-            Output of process function
-
-        Raises:
-            RuntimeError: if sampling rates of model and signal do not match
-
-        """
-        # Enforce 2D signals
         signal = np.atleast_2d(signal)
 
         # Resample signal
@@ -208,15 +240,75 @@ class Process:
                 )
 
         # Find start and end index
-        start_i, end_i = utils.segment_to_indices(signal, sampling_rate,
-                                                  start, end)
+        if start is None or pd.isna(start):
+            start = pd.to_timedelta(0)
+        if end is None or pd.isna(end):
+            end = pd.to_timedelta(
+                signal.shape[-1] / sampling_rate, unit='sec'
+            )
+        start_i, end_i = utils.segment_to_indices(
+            signal, sampling_rate, start, end,
+        )
 
         # Process signal
-        return self.process_func(
+        y = self.process_func(
             signal[:, start_i:end_i],
             sampling_rate,
             **self.process_func_kwargs,
         )
+
+        # Create index
+        if file is not None:
+            index = pd.MultiIndex.from_tuples(
+                [(file, start, end)], names=['file', 'start', 'end']
+            )
+        else:
+            index = pd.MultiIndex.from_tuples(
+                [(start, end)], names=['start', 'end']
+            )
+
+        return pd.Series([y], index)
+
+    def process_signal(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            *,
+            file: str = None,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
+    ) -> typing.Any:
+        r"""Process audio signal and return result.
+
+        .. note:: If a ``file`` is given, the index of the returned frame
+            has levels ``file``, ``start`` and ``end``. Otherwise,
+            it consists only of ``start`` and ``end``.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+            file: file path
+            start: start processing at this position
+            end: end processing at this position
+
+        Returns:
+            Series with processed signal in the Unified Format
+
+        Raises:
+            RuntimeError: if sampling rates of model and signal do not match
+
+        """
+        if self.segment is not None:
+            index = self.segment.process_signal(
+                signal, sampling_rate, file=file, start=start, end=end,
+            )
+            return self.process_signal_from_index(
+                signal, sampling_rate, index,
+            )
+        else:
+            return self._process_signal(
+                signal, sampling_rate, file=file, start=start, end=end,
+            )
 
     def process_signal_from_index(
             self,
@@ -225,6 +317,9 @@ class Process:
             index: pd.MultiIndex,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
 
         Args:
             signal: signal values
@@ -242,14 +337,22 @@ class Process:
         if index.empty:
             return pd.Series(None, index=index)
 
-        params = [
-            (
-                (signal, sampling_rate, ),
-                {'start': start, 'end': end, },
-            ) for start, end in index
-        ]
+        if len(index.levels) == 3:
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'file': file, 'start': start, 'end': end},
+                ) for file, start, end in index
+            ]
+        else:
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'start': start, 'end': end},
+                ) for start, end in index
+            ]
         y = utils.run_tasks(
-            self.process_signal,
+            self._process_signal,
             params,
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
@@ -257,7 +360,7 @@ class Process:
             task_description=f'Process {len(index)} segments',
         )
 
-        return pd.Series(y, index=index)
+        return pd.concat(y)
 
     def process_unified_format_index(
             self,
@@ -269,6 +372,9 @@ class Process:
         .. note:: Currently expects a segmented index. In the future it is
             planned to support other index types (e.g. filewise), too. Until
             then you can use audata.util.to_segmented_frame_ for conversion
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
 
         Args:
             index: index with segment information
@@ -295,13 +401,13 @@ class Process:
 
         params = [
             (
-                (audeer.safe_path(file), ),
-                {'start': start, 'end': end, 'channel': channel, },
+                (file, ),
+                {'start': start, 'end': end, 'channel': channel},
             )
             for file, start, end in index
         ]
         y = utils.run_tasks(
-            self.process_file,
+            self._process_file,
             params,
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
@@ -309,7 +415,7 @@ class Process:
             task_description=f'Process {len(index)} segments',
         )
 
-        return pd.Series(y, index=index)
+        return pd.concat(y)
 
     def read_audio(
             self,

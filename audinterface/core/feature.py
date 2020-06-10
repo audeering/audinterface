@@ -8,6 +8,7 @@ import pandas as pd
 import audeer
 
 from audinterface.core.process import Process
+from audinterface.core.segment import Segment
 
 
 class Feature:
@@ -54,6 +55,9 @@ class Feature:
             Can be ``'samples'``,
             or any unit supported by :class:`pd.timedelta`
         resample: if ``True`` enforces given sampling rate by resampling
+        segment: when a :class:`audinterface.Segment` object is provided,
+            it will be used to find a segmentation of the input signal.
+            Afterwards processing is applied to each segment
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -80,6 +84,7 @@ class Feature:
             hop_dur: typing.Union[int, float] = None,
             unit: str = 'seconds',
             resample: bool = False,
+            segment: Segment = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -105,6 +110,7 @@ class Feature:
             process_func=process_func,
             sampling_rate=sampling_rate,
             resample=resample,
+            segment=segment,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
@@ -158,23 +164,25 @@ class Feature:
             RuntimeError: if number of channels do not match
 
         """
-        features = self.process.process_file(
+        series = self.process.process_file(
             file, start=start, end=end, channel=channel,
         )
-        return self._features_to_frame(
-            features, file=file, start=start, end=end,
-        )
+        return self._series_to_frame(series)
 
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
+            starts: typing.Sequence[pd.Timedelta] = None,
+            ends: typing.Sequence[pd.Timedelta] = None,
             channel: int = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
         Args:
             files: list of file paths
+            starts: list with start positions
+            ends: list with end positions
             channel: channel number
 
         Raises:
@@ -183,11 +191,10 @@ class Feature:
             RuntimeError: if number of channels do not match
 
         """
-        series = self.process.process_files(files, channel=channel)
-        frames = [None] * len(files)
-        for idx, (file, features) in enumerate(series.items()):
-            frames[idx] = self._features_to_frame(features, file=file)
-        return pd.concat(frames, axis='index')
+        series = self.process.process_files(
+            files, starts=starts, ends=ends, channel=channel,
+        )
+        return self._series_to_frame(series)
 
     def process_folder(
             self,
@@ -212,6 +219,7 @@ class Feature:
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
+        files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files, channel=channel)
 
     def process_signal(
@@ -219,14 +227,20 @@ class Feature:
             signal: np.ndarray,
             sampling_rate: int,
             *,
+            file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
     ) -> pd.DataFrame:
         r"""Extract features for an audio signal.
 
+        .. note:: If a ``file`` is given, the index of the returned frame
+            has levels ``file``, ``start`` and ``end``. Otherwise,
+            it consists only of ``start`` and ``end``.
+
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
+            file: file path
             start: start processing at this position
             end: end processing at this position
 
@@ -242,13 +256,14 @@ class Feature:
             RuntimeError: if number of channels do not match
 
         """
-        features = self.process.process_signal(
+        series = self.process.process_signal(
             signal,
             sampling_rate,
+            file=file,
             start=start,
             end=end,
         )
-        return self._features_to_frame(features, start=start, end=end)
+        return self._series_to_frame(series)
 
     def process_signal_from_index(
             self,
@@ -257,6 +272,9 @@ class Feature:
             index: pd.MultiIndex,
     ) -> pd.DataFrame:
         r"""Split a signal into segments and extract features for each segment.
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
 
         Args:
             signal: signal values
@@ -275,12 +293,7 @@ class Feature:
         series = self.process.process_signal_from_index(
             signal, sampling_rate, index,
         )
-        frames = [None] * len(index)
-        for idx, ((start, end), features) in enumerate(series.items()):
-            frames[idx] = self._features_to_frame(
-                features, start=start, end=end,
-            )
-        return pd.concat(frames, axis='index')
+        return self._series_to_frame(series)
 
     def process_unified_format_index(
             self,
@@ -293,6 +306,9 @@ class Feature:
         .. note:: Currently expects a segmented index. In the future it is
             planned to support other index types (e.g. filewise), too. Until
             then you can use audata.util.to_segmented_frame_ for conversion
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
 
         Args:
             index: index with segment information
@@ -315,12 +331,7 @@ class Feature:
         series = self.process.process_unified_format_index(
             index, channel=channel,
         )
-        frames = [None] * len(index)
-        for idx, ((file, start, end), features) in enumerate(series.items()):
-            frames[idx] = self._features_to_frame(
-                features, file=file, start=start, end=end,
-            )
-        return pd.concat(frames, axis='index')
+        return self._series_to_frame(series)
 
     def to_numpy(
             self,
@@ -335,13 +346,30 @@ class Feature:
         """
         return frame.values.T.reshape(self.num_channels, self.num_features, -1)
 
-    def _features_to_frame(
+    def _series_to_frame(
+            self,
+            series: pd.Series,
+    ) -> pd.DataFrame:
+        frames = [None] * len(series)
+        if len(series.index.levels) == 3:
+            for idx, ((file, start, end), values) in enumerate(series.items()):
+                frames[idx] = self._values_to_frame(
+                    values, file=file, start=start, end=end,
+                )
+        else:
+            for idx, ((start, end), values) in enumerate(series.items()):
+                frames[idx] = self._values_to_frame(
+                    values, start=start, end=end,
+                )
+        return pd.concat(frames, axis='index')
+
+    def _values_to_frame(
             self,
             features: np.ndarray,
+            start: pd.Timedelta,
+            end: pd.Timedelta,
             *,
             file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
     ) -> pd.DataFrame:
 
         # Convert features to a pd.DataFrame
@@ -383,11 +411,6 @@ class Feature:
         # [n_channels * n_features + 1, n_time_steps]
         new_shape = (n_channels * n_features, n_time_steps)
         features = features.reshape(new_shape).T
-
-        if start is None:
-            start = pd.to_timedelta(0)
-        if end is None:
-            end = pd.to_timedelta(np.NaN)
 
         if n_time_steps > 1:
             starts = pd.timedelta_range(

@@ -7,7 +7,6 @@ import pandas as pd
 import audeer
 
 from audinterface.core import utils
-from audinterface.core.process import Process
 
 
 class Segment:
@@ -55,9 +54,14 @@ class Segment:
         if process_func is None:
             def process_func(signal, sr, **kwargs):
                 return pd.MultiIndex.from_arrays(
-                    [pd.to_timedelta([]), pd.to_timedelta([])],
-                    names=['start', 'end']
+                    [
+                        pd.to_timedelta([]),
+                        pd.to_timedelta([]),
+                    ],
+                    names=['start', 'end'],
                 )
+        # avoid cycling imports
+        from audinterface.core.process import Process
         self.process = Process(
             process_func=process_func,
             sampling_rate=sampling_rate,
@@ -91,33 +95,31 @@ class Segment:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
+        if start is None or pd.isna(start):
+            start = pd.to_timedelta(0)
         index = self.process.process_file(
             file, start=start, end=end, channel=channel,
-        )
-        files = [file] * len(index)
-        if start is not None:
-            starts = index.levels[0] + start
-            ends = index.levels[1] + start
-        else:
-            starts = index.levels[0]
-            ends = index.levels[1]
-        return pd.MultiIndex.from_arrays(
-            [
-                files, starts, ends,
-            ],
-            names=['file', 'start', 'end']
+        ).values[0]
+        return pd.MultiIndex(
+            [[file], index.levels[0] + start, index.levels[1] + start],
+            [[0] * len(index), index.codes[0], index.codes[1]],
+            names=['file', 'start', 'end'],
         )
 
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
+            starts: typing.Sequence[pd.Timedelta] = None,
+            ends: typing.Sequence[pd.Timedelta] = None,
             channel: int = None,
     ) -> pd.MultiIndex:
         r"""Segment a list of files.
 
         Args:
             files: list of file paths
+            starts: list with start positions
+            ends: list with end positions
             channel: channel number
 
         Returns:
@@ -127,19 +129,22 @@ class Segment:
             RuntimeError: if sampling rates of model and signal do not match
 
         """
-        series = self.process.process_files(files, channel=channel)
-        files = []
-        starts = []
-        ends = []
-        for file, index in series.items():
-            files.extend([file] * len(index))
-            starts.extend(index.levels[0])
-            ends.extend(index.levels[1])
-        return pd.MultiIndex.from_arrays(
-            [
-                files, starts, ends,
-            ],
-            names=['file', 'start', 'end']
+        series = self.process.process_files(
+            files,
+            starts=starts,
+            ends=ends,
+            channel=channel,
+        )
+        tuples = []
+        for idx, ((file, start, _), index) in enumerate(series.items()):
+            tuples.extend(
+                pd.MultiIndex(
+                    [[file], index.levels[0] + start, index.levels[1] + start],
+                    [[0] * len(index), index.codes[0], index.codes[1]],
+                ).to_list()
+            )
+        return pd.MultiIndex.from_tuples(
+            tuples, names=['file', 'start', 'end'],
         )
 
     def process_folder(
@@ -174,14 +179,20 @@ class Segment:
             signal: np.ndarray,
             sampling_rate: int,
             *,
+            file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
     ) -> pd.MultiIndex:
         r"""Segment audio signal.
 
+        .. note:: If a ``file`` is given, the index of the returned frame
+            has levels ``file``, ``start`` and ``end``. Otherwise,
+            it consists only of ``start`` and ``end``.
+
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
+            file: file path
             start: start processing at this position
             end: end processing at this position
 
@@ -193,8 +204,8 @@ class Segment:
 
         """
         index = self.process.process_signal(
-            signal, sampling_rate, start=start, end=end,
-        )
+            signal, sampling_rate, file=file, start=start, end=end,
+        ).values[0]
         utils.check_index(index)
         if start is not None:
             index = index.set_levels(
@@ -202,4 +213,14 @@ class Segment:
                     index.levels[0] + start,
                     index.levels[1] + start,
                 ], [0, 1])
+        if file is not None:
+            index = pd.MultiIndex(
+                levels=[
+                    [file], index.levels[0], index.levels[1],
+                ],
+                codes=[
+                    [0] * len(index), index.codes[0], index.codes[1],
+                ],
+                names=['file', 'start', 'end'],
+            )
         return index
