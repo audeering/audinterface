@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.2.0 (2020-06-10)
+--------------------------
+
+* Added: ``segment`` argument to :class:`audinterface.Process` and :class:`audinterface.Feature`
+* Removed: ``name`` argument from :class:`audinterface.Feature`
+
+
 Version 0.1.0 (2020-06-05)
 --------------------------
 
