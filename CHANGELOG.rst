@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.2.1 (2020-06-10)
+--------------------------
+
+* Changed: ``utils.check_index`` ignores `datetime`
+
+
 Version 0.2.0 (2020-06-10)
 --------------------------
 
