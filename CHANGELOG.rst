@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.2.2 (2020-06-11)
+--------------------------
+
+* Fixed: :method:`audinterface.Process.process_file` was changing end times
+  when process a segmented index
+
+
 Version 0.2.1 (2020-06-10)
 --------------------------
 
