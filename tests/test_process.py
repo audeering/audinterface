@@ -41,12 +41,16 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 
 @pytest.mark.parametrize(
-    'process_func, segment, signal, selected_channel, expected_output',
+    'process_func, segment, signal, sampling_rate, start, end, '
+    'selected_channel, expected_output',
     [
         (
             signal_max,
             None,
             np.ones((1, 3)),
+            8000,
+            None,
+            None,
             None,
             1,
         ),
@@ -54,6 +58,9 @@ def signal_modification(signal, sampling_rate, subtract=False):
             signal_max,
             SEGMENT,
             np.ones((1, 8000)),
+            8000,
+            None,
+            None,
             None,
             1,
         ),
@@ -61,6 +68,9 @@ def signal_modification(signal, sampling_rate, subtract=False):
             signal_max,
             None,
             np.ones(3),
+            8000,
+            None,
+            None,
             0,
             1,
         ),
@@ -68,6 +78,9 @@ def signal_modification(signal, sampling_rate, subtract=False):
             signal_max,
             None,
             np.array([[0., 0., 0.], [1., 1., 1.]]),
+            8000,
+            None,
+            None,
             0,
             0,
         ),
@@ -75,6 +88,9 @@ def signal_modification(signal, sampling_rate, subtract=False):
             signal_max,
             None,
             np.array([[0., 0., 0.], [1., 1., 1.]]),
+            8000,
+            None,
+            None,
             1,
             1,
         ),
@@ -82,9 +98,82 @@ def signal_modification(signal, sampling_rate, subtract=False):
             signal_max,
             None,
             np.ones((1, 3)),
+            8000,
+            None,
+            None,
             1,
             1,
             marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            None,
+            None,
+            None,
+            3.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.NaT,
+            pd.NaT,
+            None,
+            3.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.to_timedelta('1s'),
+            None,
+            None,
+            2.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.to_timedelta('1s'),
+            pd.NaT,
+            None,
+            2.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            None,
+            pd.to_timedelta('2s'),
+            None,
+            2.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.NaT,
+            pd.to_timedelta('2s'),
+            None,
+            2.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.to_timedelta('1s'),
+            pd.to_timedelta('2s'),
+            None,
+            1.0,
         ),
     ],
 )
@@ -93,10 +182,12 @@ def test_process_file(
     process_func,
     segment,
     signal,
+    sampling_rate,
+    start,
+    end,
     selected_channel,
     expected_output,
 ):
-    sampling_rate = 8000
     model = audinterface.Process(
         process_func=process_func,
         sampling_rate=sampling_rate,
@@ -107,7 +198,12 @@ def test_process_file(
     path = str(tmpdir.mkdir('wav'))
     filename = f'{path}/channel.wav'
     af.write(filename, signal, sampling_rate)
-    output = model.process_file(filename, channel=selected_channel)
+    output = model.process_file(
+        filename,
+        start=start,
+        end=end,
+        channel=selected_channel,
+    )
     np.testing.assert_almost_equal(
         output.values, expected_output, decimal=4,
     )

@@ -65,15 +65,15 @@ def read_audio(
         sampling_rate: sampling rate in Hz
 
     """
-    if start is not None:
-        offset = start.total_seconds()
-    else:
+    if start is None or pd.isna(start):
         offset = 0
-
-    if end is not None:
-        duration = None if pd.isna(end) else end.total_seconds() - offset
     else:
+        offset = start.total_seconds()
+
+    if end is None or pd.isna(end):
         duration = None
+    else:
+        duration = end.total_seconds() - offset
 
     # load raw audio
     signal, sampling_rate = af.read(

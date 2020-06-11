@@ -66,13 +66,19 @@ def test_feature():
 
 
 @pytest.mark.parametrize(
-    'segment',
+    'start, end, segment',
     [
-        None,
-        SEGMENT,
+        (None, None, None),
+        (None, None, SEGMENT),
+        (pd.NaT, pd.NaT, None),
+        (pd.to_timedelta('0.25s'), None, None),
+        (pd.to_timedelta('0.25s'), pd.NaT, None),
+        (None, pd.to_timedelta('0.75s'), None),
+        (pd.NaT, pd.to_timedelta('0.75s'), None),
+        (pd.to_timedelta('0.25s'), pd.to_timedelta('0.75s'), None),
     ]
 )
-def test_process_file(tmpdir, segment):
+def test_process_file(tmpdir, start, end, segment):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extrator,
@@ -86,28 +92,15 @@ def test_process_file(tmpdir, segment):
     path = str(tmpdir.mkdir('wav'))
     file = os.path.join(path, 'file.wav')
     af.write(file, SIGNAL, SAMPLING_RATE)
-    features = extractor.process_file(file)
-    assert all(
-        features.index.levels[0] == file
-    )
-    assert all(
-        features.index.levels[1] == INDEX.levels[0]
-    )
-    assert all(
-        features.index.levels[2] == INDEX.levels[1]
-    )
+    features = extractor.process_file(file, start=start, end=end)
+    if start is None or pd.isna(start):
+        start = pd.to_timedelta(0)
+    if end is None or pd.isna(end):
+        end = pd.to_timedelta(af.duration(file), unit='sec')
+    assert features.index.levels[0][0] == file
+    assert features.index.levels[1][0] == start
+    assert features.index.levels[2][0] == end
     np.testing.assert_array_equal(features, expected_features)
-    features = extractor.process_file(file, start=pd.to_timedelta('0.5s'))
-    assert all(
-        features.index.levels[0] == file
-    )
-    assert all(
-        features.index.levels[1] == INDEX.levels[0] + pd.to_timedelta('0.5s')
-    )
-    assert all(
-        features.index.levels[2] == INDEX.levels[1]
-    )
-    np.testing.assert_array_equal(features.values, expected_features)
 
 
 def test_process_folder(tmpdir):

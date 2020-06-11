@@ -81,6 +81,7 @@ class Process:
             end: pd.Timedelta = None,
             channel: int = None,
     ) -> pd.Series:
+
         signal, sampling_rate = self.read_audio(
             file,
             channel=channel,
@@ -92,12 +93,14 @@ class Process:
             sampling_rate,
             file=file,
         )
-        if start is not None:
-            y.index = y.index.set_levels(
-                [
-                    y.index.levels[1] + start,
-                    y.index.levels[2] + start,
-                ], [1, 2])
+
+        if start is None or pd.isna(start):
+            start = y.index.levels[1][0]
+        if end is None or pd.isna(end):
+            end = y.index.levels[2][0] + start
+
+        y.index = y.index.set_levels([[start], [end]], [1, 2])
+
         return y
 
     def process_file(
@@ -125,10 +128,7 @@ class Process:
         """
         if self.segment is not None:
             index = self.segment.process_file(
-                file,
-                start=start,
-                end=end,
-                channel=channel,
+                file, start=start, end=end, channel=channel,
             )
             return self.process_unified_format_index(
                 index=index, channel=channel,
