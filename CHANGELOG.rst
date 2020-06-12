@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.2.4 (2020-06-12)
+--------------------------
+
+* Fixed: description and keywords of package in :file:`setup.cfg`
+
+
 Version 0.2.3 (2020-06-11)
 --------------------------
 
