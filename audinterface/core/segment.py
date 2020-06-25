@@ -26,6 +26,8 @@ class Segment:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -46,6 +48,7 @@ class Segment:
             process_func: typing.Callable[..., pd.MultiIndex] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -66,6 +69,7 @@ class Segment:
             process_func=process_func,
             sampling_rate=sampling_rate,
             resample=resample,
+            keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,

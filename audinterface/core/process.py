@@ -26,6 +26,8 @@ class Process:
         segment: when a :class:`audinterface.Segment` object is provided,
             it will be used to find a segmentation of the input signal.
             Afterwards processing is applied to each segment
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -46,6 +48,7 @@ class Process:
             sampling_rate: int = None,
             resample: bool = False,
             segment: Segment = None,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -57,6 +60,7 @@ class Process:
             )
         self.sampling_rate = sampling_rate
         self.segment = segment
+        self.keep_nat = keep_nat
         self.num_workers = num_workers
         self.multiprocessing = multiprocessing
         self.verbose = verbose
@@ -96,7 +100,7 @@ class Process:
 
         if start is None or pd.isna(start):
             start = y.index.levels[1][0]
-        if end is None or pd.isna(end):
+        if end is None or (pd.isna(end) and not self.keep_nat):
             end = y.index.levels[2][0] + start
 
         y.index = y.index.set_levels([[start], [end]], [1, 2])
@@ -242,7 +246,7 @@ class Process:
         # Find start and end index
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
-        if end is None or pd.isna(end):
+        if end is None or (pd.isna(end) and not self.keep_nat):
             end = pd.to_timedelta(
                 signal.shape[-1] / sampling_rate, unit='sec'
             )

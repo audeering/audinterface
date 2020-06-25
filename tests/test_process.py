@@ -41,7 +41,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 
 @pytest.mark.parametrize(
-    'process_func, segment, signal, sampling_rate, start, end, '
+    'process_func, segment, signal, sampling_rate, start, end, keep_nat, '
     'selected_channel, expected_output',
     [
         (
@@ -51,6 +51,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             None,
             1,
         ),
@@ -61,6 +62,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             None,
             1,
         ),
@@ -71,6 +73,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             0,
             1,
         ),
@@ -81,6 +84,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             0,
             0,
         ),
@@ -91,6 +95,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             1,
             1,
         ),
@@ -101,6 +106,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             1,
             1,
             marks=pytest.mark.xfail(raises=ValueError),
@@ -112,6 +118,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             None,
+            False,
             None,
             3.0,
         ),
@@ -122,6 +129,18 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             pd.NaT,
             pd.NaT,
+            False,
+            None,
+            3.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            pd.NaT,
+            pd.NaT,
+            True,
             None,
             3.0,
         ),
@@ -132,6 +151,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             pd.to_timedelta('1s'),
             None,
+            False,
             None,
             2.0,
         ),
@@ -142,6 +162,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             pd.to_timedelta('1s'),
             pd.NaT,
+            False,
             None,
             2.0,
         ),
@@ -152,6 +173,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             None,
             pd.to_timedelta('2s'),
+            False,
             None,
             2.0,
         ),
@@ -162,6 +184,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             pd.NaT,
             pd.to_timedelta('2s'),
+            False,
             None,
             2.0,
         ),
@@ -172,6 +195,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             8000,
             pd.to_timedelta('1s'),
             pd.to_timedelta('2s'),
+            False,
             None,
             1.0,
         ),
@@ -185,6 +209,7 @@ def test_process_file(
     sampling_rate,
     start,
     end,
+    keep_nat,
     selected_channel,
     expected_output,
 ):
@@ -193,6 +218,7 @@ def test_process_file(
         sampling_rate=sampling_rate,
         resample=False,
         segment=segment,
+        keep_nat=keep_nat,
         verbose=False,
     )
     path = str(tmpdir.mkdir('wav'))
@@ -258,7 +284,7 @@ def test_process_folder(
 
 @pytest.mark.parametrize(
     'process_func, process_func_kwargs, segment, signal, sampling_rate,'
-    'file, start, end, expected_signal',
+    'file, start, end, keep_nat, expected_signal',
     [
         (
             None,
@@ -269,6 +295,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             np.array([1., 2., 3.]),
         ),
         (
@@ -280,6 +307,7 @@ def test_process_folder(
             'file',
             None,
             None,
+            False,
             np.array([1., 2., 3.]),
         ),
         (
@@ -291,6 +319,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             np.array([1., 2., 3.]),
         ),
         (
@@ -302,6 +331,7 @@ def test_process_folder(
             'file',
             None,
             None,
+            False,
             np.array([1., 2., 3.]),
         ),
         (
@@ -313,6 +343,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             3.0,
         ),
         (
@@ -324,6 +355,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             1.0,
         ),
         (
@@ -335,6 +367,7 @@ def test_process_folder(
             None,
             pd.to_timedelta('2s'),
             None,
+            False,
             1.0,
         ),
         (
@@ -346,7 +379,32 @@ def test_process_folder(
             None,
             None,
             pd.to_timedelta('1s'),
+            False,
             1.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
+            None,
+            None,
+            pd.NaT,
+            False,
+            3.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
+            None,
+            None,
+            pd.NaT,
+            True,
+            3.0,
         ),
         (
             signal_duration,
@@ -357,6 +415,7 @@ def test_process_folder(
             None,
             pd.to_timedelta('1s'),
             pd.to_timedelta('2s'),
+            False,
             1.0,
         ),
         (
@@ -368,6 +427,7 @@ def test_process_folder(
             'file',
             pd.to_timedelta('1s'),
             pd.to_timedelta('2s'),
+            False,
             1.0,
         ),
         (
@@ -379,6 +439,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             np.array([[1.1, 1.1, 1.1]]),
         ),
         (
@@ -390,6 +451,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             np.array([[1.1, 1.1, 1.1]]),
         ),
         (
@@ -401,6 +463,7 @@ def test_process_folder(
             None,
             None,
             None,
+            False,
             np.array([[0.9, 0.9, 0.9]]),
         ),
     ],
@@ -414,6 +477,7 @@ def test_process_signal(
         file,
         start,
         end,
+        keep_nat,
         expected_signal,
 ):
     model = audinterface.Process(
@@ -421,6 +485,7 @@ def test_process_signal(
         sampling_rate=None,
         resample=False,
         segment=segment,
+        keep_nat=keep_nat,
         verbose=False,
         **process_func_kwargs,
     )
@@ -430,7 +495,7 @@ def test_process_signal(
     signal = np.atleast_2d(signal)
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
-    if end is None or pd.isna(end):
+    if end is None or (pd.isna(end) and not keep_nat):
         end = pd.to_timedelta(
             signal.shape[1] / sampling_rate, unit='sec',
         )

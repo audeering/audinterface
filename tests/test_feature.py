@@ -11,6 +11,7 @@ import audinterface
 SAMPLING_RATE = 8000
 NUM_CHANNELS = 2
 NUM_FEATURES = 3
+NUM_FRAMES = 5
 SIGNAL = np.ones((NUM_CHANNELS, SAMPLING_RATE))
 STARTS = [pd.to_timedelta('0s')] * 3
 ENDS = [pd.to_timedelta('1s')] * 3
@@ -145,6 +146,12 @@ def test_process_folder(tmpdir):
             pd.to_timedelta('10s'),
             np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
         ),
+        (
+            lambda s, sr: np.ones((NUM_CHANNELS, NUM_FEATURES, NUM_FRAMES)),
+            None,
+            None,
+            np.ones((NUM_FRAMES, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+        ),
         # Feature extractor function returns too many dimensions
         pytest.param(
             lambda s, sr: np.ones((1, 1, 1, 1)),
@@ -164,14 +171,6 @@ def test_process_folder(tmpdir):
         # Feature extractor function returns wrong number of features
         pytest.param(
             lambda s, sr: np.ones((NUM_CHANNELS, NUM_FEATURES + 1)),
-            None,
-            None,
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
-            marks=pytest.mark.xfail(raises=RuntimeError),
-        ),
-        # Feature extrator function returns more than one time step
-        pytest.param(
-            lambda s, sr: np.ones((NUM_CHANNELS, NUM_FEATURES, 2)),
             None,
             None,
             np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
@@ -247,23 +246,58 @@ def test_process_unified_format_index(tmpdir):
     np.testing.assert_array_equal(features.values, expected_features)
 
 
-def test_signal_sliding_window():
+@pytest.mark.parametrize(
+    'win_dur, hop_dur, unit',
+    [
+        (1, 0.5, 'seconds'),
+        (1, None, 'seconds'),
+        (1000, 500, 'milliseconds'),
+        (None, None, 'seconds'),
+    ],
+)
+def test_signal_sliding_window(win_dur, hop_dur, unit):
     # Test sliding window with two time steps
     expected_features = np.ones((NUM_CHANNELS, 2 * NUM_FEATURES))
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=features_extractor_sliding_window,
         num_channels=NUM_CHANNELS,
-        win_dur=1,
-        hop_dur=0.5,
-        unit='seconds',
+        win_dur=win_dur,
+        hop_dur=hop_dur,
+        unit=unit,
         hop_size=SAMPLING_RATE // 2,  # argument to process_func
     )
     features = extractor.process_signal(
         SIGNAL,
         SAMPLING_RATE,
     )
-    np.testing.assert_array_equal(features.values, expected_features)
+    n_time_steps = len(features)
+    start = pd.to_timedelta(0)
+    end = pd.to_timedelta(SIGNAL.shape[-1] / SAMPLING_RATE, unit=unit)
+    if win_dur is None:
+        starts = [start] * n_time_steps
+        ends = [end] * n_time_steps
+    else:
+        if hop_dur is None:
+            hop_dur = win_dur / 2
+        starts = pd.timedelta_range(
+            start,
+            freq=pd.to_timedelta(hop_dur, unit=unit),
+            periods=n_time_steps,
+        )
+        ends = starts + pd.to_timedelta(win_dur, unit=unit)
+    index = pd.MultiIndex.from_arrays(
+        [starts, ends],
+        names=['start', 'end'],
+    )
+    pd.testing.assert_frame_equal(
+        features,
+        pd.DataFrame(
+            expected_features,
+            index=index,
+            columns=extractor.column_names,
+        ),
+    )
 
 
 def test_signal_kwargs():

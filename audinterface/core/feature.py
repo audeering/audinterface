@@ -19,12 +19,13 @@ class Feature:
     the returned dataframe will have ``num_channels * num_features``
     columns.
     It will have one row per file or signal.
-    If ``win_dur`` is specified
-    and the features are extracted using a sliding window,
-    each window will be stored as one row,
-    and the resulting ``start`` and ``end`` indices
+    If features are extracted using a sliding window,
+    each window will be stored as one row.
+    If ``win_dur`` is specified ``start`` and ``end`` indices
     are referred from the original ``start`` and ``end`` arguments
     and the window positions.
+    Otherwise, the original ``start`` and ``end`` indices
+    are kept.
 
     Args:
         name: name of feature extractor, e.g. ``'stft'``
@@ -58,6 +59,8 @@ class Feature:
         segment: when a :class:`audinterface.Segment` object is provided,
             it will be used to find a segmentation of the input signal.
             Afterwards processing is applied to each segment
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -85,6 +88,7 @@ class Feature:
             unit: str = 'seconds',
             resample: bool = False,
             segment: Segment = None,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -111,6 +115,7 @@ class Feature:
             sampling_rate=sampling_rate,
             resample=resample,
             segment=segment,
+            keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
@@ -400,11 +405,6 @@ class Feature:
                 f'Feature names {self.column_names} do not match '
                 f'number of extracted features: {n_features * n_channels}'
             )
-        if n_time_steps > 1 and self.win_dur is None:
-            raise RuntimeError(
-                'Features are extracted with a sliding window, '
-                "but no 'win_dur' is specified."
-            )
 
         # Reshape features and store channel number as first feature
         # [n_channels, n_features, n_time_steps] =>
@@ -413,12 +413,16 @@ class Feature:
         features = features.reshape(new_shape).T
 
         if n_time_steps > 1:
-            starts = pd.timedelta_range(
-                start,
-                freq=self.hop_dur,
-                periods=n_time_steps,
-            )
-            ends = starts + self.win_dur
+            if self.win_dur is None:
+                starts = [start] * n_time_steps
+                ends = [end] * n_time_steps
+            else:
+                starts = pd.timedelta_range(
+                    start,
+                    freq=self.hop_dur,
+                    periods=n_time_steps,
+                )
+                ends = starts + self.win_dur
         else:
             starts = [start]
             ends = [end]

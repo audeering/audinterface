@@ -181,6 +181,10 @@ def segment_to_indices(
         start: pd.Timedelta,
         end: pd.Timedelta,
 ) -> typing.Tuple[int, int]:
+    if pd.isna(end):
+        end = pd.to_timedelta(
+            signal.shape[-1] / sampling_rate, unit='sec'
+        )
     max_i = signal.shape[-1]
     start_i = int(round(start.total_seconds() * sampling_rate))
     start_i = min(start_i, max_i)
