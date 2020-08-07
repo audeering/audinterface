@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.3.0 (2020-08-07)
+--------------------------
+
+* Changed: switch to :mod:`audsp` >=0.9.2, which fixes a critical resampling
+  issue and introduces a new keyword arg name
+
+
 Version 0.2.4 (2020-06-12)
 --------------------------
 
