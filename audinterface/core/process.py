@@ -71,7 +71,7 @@ class Process:
         self.process_func_kwargs = kwargs
         if resample:
             self.resample = audsp.Resample(
-                sampling_rate=sampling_rate,
+                target_rate=sampling_rate,
                 quality=audsp.define.ResampleQuality.HIGH,
             )
         else:
@@ -489,7 +489,7 @@ class ProcessWithContext:
         self.process_func_kwargs = kwargs
         if resample:
             self.resample = audsp.Resample(
-                sampling_rate=sampling_rate,
+                target_rate=sampling_rate,
                 quality=audsp.define.ResampleQuality.HIGH,
             )
         else:

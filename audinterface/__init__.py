@@ -31,7 +31,7 @@ Example:
     >>> signal = np.array([1., 2., 3.])
     >>> model.process_signal(signal, sampling_rate=3)
     start   end
-    0 days  00:00:01    1.0
+    0 days  0 days 00:00:01    1.0
     dtype: float64
 
 """
