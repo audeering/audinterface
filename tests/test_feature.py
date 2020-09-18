@@ -45,13 +45,20 @@ def features_extractor_sliding_window(signal, _, hop_size):
 
 
 def test_feature():
-    # You have to specify sampling rate with unit == 'samples'
+    # You have to specify sampling rate with unit == 'samples' and win_dur
     with pytest.raises(ValueError):
         audinterface.Feature(
             feature_names=('o1', 'o2', 'o3'),
             sampling_rate=None,
             unit='samples',
+            win_dur=2048,
         )
+    # If no win_dur is given, no error should occur
+    audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        unit='samples',
+        sampling_rate=None,
+    )
     # Only hop_dur is given
     with pytest.raises(ValueError):
         audinterface.Feature(

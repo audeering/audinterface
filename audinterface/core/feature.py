@@ -71,7 +71,8 @@ class Feature:
         kwargs: additional keyword arguments to the processing function
 
     Raises:
-        ValueError: if ``unit == 'samples'`` and ``sampling_rate is None``
+        ValueError: if ``unit == 'samples'``, ``sampling_rate is None``
+            and ``win_dur is not None``
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     """
@@ -94,14 +95,14 @@ class Feature:
             verbose: bool = False,
             **kwargs,
     ):
-        if unit == 'samples' and sampling_rate is None:
-            raise ValueError(
-                "You have specified 'samples' as unit, "
-                "but haven't provided a sampling rate"
-            )
         if win_dur is None and hop_dur is not None:
             raise ValueError(
                 "You have to specify 'win_dur' if 'hop_dur' is given"
+            )
+        if unit == 'samples' and sampling_rate is None and win_dur is not None:
+            raise ValueError(
+                "You have specified 'samples' as unit, "
+                "but haven't provided a sampling rate"
             )
 
         if process_func is None:
