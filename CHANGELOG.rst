@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.3.1 (2020-09-18)
+--------------------------
+
+* Fixed: :class:`audinterface.Feature` raises an due to missing sampling rate
+  now only if ``win_dur`` is given
+
+
 Version 0.3.0 (2020-08-07)
 --------------------------
 
