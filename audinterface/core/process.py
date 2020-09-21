@@ -225,24 +225,6 @@ class Process:
 
         signal = np.atleast_2d(signal)
 
-        # Resample signal
-        if (
-                self.sampling_rate is not None
-                and sampling_rate != self.sampling_rate
-        ):
-            if self.resample is not None:
-                # TODO: support stereo, see
-                # https://gitlab.audeering.com/tools/pyaudsp/-/issues/20
-                signal = self.resample(signal, sampling_rate)
-                signal = np.atleast_2d(signal)
-                sampling_rate = self.sampling_rate
-            else:
-                raise RuntimeError(
-                    f'Signal sampling rate of {sampling_rate} Hz '
-                    f'does not match requested model sampling rate of '
-                    f'{self.sampling_rate} Hz.'
-                )
-
         # Find start and end index
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
@@ -254,9 +236,16 @@ class Process:
             signal, sampling_rate, start, end,
         )
 
+        # Trim signal and possibly resample
+        signal = signal[:, start_i:end_i]
+        signal, sampling_rate = self._resample(
+            signal,
+            sampling_rate,
+        )
+
         # Process signal
         y = self.process_func(
-            signal[:, start_i:end_i],
+            signal,
             sampling_rate,
             **self.process_func_kwargs,
         )
@@ -430,6 +419,27 @@ class Process:
     ):
         return utils.read_audio(path, start, end, channel)
 
+    def _resample(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+    ) -> typing.Tuple[np.ndarray, int]:
+        if (
+                self.sampling_rate is not None
+                and sampling_rate != self.sampling_rate
+        ):
+            if self.resample is not None:
+                signal = self.resample(signal, sampling_rate)
+                signal = np.atleast_2d(signal)
+                sampling_rate = self.sampling_rate
+            else:
+                raise RuntimeError(
+                    f'Signal sampling rate of {sampling_rate} Hz '
+                    f'does not match requested model sampling rate of '
+                    f'{self.sampling_rate} Hz.'
+                )
+        return signal, sampling_rate
+
 
 class ProcessWithContext:
     r"""Alternate processing interface that provides signal context.
@@ -517,24 +527,8 @@ class ProcessWithContext:
         """
         utils.check_index(index)
 
-        # Enforce 2D signals
         signal = np.atleast_2d(signal)
-
-        # Resample signal
-        if (
-                self.sampling_rate is not None
-                and sampling_rate != self.sampling_rate
-        ):
-            if self.resample is not None:
-                signal = self.resample(signal, sampling_rate)
-                signal = np.atleast_2d(signal)
-                sampling_rate = self.sampling_rate
-            else:
-                raise RuntimeError(
-                    f'Signal sampling rate of {sampling_rate} Hz '
-                    f'does not match requested model sampling rate of '
-                    f'{self.sampling_rate} Hz.'
-                )
+        signal, sampling_rate = self._resample(signal, sampling_rate)
 
         # Process signal
         starts_i, ends_i = utils.segments_to_indices(
@@ -601,3 +595,24 @@ class ProcessWithContext:
             channel: int = None,
     ):
         return utils.read_audio(path, start, end, channel)
+
+    def _resample(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+    ) -> typing.Tuple[np.ndarray, int]:
+        if (
+                self.sampling_rate is not None
+                and sampling_rate != self.sampling_rate
+        ):
+            if self.resample is not None:
+                signal = self.resample(signal, sampling_rate)
+                signal = np.atleast_2d(signal)
+                sampling_rate = self.sampling_rate
+            else:
+                raise RuntimeError(
+                    f'Signal sampling rate of {sampling_rate} Hz '
+                    f'does not match requested model sampling rate of '
+                    f'{self.sampling_rate} Hz.'
+                )
+        return signal, sampling_rate
