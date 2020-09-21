@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.3.2 (2020-10-21)
+--------------------------
+
+* Changed: switch to ``audeer.run_tasks``
+* Changed: cut signal before resampling is applied
+
+
 Version 0.3.1 (2020-09-18)
 --------------------------
 
