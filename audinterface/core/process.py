@@ -176,7 +176,7 @@ class Process:
                 {'start': start, 'end': end, 'channel': channel},
             ) for file, start, end in zip(files, starts, ends)
         ]
-        y = utils.run_tasks(
+        y = audeer.run_tasks(
             self.process_file,
             params,
             num_workers=self.num_workers,
@@ -355,7 +355,7 @@ class Process:
                     {'start': start, 'end': end},
                 ) for start, end in index
             ]
-        y = utils.run_tasks(
+        y = audeer.run_tasks(
             self._process_signal,
             params,
             num_workers=self.num_workers,
@@ -410,7 +410,7 @@ class Process:
             )
             for file, start, end in index
         ]
-        y = utils.run_tasks(
+        y = audeer.run_tasks(
             self._process_file,
             params,
             num_workers=self.num_workers,
