@@ -441,3 +441,29 @@ class Feature:
             )
 
         return pd.DataFrame(features, index, columns=self.column_names)
+
+    def __call__(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+    ) -> np.ndarray:
+        r"""Apply processing to signal.
+
+        This function processes the signal **without** transforming the output
+        into a :class:`pd.DataFrame`. Instead it will return the raw processed
+        signal. However, if resampling is enabled and the input sampling
+        rate does not fit the expected sampling rate, the input signal will
+        be resampled before the processing is applied.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+
+        Returns:
+            Processed signal
+
+        """
+        return self.process(
+            signal,
+            sampling_rate,
+        )

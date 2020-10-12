@@ -155,7 +155,7 @@ def test_process_signal_from_index(
 
 
 @pytest.mark.parametrize(
-    'signal_sampling_rate,model_sampling_rate,resample',
+    'signal_sampling_rate,target_rate,resample',
     [
         pytest.param(
             44100,
@@ -193,12 +193,12 @@ def test_process_signal_from_index(
 )
 def test_sampling_rate_mismatch(
         signal_sampling_rate,
-        model_sampling_rate,
+        target_rate,
         resample,
 ):
     model = audinterface.ProcessWithContext(
         process_func=None,
-        sampling_rate=model_sampling_rate,
+        sampling_rate=target_rate,
         resample=resample,
         verbose=False,
     )

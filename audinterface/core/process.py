@@ -236,19 +236,8 @@ class Process:
             signal, sampling_rate, start, end,
         )
 
-        # Trim signal and possibly resample
-        signal = signal[:, start_i:end_i]
-        signal, sampling_rate = self._resample(
-            signal,
-            sampling_rate,
-        )
-
-        # Process signal
-        y = self.process_func(
-            signal,
-            sampling_rate,
-            **self.process_func_kwargs,
-        )
+        # Trim and process signal
+        y = self(signal[:, start_i:end_i], sampling_rate)
 
         # Create index
         if file is not None:
@@ -424,6 +413,7 @@ class Process:
             signal: np.ndarray,
             sampling_rate: int,
     ) -> typing.Tuple[np.ndarray, int]:
+        r"""Resample signal."""
         if (
                 self.sampling_rate is not None
                 and sampling_rate != self.sampling_rate
@@ -439,6 +429,34 @@ class Process:
                     f'{self.sampling_rate} Hz.'
                 )
         return signal, sampling_rate
+
+    def __call__(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+    ) -> typing.Any:
+        r"""Apply processing to signal.
+
+        This function processes the signal **without** transforming the output
+        into a :class:`pd.Series`. Instead it will return the raw processed
+        signal. However, if resampling is enabled and the input sampling
+        rate does not fit the expected sampling rate, the input signal will
+        be resampled before the processing is applied.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+
+        Returns:
+            Processed signal
+
+        """
+        signal, sampling_rate = self._resample(signal, sampling_rate)
+        return self.process_func(
+            signal,
+            sampling_rate,
+            **self.process_func_kwargs,
+        )
 
 
 class ProcessWithContext:
@@ -527,14 +545,10 @@ class ProcessWithContext:
         """
         utils.check_index(index)
 
-        signal = np.atleast_2d(signal)
-        signal, sampling_rate = self._resample(signal, sampling_rate)
-
-        # Process signal
         starts_i, ends_i = utils.segments_to_indices(
             signal, sampling_rate, index,
         )
-        y = self.process_func(signal, sampling_rate, starts_i, ends_i)
+        y = self(signal, sampling_rate, starts_i, ends_i)
 
         return pd.Series(y, index=index)
 
@@ -601,6 +615,7 @@ class ProcessWithContext:
             signal: np.ndarray,
             sampling_rate: int,
     ) -> typing.Tuple[np.ndarray, int]:
+        r"""Resample signal."""
         if (
                 self.sampling_rate is not None
                 and sampling_rate != self.sampling_rate
@@ -616,3 +631,37 @@ class ProcessWithContext:
                     f'{self.sampling_rate} Hz.'
                 )
         return signal, sampling_rate
+
+    def __call__(
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        starts: typing.Sequence[int],
+        ends: typing.Sequence[int],
+    ) -> typing.Any:
+        r"""Apply processing to signal.
+
+        This function processes the signal **without** transforming the output
+        into a :class:`pd.Series`. Instead it will return the raw processed
+        signal. However, if resampling is enabled and the input sampling
+        rate does not fit the expected sampling rate, the input signal will
+        be resampled before the processing is applied.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+
+        Returns:
+            Processed signal
+
+        """
+
+        signal = np.atleast_2d(signal)
+        signal, sampling_rate = self._resample(signal, sampling_rate)
+        return self.process_func(
+            signal,
+            sampling_rate,
+            starts,
+            ends,
+            **self.process_func_kwargs,
+        )

@@ -74,6 +74,25 @@ def test_feature():
 
 
 @pytest.mark.parametrize(
+    'process_func,expected',
+    [
+        (
+            feature_extrator,
+            np.ones((NUM_CHANNELS, NUM_FEATURES), dtype=np.float),
+        ),
+    ]
+)
+def test_process_callable(process_func, expected):
+    extractor = audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=process_func,
+        num_channels=NUM_CHANNELS,
+    )
+    result = extractor(SIGNAL, SAMPLING_RATE)
+    np.testing.assert_array_equal(result, expected)
+
+
+@pytest.mark.parametrize(
     'start, end, segment',
     [
         (None, None, None),

@@ -16,6 +16,43 @@ INDEX = pd.MultiIndex.from_arrays(
 )
 
 
+@pytest.mark.parametrize(
+    'signal,sampling_rate,segment_func,result',
+    [
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            None,
+            pd.MultiIndex.from_arrays(
+                [
+                    pd.to_timedelta([]),
+                    pd.to_timedelta([])
+                ],
+                names=['start', 'end']
+            ),
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: INDEX,
+            pd.MultiIndex.from_arrays(
+                [
+                    STARTS,
+                    ENDS
+                ],
+                names=['start', 'end'],
+            )
+        ),
+    ]
+)
+def test_call(signal, sampling_rate, segment_func, result):
+    model = audinterface.Segment(
+        process_func=segment_func,
+    )
+    index = model(signal, sampling_rate)
+    pd.testing.assert_index_equal(index, result)
+
+
 def test_file(tmpdir):
     model = audinterface.Segment(
         process_func=lambda s, sr: INDEX,
@@ -64,10 +101,11 @@ def test_folder(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize(
-    'signal,segment_func,start,end,result',
+    'signal,sampling_rate,segment_func,start,end,result',
     [
         (
             SIGNAL,
+            SAMPLING_RATE,
             None,
             None,
             None,
@@ -81,6 +119,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
         (
             SIGNAL,
+            SAMPLING_RATE,
             lambda x, sr: INDEX,
             None,
             None,
@@ -94,6 +133,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
         (
             SIGNAL,
+            SAMPLING_RATE,
             lambda x, sr: INDEX,
             pd.to_timedelta('1s'),
             pd.to_timedelta('10s'),
@@ -107,6 +147,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
         pytest.param(
             SIGNAL,
+            SAMPLING_RATE,
             lambda x, sr: pd.MultiIndex.from_arrays(
                 [STARTS],
             ),
@@ -117,6 +158,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
         pytest.param(
             SIGNAL,
+            SAMPLING_RATE,
             lambda x, sr: pd.MultiIndex.from_arrays(
                 [['wrong', 'data', 'type'], ENDS],
             ),
@@ -127,6 +169,7 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
         pytest.param(
             SIGNAL,
+            SAMPLING_RATE,
             lambda x, sr: pd.MultiIndex.from_arrays(
                 [STARTS, ['wrong', 'data', 'type']],
             ),
@@ -137,11 +180,11 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         ),
     ]
 )
-def test_signal(signal, segment_func, start, end, result):
+def test_signal(signal, sampling_rate, segment_func, start, end, result):
     model = audinterface.Segment(
         process_func=segment_func,
     )
-    index = model.process_signal(signal, SAMPLING_RATE, start=start, end=end)
+    index = model.process_signal(signal, sampling_rate, start=start, end=end)
     pd.testing.assert_index_equal(index, result)
 
 

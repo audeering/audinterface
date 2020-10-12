@@ -283,8 +283,8 @@ def test_process_folder(
 
 
 @pytest.mark.parametrize(
-    'process_func, process_func_kwargs, segment, signal, sampling_rate,'
-    'file, start, end, keep_nat, expected_signal',
+    'process_func, process_func_kwargs, segment, signal, '
+    'sampling_rate, file, start, end, keep_nat, expected_signal',
     [
         (
             None,

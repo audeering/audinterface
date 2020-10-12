@@ -26,6 +26,7 @@ class Segment:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
+        resample: if ``True`` enforces given sampling rate by resampling
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
@@ -34,7 +35,6 @@ class Segment:
             multithreading and number of processors in case of
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
-        resample: if ``True`` enforces given sampling rate by resampling
         verbose: show debug messages
         kwargs: additional keyword arguments to the processing function
 
@@ -228,3 +228,29 @@ class Segment:
                 names=['file', 'start', 'end'],
             )
         return index
+
+    def __call__(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+    ) -> pd.MultiIndex:
+        r"""Apply processing to signal.
+
+        This function processes the signal **without** transforming the output
+        into a :class:`pd.MultiIndex`. Instead it will return the raw processed
+        signal. However, if resampling is enabled and the input sampling
+        rate does not fit the expected sampling rate, the input signal will
+        be resampled before the processing is applied.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+
+        Returns:
+            Processed signal
+
+        """
+        return self.process(
+            signal,
+            sampling_rate,
+        )
