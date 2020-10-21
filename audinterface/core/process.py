@@ -59,23 +59,31 @@ class Process:
                 'sampling_rate has to be provided for resample = True.'
             )
         self.sampling_rate = sampling_rate
+        r"""Sampling rate in Hz."""
         self.segment = segment
+        r"""Segmentation object."""
         self.keep_nat = keep_nat
+        r"""Keep NaT in results."""
         self.num_workers = num_workers
+        r"""Number of workers."""
         self.multiprocessing = multiprocessing
+        r"""Use multiprocessing."""
         self.verbose = verbose
+        r"""Show debug messages."""
         if process_func is None:
             def process_func(signal, _):
                 return signal
         self.process_func = process_func
+        r"""Processing function."""
         self.process_func_kwargs = kwargs
+        r"""Additional keyword arguments to processing function."""
+        self.resample = None
+        r"""Resample object."""
         if resample:
             self.resample = audsp.Resample(
                 target_rate=sampling_rate,
                 quality=audsp.define.ResampleQuality.HIGH,
             )
-        else:
-            self.resample = None
 
     def _process_file(
             self,
@@ -507,21 +515,25 @@ class ProcessWithContext:
                 'sampling_rate has to be provided for resample = True.'
             )
         self.sampling_rate = sampling_rate
+        r"""Sampling rate in Hz."""
         self.verbose = verbose
+        r"""Show debug messages."""
         if process_func is None:
             def process_func(signal, _, starts, ends):
                 return [
                     signal[:, start:end] for start, end in zip(starts, ends)
                 ]
         self.process_func = process_func
+        r"""Process function."""
         self.process_func_kwargs = kwargs
+        r"""Additional keyword arguments to processing function."""
+        self.resample = None
+        r"""Resample object."""
         if resample:
             self.resample = audsp.Resample(
                 target_rate=sampling_rate,
                 quality=audsp.define.ResampleQuality.HIGH,
             )
-        else:
-            self.resample = None
 
     def process_signal_from_index(
             self,

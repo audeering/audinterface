@@ -28,13 +28,15 @@ class Feature:
     are kept.
 
     Args:
-        name: name of feature extractor, e.g. ``'stft'``
         feature_names: features are stored as columns in a data frame,
-            this defines the names of the columns
-        feature_params: important parameters used with feature extractor,
-            e.g. ``{'win_size': 512, 'hop_size': 256}``.
-            With the parameters you can differentiate between
-            different settings of the same feature extarctor
+            `feature_names` defines the names of the columns.
+            If `num_channels` > 1,
+            the channel number will be appended to the column names.
+        name: name of the feature set, e.g. ``'stft'``
+        params: parameters that describe the feature set,
+            e.g. ``{'win_size': 512, 'hop_size': 256, 'num_fft': 512}``.
+            With the parameters you can differentiate different flavors of
+            the same feature set
         process_func: feature extraction function,
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
@@ -80,7 +82,8 @@ class Feature:
             self,
             feature_names: typing.Sequence[str],
             *,
-            feature_params: typing.Dict = {},
+            name: str = None,
+            params: typing.Dict = None,
             process_func: typing.Callable[..., np.ndarray] = None,
             sampling_rate: int = None,
             num_channels: int = 1,
@@ -122,10 +125,19 @@ class Feature:
             verbose=verbose,
             **kwargs,
         )
-        self.feature_params = feature_params
+        r"""Processing object."""
+        self.name = name
+        r"""Name of the feature set."""
+        self.params = params
+        r"""Dictionary of parameters describing the feature set."""
         self.num_channels = num_channels
+        r"""Expected number of channels"""
         self.num_features = len(feature_names)
+        r"""Number of features."""
         self.feature_names = list(feature_names)
+        r"""Feature names."""
+        self.column_names = None
+        r"""Feature column names."""
         if num_channels > 1:
             self.column_names = []
             for channel in range(num_channels):
@@ -134,10 +146,11 @@ class Feature:
                 )
         else:
             self.column_names = self.feature_names
-        if win_dur is None:
-            self.win_dur = None
-            self.hop_dur = None
-        else:
+        self.win_dur = None
+        r"""Window duration."""
+        self.hop_dur = None
+        r"""Hop duration."""
+        if win_dur is not None:
             if hop_dur is None:
                 hop_dur = win_dur // 2 if unit == 'samples' else win_dur / 2
             if unit == 'samples':
@@ -147,6 +160,7 @@ class Feature:
             self.win_dur = pd.to_timedelta(win_dur, unit=unit)
             self.hop_dur = pd.to_timedelta(hop_dur, unit=unit)
         self.verbose = verbose
+        r"""Show debug messages."""
 
     def process_file(
             self,

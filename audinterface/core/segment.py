@@ -75,6 +75,7 @@ class Segment:
             verbose=verbose,
             **kwargs,
         )
+        r"""Processing object."""
 
     def process_file(
             self,
