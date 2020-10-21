@@ -7,7 +7,20 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
-Version 0.3.2 (2020-10-21)
+Version 0.4.0 (2020-10-21)
+--------------------------
+
+* Changed: make
+  :class:`audinterface.Feature`,
+  :class:`audinterface.Process`,
+  :class:`audinterface.ProcessWithContext`,
+  :class:`audinterface.Segment`,
+  callable
+* Changed: use ``name`` and ``params`` arguments
+  in :class:`audinterface.Feature`
+
+
+Version 0.3.2 (2020-09-21)
 --------------------------
 
 * Changed: switch to ``audeer.run_tasks``
