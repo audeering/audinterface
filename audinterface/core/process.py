@@ -184,14 +184,17 @@ class Process:
                 {'start': start, 'end': end, 'channel': channel},
             ) for file, start, end in zip(files, starts, ends)
         ]
+        verbose = self.verbose
+        self.verbose = False  # avoid nested progress bar
         y = audeer.run_tasks(
             self.process_file,
             params,
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
-            progress_bar=self.verbose,
+            progress_bar=verbose,
             task_description=f'Process {len(files)} files',
         )
+        self.verbose = verbose
         return pd.concat(y)
 
     def process_folder(
