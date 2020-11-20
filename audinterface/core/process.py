@@ -19,6 +19,9 @@ class Process:
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
             and any number of additional keyword arguments.
+        process_func_is_mono: if set to ``True`` and the input signal
+            has multiple channels, ``process_func`` will be applied to
+            every channel individually
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
@@ -45,6 +48,7 @@ class Process:
             self,
             *,
             process_func: typing.Callable[..., typing.Any] = None,
+            process_func_is_mono: bool = False,
             sampling_rate: int = None,
             resample: bool = False,
             segment: Segment = None,
@@ -75,6 +79,8 @@ class Process:
                 return signal
         self.process_func = process_func
         r"""Processing function."""
+        self.process_func_is_mono = process_func_is_mono
+        r"""Process channels individually."""
         self.process_func_kwargs = kwargs
         r"""Additional keyword arguments to processing function."""
         self.resample = None
@@ -328,7 +334,7 @@ class Process:
         utils.check_index(index)
 
         if index.empty:
-            return pd.Series(None, index=index)
+            return pd.Series(None, index=index, dtype=float)
 
         if len(index.levels) == 3:
             params = [
@@ -390,7 +396,7 @@ class Process:
         utils.check_index(index)
 
         if index.empty:
-            return pd.Series(None, index=index)
+            return pd.Series(None, index=index, dtype=float)
 
         params = [
             (
@@ -463,6 +469,14 @@ class Process:
 
         """
         signal, sampling_rate = self._resample(signal, sampling_rate)
+        if self.process_func_is_mono and signal.shape[0] > 1:
+            return [
+                self.process_func(
+                    np.atleast_2d(channel),
+                    sampling_rate,
+                    **self.process_func_kwargs,
+                ) for channel in signal
+            ]
         return self.process_func(
             signal,
             sampling_rate,
@@ -591,7 +605,7 @@ class ProcessWithContext:
             raise ValueError('Not a segmented index conform to Unified Format')
 
         if index.empty:
-            return pd.Series(index=index)
+            return pd.Series(index=index, dtype=float)
 
         files = index.levels[0]
         ys = [None] * len(files)

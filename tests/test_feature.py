@@ -12,7 +12,8 @@ SAMPLING_RATE = 8000
 NUM_CHANNELS = 2
 NUM_FEATURES = 3
 NUM_FRAMES = 5
-SIGNAL = np.ones((NUM_CHANNELS, SAMPLING_RATE))
+SIGNAL_1D = np.ones((1, SAMPLING_RATE))
+SIGNAL_2D = np.ones((NUM_CHANNELS, SAMPLING_RATE))
 STARTS = [pd.to_timedelta('0s')] * 3
 ENDS = [pd.to_timedelta('1s')] * 3
 INDEX = pd.MultiIndex.from_arrays(
@@ -35,7 +36,7 @@ SEGMENT = audinterface.Segment(
 )
 
 
-def feature_extrator(signal, _):
+def feature_extractor(signal, _):
     return np.ones((NUM_CHANNELS, NUM_FEATURES))
 
 
@@ -77,8 +78,8 @@ def test_feature():
     'process_func,expected',
     [
         (
-            feature_extrator,
-            np.ones((NUM_CHANNELS, NUM_FEATURES), dtype=np.float),
+            feature_extractor,
+            np.ones((NUM_CHANNELS, NUM_FEATURES)),
         ),
     ]
 )
@@ -88,7 +89,7 @@ def test_process_callable(process_func, expected):
         process_func=process_func,
         num_channels=NUM_CHANNELS,
     )
-    result = extractor(SIGNAL, SAMPLING_RATE)
+    result = extractor(SIGNAL_2D, SAMPLING_RATE)
     np.testing.assert_array_equal(result, expected)
 
 
@@ -108,7 +109,7 @@ def test_process_callable(process_func, expected):
 def test_process_file(tmpdir, start, end, segment):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extrator,
+        process_func=feature_extractor,
         sampling_rate=None,
         num_channels=NUM_CHANNELS,
         resample=False,
@@ -118,7 +119,7 @@ def test_process_file(tmpdir, start, end, segment):
     expected_features = np.ones((1, NUM_CHANNELS * NUM_FEATURES))
     path = str(tmpdir.mkdir('wav'))
     file = os.path.join(path, 'file.wav')
-    af.write(file, SIGNAL, SAMPLING_RATE)
+    af.write(file, SIGNAL_2D, SAMPLING_RATE)
     features = extractor.process_file(file, start=start, end=end)
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
@@ -133,7 +134,7 @@ def test_process_file(tmpdir, start, end, segment):
 def test_process_folder(tmpdir):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extrator,
+        process_func=feature_extractor,
         sampling_rate=None,
         num_channels=NUM_CHANNELS,
         resample=False,
@@ -143,7 +144,7 @@ def test_process_folder(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     files = [f'{path}/file{n}.wav' for n in range(3)]
     for file in files:
-        af.write(file, SIGNAL, SAMPLING_RATE)
+        af.write(file, SIGNAL_2D, SAMPLING_RATE)
     features = extractor.process_folder(path)
     assert all(features.index.levels[0] == files)
     assert all(features.index.levels[1] == INDEX.levels[0])
@@ -152,71 +153,202 @@ def test_process_folder(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'process_func,start,end,expected_features',
+    'process_func, num_feat, signal, start, end, expand, expected',
     [
+        # no process function
         (
             None,
+            3,
+            SIGNAL_2D,
             None,
             None,
-            np.zeros((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            False,
+            np.zeros((1, 2 * 3)),
         ),
+        # 1 channel, 1 feature
         (
-            feature_extrator,
+            lambda s, sr: np.ones((1, 1)),
+            1,
+            SIGNAL_1D,
             None,
             None,
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            False,
+            np.ones((1, 1)),
         ),
+        # 1 channel, 3 features
         (
-            feature_extrator,
+            lambda s, sr: np.ones((1, 3)),
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 3)),
+        ),
+        # 2 channels, 1 feature
+        (
+            lambda s, sr: np.ones((2, 1)),
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.ones((1, 2)),
+        ),
+        # 2 channels, 3 features
+        (
+            lambda s, sr: np.ones((2, 3)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.ones((1, 2 * 3)),
+        ),
+        # 2 channels, 3 features + start, end
+        (
+            lambda s, sr: np.ones((2, 3)),
+            3,
+            SIGNAL_2D,
             pd.to_timedelta('1s'),
             pd.to_timedelta('10s'),
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            False,
+            np.ones((1, 2 * 3)),
         ),
+        # 2 channels, 3 features, 5 steps
         (
-            lambda s, sr: np.ones((NUM_CHANNELS, NUM_FEATURES, NUM_FRAMES)),
+            lambda s, sr: np.ones((2, 3, 5)),
+            3,
+            SIGNAL_2D,
             None,
             None,
-            np.ones((NUM_FRAMES, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            False,
+            np.ones((5, 2 * 3)),
+        ),
+        # 1 channel, 1 feature + expand
+        (
+            lambda s, sr: np.ones((1, 1)),
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            True,
+            np.ones((1, 1)),
+        ),
+        # 2 channels, 1 feature + expand
+        (
+            lambda s, sr: np.ones((1, 1)),
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2)),
+        ),
+        # 2 channels, 3 features + expand
+        (
+            lambda s, sr: np.ones((1, 3)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2 * 3)),
+        ),
+        # 2 channels, 3 features, 5 steps + expand
+        (
+            lambda s, sr: np.ones((1, 3, 5)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((5, 2 * 3)),
+        ),
+        # Feature extractor function is not a np.ndarray
+        pytest.param(
+            lambda s, sr: 1,
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            None,
+            False,
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        # Feature extractor function returns too less dimensions
+        pytest.param(
+            lambda s, sr: np.ones((1, )),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            None,
+            False,
+            marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns too many dimensions
         pytest.param(
             lambda s, sr: np.ones((1, 1, 1, 1)),
+            3,
+            SIGNAL_2D,
             None,
             None,
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            None,
+            False,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns wrong number of channels
         pytest.param(
-            lambda s, sr: np.ones((NUM_CHANNELS + 1, NUM_FEATURES)),
+            lambda s, sr: np.ones((1, 3)),
+            3,
+            SIGNAL_2D,
             None,
             None,
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            None,
+            False,
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        # Feature extractor function returns wrong number of channels
+        pytest.param(
+            lambda s, sr: np.ones((2 + 1, 3)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            None,
+            False,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns wrong number of features
         pytest.param(
-            lambda s, sr: np.ones((NUM_CHANNELS, NUM_FEATURES + 1)),
+            lambda s, sr: np.ones((2, 3 + 1)),
+            3,
+            SIGNAL_2D,
             None,
             None,
-            np.ones((1, NUM_CHANNELS * NUM_FEATURES), dtype=np.float),
+            None,
+            False,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
     ]
 )
-def test_process_signal(process_func, start, end, expected_features):
+def test_process_signal(
+        process_func, num_feat, signal, start, end, expand, expected,
+):
     extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=[f'f{i}' for i in range(num_feat)],
         process_func=process_func,
-        num_channels=NUM_CHANNELS,
+        num_channels=signal.shape[0],
+        process_func_is_mono=expand,
     )
     features = extractor.process_signal(
-        SIGNAL,
+        signal,
         SAMPLING_RATE,
         start=start,
         end=end,
     )
-    np.testing.assert_array_equal(features.values, expected_features)
+    np.testing.assert_array_equal(features.values, expected)
 
 
 @pytest.mark.parametrize(
@@ -237,11 +369,11 @@ def test_process_signal(process_func, start, end, expected_features):
 def test_process_signal_from_index(index, expected_features):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extrator,
+        process_func=feature_extractor,
         num_channels=NUM_CHANNELS,
     )
     features = extractor.process_signal_from_index(
-        SIGNAL,
+        SIGNAL_2D,
         SAMPLING_RATE,
         index,
     )
@@ -251,7 +383,7 @@ def test_process_signal_from_index(index, expected_features):
 def test_process_unified_format_index(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
-    af.write(file, SIGNAL, SAMPLING_RATE)
+    af.write(file, SIGNAL_2D, SAMPLING_RATE)
     index = pd.MultiIndex.from_arrays(
         [
             (file, ) * 2,
@@ -263,7 +395,7 @@ def test_process_unified_format_index(tmpdir):
     expected_features = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extrator,
+        process_func=feature_extractor,
         num_channels=NUM_CHANNELS,
     )
     features = extractor.process_unified_format_index(
@@ -294,12 +426,12 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
         hop_size=SAMPLING_RATE // 2,  # argument to process_func
     )
     features = extractor.process_signal(
-        SIGNAL,
+        SIGNAL_2D,
         SAMPLING_RATE,
     )
     n_time_steps = len(features)
     start = pd.to_timedelta(0)
-    end = pd.to_timedelta(SIGNAL.shape[-1] / SAMPLING_RATE, unit=unit)
+    end = pd.to_timedelta(SIGNAL_2D.shape[-1] / SAMPLING_RATE, unit=unit)
     if win_dur is None:
         starts = [start] * n_time_steps
         ends = [end] * n_time_steps
@@ -342,11 +474,11 @@ def test_to_numpy():
     expected_features = np.ones((NUM_CHANNELS, NUM_FEATURES, 1))
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extrator,
+        process_func=feature_extractor,
         num_channels=NUM_CHANNELS,
     )
     features = extractor.process_signal(
-        SIGNAL,
+        SIGNAL_2D,
         SAMPLING_RATE,
     )
     features = extractor.to_numpy(features)

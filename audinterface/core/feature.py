@@ -44,6 +44,8 @@ class Feature:
             The function must return features in the shape of
             ``(num_channels, num_features)``
             or ``(num_channels, num_features, num_time_steps)``.
+        process_func_is_mono: apply ``process_func`` to every channel
+            individually
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
@@ -85,6 +87,7 @@ class Feature:
             name: str = None,
             params: typing.Dict = None,
             process_func: typing.Callable[..., np.ndarray] = None,
+            process_func_is_mono: bool = False,
             sampling_rate: int = None,
             num_channels: int = 1,
             win_dur: typing.Union[int, float] = None,
@@ -114,8 +117,10 @@ class Feature:
                     (num_channels, len(feature_names)),
                     dtype=np.float,
                 )
+
         self.process = Process(
             process_func=process_func,
+            process_func_is_mono=process_func_is_mono,
             sampling_rate=sampling_rate,
             resample=resample,
             segment=segment,
@@ -271,7 +276,7 @@ class Feature:
                 is greater than three
             RuntimeError: if feature extractor uses sliding window,
                 but ``self.win_dur`` is not specified
-            RuntimeError: ifnumber of features does not match
+            RuntimeError: if number of features does not match
                 number of feature names
             RuntimeError: if number of channels do not match
 
@@ -398,27 +403,42 @@ class Feature:
         # or
         # [n_channels, n_features]
 
+        if self.process.process_func_is_mono and self.num_channels > 1:
+            features = np.concatenate(features)
+
+        if not isinstance(features, np.ndarray):
+            raise RuntimeError(
+                "Features must be a 'np.ndarray', "
+                f"not '{type(features)}'."
+            )
+
+        # features = np.array(features)
+        if features.ndim < 2:
+            raise RuntimeError(
+                f'Dimension of extracted features must be 2 or 3, '
+                f'not {features.ndim}.'
+            )
+
         # Force third time step dimension
         features = np.atleast_3d(features)
         if features.ndim > 3:
             raise RuntimeError(
-                f'Dimension of extracted features must be not greater than 3. '
-                f'Yours is {features.ndim}'
+                f'Dimension of extracted features must be 2 or 3, '
+                f'not {features.ndim}.'
             )
         n_channels = features.shape[0]
         n_features = features.shape[1]
         n_time_steps = features.shape[2]
 
-        # n_features + 1 as we added 'channel' to feature names
         if n_channels != self.num_channels:
             raise RuntimeError(
-                f'Channel number {n_channels} does not match '
-                f'number of expected channels: {self.num_channels}'
+                f'Number of channels must be {self.num_channels}, '
+                f'not {n_channels}.'
             )
-        if n_features * n_channels != len(self.column_names):
+        if n_features != len(self.feature_names):
             raise RuntimeError(
-                f'Feature names {self.column_names} do not match '
-                f'number of extracted features: {n_features * n_channels}'
+                f'Number of features must be {len(self.feature_names)}, '
+                f'not {n_features}.'
             )
 
         # Reshape features and store channel number as first feature
