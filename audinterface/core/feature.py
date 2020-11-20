@@ -337,7 +337,7 @@ class Feature:
 
         Args:
             index: index with segment information
-            channel: channel number (default 0)
+            channel: channel number
 
         Raises:
             RuntimeError: if sampling rates of feature extractor
