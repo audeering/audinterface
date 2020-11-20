@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.4.1 (2020-11-20)
+--------------------------
+
+* Added: ``process_func_is_mono`` argument to
+  :class:`audinterface.Feature`,
+  :class:`audinterface.Process`
+* Fixed: avoid nested progress bars
+
+
 Version 0.4.0 (2020-10-21)
 --------------------------
 
