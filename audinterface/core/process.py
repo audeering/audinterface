@@ -366,11 +366,7 @@ class Process:
             index: pd.Index,
             *,
             channel: int = None) -> pd.Series:
-        r"""Process from a segmented index conform to the `Unified Format`_.
-
-        .. note:: Currently expects a segmented index. In the future it is
-            planned to support other index types (e.g. filewise), too. Until
-            then you can use audata.util.to_segmented_frame_ for conversion
+        r"""Process from an index conform to the `Unified Format`_.
 
         .. note:: It is assumed that the index already holds segments,
             i.e. in case a ``segment`` object is given, it will be ignored.

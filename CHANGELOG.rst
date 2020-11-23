@@ -7,6 +7,14 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.4.2 (2020-11-23)
+--------------------------
+
+* Changed: :meth:`audinterface.Process.process_unified_format_index` and
+  :meth:`audinterface.Feature.process_unified_format_index`
+  support filewise index
+
+
 Version 0.4.1 (2020-11-20)
 --------------------------
 
