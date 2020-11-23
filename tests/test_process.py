@@ -744,7 +744,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
     result = model.process_unified_format_index(index)
     assert result.empty
 
-    # valid index
+    # segmented index
     index = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
@@ -753,6 +753,15 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
+    result = model.process_unified_format_index(index)
+    for (file, start, end), value in result.items():
+        signal, sampling_rate = model.read_audio(
+            file, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
+
+    # filewise index
+    index = pd.Index([file] * 3, name='file')
     result = model.process_unified_format_index(index)
     for (file, start, end), value in result.items():
         signal, sampling_rate = model.read_audio(

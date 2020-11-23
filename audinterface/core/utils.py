@@ -125,3 +125,24 @@ def segments_to_indices(
         starts_i[idx] = start_i
         ends_i[idx] = end_i
     return starts_i, ends_i
+
+
+def to_segmented_index(index: pd.Index) -> pd.MultiIndex:
+    r"""Converts index to segmented index.
+
+    Args:
+        index: frame with a file-wise or segmented index
+
+    Raises:
+        ValueError: If ``frame`` does not satisfy the
+            :ref:`table specifications <data-tables:Tables>`.
+
+    """
+    if index.nlevels == 1:
+        df = index.to_frame(index=False)
+        df['start'] = pd.to_timedelta(0)
+        df['end'] = pd.NaT
+        index = pd.MultiIndex.from_frame(
+            df, names=['file', 'start', 'end']
+        )
+    return index

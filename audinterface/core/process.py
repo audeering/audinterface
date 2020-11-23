@@ -363,7 +363,7 @@ class Process:
 
     def process_unified_format_index(
             self,
-            index: pd.MultiIndex,
+            index: pd.Index,
             *,
             channel: int = None) -> pd.Series:
         r"""Process from a segmented index conform to the `Unified Format`_.
@@ -391,8 +391,9 @@ class Process:
         .. _audata.util.to_segmented_frame: http://tools.pp.audeering.com/
             audata/api-utils.html#to-segmented-frame
 
-
         """
+
+        index = utils.to_segmented_index(index)
         utils.check_index(index)
 
         if index.empty:

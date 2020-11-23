@@ -322,7 +322,7 @@ class Feature:
 
     def process_unified_format_index(
             self,
-            index: pd.MultiIndex,
+            index: pd.Index,
             *,
             channel: int = None,
     ) -> pd.DataFrame:
