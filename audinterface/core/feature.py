@@ -409,7 +409,7 @@ class Feature:
             )
 
         # features = np.array(features)
-        if features.ndim < 2:
+        if features.ndim < 2 or features.ndim > 3:
             raise RuntimeError(
                 f'Dimension of extracted features must be 2 or 3, '
                 f'not {features.ndim}.'
@@ -417,11 +417,6 @@ class Feature:
 
         # Force third time step dimension
         features = np.atleast_3d(features)
-        if features.ndim > 3:
-            raise RuntimeError(
-                f'Dimension of extracted features must be 2 or 3, '
-                f'not {features.ndim}.'
-            )
         n_channels = features.shape[0]
         n_features = features.shape[1]
         n_time_steps = features.shape[2]
@@ -493,7 +488,10 @@ class Feature:
             Processed signal
 
         """
-        return self.process(
+        y = self.process(
             signal,
             sampling_rate,
         )
+        if self.process.process_func_is_mono and self.num_channels > 1:
+            y = np.concatenate(y)
+        return y

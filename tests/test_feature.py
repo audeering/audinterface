@@ -75,22 +75,71 @@ def test_feature():
 
 
 @pytest.mark.parametrize(
-    'process_func,expected',
+    'signal, feature, expected',
     [
         (
-            feature_extractor,
-            np.ones((NUM_CHANNELS, NUM_FEATURES)),
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3)),
+                num_channels=1,
+            ),
+            np.ones((1, 3)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3, 5)),
+                num_channels=1,
+            ),
+            np.ones((1, 3, 5)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((2, 3)),
+                num_channels=2,
+            ),
+            np.ones((2, 3)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((2, 3, 5)),
+                num_channels=2,
+            ),
+            np.ones((2, 3, 5)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3)),
+                num_channels=2,
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3, 5)),
+                num_channels=2,
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3, 5)),
         ),
     ]
 )
-def test_process_callable(process_func, expected):
-    extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=process_func,
-        num_channels=NUM_CHANNELS,
+def test_process_callable(signal, feature, expected):
+    np.testing.assert_array_equal(
+        feature(signal, SAMPLING_RATE),
+        expected,
     )
-    result = extractor(SIGNAL_2D, SAMPLING_RATE)
-    np.testing.assert_array_equal(result, expected)
 
 
 @pytest.mark.parametrize(
