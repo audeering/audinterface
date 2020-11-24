@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.4.3 (2020-11-24)
+--------------------------
+
+* Fixed: :meth:`audinterface.Feature.__call__`
+  always returns :class:`numpy.ndarray`
+
+
 Version 0.4.2 (2020-11-23)
 --------------------------
 
