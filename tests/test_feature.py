@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import audiofile as af
 import numpy as np
@@ -82,7 +83,6 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
-                num_channels=1,
             ),
             np.ones((1, 3)),
         ),
@@ -91,7 +91,15 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
-                num_channels=1,
+            ),
+            np.ones((1, 3, 5)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3, 5)),
+                channels=1,
             ),
             np.ones((1, 3, 5)),
         ),
@@ -100,7 +108,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((2, 3)),
-                num_channels=2,
+                channels=range(2),
             ),
             np.ones((2, 3)),
         ),
@@ -109,7 +117,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((2, 3, 5)),
-                num_channels=2,
+                channels=range(2),
             ),
             np.ones((2, 3, 5)),
         ),
@@ -118,7 +126,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
-                num_channels=2,
+                channels=range(2),
                 process_func_is_mono=True,
             ),
             np.ones((2, 3)),
@@ -128,7 +136,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
-                num_channels=2,
+                channels=range(2),
                 process_func_is_mono=True,
             ),
             np.ones((2, 3, 5)),
@@ -160,7 +168,7 @@ def test_process_file(tmpdir, start, end, segment):
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
         sampling_rate=None,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
         resample=False,
         segment=segment,
         verbose=False,
@@ -185,7 +193,7 @@ def test_process_folder(tmpdir):
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
         sampling_rate=None,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
         resample=False,
         verbose=False,
     )
@@ -388,7 +396,7 @@ def test_process_signal(
     extractor = audinterface.Feature(
         feature_names=[f'f{i}' for i in range(num_feat)],
         process_func=process_func,
-        num_channels=signal.shape[0],
+        channels=range(signal.shape[0]),
         process_func_is_mono=expand,
     )
     features = extractor.process_signal(
@@ -419,7 +427,7 @@ def test_process_signal_from_index(index, expected_features):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
     )
     features = extractor.process_signal_from_index(
         SIGNAL_2D,
@@ -445,7 +453,7 @@ def test_process_unified_format_index(tmpdir):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
     )
     features = extractor.process_unified_format_index(
         index,
@@ -468,7 +476,7 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=features_extractor_sliding_window,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
         win_dur=win_dur,
         hop_dur=hop_dur,
         unit=unit,
@@ -524,7 +532,7 @@ def test_to_numpy():
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
-        num_channels=NUM_CHANNELS,
+        channels=range(NUM_CHANNELS),
     )
     features = extractor.process_signal(
         SIGNAL_2D,

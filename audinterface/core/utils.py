@@ -1,16 +1,19 @@
-import concurrent.futures
+import functools
 import typing
+import warnings
 
 import numpy as np
 import pandas as pd
 
 import audeer
+import audresample
 import audiofile as af
 
 
 def check_index(
         index: pd.MultiIndex
 ):
+    r"""Check if index is in Unified Format."""
     if len(index.levels) == 2:
         if not index.empty:
             if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
@@ -46,11 +49,43 @@ def check_index(
                          f'expected 2 or 3.')
 
 
+def preprocess_signal(
+        signal: np.ndarray,
+        sampling_rate: int,
+        expected_rate: int,
+        resample: bool,
+        channels: typing.Union[int, typing.Sequence[int]],
+        mixdown: bool,
+) -> (np.ndarray, int):
+    r"""Pre-process signal."""
+
+    signal = np.atleast_2d(signal)
+
+    if channels is not None or mixdown:
+        signal = audresample.remix(signal, channels, mixdown)
+
+    if expected_rate is not None and sampling_rate != expected_rate:
+        if resample:
+            signal = audresample.resample(
+                signal, sampling_rate, expected_rate,
+            )
+            sampling_rate = expected_rate
+        else:
+            raise RuntimeError(
+                f'Sampling rate of input signal is '
+                f'{sampling_rate} '
+                f'but the expected sampling rate is '
+                f'{expected_rate} Hz. '
+                f'Enable resampling to avoid this error.'
+            )
+
+    return signal, sampling_rate
+
+
 def read_audio(
         path: str,
         start: pd.Timedelta = None,
         end: pd.Timedelta = None,
-        channel: int = None,
 ) -> typing.Tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
@@ -58,7 +93,6 @@ def read_audio(
         path: path to audio file
         start: read from this position
         end: read until this position
-        channel: channel number
 
     Returns:
         signal: array with signal values in shape ``(channels, samples)``
@@ -75,22 +109,12 @@ def read_audio(
     else:
         duration = end.total_seconds() - offset
 
-    # load raw audio
     signal, sampling_rate = af.read(
         audeer.safe_path(path),
         always_2d=True,
         offset=offset,
         duration=duration,
     )
-
-    # mix down
-    if channel is not None:
-        if channel < 0 or channel >= signal.shape[0]:
-            raise ValueError(
-                f'We need 0<=channel<{signal.shape[0]}, '
-                f'but we have channel={channel}.'
-            )
-        signal = signal[channel, :]
 
     return signal, sampling_rate
 

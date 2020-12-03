@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import audeer
-import audsp
+import audresample
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
@@ -26,6 +26,8 @@ class Process:
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
         resample: if ``True`` enforces given sampling rate by resampling
+        channels: channel selection, see :func:`audresample.remix`
+        mixdown: apply mono mix-down on selection
         segment: when a :class:`audinterface.Segment` object is provided,
             it will be used to find a segmentation of the input signal.
             Afterwards processing is applied to each segment
@@ -51,6 +53,8 @@ class Process:
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
             resample: bool = False,
+            channels: typing.Union[int, typing.Sequence[int]] = None,
+            mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
@@ -64,6 +68,12 @@ class Process:
             )
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
+        self.resample = resample
+        r"""Resample signal."""
+        self.channels = channels
+        r"""Channel selection."""
+        self.mixdown = mixdown
+        r"""Mono mixdown."""
         self.segment = segment
         r"""Segmentation object."""
         self.keep_nat = keep_nat
@@ -83,13 +93,6 @@ class Process:
         r"""Process channels individually."""
         self.process_func_kwargs = kwargs
         r"""Additional keyword arguments to processing function."""
-        self.resample = None
-        r"""Resample object."""
-        if resample:
-            self.resample = audsp.Resample(
-                target_rate=sampling_rate,
-                quality=audsp.define.ResampleQuality.HIGH,
-            )
 
     def _process_file(
             self,
@@ -97,12 +100,10 @@ class Process:
             *,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            channel: int = None,
     ) -> pd.Series:
 
-        signal, sampling_rate = self.read_audio(
+        signal, sampling_rate = utils.read_audio(
             file,
-            channel=channel,
             start=start,
             end=end,
         )
@@ -121,13 +122,16 @@ class Process:
 
         return y
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_file(
             self,
             file: str,
             *,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            channel: int = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
@@ -135,40 +139,36 @@ class Process:
             file: file path
             start: start processing at this position
             end: end processing at this position
-            channel: channel number
 
         Returns:
             Series with processed file in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         if self.segment is not None:
-            index = self.segment.process_file(
-                file, start=start, end=end, channel=channel,
-            )
-            return self.process_unified_format_index(
-                index=index, channel=channel,
-            )
+            index = self.segment.process_file(file, start=start, end=end)
+            return self.process_unified_format_index(index)
         else:
-            return self._process_file(
-                file, start=start, end=end, channel=channel,
-            )
+            return self._process_file(file, start=start, end=end)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
             starts: typing.Sequence[pd.Timedelta] = None,
             ends: typing.Sequence[pd.Timedelta] = None,
-            channel: int = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
         Args:
             files: list of file paths
-            channel: channel number
             starts: list with start positions
             ends: list with end positions
 
@@ -176,7 +176,8 @@ class Process:
             Series with processed files in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         if starts is None:
@@ -187,7 +188,10 @@ class Process:
         params = [
             (
                 (file, ),
-                {'start': start, 'end': end, 'channel': channel},
+                {
+                    'start': start,
+                    'end': end,
+                },
             ) for file, start, end in zip(files, starts, ends)
         ]
         verbose = self.verbose
@@ -203,11 +207,14 @@ class Process:
         self.verbose = verbose
         return pd.concat(y)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_folder(
             self,
             root: str,
             *,
-            channel: int = None,
             filetype: str = 'wav',
     ) -> pd.Series:
         r"""Process files in a folder.
@@ -216,19 +223,19 @@ class Process:
 
         Args:
             root: root folder
-            channel: channel number
             filetype: file extension
 
         Returns:
             Series with processed files in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
-        return self.process_files(files, channel=channel)
+        return self.process_files(files)
 
     def _process_signal(
             self,
@@ -294,7 +301,8 @@ class Process:
             Series with processed signal in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         if self.segment is not None:
@@ -330,6 +338,10 @@ class Process:
         Returns:
             Series with processed segments in the Unified Format
 
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
         """
         utils.check_index(index)
 
@@ -361,11 +373,14 @@ class Process:
 
         return pd.concat(y)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_unified_format_index(
             self,
             index: pd.Index,
-            *,
-            channel: int = None) -> pd.Series:
+    ) -> pd.Series:
         r"""Process from an index conform to the `Unified Format`_.
 
         .. note:: It is assumed that the index already holds segments,
@@ -373,13 +388,13 @@ class Process:
 
         Args:
             index: index with segment information
-            channel: channel number
 
         Returns:
             Series with processed segments in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         .. _`Unified Format`: http://tools.pp.audeering.com/audata/
             data-tables.html
@@ -398,7 +413,10 @@ class Process:
         params = [
             (
                 (file, ),
-                {'start': start, 'end': end, 'channel': channel},
+                {
+                    'start': start,
+                    'end': end,
+                },
             )
             for file, start, end in index
         ]
@@ -413,37 +431,6 @@ class Process:
 
         return pd.concat(y)
 
-    def read_audio(
-            self,
-            path: str,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
-            channel: int = None,
-    ):
-        return utils.read_audio(path, start, end, channel)
-
-    def _resample(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-    ) -> typing.Tuple[np.ndarray, int]:
-        r"""Resample signal."""
-        if (
-                self.sampling_rate is not None
-                and sampling_rate != self.sampling_rate
-        ):
-            if self.resample is not None:
-                signal = self.resample(signal, sampling_rate)
-                signal = np.atleast_2d(signal)
-                sampling_rate = self.sampling_rate
-            else:
-                raise RuntimeError(
-                    f'Signal sampling rate of {sampling_rate} Hz '
-                    f'does not match requested model sampling rate of '
-                    f'{self.sampling_rate} Hz.'
-                )
-        return signal, sampling_rate
-
     def __call__(
             self,
             signal: np.ndarray,
@@ -453,9 +440,9 @@ class Process:
 
         This function processes the signal **without** transforming the output
         into a :class:`pd.Series`. Instead it will return the raw processed
-        signal. However, if resampling is enabled and the input sampling
-        rate does not fit the expected sampling rate, the input signal will
-        be resampled before the processing is applied.
+        signal. However, if channel selection, mixdown and/or resampling
+        is enabled, the signal will be first remixed and resampled if the
+        input sampling rate does not fit the expected sampling rate.
 
         Args:
             signal: signal values
@@ -464,8 +451,19 @@ class Process:
         Returns:
             Processed signal
 
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
         """
-        signal, sampling_rate = self._resample(signal, sampling_rate)
+        signal, sampling_rate = utils.preprocess_signal(
+            signal,
+            sampling_rate,
+            self.sampling_rate,
+            self.resample,
+            self.channels,
+            self.mixdown,
+        )
         if self.process_func_is_mono and signal.shape[0] > 1:
             return [
                 self.process_func(
@@ -505,6 +503,8 @@ class ProcessWithContext:
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
         resample: if ``True`` enforces given sampling rate by resampling
+        channels: channel selection, see :func:`audresample.remix`
+        mixdown: apply mono mix-down on selection
         verbose: show debug messages
         kwargs: additional keyword arguments to the processing function
 
@@ -521,6 +521,8 @@ class ProcessWithContext:
             ] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            channels: typing.Union[int, typing.Sequence[int]] = None,
+            mixdown: bool = False,
             verbose: bool = False,
             **kwargs,
     ):
@@ -530,6 +532,12 @@ class ProcessWithContext:
             )
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
+        self.resample = resample
+        r"""Resample signal."""
+        self.channels = channels
+        r"""Channel selection."""
+        self.mixdown = mixdown
+        r"""Mono mixdown."""
         self.verbose = verbose
         r"""Show debug messages."""
         if process_func is None:
@@ -541,13 +549,6 @@ class ProcessWithContext:
         r"""Process function."""
         self.process_func_kwargs = kwargs
         r"""Additional keyword arguments to processing function."""
-        self.resample = None
-        r"""Resample object."""
-        if resample:
-            self.resample = audsp.Resample(
-                target_rate=sampling_rate,
-                quality=audsp.define.ResampleQuality.HIGH,
-            )
 
     def process_signal_from_index(
             self,
@@ -568,6 +569,10 @@ class ProcessWithContext:
         Returns:
             Series with processed segments in the Unified Format
 
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
         """
         utils.check_index(index)
 
@@ -578,21 +583,25 @@ class ProcessWithContext:
 
         return pd.Series(y, index=index)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_unified_format_index(
             self,
             index: pd.MultiIndex,
-            channel: int = None) -> pd.Series:
+    ) -> pd.Series:
         r"""Process from a segmented index conform to the `Unified Format`_.
 
         Args:
             index: index with segment information
-            channel: channel number
 
         Returns:
             Series with processed segments in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         .. _`Unified Format`: http://tools.pp.audeering.com/audata/
             data-tables.html
@@ -617,7 +626,7 @@ class ProcessWithContext:
                 pbar.set_description(desc, refresh=True)
                 mask = index.isin([file], 0)
                 select = index[mask].droplevel(0)
-                signal, sampling_rate = self.read_audio(file, channel=channel)
+                signal, sampling_rate = utils.read_audio(file)
                 ys[idx] = pd.Series(
                     self.process_signal_from_index(
                         signal, sampling_rate, select,
@@ -626,37 +635,6 @@ class ProcessWithContext:
                 )
 
         return pd.concat(ys)
-
-    def read_audio(
-            self,
-            path: str,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
-            channel: int = None,
-    ):
-        return utils.read_audio(path, start, end, channel)
-
-    def _resample(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-    ) -> typing.Tuple[np.ndarray, int]:
-        r"""Resample signal."""
-        if (
-                self.sampling_rate is not None
-                and sampling_rate != self.sampling_rate
-        ):
-            if self.resample is not None:
-                signal = self.resample(signal, sampling_rate)
-                signal = np.atleast_2d(signal)
-                sampling_rate = self.sampling_rate
-            else:
-                raise RuntimeError(
-                    f'Signal sampling rate of {sampling_rate} Hz '
-                    f'does not match requested model sampling rate of '
-                    f'{self.sampling_rate} Hz.'
-                )
-        return signal, sampling_rate
 
     def __call__(
         self,
@@ -669,9 +647,9 @@ class ProcessWithContext:
 
         This function processes the signal **without** transforming the output
         into a :class:`pd.Series`. Instead it will return the raw processed
-        signal. However, if resampling is enabled and the input sampling
-        rate does not fit the expected sampling rate, the input signal will
-        be resampled before the processing is applied.
+        signal. However, if channel selection, mixdown and/or resampling
+        is enabled, the signal will be first remixed and resampled if the
+        input sampling rate does not fit the expected sampling rate.
 
         Args:
             signal: signal values
@@ -680,10 +658,19 @@ class ProcessWithContext:
         Returns:
             Processed signal
 
-        """
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
-        signal = np.atleast_2d(signal)
-        signal, sampling_rate = self._resample(signal, sampling_rate)
+        """
+        signal, sampling_rate = utils.preprocess_signal(
+            signal,
+            sampling_rate,
+            self.sampling_rate,
+            self.resample,
+            self.channels,
+            self.mixdown,
+        )
         return self.process_func(
             signal,
             sampling_rate,

@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import audiofile as af
 import numpy as np
@@ -42,7 +43,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 @pytest.mark.parametrize(
     'process_func, segment, signal, sampling_rate, start, end, keep_nat, '
-    'selected_channel, expected_output',
+    'channels, mixdown, expected_output',
     [
         (
             signal_max,
@@ -53,6 +54,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             None,
+            False,
             1,
         ),
         (
@@ -64,6 +66,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             None,
+            False,
             1,
         ),
         (
@@ -75,6 +78,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             0,
+            False,
             1,
         ),
         (
@@ -86,6 +90,19 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             0,
+            False,
+            0,
+        ),
+        (
+            signal_max,
+            None,
+            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            8000,
+            None,
+            None,
+            False,
+            0,
+            False,
             0,
         ),
         (
@@ -97,8 +114,34 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             1,
+            False,
             1,
         ),
+        (
+            signal_max,
+            None,
+            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            8000,
+            None,
+            None,
+            False,
+            None,
+            True,
+            0.5,
+        ),
+        (
+            signal_max,
+            None,
+            np.array([[-1., -1., -1.], [0., 0., 0.], [1., 1., 1.]]),
+            8000,
+            None,
+            None,
+            False,
+            [1, 2],
+            True,
+            0.5,
+        ),
+        # invalid channel selection
         pytest.param(
             signal_max,
             None,
@@ -108,8 +151,9 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             1,
+            False,
             1,
-            marks=pytest.mark.xfail(raises=ValueError),
+            marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         (
             signal_duration,
@@ -120,6 +164,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             None,
+            False,
             3.0,
         ),
         (
@@ -131,6 +176,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.NaT,
             False,
             None,
+            False,
             3.0,
         ),
         (
@@ -142,6 +188,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.NaT,
             True,
             None,
+            False,
             3.0,
         ),
         (
@@ -153,6 +200,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             None,
+            False,
             2.0,
         ),
         (
@@ -164,6 +212,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.NaT,
             False,
             None,
+            False,
             2.0,
         ),
         (
@@ -175,6 +224,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.to_timedelta('2s'),
             False,
             None,
+            False,
             2.0,
         ),
         (
@@ -186,6 +236,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.to_timedelta('2s'),
             False,
             None,
+            False,
             2.0,
         ),
         (
@@ -197,6 +248,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             pd.to_timedelta('2s'),
             False,
             None,
+            False,
             1.0,
         ),
     ],
@@ -210,13 +262,16 @@ def test_process_file(
     start,
     end,
     keep_nat,
-    selected_channel,
+    channels,
+    mixdown,
     expected_output,
 ):
     model = audinterface.Process(
         process_func=process_func,
         sampling_rate=sampling_rate,
         resample=False,
+        channels=channels,
+        mixdown=mixdown,
         segment=segment,
         keep_nat=keep_nat,
         verbose=False,
@@ -228,7 +283,6 @@ def test_process_file(
         filename,
         start=start,
         end=end,
-        channel=selected_channel,
     )
     np.testing.assert_almost_equal(
         output.values, expected_output, decimal=4,
@@ -273,12 +327,12 @@ def test_process_folder(
     for idx, (index, values) in enumerate(result.iteritems()):
         file = index[0] if isinstance(index, tuple) else index
         assert file == files[idx]
-        signal, sampling_rate = model.read_audio(file)
+        signal, sampling_rate = audinterface.utils.read_audio(file)
         np.testing.assert_equal(values, signal)
     for idx, (index, values) in enumerate(rel_result.iteritems()):
         file = index[0] if isinstance(index, tuple) else index
         assert file == rel_files[idx]
-        signal, sampling_rate = model.read_audio(file)
+        signal, sampling_rate = audinterface.utils.read_audio(file)
         np.testing.assert_equal(values, signal)
 
 
@@ -652,7 +706,7 @@ def test_read_audio(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     file = os.path.join(path, 'file.wav')
     af.write(file, signal, sampling_rate)
-    s, sr = audinterface.Process().read_audio(
+    s, sr = audinterface.utils.read_audio(
         file,
         start=pd.Timedelta('00:00:00.1'),
         end=pd.Timedelta('00:00:00.2'),
@@ -755,7 +809,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
     )
     result = model.process_unified_format_index(index)
     for (file, start, end), value in result.items():
-        signal, sampling_rate = model.read_audio(
+        signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
         )
         np.testing.assert_equal(signal, value)
@@ -764,7 +818,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
     index = pd.Index([file] * 3, name='file')
     result = model.process_unified_format_index(index)
     for (file, start, end), value in result.items():
-        signal, sampling_rate = model.read_audio(
+        signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
         )
         np.testing.assert_equal(signal, value)

@@ -251,7 +251,7 @@ def test_unified_format_index(tmpdir):
     )
     result = model.process_unified_format_index(index)
     for (file, start, end), value in result.items():
-        signal, sampling_rate = model.read_audio(
+        signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
         )
         np.testing.assert_equal(signal, value)

@@ -50,10 +50,15 @@ python-3.7:
   stage: test
   image: docker.audeering.com/python:3.7
 
-python-3.8:
-  extends: .pytest
-  stage: test
-  image: docker.audeering.com/python:3.8
+#test-windows-general:  https://gitlab.audeering.com/devops/gitlab-runners/-/issues/67
+#  # Based on Python 3.8 by default
+#  stage: test
+#  tags:
+#    - windows
+#  script:
+#    - pip install -r requirements.txt
+#    - pip install -r tests/requirements.txt
+#    - python -m pytest
 
 docs:
   extends: .pytest

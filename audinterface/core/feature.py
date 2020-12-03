@@ -1,7 +1,7 @@
 import os
 import typing
+import warnings
 
-import audiofile as af
 import numpy as np
 import pandas as pd
 
@@ -9,6 +9,7 @@ import audeer
 
 from audinterface.core.process import Process
 from audinterface.core.segment import Segment
+import audinterface.core.utils as utils
 
 
 class Feature:
@@ -60,6 +61,8 @@ class Feature:
             Can be ``'samples'``,
             or any unit supported by :class:`pd.timedelta`
         resample: if ``True`` enforces given sampling rate by resampling
+        channels: channel selection, see :func:`audresample.remix`
+        mixdown: apply mono mix-down on selection
         segment: when a :class:`audinterface.Segment` object is provided,
             it will be used to find a segmentation of the input signal.
             Afterwards processing is applied to each segment
@@ -80,6 +83,12 @@ class Feature:
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     """
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='num_channels',
+        removal_version='0.6.0',
+        new_argument='channels',
+        mapping=lambda x: range(x),
+    )
     def __init__(
             self,
             feature_names: typing.Sequence[str],
@@ -89,11 +98,12 @@ class Feature:
             process_func: typing.Callable[..., np.ndarray] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
-            num_channels: int = 1,
             win_dur: typing.Union[int, float] = None,
             hop_dur: typing.Union[int, float] = None,
             unit: str = 'seconds',
             resample: bool = False,
+            channels: typing.Union[int, typing.Sequence[int]] = 0,
+            mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
@@ -101,14 +111,15 @@ class Feature:
             verbose: bool = False,
             **kwargs,
     ):
+
         if win_dur is None and hop_dur is not None:
             raise ValueError(
-                "You have to specify 'win_dur' if 'hop_dur' is given"
+                "You have to specify 'win_dur' if 'hop_dur' is given."
             )
         if unit == 'samples' and sampling_rate is None and win_dur is not None:
             raise ValueError(
                 "You have specified 'samples' as unit, "
-                "but haven't provided a sampling rate"
+                "but haven't provided a sampling rate."
             )
 
         if process_func is None:
@@ -118,11 +129,18 @@ class Feature:
                     dtype=np.float,
                 )
 
+        if mixdown or isinstance(channels, int):
+            num_channels = 1
+        else:
+            num_channels = len(channels)
+
         self.process = Process(
             process_func=process_func,
             process_func_is_mono=process_func_is_mono,
             sampling_rate=sampling_rate,
             resample=resample,
+            channels=channels,
+            mixdown=mixdown,
             segment=segment,
             keep_nat=keep_nat,
             num_workers=num_workers,
@@ -167,40 +185,44 @@ class Feature:
         self.verbose = verbose
         r"""Show debug messages."""
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_file(
             self,
             file: str,
             *,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            channel: int = None,
     ) -> pd.DataFrame:
         r"""Extract features from an audio file.
 
         Args:
             file: file path
-            channel: channel number
             start: start processing at this position
             end: end processing at this position
 
         Raises:
-            RuntimeError: if sampling rates of feature extracted
-                and signal do not match
-            RuntimeError: if number of channels do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         series = self.process.process_file(
-            file, start=start, end=end, channel=channel,
+            file, start=start, end=end,
         )
         return self._series_to_frame(series)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
             starts: typing.Sequence[pd.Timedelta] = None,
             ends: typing.Sequence[pd.Timedelta] = None,
-            channel: int = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
@@ -208,25 +230,24 @@ class Feature:
             files: list of file paths
             starts: list with start positions
             ends: list with end positions
-            channel: channel number
 
         Raises:
-            RuntimeError: if sampling rates of feature extracted
-                and signal do not match
-            RuntimeError: if number of channels do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
-        series = self.process.process_files(
-            files, starts=starts, ends=ends, channel=channel,
-        )
+        series = self.process.process_files(files, starts=starts, ends=ends)
         return self._series_to_frame(series)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_folder(
             self,
             root: str,
             *,
             filetype: str = 'wav',
-            channel: int = None,
     ) -> pd.DataFrame:
         r"""Extract features from files in a folder.
 
@@ -235,17 +256,15 @@ class Feature:
         Args:
             root: root folder
             filetype: file extension
-            channel: channel number
 
         Raises:
-            RuntimeError: if sampling rates of feature extracted
-                and signal do not match
-            RuntimeError: if number of channels do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
-        return self.process_files(files, channel=channel)
+        return self.process_files(files)
 
     def process_signal(
             self,
@@ -270,15 +289,14 @@ class Feature:
             end: end processing at this position
 
         Raises:
-            RuntimeError: if sampling rates of feature extractor
-                and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
             RuntimeError: if dimension of extracted features
                 is greater than three
             RuntimeError: if feature extractor uses sliding window,
                 but ``self.win_dur`` is not specified
             RuntimeError: if number of features does not match
                 number of feature names
-            RuntimeError: if number of channels do not match
 
         """
         series = self.process.process_signal(
@@ -309,9 +327,8 @@ class Feature:
                 positions as :class:`pandas.Timedelta` objects.
 
         Raises:
-            RuntimeError: if sampling rates of feature extracted
-                and signal do not match
-            RuntimeError: if number of channels do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
             ValueError: if given index has wrong format
 
         """
@@ -320,11 +337,13 @@ class Feature:
         )
         return self._series_to_frame(series)
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_unified_format_index(
             self,
             index: pd.Index,
-            *,
-            channel: int = None,
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to the `Unified Format`_.
 
@@ -333,12 +352,10 @@ class Feature:
 
         Args:
             index: index with segment information
-            channel: channel number
 
         Raises:
-            RuntimeError: if sampling rates of feature extractor
-                and signal do not match
-            RuntimeError: if number of channels do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
             ValueError: if index is not conform to the `Unified Format`_
 
         .. _`Unified Format`: http://tools.pp.audeering.com/audata/
@@ -347,11 +364,8 @@ class Feature:
         .. _audata.util.to_segmented_frame: http://tools.pp.audeering.com/
             audata/api-utils.html#to-segmented-frame
 
-
         """
-        series = self.process.process_unified_format_index(
-            index, channel=channel,
-        )
+        series = self.process.process_unified_format_index(index)
         return self._series_to_frame(series)
 
     def to_numpy(
@@ -476,9 +490,9 @@ class Feature:
 
         This function processes the signal **without** transforming the output
         into a :class:`pd.DataFrame`. Instead it will return the raw processed
-        signal. However, if resampling is enabled and the input sampling
-        rate does not fit the expected sampling rate, the input signal will
-        be resampled before the processing is applied.
+        signal. However, if channel selection, mixdown and/or resampling
+        is enabled, the signal will be first remixed and resampled if the
+        input sampling rate does not fit the expected sampling rate.
 
         Args:
             signal: signal values
@@ -486,6 +500,10 @@ class Feature:
 
         Returns:
             Processed signal
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         y = self.process(

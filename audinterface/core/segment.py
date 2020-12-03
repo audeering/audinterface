@@ -27,6 +27,8 @@ class Segment:
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
         resample: if ``True`` enforces given sampling rate by resampling
+        channels: channel selection, see :func:`audresample.remix`
+        mixdown: apply mono mix-down on selection
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
@@ -48,6 +50,8 @@ class Segment:
             process_func: typing.Callable[..., pd.MultiIndex] = None,
             sampling_rate: int = None,
             resample: bool = False,
+            channels: typing.Union[int, typing.Sequence[int]] = None,
+            mixdown: bool = False,
             keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
@@ -69,6 +73,8 @@ class Segment:
             process_func=process_func,
             sampling_rate=sampling_rate,
             resample=resample,
+            channels=channels,
+            mixdown=mixdown,
             keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
@@ -77,47 +83,53 @@ class Segment:
         )
         r"""Processing object."""
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_file(
             self,
             file: str,
             *,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            channel: int = None,
     ) -> pd.MultiIndex:
         r"""Segment the content of an audio file.
 
         Args:
             file: file path
-            channel: channel number
             start: start processing at this position
             end: end processing at this position
+            channels: channel selection, see :func:`audresample.remix`
+            mixdown: apply mono mix-down on selection
 
         Returns:
             Segmented index in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
-        index = self.process.process_file(
-            file, start=start, end=end, channel=channel,
-        ).values[0]
+        index = self.process.process_file(file, start=start, end=end).values[0]
         return pd.MultiIndex(
             [[file], index.levels[0] + start, index.levels[1] + start],
             [[0] * len(index), index.codes[0], index.codes[1]],
             names=['file', 'start', 'end'],
         )
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_files(
             self,
             files: typing.Sequence[str],
             *,
             starts: typing.Sequence[pd.Timedelta] = None,
             ends: typing.Sequence[pd.Timedelta] = None,
-            channel: int = None,
     ) -> pd.MultiIndex:
         r"""Segment a list of files.
 
@@ -125,21 +137,16 @@ class Segment:
             files: list of file paths
             starts: list with start positions
             ends: list with end positions
-            channel: channel number
 
         Returns:
             Segmented index in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
-        series = self.process.process_files(
-            files,
-            starts=starts,
-            ends=ends,
-            channel=channel,
-        )
+        series = self.process.process_files(files, starts=starts, ends=ends)
         tuples = []
         for idx, ((file, start, _), index) in enumerate(series.items()):
             tuples.extend(
@@ -152,11 +159,14 @@ class Segment:
             tuples, names=['file', 'start', 'end'],
         )
 
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='channel',
+        removal_version='0.6.0',
+    )
     def process_folder(
             self,
             root: str,
             *,
-            channel: int = None,
             filetype: str = 'wav',
     ) -> pd.MultiIndex:
         r"""Segment files in a folder.
@@ -165,19 +175,19 @@ class Segment:
 
         Args:
             root: root folder
-            channel: channel number
             filetype: file extension
 
         Returns:
             Segmented index in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
-        return self.process_files(files, channel=channel)
+        return self.process_files(files)
 
     def process_signal(
             self,
@@ -205,7 +215,8 @@ class Segment:
             Segmented index in the Unified Format
 
         Raises:
-            RuntimeError: if sampling rates of model and signal do not match
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         index = self.process.process_signal(
@@ -239,9 +250,9 @@ class Segment:
 
         This function processes the signal **without** transforming the output
         into a :class:`pd.MultiIndex`. Instead it will return the raw processed
-        signal. However, if resampling is enabled and the input sampling
-        rate does not fit the expected sampling rate, the input signal will
-        be resampled before the processing is applied.
+        signal. However, if channel selection, mixdown and/or resampling
+        is enabled, the signal will be first remixed and resampled if the
+        input sampling rate does not fit the expected sampling rate.
 
         Args:
             signal: signal values
@@ -249,6 +260,10 @@ class Segment:
 
         Returns:
             Processed signal
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
 
         """
         return self.process(
