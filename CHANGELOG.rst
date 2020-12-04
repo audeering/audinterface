@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.5.1 (2020-12-04)
+--------------------------
+
+* Changed: store ``Process.channels`` always as a list
+* Changed: keep ``Feature.win_dur`` and ``Feature.hop_dur`` in original format
+
+
 Version 0.5.0 (2020-12-03)
 --------------------------
 
