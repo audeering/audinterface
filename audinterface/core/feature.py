@@ -1,6 +1,5 @@
 import os
 import typing
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -9,7 +8,6 @@ import audeer
 
 from audinterface.core.process import Process
 from audinterface.core.segment import Segment
-import audinterface.core.utils as utils
 
 
 class Feature:
@@ -59,7 +57,7 @@ class Feature:
             Defaults to ``win_dur / 2``.
         unit: unit of ``win_dur`` and ``hop_dur``.
             Can be ``'samples'``,
-            or any unit supported by :class:`pd.timedelta`
+            or any unit supported by :func:`pandas.to_timedelta`
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
@@ -169,19 +167,14 @@ class Feature:
                 )
         else:
             self.column_names = self.feature_names
-        self.win_dur = None
+        self.win_dur = win_dur
         r"""Window duration."""
-        self.hop_dur = None
+        self.hop_dur = hop_dur
         r"""Hop duration."""
-        if win_dur is not None:
-            if hop_dur is None:
-                hop_dur = win_dur // 2 if unit == 'samples' else win_dur / 2
-            if unit == 'samples':
-                unit = 'seconds'
-                win_dur = win_dur / sampling_rate
-                hop_dur = hop_dur / sampling_rate
-            self.win_dur = pd.to_timedelta(win_dur, unit=unit)
-            self.hop_dur = pd.to_timedelta(hop_dur, unit=unit)
+        if win_dur is not None and hop_dur is None:
+            self.hop_dur = win_dur // 2 if unit == 'samples' else win_dur / 2
+        self.unit = unit
+        r"""Unit of ``win_dur`` and ``hop dur``"""
         self.verbose = verbose
         r"""Show debug messages."""
 
@@ -413,6 +406,17 @@ class Feature:
         # or
         # [n_channels, n_features]
 
+        if self.unit == 'samples':
+            win_dur = pd.to_timedelta(
+                self.win_dur / self.process.sampling_rate, unit='seconds',
+            )
+            hop_dur = pd.to_timedelta(
+                self.hop_dur / self.process.sampling_rate, unit='seconds',
+            )
+        else:
+            win_dur = pd.to_timedelta(self.win_dur, unit=self.unit)
+            hop_dur = pd.to_timedelta(self.hop_dur, unit=self.unit)
+
         if self.process.process_func_is_mono and self.num_channels > 1:
             features = np.concatenate(features)
 
@@ -453,16 +457,16 @@ class Feature:
         features = features.reshape(new_shape).T
 
         if n_time_steps > 1:
-            if self.win_dur is None:
+            if win_dur is None:
                 starts = [start] * n_time_steps
                 ends = [end] * n_time_steps
             else:
                 starts = pd.timedelta_range(
                     start,
-                    freq=self.hop_dur,
+                    freq=hop_dur,
                     periods=n_time_steps,
                 )
-                ends = starts + self.win_dur
+                ends = starts + win_dur
         else:
             starts = [start]
             ends = [end]

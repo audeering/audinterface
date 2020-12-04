@@ -468,6 +468,7 @@ def test_process_unified_format_index(tmpdir):
         (1, None, 'seconds'),
         (1000, 500, 'milliseconds'),
         (None, None, 'seconds'),
+        (SAMPLING_RATE, SAMPLING_RATE // 2, 'samples'),
     ],
 )
 def test_signal_sliding_window(win_dur, hop_dur, unit):
@@ -479,6 +480,7 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
         channels=range(NUM_CHANNELS),
         win_dur=win_dur,
         hop_dur=hop_dur,
+        sampling_rate=SAMPLING_RATE,
         unit=unit,
         hop_size=SAMPLING_RATE // 2,  # argument to process_func
     )
@@ -488,13 +490,19 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
     )
     n_time_steps = len(features)
     start = pd.to_timedelta(0)
-    end = pd.to_timedelta(SIGNAL_2D.shape[-1] / SAMPLING_RATE, unit=unit)
+    end = pd.to_timedelta(SIGNAL_2D.shape[-1] / SAMPLING_RATE, unit='seconds')
     if win_dur is None:
         starts = [start] * n_time_steps
         ends = [end] * n_time_steps
     else:
+        if unit == 'samples':
+            win_dur = win_dur / SAMPLING_RATE
+            if hop_dur is not None:
+                hop_dur /= SAMPLING_RATE
+            unit = 'seconds'
         if hop_dur is None:
             hop_dur = win_dur / 2
+
         starts = pd.timedelta_range(
             start,
             freq=pd.to_timedelta(hop_dur, unit=unit),
