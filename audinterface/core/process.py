@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 import audeer
-import audresample
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
@@ -70,7 +69,7 @@ class Process:
         r"""Sampling rate in Hz."""
         self.resample = resample
         r"""Resample signal."""
-        self.channels = channels
+        self.channels = None if channels is None else audeer.to_list(channels)
         r"""Channel selection."""
         self.mixdown = mixdown
         r"""Mono mixdown."""
@@ -534,7 +533,7 @@ class ProcessWithContext:
         r"""Sampling rate in Hz."""
         self.resample = resample
         r"""Resample signal."""
-        self.channels = channels
+        self.channels = None if channels is None else audeer.to_list(channels)
         r"""Channel selection."""
         self.mixdown = mixdown
         r"""Mono mixdown."""
