@@ -406,16 +406,20 @@ class Feature:
         # or
         # [n_channels, n_features]
 
-        if self.unit == 'samples':
-            win_dur = pd.to_timedelta(
-                self.win_dur / self.process.sampling_rate, unit='seconds',
-            )
-            hop_dur = pd.to_timedelta(
-                self.hop_dur / self.process.sampling_rate, unit='seconds',
-            )
+        if self.win_dur is not None:
+            if self.unit == 'samples':
+                win_dur = pd.to_timedelta(
+                    self.win_dur / self.process.sampling_rate, unit='seconds',
+                )
+                hop_dur = pd.to_timedelta(
+                    self.hop_dur / self.process.sampling_rate, unit='seconds',
+                )
+            else:
+                win_dur = pd.to_timedelta(self.win_dur, unit=self.unit)
+                hop_dur = pd.to_timedelta(self.hop_dur, unit=self.unit)
         else:
-            win_dur = pd.to_timedelta(self.win_dur, unit=self.unit)
-            hop_dur = pd.to_timedelta(self.hop_dur, unit=self.unit)
+            win_dur = None
+            hop_dur = None
 
         if self.process.process_func_is_mono and self.num_channels > 1:
             features = np.concatenate(features)

@@ -469,6 +469,7 @@ def test_process_unified_format_index(tmpdir):
         (1000, 500, 'milliseconds'),
         (None, None, 'seconds'),
         (SAMPLING_RATE, SAMPLING_RATE // 2, 'samples'),
+        (None, None, 'samples'),
     ],
 )
 def test_signal_sliding_window(win_dur, hop_dur, unit):
