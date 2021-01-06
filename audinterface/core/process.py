@@ -560,7 +560,6 @@ class ProcessWithContext:
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
-            sampling_rate:
             index: a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
