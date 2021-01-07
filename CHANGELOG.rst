@@ -7,6 +7,19 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.5.3 (2021-01-07)
+--------------------------
+
+* Changed: rename
+  :meth:`audinterface.Feature.process_unified_format_index`,
+  :meth:`audinterface.Process.process_unified_format_index`,
+  :meth:`audinterface.ProcessWithContext.process_unified_format_index`
+  to
+  :meth:`audinterface.Feature.process_index`,
+  :meth:`audinterface.Process.process_index`,
+  :meth:`audinterface.ProcessWithContext.process_index`
+
+
 Version 0.5.2 (2020-12-10)
 --------------------------
 
