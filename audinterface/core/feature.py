@@ -259,6 +259,29 @@ class Feature:
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
 
+    def process_index(
+            self,
+            index: pd.Index,
+    ) -> pd.DataFrame:
+        r"""Extract features from an index conform to audformat_.
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
+
+        Args:
+            index: index with segment information
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+            ValueError: if index is not conform to audformat_
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        series = self.process.process_index(index)
+        return self._series_to_frame(series)
+
     def process_signal(
             self,
             signal: np.ndarray,
@@ -330,6 +353,10 @@ class Feature:
         )
         return self._series_to_frame(series)
 
+    @audeer.deprecated(
+        removal_version='0.8.0',
+        alternative='process_index',
+    )
     @audeer.deprecated_keyword_argument(
         deprecated_argument='channel',
         removal_version='0.6.0',
@@ -337,7 +364,7 @@ class Feature:
     def process_unified_format_index(
             self,
             index: pd.Index,
-    ) -> pd.DataFrame:
+    ) -> pd.DataFrame:  # pragma: nocover
         r"""Extract features from an index conform to the `Unified Format`_.
 
         .. note:: It is assumed that the index already holds segments,

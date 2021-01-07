@@ -13,7 +13,7 @@ import audiofile as af
 def check_index(
         index: pd.MultiIndex
 ):
-    r"""Check if index is in Unified Format."""
+    r"""Check if index is conform to audformat."""
     if len(index.levels) == 2:
         if not index.empty:
             if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
@@ -30,7 +30,7 @@ def check_index(
                                  f', expected timedelta64[ns].')
     elif len(index.levels) == 3:
         if not index.names == ('file', 'start', 'end'):
-            raise ValueError('Not a segmented index conform to Unified Format')
+            raise ValueError('Not a segmented index conform to audformat.')
         if not index.empty:
             if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     index.levels[1]

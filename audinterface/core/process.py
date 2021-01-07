@@ -140,7 +140,7 @@ class Process:
             end: end processing at this position
 
         Returns:
-            Series with processed file in the Unified Format
+            Series with processed file conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -149,7 +149,7 @@ class Process:
         """
         if self.segment is not None:
             index = self.segment.process_file(file, start=start, end=end)
-            return self.process_unified_format_index(index)
+            return self.process_index(index)
         else:
             return self._process_file(file, start=start, end=end)
 
@@ -172,7 +172,7 @@ class Process:
             ends: list with end positions
 
         Returns:
-            Series with processed files in the Unified Format
+            Series with processed files conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -225,7 +225,7 @@ class Process:
             filetype: file extension
 
         Returns:
-            Series with processed files in the Unified Format
+            Series with processed files conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -274,6 +274,56 @@ class Process:
 
         return pd.Series([y], index)
 
+    def process_index(
+            self,
+            index: pd.Index,
+    ) -> pd.Series:
+        r"""Process from an index conform to audformat_.
+
+        .. note:: It is assumed that the index already holds segments,
+            i.e. in case a ``segment`` object is given, it will be ignored.
+
+        Args:
+            index: index with segment information
+
+        Returns:
+            Series with processed segments conform to audformat
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+
+        index = utils.to_segmented_index(index)
+        utils.check_index(index)
+
+        if index.empty:
+            return pd.Series(None, index=index, dtype=float)
+
+        params = [
+            (
+                (file, ),
+                {
+                    'start': start,
+                    'end': end,
+                },
+            )
+            for file, start, end in index
+        ]
+        y = audeer.run_tasks(
+            self._process_file,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
+
+        return pd.concat(y)
+
     def process_signal(
             self,
             signal: np.ndarray,
@@ -297,7 +347,7 @@ class Process:
             end: end processing at this position
 
         Returns:
-            Series with processed signal in the Unified Format
+            Series with processed signal conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -335,7 +385,7 @@ class Process:
                 positions as :class:`pandas.Timedelta` objects.
 
         Returns:
-            Series with processed segments in the Unified Format
+            Series with processed segments conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -372,6 +422,10 @@ class Process:
 
         return pd.concat(y)
 
+    @audeer.deprecated(
+        removal_version='0.8.0',
+        alternative='process_index',
+    )
     @audeer.deprecated_keyword_argument(
         deprecated_argument='channel',
         removal_version='0.6.0',
@@ -379,7 +433,7 @@ class Process:
     def process_unified_format_index(
             self,
             index: pd.Index,
-    ) -> pd.Series:
+    ) -> pd.Series:  # pragma: nocover
         r"""Process from an index conform to the `Unified Format`_.
 
         .. note:: It is assumed that the index already holds segments,
@@ -549,6 +603,54 @@ class ProcessWithContext:
         self.process_func_kwargs = kwargs
         r"""Additional keyword arguments to processing function."""
 
+    def process_index(
+            self,
+            index: pd.MultiIndex,
+    ) -> pd.Series:
+        r"""Process from a segmented index conform to audformat_.
+
+        Args:
+            index: index with segment information
+
+        Returns:
+            Series with processed segments conform to audformat
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        if not index.names == ('file', 'start', 'end'):
+            raise ValueError('Not a segmented index conform to audformat.')
+
+        if index.empty:
+            return pd.Series(index=index, dtype=float)
+
+        files = index.levels[0]
+        ys = [None] * len(files)
+
+        with audeer.progress_bar(
+                files,
+                total=len(files),
+                disable=not self.verbose,
+        ) as pbar:
+            for idx, file in enumerate(pbar):
+                desc = audeer.format_display_message(file, pbar=True)
+                pbar.set_description(desc, refresh=True)
+                mask = index.isin([file], 0)
+                select = index[mask].droplevel(0)
+                signal, sampling_rate = utils.read_audio(file)
+                ys[idx] = pd.Series(
+                    self.process_signal_from_index(
+                        signal, sampling_rate, select,
+                    ).values,
+                    index=index[mask],
+                )
+
+        return pd.concat(ys)
+
     def process_signal_from_index(
             self,
             signal: np.ndarray,
@@ -565,7 +667,7 @@ class ProcessWithContext:
                 positions as :class:`pandas.Timedelta` objects.
 
         Returns:
-            Series with processed segments in the Unified Format
+            Series with processed segments conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -581,6 +683,10 @@ class ProcessWithContext:
 
         return pd.Series(y, index=index)
 
+    @audeer.deprecated(
+        removal_version='0.8.0',
+        alternative='process_index',
+    )
     @audeer.deprecated_keyword_argument(
         deprecated_argument='channel',
         removal_version='0.6.0',
@@ -588,7 +694,7 @@ class ProcessWithContext:
     def process_unified_format_index(
             self,
             index: pd.MultiIndex,
-    ) -> pd.Series:
+    ) -> pd.Series:  # pragma: nocover
         r"""Process from a segmented index conform to the `Unified Format`_.
 
         Args:

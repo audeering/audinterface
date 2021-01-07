@@ -104,7 +104,7 @@ class Segment:
             mixdown: apply mono mix-down on selection
 
         Returns:
-            Segmented index in the Unified Format
+            Segmented index conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -139,7 +139,7 @@ class Segment:
             ends: list with end positions
 
         Returns:
-            Segmented index in the Unified Format
+            Segmented index conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -178,7 +178,7 @@ class Segment:
             filetype: file extension
 
         Returns:
-            Segmented index in the Unified Format
+            Segmented index conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -212,7 +212,7 @@ class Segment:
             end: end processing at this position
 
         Returns:
-            Segmented index in the Unified Format
+            Segmented index conform to audformat
 
         Raises:
             RuntimeError: if sampling rates do not match

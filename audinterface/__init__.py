@@ -14,9 +14,9 @@ or a selection of the following methods:
 * :meth:`process_file`
 * :meth:`process_files`
 * :meth:`process_folder`
+* :meth:`process_index`
 * :meth:`process_signal`
 * :meth:`process_signal_from_index`
-* :meth:`process_unified_format_index`
 
 You can inherit from the classes
 or just instantiate them

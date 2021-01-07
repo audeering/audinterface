@@ -437,7 +437,7 @@ def test_process_signal_from_index(index, expected_features):
     np.testing.assert_array_equal(features.values, expected_features)
 
 
-def test_process_unified_format_index(tmpdir):
+def test_process_index(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
     af.write(file, SIGNAL_2D, SAMPLING_RATE)
@@ -455,7 +455,7 @@ def test_process_unified_format_index(tmpdir):
         process_func=feature_extractor,
         channels=range(NUM_CHANNELS),
     )
-    features = extractor.process_unified_format_index(
+    features = extractor.process_index(
         index,
     )
     np.testing.assert_array_equal(features.values, expected_features)

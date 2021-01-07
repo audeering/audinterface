@@ -770,7 +770,7 @@ def test_sampling_rate_mismatch(
         (None, False, ),
     ]
 )
-def test_unified_format_index(tmpdir, num_workers, multiprocessing):
+def test_index(tmpdir, num_workers, multiprocessing):
 
     model = audinterface.Process(
         process_func=None,
@@ -795,7 +795,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
-    result = model.process_unified_format_index(index)
+    result = model.process_index(index)
     assert result.empty
 
     # segmented index
@@ -807,7 +807,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
-    result = model.process_unified_format_index(index)
+    result = model.process_index(index)
     for (file, start, end), value in result.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
@@ -816,7 +816,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
 
     # filewise index
     index = pd.Index([file] * 3, name='file')
-    result = model.process_unified_format_index(index)
+    result = model.process_index(index)
     for (file, start, end), value in result.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
@@ -830,10 +830,10 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
             pd.to_timedelta([1, 2, 3], unit='sec'),
             pd.to_timedelta([2, 3, 4], unit='sec'),
         ],
-        names=['no', 'unified', 'format'],
+        names=['no', 'aud', 'format'],
     )
     with pytest.raises(ValueError):
-        model.process_unified_format_index(index)
+        model.process_index(index)
     index = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
@@ -843,7 +843,7 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         names=['file', 'start', 'end'],
     )
     with pytest.raises(ValueError):
-        model.process_unified_format_index(index)
+        model.process_index(index)
     index = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
@@ -853,4 +853,4 @@ def test_unified_format_index(tmpdir, num_workers, multiprocessing):
         names=['file', 'start', 'end'],
     )
     with pytest.raises(ValueError):
-        model.process_unified_format_index(index)
+        model.process_index(index)

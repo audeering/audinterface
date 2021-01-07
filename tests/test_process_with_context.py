@@ -213,7 +213,7 @@ def test_sampling_rate_mismatch(
     model.process_signal_from_index(signal, signal_sampling_rate, index)
 
 
-def test_unified_format_index(tmpdir):
+def test_index(tmpdir):
 
     model = audinterface.ProcessWithContext(
         process_func=None,
@@ -237,7 +237,7 @@ def test_unified_format_index(tmpdir):
         ],
         names=('file', 'start', 'end')
     )
-    result = model.process_unified_format_index(index)
+    result = model.process_index(index)
     assert result.empty
 
     # valid index
@@ -249,7 +249,7 @@ def test_unified_format_index(tmpdir):
         ],
         names=('file', 'start', 'end')
     )
-    result = model.process_unified_format_index(index)
+    result = model.process_index(index)
     for (file, start, end), value in result.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end
@@ -259,6 +259,6 @@ def test_unified_format_index(tmpdir):
     # bad index
     index = pd.MultiIndex(levels=[[], [], []],
                           codes=[[], [], []],
-                          names=['no', 'unified', 'format'])
+                          names=['no', 'aud', 'format'])
     with pytest.raises(ValueError):
-        model.process_unified_format_index(index)
+        model.process_index(index)
