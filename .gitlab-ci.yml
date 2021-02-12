@@ -4,10 +4,6 @@ stages:
   - doc
   - pypi
 
-variables:
-  PIP_INDEX_URL: https://artifactory.audeering.com/artifactory/api/pypi/pypi/simple
-  PIP_TRUSTED_HOST: artifactory.audeering.com
-
 generate-token:
   stage: token
   image: docker.audeering.com/alpine
@@ -24,8 +20,6 @@ generate-token:
 
 .pytest:
   before_script:
-    - apt-get update
-    - apt-get install -y curl jq pandoc graphviz libsndfile1 sox
     - username=${GITLAB_USER_LOGIN}
     - api_key=$(cat token.json | jq -r '.access_token')
     - export ARTIFACTORY_USERNAME=${username}
@@ -43,12 +37,17 @@ generate-token:
 python-3.6:
   extends: .pytest
   stage: test
-  image: docker.audeering.com/python:3.6
+  image: docker.audeering.com/audeering/python-3.6:latest
 
 python-3.7:
   extends: .pytest
   stage: test
-  image: docker.audeering.com/python:3.7
+  image: docker.audeering.com/audeering/python-3.7:latest
+
+python-3.8:
+  extends: .pytest
+  stage: test
+  image: docker.audeering.com/audeering/python-3.8:latest
 
 #test-windows-general:  https://gitlab.audeering.com/devops/gitlab-runners/-/issues/67
 #  # Based on Python 3.8 by default
@@ -63,7 +62,7 @@ python-3.7:
 docs:
   extends: .pytest
   stage: test
-  image: docker.audeering.com/python:3.6
+  image: docker.audeering.com/audeering/python-3.6:latest
   script:
     - pip install -r requirements.txt
     - pip install -r docs/requirements.txt
