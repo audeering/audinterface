@@ -405,6 +405,12 @@ class Feature:
             self,
             series: pd.Series,
     ) -> pd.DataFrame:
+
+        if series.empty:
+            return pd.DataFrame(
+                columns=self.column_names,
+            )
+
         frames = [None] * len(series)
         if len(series.index.levels) == 3:
             for idx, ((file, start, end), values) in enumerate(series.items()):

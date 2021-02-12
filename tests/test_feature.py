@@ -438,6 +438,26 @@ def test_process_signal_from_index(index, expected_features):
 
 
 def test_process_index(tmpdir):
+
+    # empty
+
+    index = pd.MultiIndex.from_arrays(
+        [[], [], []],
+        names=['file', 'start', 'end'],
+    )
+    extractor = audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=feature_extractor,
+        channels=range(NUM_CHANNELS),
+    )
+    features = extractor.process_index(
+        index,
+    )
+    assert features.empty
+    assert features.columns.tolist() == extractor.column_names
+
+    # non-empty
+
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
     af.write(file, SIGNAL_2D, SAMPLING_RATE)
@@ -459,6 +479,7 @@ def test_process_index(tmpdir):
         index,
     )
     np.testing.assert_array_equal(features.values, expected_features)
+    assert features.columns.tolist() == extractor.column_names
 
 
 @pytest.mark.parametrize(
