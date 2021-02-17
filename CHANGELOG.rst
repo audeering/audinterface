@@ -7,6 +7,16 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.5.4 (2021-02-17)
+--------------------------
+
+* Added: support for providing ``start`` and ``end`` time values
+  in the same format as done in ``audformat``,
+  e.g. as integer, floats, or ``pandas.Timedelta``
+* Changed: improve speed of CI pipelines
+* Fixed: ``audinterface.Feature`` handles empty index
+
+
 Version 0.5.3 (2021-01-07)
 --------------------------
 
