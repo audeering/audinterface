@@ -7,6 +7,10 @@ import pandas as pd
 import audeer
 
 from audinterface.core import utils
+from audinterface.core.typing import (
+    Timestamp,
+    Timestamps,
+)
 
 
 class Segment:
@@ -91,17 +95,17 @@ class Segment:
             self,
             file: str,
             *,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> pd.MultiIndex:
         r"""Segment the content of an audio file.
 
         Args:
             file: file path
-            start: start processing at this position
-            end: end processing at this position
-            channels: channel selection, see :func:`audresample.remix`
-            mixdown: apply mono mix-down on selection
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Returns:
             Segmented index conform to audformat
@@ -128,15 +132,19 @@ class Segment:
             self,
             files: typing.Sequence[str],
             *,
-            starts: typing.Sequence[pd.Timedelta] = None,
-            ends: typing.Sequence[pd.Timedelta] = None,
+            starts: Timestamps = None,
+            ends: Timestamps = None,
     ) -> pd.MultiIndex:
         r"""Segment a list of files.
 
         Args:
             files: list of file paths
-            starts: list with start positions
-            ends: list with end positions
+            starts: segment start positions.
+                Time values given as float or integers are treated as seconds.
+                If a scalar is given, it is applied to all files
+            ends: segment end positions.
+                Time values given as float or integers are treated as seconds
+                If a scalar is given, it is applied to all files
 
         Returns:
             Segmented index conform to audformat
@@ -195,8 +203,8 @@ class Segment:
             sampling_rate: int,
             *,
             file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> pd.MultiIndex:
         r"""Segment audio signal.
 
@@ -208,8 +216,10 @@ class Segment:
             signal: signal values
             sampling_rate: sampling rate in Hz
             file: file path
-            start: start processing at this position
-            end: end processing at this position
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Returns:
             Segmented index conform to audformat
@@ -220,7 +230,11 @@ class Segment:
 
         """
         index = self.process.process_signal(
-            signal, sampling_rate, file=file, start=start, end=end,
+            signal,
+            sampling_rate,
+            file=file,
+            start=start,
+            end=end,
         ).values[0]
         utils.check_index(index)
         if start is not None:

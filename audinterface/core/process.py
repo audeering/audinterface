@@ -8,6 +8,10 @@ import audeer
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
+from audinterface.core.typing import (
+    Timestamp,
+    Timestamps,
+)
 
 
 class Process:
@@ -129,15 +133,17 @@ class Process:
             self,
             file: str,
             *,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
         Args:
             file: file path
-            start: start processing at this position
-            end: end processing at this position
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Returns:
             Series with processed file conform to audformat
@@ -147,6 +153,8 @@ class Process:
             RuntimeError: if channel selection is invalid
 
         """
+        start = utils.to_timedelta(start)
+        end = utils.to_timedelta(end)
         if self.segment is not None:
             index = self.segment.process_file(file, start=start, end=end)
             return self.process_index(index)
@@ -161,15 +169,19 @@ class Process:
             self,
             files: typing.Sequence[str],
             *,
-            starts: typing.Sequence[pd.Timedelta] = None,
-            ends: typing.Sequence[pd.Timedelta] = None,
+            starts: Timestamps = None,
+            ends: Timestamps = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
         Args:
             files: list of file paths
-            starts: list with start positions
-            ends: list with end positions
+            starts: segment start positions.
+                Time values given as float or integers are treated as seconds.
+                If a scalar is given, it is applied to all files
+            ends: segment end positions.
+                Time values given as float or integers are treated as seconds
+                If a scalar is given, it is applied to all files
 
         Returns:
             Series with processed files conform to audformat
@@ -179,10 +191,13 @@ class Process:
             RuntimeError: if channel selection is invalid
 
         """
-        if starts is None:
-            starts = [None] * len(files)
-        if ends is None:
-            ends = [None] * len(files)
+        if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
+            starts = [starts] * len(files)
+        if isinstance(ends, (type(None), float, int, str, pd.Timedelta)):
+            ends = [ends] * len(files)
+
+        starts = utils.to_timedelta(starts)
+        ends = utils.to_timedelta(ends)
 
         params = [
             (
@@ -330,8 +345,8 @@ class Process:
             sampling_rate: int,
             *,
             file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> typing.Any:
         r"""Process audio signal and return result.
 
@@ -343,8 +358,10 @@ class Process:
             signal: signal values
             sampling_rate: sampling rate in Hz
             file: file path
-            start: start processing at this position
-            end: end processing at this position
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Returns:
             Series with processed signal conform to audformat
@@ -354,16 +371,28 @@ class Process:
             RuntimeError: if channel selection is invalid
 
         """
+        start = utils.to_timedelta(start)
+        end = utils.to_timedelta(end)
         if self.segment is not None:
             index = self.segment.process_signal(
-                signal, sampling_rate, file=file, start=start, end=end,
+                signal,
+                sampling_rate,
+                file=file,
+                start=start,
+                end=end,
             )
             return self.process_signal_from_index(
-                signal, sampling_rate, index,
+                signal,
+                sampling_rate,
+                index,
             )
         else:
             return self._process_signal(
-                signal, sampling_rate, file=file, start=start, end=end,
+                signal,
+                sampling_rate,
+                file=file,
+                start=start,
+                end=end,
             )
 
     def process_signal_from_index(

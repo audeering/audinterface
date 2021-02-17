@@ -251,6 +251,54 @@ def signal_modification(signal, sampling_rate, subtract=False):
             False,
             1.0,
         ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            '1s',
+            '2s',
+            False,
+            None,
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            '1000ms',
+            '2000ms',
+            False,
+            None,
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            1,
+            2,
+            False,
+            None,
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            None,
+            np.zeros((1, 24000)),
+            8000,
+            1.0,
+            2.0,
+            False,
+            None,
+            False,
+            1.0,
+        ),
     ],
 )
 def test_process_file(
@@ -286,6 +334,108 @@ def test_process_file(
     )
     np.testing.assert_almost_equal(
         output.values, expected_output, decimal=4,
+    )
+
+
+@pytest.mark.parametrize(
+    'process_func, num_files, signal, sampling_rate, starts, ends, '
+    'expected_output',
+    [
+        (
+            signal_duration,
+            2,
+            np.zeros((1, 24000)),
+            8000,
+            None,
+            None,
+            [3.0] * 2,
+        ),
+        (
+            signal_duration,
+            2,
+            np.zeros((1, 24000)),
+            8000,
+            '1s',
+            '2s',
+            [1.0] * 2,
+        ),
+        (
+            signal_duration,
+            2,
+            np.zeros((1, 24000)),
+            8000,
+            1,
+            2,
+            [1.0] * 2,
+        ),
+        (
+            signal_duration,
+            2,
+            np.zeros((1, 24000)),
+            8000,
+            [None, 1],
+            [None, 2],
+            [3.0, 1.0],
+        ),
+        (
+            signal_duration,
+            2,
+            np.zeros((1, 24000)),
+            8000,
+            [None, '1s'],
+            [None, '2s'],
+            [3.0, 1.0],
+        ),
+        (
+            signal_duration,
+            3,
+            np.zeros((1, 24000)),
+            8000,
+            [None, '1s'],
+            [None, '2s', None],
+            [3.0, 1.0],
+        ),
+        (
+            signal_duration,
+            1,
+            np.zeros((1, 24000)),
+            8000,
+            [None],
+            [None, '2s'],
+            [3.0],
+        ),
+    ],
+)
+def test_process_files(
+    tmpdir,
+    process_func,
+    num_files,
+    signal,
+    sampling_rate,
+    starts,
+    ends,
+    expected_output,
+):
+    model = audinterface.Process(
+        process_func=process_func,
+        sampling_rate=sampling_rate,
+        resample=False,
+        verbose=False,
+    )
+    files = []
+    for idx in range(num_files):
+        file = f'{tmpdir}/file{idx}.wav'
+        af.write(file, signal, sampling_rate)
+        files.append(file)
+    output = model.process_files(
+        files,
+        starts=starts,
+        ends=ends,
+    )
+    np.testing.assert_almost_equal(
+        output.values,
+        expected_output,
+        decimal=4,
     )
 
 
@@ -478,6 +628,42 @@ def test_process_folder(
             None,
             np.array([1., 2., 3.]),
             1,
+            None,
+            1,
+            2,
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
+            None,
+            1.0,
+            2.0,
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
+            None,
+            '1s',
+            '2s',
+            False,
+            1.0,
+        ),
+        (
+            signal_duration,
+            {},
+            None,
+            np.array([1., 2., 3.]),
+            1,
             'file',
             pd.to_timedelta('1s'),
             pd.to_timedelta('2s'),
@@ -544,15 +730,28 @@ def test_process_signal(
         **process_func_kwargs,
     )
     x = model.process_signal(
-        signal, sampling_rate, file=file, start=start, end=end,
+        signal,
+        sampling_rate,
+        file=file,
+        start=start,
+        end=end,
     )
     signal = np.atleast_2d(signal)
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
+    elif isinstance(start, (int, float)):
+        start = pd.to_timedelta(start, 's')
+    elif isinstance(start, str):
+        start = pd.to_timedelta(start)
     if end is None or (pd.isna(end) and not keep_nat):
         end = pd.to_timedelta(
-            signal.shape[1] / sampling_rate, unit='sec',
+            signal.shape[1] / sampling_rate,
+            unit='s',
         )
+    elif isinstance(end, (int, float)):
+        end = pd.to_timedelta(end, 's')
+    elif isinstance(end, str):
+        end = pd.to_timedelta(end)
     if file is None:
         y = pd.Series(
             [expected_signal],

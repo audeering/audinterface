@@ -1,6 +1,4 @@
-import functools
 import typing
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -8,6 +6,8 @@ import pandas as pd
 import audeer
 import audresample
 import audiofile as af
+
+from audinterface.core.typing import Timestamps
 
 
 def check_index(
@@ -170,3 +170,11 @@ def to_segmented_index(index: pd.Index) -> pd.MultiIndex:
             df, names=['file', 'start', 'end']
         )
     return index
+
+
+def to_timedelta(times: Timestamps):
+    r"""Convert time value to pd.Timedelta."""
+    try:
+        return pd.to_timedelta(times, unit='s')
+    except ValueError:  # catches values like '1s'
+        return pd.to_timedelta(times)

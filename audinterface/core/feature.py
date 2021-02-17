@@ -8,6 +8,10 @@ import audeer
 
 from audinterface.core.process import Process
 from audinterface.core.segment import Segment
+from audinterface.core.typing import (
+    Timestamp,
+    Timestamps,
+)
 
 
 class Feature:
@@ -186,15 +190,17 @@ class Feature:
             self,
             file: str,
             *,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> pd.DataFrame:
         r"""Extract features from an audio file.
 
         Args:
             file: file path
-            start: start processing at this position
-            end: end processing at this position
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -214,15 +220,19 @@ class Feature:
             self,
             files: typing.Sequence[str],
             *,
-            starts: typing.Sequence[pd.Timedelta] = None,
-            ends: typing.Sequence[pd.Timedelta] = None,
+            starts: Timestamps = None,
+            ends: Timestamps = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
         Args:
             files: list of file paths
-            starts: list with start positions
-            ends: list with end positions
+            starts: segment start positions.
+                Time values given as float or integers are treated as seconds.
+                If a scalar is given, it is applied to all files
+            ends: segment end positions.
+                Time values given as float or integers are treated as seconds
+                If a scalar is given, it is applied to all files
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -288,8 +298,8 @@ class Feature:
             sampling_rate: int,
             *,
             file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
+            start: Timestamp = None,
+            end: Timestamp = None,
     ) -> pd.DataFrame:
         r"""Extract features for an audio signal.
 
@@ -301,8 +311,10 @@ class Feature:
             signal: signal values
             sampling_rate: sampling rate in Hz
             file: file path
-            start: start processing at this position
-            end: end processing at this position
+            start: start processing at this position.
+                If value is as a float or integer it is treated as seconds
+            end: end processing at this position.
+                If value is as a float or integer it is treated as seconds
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -349,7 +361,9 @@ class Feature:
 
         """
         series = self.process.process_signal_from_index(
-            signal, sampling_rate, index,
+            signal,
+            sampling_rate,
+            index,
         )
         return self._series_to_frame(series)
 
