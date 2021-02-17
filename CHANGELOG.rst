@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.5.5 (2021-02-17)
+--------------------------
+
+* Fixed: PyPI publishing pipeline
+* Changed: use new tokenizer in CI pipeline
+
+
 Version 0.5.4 (2021-02-17)
 --------------------------
 
