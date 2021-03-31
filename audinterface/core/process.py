@@ -147,11 +147,13 @@ class Process:
                 If value is as a float or integer it is treated as seconds
 
         Returns:
-            Series with processed file conform to audformat
+            Series with processed file conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         start = utils.to_timedelta(start)
@@ -185,11 +187,13 @@ class Process:
                 If a scalar is given, it is applied to all files
 
         Returns:
-            Series with processed files conform to audformat
+            Series with processed files conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
@@ -241,11 +245,13 @@ class Process:
             filetype: file extension
 
         Returns:
-            Series with processed files conform to audformat
+            Series with processed files conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
@@ -301,7 +307,7 @@ class Process:
             index: index with segment information
 
         Returns:
-            Series with processed segments conform to audformat
+            Series with processed segments conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -363,11 +369,13 @@ class Process:
                 If value is as a float or integer it is treated as seconds
 
         Returns:
-            Series with processed signal conform to audformat
+            Series with processed signal conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         start = utils.to_timedelta(start)
@@ -413,11 +421,13 @@ class Process:
                 positions as :class:`pandas.Timedelta` objects.
 
         Returns:
-            Series with processed segments conform to audformat
+            Series with processed segments conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         utils.check_index(index)
@@ -641,7 +651,7 @@ class ProcessWithContext:
             index: index with segment information
 
         Returns:
-            Series with processed segments conform to audformat
+            Series with processed segments conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -694,11 +704,13 @@ class ProcessWithContext:
                 positions as :class:`pandas.Timedelta` objects.
 
         Returns:
-            Series with processed segments conform to audformat
+            Series with processed segments conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         utils.check_index(index)
@@ -720,9 +732,9 @@ class ProcessWithContext:
     )
     def process_unified_format_index(
             self,
-            index: pd.MultiIndex,
+            index: pd.Index,
     ) -> pd.Series:  # pragma: nocover
-        r"""Process from a segmented index conform to the `Unified Format`_.
+        r"""Process from a index conform to the `Unified Format`_.
 
         Args:
             index: index with segment information
@@ -733,9 +745,6 @@ class ProcessWithContext:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
-
-        .. _`Unified Format`: http://tools.pp.audeering.com/audata/
-            data-tables.html
 
         """
         index = audformat.utils.to_segmented_index(index)

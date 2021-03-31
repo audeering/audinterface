@@ -98,7 +98,7 @@ class Segment:
             *,
             start: Timestamp = None,
             end: Timestamp = None,
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Segment the content of an audio file.
 
         Args:
@@ -109,19 +109,29 @@ class Segment:
                 If value is as a float or integer it is treated as seconds
 
         Returns:
-            Segmented index conform to audformat
+            Segmented index conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
         index = self.process.process_file(file, start=start, end=end).values[0]
         return pd.MultiIndex(
-            [[file], index.levels[0] + start, index.levels[1] + start],
-            [[0] * len(index), index.codes[0], index.codes[1]],
+            levels=[
+                [file],
+                index.levels[0] + start,
+                index.levels[1] + start,
+            ],
+            codes=[
+                [0] * len(index),
+                index.codes[0],
+                index.codes[1],
+            ],
             names=['file', 'start', 'end'],
         )
 
@@ -135,7 +145,7 @@ class Segment:
             *,
             starts: Timestamps = None,
             ends: Timestamps = None,
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Segment a list of files.
 
         Args:
@@ -148,25 +158,34 @@ class Segment:
                 If a scalar is given, it is applied to all files
 
         Returns:
-            Segmented index conform to audformat
+            Segmented index conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
         """
         series = self.process.process_files(files, starts=starts, ends=ends)
-        tuples = []
+        objs = []
         for idx, ((file, start, _), index) in enumerate(series.items()):
-            tuples.extend(
+            objs.append(
                 pd.MultiIndex(
-                    [[file], index.levels[0] + start, index.levels[1] + start],
-                    [[0] * len(index), index.codes[0], index.codes[1]],
-                ).to_list()
+                    levels=[
+                        [file],
+                        index.levels[0] + start,
+                        index.levels[1] + start,
+                    ],
+                    codes=[
+                        [0] * len(index),
+                        index.codes[0],
+                        index.codes[1],
+                    ],
+                    names=['file', 'start', 'end'],
+                )
             )
-        return pd.MultiIndex.from_tuples(
-            tuples, names=['file', 'start', 'end'],
-        )
+        return audformat.utils.union(objs)
 
     @audeer.deprecated_keyword_argument(
         deprecated_argument='channel',
@@ -177,7 +196,7 @@ class Segment:
             root: str,
             *,
             filetype: str = 'wav',
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Segment files in a folder.
 
         .. note:: At the moment does not scan in sub-folders!
@@ -187,11 +206,13 @@ class Segment:
             filetype: file extension
 
         Returns:
-            Segmented index conform to audformat
+            Segmented index conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
@@ -201,18 +222,20 @@ class Segment:
     def process_index(
             self,
             index: pd.Index,
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Segment files or segments from an index.
 
         Args:
-            index: index conform to audformat
+            index: index conform to audformat_
 
         Returns:
-            Segmented index conform to audformat
+            Segmented index conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         index = audformat.utils.to_segmented_index(index)
@@ -235,7 +258,7 @@ class Segment:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Segment audio signal.
 
         .. note:: If a ``file`` is given, the index of the returned frame
@@ -252,11 +275,13 @@ class Segment:
                 If value is as a float or integer it is treated as seconds
 
         Returns:
-            Segmented index conform to audformat
+            Segmented index conform to audformat_
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         index = self.process.process_signal(
@@ -276,10 +301,14 @@ class Segment:
         if file is not None:
             index = pd.MultiIndex(
                 levels=[
-                    [file], index.levels[0], index.levels[1],
+                    [file],
+                    index.levels[0],
+                    index.levels[1],
                 ],
                 codes=[
-                    [0] * len(index), index.codes[0], index.codes[1],
+                    [0] * len(index),
+                    index.codes[0],
+                    index.codes[1],
                 ],
                 names=['file', 'start', 'end'],
             )
@@ -289,7 +318,7 @@ class Segment:
             self,
             signal: np.ndarray,
             sampling_rate: int,
-    ) -> pd.MultiIndex:
+    ) -> pd.Index:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
