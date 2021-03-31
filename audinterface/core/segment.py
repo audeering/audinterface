@@ -197,6 +197,35 @@ class Segment:
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
 
+    def process_index(
+            self,
+            index: pd.Index,
+    ) -> pd.MultiIndex:
+        r"""Segment files or segments from an index.
+
+        Args:
+            index: index conform to audformat
+
+        Returns:
+            Segmented index conform to audformat
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        """
+        index = utils.to_segmented_index(index)
+        utils.check_index(index)
+
+        if index.empty:
+            return index
+
+        return self.process_files(
+            index.get_level_values('file'),
+            starts=index.get_level_values('start'),
+            ends=index.get_level_values('end'),
+        )
+
     def process_signal(
             self,
             signal: np.ndarray,

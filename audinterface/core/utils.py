@@ -163,11 +163,16 @@ def to_segmented_index(index: pd.Index) -> pd.MultiIndex:
 
     """
     if index.nlevels == 1:
-        df = index.to_frame(index=False)
-        df['start'] = pd.to_timedelta(0)
-        df['end'] = pd.NaT
-        index = pd.MultiIndex.from_frame(
-            df, names=['file', 'start', 'end']
+        files = index.get_level_values(0)
+        starts = [pd.to_timedelta(0)] * len(files)
+        ends = pd.to_timedelta([pd.NaT] * len(files))
+        index = pd.MultiIndex.from_arrays(
+            [
+                files,
+                starts,
+                ends,
+            ],
+            names=['file', 'start', 'end'],
         )
     return index
 

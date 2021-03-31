@@ -101,6 +101,86 @@ def test_folder(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize(
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+def test_index(tmpdir, num_workers, multiprocessing):
+
+    def process_func(x, sr):
+        dur = pd.to_timedelta(x.shape[-1] / sr, unit='s')
+        return pd.MultiIndex.from_arrays(
+            [
+                [pd.to_timedelta('0.1s')],
+                [dur - pd.to_timedelta('0.1s')],
+            ],
+            names=['start', 'end'],
+        )
+
+    segment = audinterface.Segment(
+        process_func=process_func,
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
+        verbose=False,
+    )
+    sampling_rate = 8000
+    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
+    path = str(tmpdir.mkdir('wav'))
+    file = f'{path}/file.wav'
+    af.write(file, signal, sampling_rate)
+
+    # empty index
+    index = pd.MultiIndex.from_arrays(
+        [
+            [],
+            pd.to_timedelta([]),
+            pd.to_timedelta([]),
+        ],
+        names=('file', 'start', 'end')
+    )
+    result = segment.process_index(index)
+    assert result.empty
+
+    # segmented index
+    index = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            pd.timedelta_range('0s', '2s', 3),
+            pd.timedelta_range('1s', '3s', 3),
+        ],
+        names=('file', 'start', 'end')
+    )
+    result = segment.process_index(index)
+    expected = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            index.get_level_values('start') + pd.to_timedelta('0.1s'),
+            index.get_level_values('end') - pd.to_timedelta('0.1s'),
+        ],
+        names=('file', 'start', 'end')
+    )
+    pd.testing.assert_index_equal(result, expected)
+
+    # filewise index
+    index = pd.Index([file] * 3, name='file')
+    result = segment.process_index(index)
+    expected = pd.MultiIndex.from_arrays(
+        [
+            [file] * 3,
+            [pd.to_timedelta('0.1s')] * 3,
+            [pd.to_timedelta('2.9s')] * 3,
+        ],
+        names=('file', 'start', 'end')
+    )
+    pd.testing.assert_index_equal(result, expected)
+
+
+@pytest.mark.parametrize(
     'signal,sampling_rate,segment_func,start,end,result',
     [
         (

@@ -153,7 +153,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             1,
             False,
             1,
-            marks=pytest.mark.xfail(raises=RuntimeError),
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         (
             signal_duration,
