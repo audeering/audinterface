@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 import audeer
+import audformat
 
 from audinterface.core import utils
 from audinterface.core.typing import (
@@ -214,7 +215,7 @@ class Segment:
             RuntimeError: if channel selection is invalid
 
         """
-        index = utils.to_segmented_index(index)
+        index = audformat.utils.to_segmented_index(index)
         utils.check_index(index)
 
         if index.empty:

@@ -1,12 +1,12 @@
 import os
-import warnings
 
-import audiofile as af
 import numpy as np
 import pandas as pd
 import pytest
 
+import audformat
 import audinterface
+import audiofile as af
 
 
 SAMPLING_RATE = 8000
@@ -441,18 +441,13 @@ def test_process_index(tmpdir):
 
     # empty
 
-    index = pd.MultiIndex.from_arrays(
-        [[], [], []],
-        names=['file', 'start', 'end'],
-    )
+    index = audformat.segmented_index()
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
         channels=range(NUM_CHANNELS),
     )
-    features = extractor.process_index(
-        index,
-    )
+    features = extractor.process_index(index)
     assert features.empty
     assert features.columns.tolist() == extractor.column_names
 
@@ -461,14 +456,7 @@ def test_process_index(tmpdir):
     path = str(tmpdir.mkdir('wav'))
     file = f'{path}/file.wav'
     af.write(file, SIGNAL_2D, SAMPLING_RATE)
-    index = pd.MultiIndex.from_arrays(
-        [
-            (file, ) * 2,
-            (pd.to_timedelta('0s'), pd.to_timedelta('1s')),
-            (pd.to_timedelta('2s'), pd.to_timedelta('3s')),
-        ],
-        names=['file', 'start', 'end'],
-    )
+    index = audformat.segmented_index([file] * 2, [0, 1], [2, 3])
     expected_features = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),

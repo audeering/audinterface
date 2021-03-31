@@ -1,11 +1,10 @@
-import os
-
 import audiofile as af
 import numpy as np
 import pandas as pd
 import pytest
 
 import audinterface
+import audformat
 
 
 def signal_max(signal, sampling_rate):
@@ -229,25 +228,15 @@ def test_index(tmpdir):
     af.write(file, signal, sampling_rate)
 
     # empty index
-    index = pd.MultiIndex.from_arrays(
-        [
-            [],
-            pd.to_timedelta([]),
-            pd.to_timedelta([]),
-        ],
-        names=('file', 'start', 'end')
-    )
+    index = audformat.segmented_index()
     result = model.process_index(index)
     assert result.empty
 
     # valid index
-    index = pd.MultiIndex.from_arrays(
-        [
-            [file] * 3,
-            pd.timedelta_range('0s', '2s', 3),
-            pd.timedelta_range('1s', '3s', 3),
-        ],
-        names=('file', 'start', 'end')
+    index = audformat.segmented_index(
+        [file] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
     )
     result = model.process_index(index)
     for (file, start, end), value in result.items():
@@ -255,10 +244,3 @@ def test_index(tmpdir):
             file, start=start, end=end
         )
         np.testing.assert_equal(signal, value)
-
-    # bad index
-    index = pd.MultiIndex(levels=[[], [], []],
-                          codes=[[], [], []],
-                          names=['no', 'aud', 'format'])
-    with pytest.raises(ValueError):
-        model.process_index(index)

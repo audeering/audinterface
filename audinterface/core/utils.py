@@ -4,15 +4,14 @@ import numpy as np
 import pandas as pd
 
 import audeer
+import audformat
 import audresample
 import audiofile as af
 
 from audinterface.core.typing import Timestamps
 
 
-def check_index(
-        index: pd.MultiIndex
-):
+def check_index(index: pd.Index):
     r"""Check if index is conform to audformat."""
     if len(index.levels) == 2:
         if not index.empty:
@@ -28,25 +27,8 @@ def check_index(
                 raise ValueError(f'Level 1 has type '
                                  f'{type(index.levels[1].dtype)}'
                                  f', expected timedelta64[ns].')
-    elif len(index.levels) == 3:
-        if not index.names == ('file', 'start', 'end'):
-            raise ValueError('Not a segmented index conform to audformat.')
-        if not index.empty:
-            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
-                    index.levels[1]
-            ):
-                raise ValueError(f'Level 1 has type '
-                                 f'{type(index.levels[1].dtype)}'
-                                 f', expected timedelta64[ns].')
-            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
-                    index.levels[2]
-            ):
-                raise ValueError(f'Level 2 has type '
-                                 f'{type(index.levels[2].dtype)}'
-                                 f', expected timedelta64[ns].')
     else:
-        raise ValueError(f'Index has {len(index.levels)} levels, '
-                         f'expected 2 or 3.')
+        audformat.assert_index(index)
 
 
 def preprocess_signal(
@@ -149,32 +131,6 @@ def segments_to_indices(
         starts_i[idx] = start_i
         ends_i[idx] = end_i
     return starts_i, ends_i
-
-
-def to_segmented_index(index: pd.Index) -> pd.MultiIndex:
-    r"""Converts index to segmented index.
-
-    Args:
-        index: frame with a file-wise or segmented index
-
-    Raises:
-        ValueError: If ``frame`` does not satisfy the
-            :ref:`table specifications <data-tables:Tables>`.
-
-    """
-    if index.nlevels == 1:
-        files = index.get_level_values(0)
-        starts = [pd.to_timedelta(0)] * len(files)
-        ends = pd.to_timedelta([pd.NaT] * len(files))
-        index = pd.MultiIndex.from_arrays(
-            [
-                files,
-                starts,
-                ends,
-            ],
-            names=['file', 'start', 'end'],
-        )
-    return index
 
 
 def to_timedelta(times: Timestamps):

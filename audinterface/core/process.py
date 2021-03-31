@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 import audeer
+import audformat
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
@@ -279,9 +280,7 @@ class Process:
 
         # Create index
         if file is not None:
-            index = pd.MultiIndex.from_tuples(
-                [(file, start, end)], names=['file', 'start', 'end']
-            )
+            index = audformat.segmented_index(file, start, end)
         else:
             index = pd.MultiIndex.from_tuples(
                 [(start, end)], names=['start', 'end']
@@ -312,7 +311,7 @@ class Process:
 
         """
 
-        index = utils.to_segmented_index(index)
+        index = audformat.utils.to_segmented_index(index)
         utils.check_index(index)
 
         if index.empty:
@@ -486,7 +485,7 @@ class Process:
 
         """
 
-        index = utils.to_segmented_index(index)
+        index = audformat.utils.to_segmented_index(index)
         utils.check_index(index)
 
         if index.empty:
@@ -634,7 +633,7 @@ class ProcessWithContext:
 
     def process_index(
             self,
-            index: pd.MultiIndex,
+            index: pd.Index,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
@@ -651,8 +650,7 @@ class ProcessWithContext:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        if not index.names == ('file', 'start', 'end'):
-            raise ValueError('Not a segmented index conform to audformat.')
+        index = audformat.utils.to_segmented_index(index)
 
         if index.empty:
             return pd.Series(index=index, dtype=float)
@@ -740,8 +738,7 @@ class ProcessWithContext:
             data-tables.html
 
         """
-        if not index.names == ('file', 'start', 'end'):
-            raise ValueError('Not a segmented index conform to Unified Format')
+        index = audformat.utils.to_segmented_index(index)
 
         if index.empty:
             return pd.Series(index=index, dtype=float)

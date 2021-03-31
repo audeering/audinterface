@@ -167,13 +167,13 @@ def test_index(tmpdir, num_workers, multiprocessing):
     pd.testing.assert_index_equal(result, expected)
 
     # filewise index
-    index = pd.Index([file] * 3, name='file')
+    index = pd.Index([file], name='file')
     result = segment.process_index(index)
     expected = pd.MultiIndex.from_arrays(
         [
-            [file] * 3,
-            [pd.to_timedelta('0.1s')] * 3,
-            [pd.to_timedelta('2.9s')] * 3,
+            [file],
+            [pd.to_timedelta('0.1s')],
+            [pd.to_timedelta('2.9s')],
         ],
         names=('file', 'start', 'end')
     )

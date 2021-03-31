@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 import audeer
+import audformat
 
 from audinterface.core.process import Process
 from audinterface.core.segment import Segment
@@ -207,9 +208,7 @@ class Feature:
             RuntimeError: if channel selection is invalid
 
         """
-        series = self.process.process_file(
-            file, start=start, end=end,
-        )
+        series = self.process.process_file(file, start=start, end=end)
         return self._series_to_frame(series)
 
     @audeer.deprecated_keyword_argument(
@@ -529,10 +528,7 @@ class Feature:
             )
         else:
             files = [file] * len(starts)
-            index = pd.MultiIndex.from_arrays(
-                [files, starts, ends],
-                names=['file', 'start', 'end'],
-            )
+            index = audformat.segmented_index(files, starts, ends)
 
         return pd.DataFrame(features, index, columns=self.column_names)
 
