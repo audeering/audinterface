@@ -13,7 +13,7 @@ from audinterface.core.typing import Timestamps
 
 def check_index(index: pd.Index):
     r"""Check if index is conform to audformat."""
-    if len(index.levels) == 2:
+    if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
         if not index.empty:
             if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
                     index.levels[0]

@@ -314,6 +314,68 @@ class Segment:
             )
         return index
 
+    def process_signal_from_index(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            index: pd.Index,
+    ) -> pd.Index:
+        r"""Segment parts of a signal.
+
+        Args:
+            signal: signal values
+            sampling_rate: sampling rate in Hz
+            index: a segmented index conform to audformat_
+                or a :class:`pandas.MultiIndex` with two levels
+                named `start` and `end` that hold start and end
+                positions as :class:`pandas.Timedelta` objects.
+
+        Returns:
+            Segmented index conform to audformat_
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        utils.check_index(index)
+
+        if index.empty:
+            return index
+
+        if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'start': start, 'end': end},
+                ) for start, end in index
+            ]
+        else:
+            index = audformat.utils.to_segmented_index(index)
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'file': file, 'start': start, 'end': end},
+                ) for file, start, end in index
+            ]
+
+        y = audeer.run_tasks(
+            self.process_signal,
+            params,
+            num_workers=self.process.num_workers,
+            multiprocessing=self.process.multiprocessing,
+            progress_bar=self.process.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
+
+        index = y[0]
+        for obj in y[1:]:
+            index = index.union(obj)
+
+        return index
+
     def __call__(
             self,
             signal: np.ndarray,

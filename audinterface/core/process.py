@@ -416,7 +416,8 @@ class Process:
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
-            index: a :class:`pandas.MultiIndex` with two levels
+            index: a segmented index conform to audformat_
+                or a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
 
@@ -435,20 +436,22 @@ class Process:
         if index.empty:
             return pd.Series(None, index=index, dtype=float)
 
-        if len(index.levels) == 3:
-            params = [
-                (
-                    (signal, sampling_rate),
-                    {'file': file, 'start': start, 'end': end},
-                ) for file, start, end in index
-            ]
-        else:
+        if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
             params = [
                 (
                     (signal, sampling_rate),
                     {'start': start, 'end': end},
                 ) for start, end in index
             ]
+        else:
+            index = audformat.utils.to_segmented_index(index)
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'file': file, 'start': start, 'end': end},
+                ) for file, start, end in index
+            ]
+
         y = audeer.run_tasks(
             self._process_signal,
             params,

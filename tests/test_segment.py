@@ -145,6 +145,8 @@ def test_index(tmpdir, num_workers, multiprocessing):
     )
     result = segment.process_index(index)
     assert result.empty
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
+    assert result.empty
 
     # segmented index
     index = pd.MultiIndex.from_arrays(
@@ -155,7 +157,6 @@ def test_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
-    result = segment.process_index(index)
     expected = pd.MultiIndex.from_arrays(
         [
             [file] * 3,
@@ -164,11 +165,31 @@ def test_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
+    result = segment.process_index(index)
+    pd.testing.assert_index_equal(result, expected)
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
+    pd.testing.assert_index_equal(result, expected)
+
+    # segmented index without file level
+    index = pd.MultiIndex.from_arrays(
+        [
+            pd.timedelta_range('0s', '2s', 3),
+            pd.timedelta_range('1s', '3s', 3),
+        ],
+        names=('start', 'end')
+    )
+    expected = pd.MultiIndex.from_arrays(
+        [
+            index.get_level_values('start') + pd.to_timedelta('0.1s'),
+            index.get_level_values('end') - pd.to_timedelta('0.1s'),
+        ],
+        names=('start', 'end')
+    )
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
     # filewise index
     index = pd.Index([file], name='file')
-    result = segment.process_index(index)
     expected = pd.MultiIndex.from_arrays(
         [
             [file],
@@ -177,6 +198,9 @@ def test_index(tmpdir, num_workers, multiprocessing):
         ],
         names=('file', 'start', 'end')
     )
+    result = segment.process_index(index)
+    pd.testing.assert_index_equal(result, expected)
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
 
