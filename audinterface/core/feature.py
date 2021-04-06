@@ -274,9 +274,6 @@ class Feature:
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
-
         Args:
             index: index with segment information
 
@@ -342,9 +339,6 @@ class Feature:
             index: pd.MultiIndex,
     ) -> pd.DataFrame:
         r"""Split a signal into segments and extract features for each segment.
-
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
 
         Args:
             signal: signal values

@@ -300,9 +300,6 @@ class Process:
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
 
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
-
         Args:
             index: index with segment information
 
@@ -318,7 +315,9 @@ class Process:
         """
 
         index = audformat.utils.to_segmented_index(index)
-        utils.check_index(index)
+
+        if self.segment is not None:
+            index = self.segment.process_index(index)
 
         if index.empty:
             return pd.Series(None, index=index, dtype=float)
@@ -410,9 +409,6 @@ class Process:
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
-
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
@@ -435,6 +431,13 @@ class Process:
 
         if index.empty:
             return pd.Series(None, index=index, dtype=float)
+
+        if self.segment is not None:
+            index = self.segment.process_signal_from_index(
+                signal,
+                sampling_rate,
+                index,
+            )
 
         if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
             params = [
