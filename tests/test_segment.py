@@ -3,45 +3,43 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import audeer
+import audformat
 import audinterface
 
 
+def create_index(starts, ends):
+    return pd.MultiIndex.from_arrays(
+        [
+            pd.to_timedelta(audeer.to_list(starts)),
+            pd.to_timedelta(audeer.to_list(ends)),
+        ],
+        names=['start', 'end'],
+    )
+
+
 SAMPLING_RATE = 8000
-SIGNAL = np.ones((10, SAMPLING_RATE))
+SIGNAL = np.ones((3, SAMPLING_RATE * 10))
+SIGNAL_DUR = pd.to_timedelta(SIGNAL.shape[-1] / SAMPLING_RATE, unit='s')
 STARTS = pd.timedelta_range('0s', '10s', 3)
 ENDS = STARTS + pd.to_timedelta('1s')
-INDEX = pd.MultiIndex.from_arrays(
-    [STARTS, ENDS],
-    names=['start', 'end']
-)
+INDEX = create_index(STARTS, ENDS)
 
 
 @pytest.mark.parametrize(
-    'signal,sampling_rate,segment_func,result',
+    'signal, sampling_rate, segment_func, result',
     [
         (
             SIGNAL,
             SAMPLING_RATE,
             None,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([])
-                ],
-                names=['start', 'end']
-            ),
+            create_index([], []),
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
             lambda x, sr: INDEX,
-            pd.MultiIndex.from_arrays(
-                [
-                    STARTS,
-                    ENDS
-                ],
-                names=['start', 'end'],
-            )
+            create_index(STARTS, ENDS),
         ),
     ]
 )
@@ -112,13 +110,7 @@ def test_index(tmpdir, num_workers, multiprocessing):
 
     def process_func(x, sr):
         dur = pd.to_timedelta(x.shape[-1] / sr, unit='s')
-        return pd.MultiIndex.from_arrays(
-            [
-                [pd.to_timedelta('0.1s')],
-                [dur - pd.to_timedelta('0.1s')],
-            ],
-            names=['start', 'end'],
-        )
+        return create_index('0.1s', dur - pd.to_timedelta('0.1s'))
 
     segment = audinterface.Segment(
         process_func=process_func,
@@ -135,35 +127,22 @@ def test_index(tmpdir, num_workers, multiprocessing):
     af.write(file, signal, sampling_rate)
 
     # empty index
-    index = pd.MultiIndex.from_arrays(
-        [
-            [],
-            pd.to_timedelta([]),
-            pd.to_timedelta([]),
-        ],
-        names=('file', 'start', 'end')
-    )
+    index = audformat.segmented_index()
     result = segment.process_index(index)
     assert result.empty
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     assert result.empty
 
     # segmented index
-    index = pd.MultiIndex.from_arrays(
-        [
-            [file] * 3,
-            pd.timedelta_range('0s', '2s', 3),
-            pd.timedelta_range('1s', '3s', 3),
-        ],
-        names=('file', 'start', 'end')
+    index = audformat.segmented_index(
+        [file] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
     )
-    expected = pd.MultiIndex.from_arrays(
-        [
-            [file] * 3,
-            index.get_level_values('start') + pd.to_timedelta('0.1s'),
-            index.get_level_values('end') - pd.to_timedelta('0.1s'),
-        ],
-        names=('file', 'start', 'end')
+    expected = audformat.segmented_index(
+        [file] * 3,
+        index.get_level_values('start') + pd.to_timedelta('0.1s'),
+        index.get_level_values('end') - pd.to_timedelta('0.1s'),
     )
     result = segment.process_index(index)
     pd.testing.assert_index_equal(result, expected)
@@ -171,33 +150,20 @@ def test_index(tmpdir, num_workers, multiprocessing):
     pd.testing.assert_index_equal(result, expected)
 
     # segmented index without file level
-    index = pd.MultiIndex.from_arrays(
-        [
-            pd.timedelta_range('0s', '2s', 3),
-            pd.timedelta_range('1s', '3s', 3),
-        ],
-        names=('start', 'end')
+    index = create_index(
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
     )
-    expected = pd.MultiIndex.from_arrays(
-        [
-            index.get_level_values('start') + pd.to_timedelta('0.1s'),
-            index.get_level_values('end') - pd.to_timedelta('0.1s'),
-        ],
-        names=('start', 'end')
+    expected = create_index(
+        index.get_level_values('start') + pd.to_timedelta('0.1s'),
+        index.get_level_values('end') - pd.to_timedelta('0.1s'),
     )
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
     # filewise index
     index = pd.Index([file], name='file')
-    expected = pd.MultiIndex.from_arrays(
-        [
-            [file],
-            [pd.to_timedelta('0.1s')],
-            [pd.to_timedelta('2.9s')],
-        ],
-        names=('file', 'start', 'end')
-    )
+    expected = audformat.segmented_index(file, '0.1s', '2.9s')
     result = segment.process_index(index)
     pd.testing.assert_index_equal(result, expected)
     result = segment.process_signal_from_index(signal, sampling_rate, index)
@@ -205,7 +171,75 @@ def test_index(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize(
-    'signal,sampling_rate,segment_func,start,end,result',
+    'signal, sampling_rate, segment_func, result',
+    [
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            None,
+            create_index(0, SIGNAL_DUR),
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(0, SIGNAL_DUR),
+            create_index([], []),
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(0, '1s'),
+            create_index('1s', SIGNAL_DUR)
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index('1s', SIGNAL_DUR),
+            create_index(0, '1s')
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(['1s', '4s'], ['2s', '5s']),
+            create_index([0, '2s', '5s'], ['1s', '4s', SIGNAL_DUR])
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(['4s', '1s'], ['5s', '2s']),
+            create_index([0, '2s', '5s'], ['1s', '4s', SIGNAL_DUR])
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(['1s', '2s'], ['5s', '4s']),
+            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(['2s', '1s'], ['4s', '5s']),
+            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+        ),
+        (
+            SIGNAL,
+            SAMPLING_RATE,
+            lambda x, sr: create_index(['2s', '1s'], ['5s', '4s']),
+            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+        ),
+    ]
+)
+def test_invert(signal, sampling_rate, segment_func, result):
+    model = audinterface.Segment(
+        process_func=segment_func,
+        invert=True,
+    )
+    index = model(signal, sampling_rate)
+    pd.testing.assert_index_equal(index, result)
+
+
+@pytest.mark.parametrize(
+    'signal, sampling_rate, segment_func, start, end, result',
     [
         (
             SIGNAL,
@@ -213,13 +247,7 @@ def test_index(tmpdir, num_workers, multiprocessing):
             None,
             None,
             None,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([])
-                ],
-                names=['start', 'end']
-            ),
+            create_index([], []),
         ),
         (
             SIGNAL,
@@ -227,13 +255,7 @@ def test_index(tmpdir, num_workers, multiprocessing):
             lambda x, sr: INDEX,
             None,
             None,
-            pd.MultiIndex.from_arrays(
-                [
-                    STARTS,
-                    ENDS
-                ],
-                names=['start', 'end'],
-            )
+            create_index(STARTS, ENDS)
         ),
         (
             SIGNAL,
@@ -241,12 +263,9 @@ def test_index(tmpdir, num_workers, multiprocessing):
             lambda x, sr: INDEX,
             pd.to_timedelta('1s'),
             pd.to_timedelta('10s'),
-            pd.MultiIndex.from_arrays(
-                [
-                    STARTS + pd.to_timedelta('1s'),
-                    ENDS + pd.to_timedelta('1s')
-                ],
-                names=['start', 'end'],
+            create_index(
+                STARTS + pd.to_timedelta('1s'),
+                ENDS + pd.to_timedelta('1s'),
             )
         ),
         pytest.param(

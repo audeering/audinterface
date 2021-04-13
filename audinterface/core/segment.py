@@ -14,6 +14,109 @@ from audinterface.core.typing import (
 )
 
 
+def create_process_func(
+        process_func: typing.Optional[typing.Callable[..., pd.MultiIndex]],
+        invert: bool,
+) -> typing.Callable[..., pd.MultiIndex]:
+    r"""Create processing function."""
+
+    if process_func is None:
+        def process_func(signal, sr, **kwargs):
+            return pd.MultiIndex.from_arrays(
+                [
+                    pd.to_timedelta([]),
+                    pd.to_timedelta([]),
+                ],
+                names=['start', 'end'],
+            )
+
+    if invert:
+        def process_func_invert(signal, sr, **kwargs):
+            index = process_func(signal, sr, **kwargs)
+            dur = pd.to_timedelta(signal.shape[-1] / sr, unit='s')
+            index = index.sortlevel('start')[0]
+            index = merge_index(index)
+            index = invert_index(index, dur)
+            return index
+        return process_func_invert
+    else:
+        return process_func
+
+
+def invert_index(
+        index: pd.MultiIndex,
+        dur: pd.Timedelta,
+) -> pd.MultiIndex:
+    r"""Invert index.
+
+    Assumes that index is sorted by 'start' level.
+
+    """
+    if index.empty:
+        return pd.MultiIndex.from_arrays(
+            [
+                [pd.to_timedelta(0)],
+                [dur],
+            ],
+            names=['start', 'end'],
+        )
+
+    starts = index.get_level_values('start')
+    ends = index.get_level_values('end')
+    new_starts = ends[:-1]
+    new_ends = starts[1:]
+    if starts[0] != pd.to_timedelta(0):
+        new_starts = new_starts.insert(0, pd.to_timedelta(0))
+        new_ends = new_ends.insert(0, starts[0])
+    if ends[-1] != dur:
+        new_starts = new_starts.insert(len(new_starts), ends[-1])
+        new_ends = new_ends.insert(len(new_ends), dur)
+    return pd.MultiIndex.from_arrays(
+        [
+            new_starts,
+            new_ends,
+        ],
+        names=['start', 'end'],
+    )
+
+
+def merge_index(
+        index: pd.MultiIndex,
+) -> pd.MultiIndex:
+    r"""Merge overlapping segments.
+
+    Assumes that index is sorted by 'start' level.
+
+    """
+    if index.empty:
+        return index
+
+    starts = index.get_level_values('start')
+    ends = index.get_level_values('end')
+    new_starts = []
+    new_ends = []
+    new_start = starts[0]
+    new_end = ends[0]
+    for start, end in zip(starts[1:], ends[1:]):
+        if start > new_end:
+            new_starts.append(new_start)
+            new_ends.append(new_end)
+            new_start = start
+            new_end = end
+        elif end > new_end:
+            new_end = end
+    new_starts.append(new_start)
+    new_ends.append(new_end)
+
+    return pd.MultiIndex.from_arrays(
+        [
+            new_starts,
+            new_ends,
+        ],
+        names=['start', 'end'],
+    )
+
+
 class Segment:
     r"""Segmentation interface.
 
@@ -28,6 +131,7 @@ class Segment:
             Must return a :class:`pandas.MultiIndex` with two levels
             named `start` and `end` that hold start and end
             positions as :class:`pandas.Timedelta` objects.
+        invert: Invert the segmentation
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
@@ -53,6 +157,7 @@ class Segment:
             self,
             *,
             process_func: typing.Callable[..., pd.MultiIndex] = None,
+            invert: bool = False,
             sampling_rate: int = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = None,
@@ -63,19 +168,13 @@ class Segment:
             verbose: bool = False,
             **kwargs,
     ):
-        if process_func is None:
-            def process_func(signal, sr, **kwargs):
-                return pd.MultiIndex.from_arrays(
-                    [
-                        pd.to_timedelta([]),
-                        pd.to_timedelta([]),
-                    ],
-                    names=['start', 'end'],
-                )
+        self.invert = invert
+        r"""Invert segmentation."""
+
         # avoid cycling imports
         from audinterface.core.process import Process
         self.process = Process(
-            process_func=process_func,
+            process_func=create_process_func(process_func, invert),
             sampling_rate=sampling_rate,
             resample=resample,
             channels=channels,
