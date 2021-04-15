@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.0 (2021-04-15)
+--------------------------
+
+* Added: ``invert`` argument to ``Segment``
+* Added: ``Segment.process_index()`` and ``Segment.process_signal_from_index()``
+* Changed: ``Process.process_index()`` and ``Process.process_signal_from_index()`` do not ignore segment object
+* Changed: ``Feature.process_index()`` and ``Feature.process_signal_from_index()`` do not ignore segment object
+
+
 Version 0.5.5 (2021-02-17)
 --------------------------
 
