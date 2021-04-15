@@ -364,10 +364,6 @@ class Feature:
         removal_version='0.8.0',
         alternative='process_index',
     )
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_unified_format_index(
             self,
             index: pd.Index,
@@ -387,9 +383,6 @@ class Feature:
 
         .. _`Unified Format`: http://tools.pp.audeering.com/audata/
              data-tables.html
-
-        .. _audata.util.to_segmented_frame: http://tools.pp.audeering.com/
-            audata/api-utils.html#to-segmented-frame
 
         """
         series = self.process.process_unified_format_index(index)
