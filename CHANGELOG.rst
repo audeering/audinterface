@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.1 (2021-04-16)
+--------------------------
+
+* Fixed: ``Process``, ``Feature``: do not apply segmentation twice when ``segment`` object is given
+
+
 Version 0.6.0 (2021-04-15)
 --------------------------
 
