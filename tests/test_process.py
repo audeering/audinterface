@@ -1,5 +1,6 @@
 import os
 
+import audiofile
 import audiofile as af
 import numpy as np
 import pandas as pd
@@ -25,7 +26,7 @@ SEGMENT = audinterface.Segment(
                     pd.to_timedelta(0),
                 ],
                 [
-                    pd.to_timedelta(x.shape[1] / sr, unit='sec'),
+                    pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
                 ],
             ],
             names=['start', 'end'],
@@ -314,7 +315,7 @@ def test_process_file(
     mixdown,
     expected_output,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=process_func,
         sampling_rate=sampling_rate,
         resample=False,
@@ -327,7 +328,7 @@ def test_process_file(
     path = str(tmpdir.mkdir('wav'))
     filename = f'{path}/channel.wav'
     af.write(filename, signal, sampling_rate)
-    output = model.process_file(
+    output = process.process_file(
         filename,
         start=start,
         end=end,
@@ -416,7 +417,7 @@ def test_process_files(
     ends,
     expected_output,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=process_func,
         sampling_rate=sampling_rate,
         resample=False,
@@ -427,7 +428,7 @@ def test_process_files(
         file = f'{tmpdir}/file{idx}.wav'
         af.write(file, signal, sampling_rate)
         files.append(file)
-    output = model.process_files(
+    output = process.process_files(
         files,
         starts=starts,
         ends=ends,
@@ -455,7 +456,7 @@ def test_process_folder(
         num_workers,
         multiprocessing,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=None,
         sampling_rate=None,
         resample=False,
@@ -472,18 +473,80 @@ def test_process_folder(
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)
-    result = model.process_folder(path)
-    rel_result = model.process_folder(rel_path)
+    result = process.process_folder(path)
+    rel_result = process.process_folder(rel_path)
     for idx, (index, values) in enumerate(result.iteritems()):
         file = index[0] if isinstance(index, tuple) else index
         assert file == files[idx]
         signal, sampling_rate = audinterface.utils.read_audio(file)
+        if segment is not None:
+            start, end = segment.process_signal(signal, sampling_rate)[0]
+            start_idx = int(start.total_seconds() * sampling_rate)
+            end_idx = int(end.total_seconds() * sampling_rate)
+            signal = signal[:, start_idx:end_idx]
         np.testing.assert_equal(values, signal)
     for idx, (index, values) in enumerate(rel_result.iteritems()):
         file = index[0] if isinstance(index, tuple) else index
         assert file == rel_files[idx]
         signal, sampling_rate = audinterface.utils.read_audio(file)
+        if segment is not None:
+            start, end = segment.process_signal(signal, sampling_rate)[0]
+            start_idx = int(start.total_seconds() * sampling_rate)
+            end_idx = int(end.total_seconds() * sampling_rate)
+            signal = signal[:, start_idx:end_idx]
         np.testing.assert_equal(values, signal)
+
+
+@pytest.mark.parametrize(
+    'num_workers, multiprocessing',
+    [
+        (1, False, ),
+        (2, False, ),
+        (None, False, ),
+    ]
+)
+def test_process_index(tmpdir, num_workers, multiprocessing):
+
+    process = audinterface.Process(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
+        verbose=False,
+    )
+    sampling_rate = 8000
+    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
+    path = str(tmpdir.mkdir('wav'))
+    file = f'{path}/file.wav'
+    af.write(file, signal, sampling_rate)
+
+    # empty index
+    index = audformat.segmented_index()
+    result = process.process_index(index)
+    assert result.empty
+
+    # segmented index
+    index = audformat.segmented_index(
+        [file] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    result = process.process_index(index)
+    for (file, start, end), value in result.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
+
+    # filewise index
+    index = audformat.filewise_index(file)
+    result = process.process_index(index)
+    for (file, start, end), value in result.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
 
 
 @pytest.mark.parametrize(
@@ -518,25 +581,25 @@ def test_process_folder(
             None,
             {},
             SEGMENT,
-            np.array([1., 2., 3.]),
+            np.array([1., 2., 3., 4.]),
             44100,
             None,
             None,
             None,
             False,
-            np.array([1., 2., 3.]),
+            np.array([1., 2.]),
         ),
         (
             None,
             {},
             SEGMENT,
-            np.array([1., 2., 3.]),
+            np.array([1., 2., 3., 4.]),
             44100,
             'file',
             None,
             None,
             False,
-            np.array([1., 2., 3.]),
+            np.array([1., 2.]),
         ),
         (
             signal_max,
@@ -720,7 +783,7 @@ def test_process_signal(
         keep_nat,
         expected_signal,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=process_func,
         sampling_rate=None,
         resample=False,
@@ -729,7 +792,7 @@ def test_process_signal(
         verbose=False,
         **process_func_kwargs,
     )
-    x = model.process_signal(
+    x = process.process_signal(
         signal,
         sampling_rate,
         file=file,
@@ -752,6 +815,17 @@ def test_process_signal(
         end = pd.to_timedelta(end, 's')
     elif isinstance(end, str):
         end = pd.to_timedelta(end)
+
+    if segment is not None:
+        index = segment.process_signal(
+            signal,
+            sampling_rate,
+            start=start,
+            end=end,
+        )
+        start = index[0][0]
+        end = index[0][1]
+
     if file is None:
         y = pd.Series(
             [expected_signal],
@@ -871,7 +945,7 @@ def test_process_signal_from_index(
         sampling_rate,
         index,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=process_func,
         sampling_rate=None,
         resample=False,
@@ -879,11 +953,11 @@ def test_process_signal_from_index(
         multiprocessing=multiprocessing,
         verbose=False,
     )
-    result = model.process_signal_from_index(signal, sampling_rate, index)
+    result = process.process_signal_from_index(signal, sampling_rate, index)
     expected = []
     for start, end in index:
         expected.append(
-            model.process_signal(signal, sampling_rate, start=start, end=end)
+            process.process_signal(signal, sampling_rate, start=start, end=end)
         )
     if not expected:
         pd.testing.assert_series_equal(
@@ -895,6 +969,107 @@ def test_process_signal_from_index(
             result,
             pd.concat(expected, names=['start', 'end']),
         )
+
+
+@pytest.mark.parametrize(
+    'segment',
+    [
+        audinterface.Segment(
+            process_func=lambda x, sr:
+                pd.MultiIndex.from_arrays(
+                    [pd.to_timedelta([]), pd.to_timedelta([])],
+                    names=['start', 'end'],
+                )
+        ),
+        audinterface.Segment(
+            process_func=lambda x, sr:
+                pd.MultiIndex.from_arrays(
+                    [
+                        [
+                            pd.to_timedelta(0),
+                        ],
+                        [
+                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                        ],
+                    ],
+                    names=['start', 'end'],
+                )
+        ),
+        audinterface.Segment(
+            process_func=lambda x, sr:
+            pd.MultiIndex.from_arrays(
+                [
+                    [
+                        pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                    ],
+                    [
+                        pd.to_timedelta(x.shape[1] / sr, unit='sec'),
+                    ],
+                ],
+                names=['start', 'end'],
+            )
+        ),
+        audinterface.Segment(
+            process_func=lambda x, sr:
+                pd.MultiIndex.from_arrays(
+                    [
+                        [
+                            pd.to_timedelta(0),
+                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                        ],
+                        [
+                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                            pd.to_timedelta(x.shape[1] / sr),
+                        ],
+                    ],
+                    names=['start', 'end'],
+                )
+        )
+    ]
+)
+def test_process_with_segment(tmpdir, segment):
+
+    sampling_rate = 8000
+    signal = np.zeros((1, sampling_rate))
+    file = os.path.join(tmpdir, 'file.wav')
+    audiofile.write(file, signal, sampling_rate)
+
+    process = audinterface.Process()
+    process_with_segment = audinterface.Process(
+        segment=segment,
+    )
+
+    index = segment.process_signal(signal, sampling_rate, file=file)
+    pd.testing.assert_series_equal(
+        process.process_index(index),
+        process_with_segment.process_signal(signal, sampling_rate, file=file)
+    )
+
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audformat.filewise_index(file),
+    )
+    pd.testing.assert_series_equal(
+        process.process_index(index),
+        process_with_segment.process_signal_from_index(
+            signal,
+            sampling_rate,
+            audformat.filewise_index(file),
+        )
+    )
+
+    index = segment.process_file(file)
+    pd.testing.assert_series_equal(
+        process.process_index(index),
+        process_with_segment.process_file(file)
+    )
+
+    index = segment.process_index(audformat.filewise_index(file))
+    pd.testing.assert_series_equal(
+        process.process_index(index),
+        process_with_segment.process_index(audformat.filewise_index(file))
+    )
 
 
 def test_read_audio(tmpdir):
@@ -949,63 +1124,11 @@ def test_sampling_rate_mismatch(
         model_sampling_rate,
         resample,
 ):
-    model = audinterface.Process(
+    process = audinterface.Process(
         process_func=None,
         sampling_rate=model_sampling_rate,
         resample=resample,
         verbose=False,
     )
     signal = np.array([1., 2., 3.])
-    model.process_signal(signal, signal_sampling_rate)
-
-
-@pytest.mark.parametrize(
-    'num_workers, multiprocessing',
-    [
-        (1, False, ),
-        (2, False, ),
-        (None, False, ),
-    ]
-)
-def test_index(tmpdir, num_workers, multiprocessing):
-
-    model = audinterface.Process(
-        process_func=None,
-        sampling_rate=None,
-        resample=False,
-        num_workers=num_workers,
-        multiprocessing=multiprocessing,
-        verbose=False,
-    )
-    sampling_rate = 8000
-    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, signal, sampling_rate)
-
-    # empty index
-    index = audformat.segmented_index()
-    result = model.process_index(index)
-    assert result.empty
-
-    # segmented index
-    index = audformat.segmented_index(
-        [file] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
-    )
-    result = model.process_index(index)
-    for (file, start, end), value in result.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end
-        )
-        np.testing.assert_equal(signal, value)
-
-    # filewise index
-    index = audformat.filewise_index(file)
-    result = model.process_index(index)
-    for (file, start, end), value in result.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end
-        )
-        np.testing.assert_equal(signal, value)
+    process.process_signal(signal, signal_sampling_rate)

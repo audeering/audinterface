@@ -160,7 +160,7 @@ class Process:
         end = utils.to_timedelta(end)
         if self.segment is not None:
             index = self.segment.process_file(file, start=start, end=end)
-            return self.process_index(index)
+            return self._process_index_wo_segment(index)
         else:
             return self._process_file(file, start=start, end=end)
 
@@ -258,6 +258,61 @@ class Process:
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
 
+    def _process_index_wo_segment(
+            self,
+            index: pd.Index,
+    ) -> pd.Series:
+        r"""Like process_index, but does not apply segmentation."""
+        if index.empty:
+            return pd.Series(None, index=index, dtype=float)
+
+        params = [
+            (
+                (file, ),
+                {
+                    'start': start,
+                    'end': end,
+                },
+            )
+            for file, start, end in index
+        ]
+        y = audeer.run_tasks(
+            self._process_file,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
+
+        return pd.concat(y)
+
+    def process_index(
+            self,
+            index: pd.Index,
+    ) -> pd.Series:
+        r"""Process from an index conform to audformat_.
+
+        Args:
+            index: index with segment information
+
+        Returns:
+            Series with processed segments conform to audformat_
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        index = audformat.utils.to_segmented_index(index)
+
+        if self.segment is not None:
+            index = self.segment.process_index(index)
+
+        return self._process_index_wo_segment(index)
+
     def _process_signal(
             self,
             signal: np.ndarray,
@@ -293,55 +348,6 @@ class Process:
             )
 
         return pd.Series([y], index)
-
-    def process_index(
-            self,
-            index: pd.Index,
-    ) -> pd.Series:
-        r"""Process from an index conform to audformat_.
-
-        Args:
-            index: index with segment information
-
-        Returns:
-            Series with processed segments conform to audformat_
-
-        Raises:
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-
-        .. _audformat: https://audeering.github.io/audformat/data-format.html
-
-        """
-
-        index = audformat.utils.to_segmented_index(index)
-
-        if self.segment is not None:
-            index = self.segment.process_index(index)
-
-        if index.empty:
-            return pd.Series(None, index=index, dtype=float)
-
-        params = [
-            (
-                (file, ),
-                {
-                    'start': start,
-                    'end': end,
-                },
-            )
-            for file, start, end in index
-        ]
-        y = audeer.run_tasks(
-            self._process_file,
-            params,
-            num_workers=self.num_workers,
-            multiprocessing=self.multiprocessing,
-            progress_bar=self.verbose,
-            task_description=f'Process {len(index)} segments',
-        )
-
-        return pd.concat(y)
 
     def process_signal(
             self,
@@ -387,7 +393,7 @@ class Process:
                 start=start,
                 end=end,
             )
-            return self.process_signal_from_index(
+            return self._process_signal_from_index_wo_segment(
                 signal,
                 sampling_rate,
                 index,
@@ -401,11 +407,49 @@ class Process:
                 end=end,
             )
 
+    def _process_signal_from_index_wo_segment(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            index: pd.Index,
+    ) -> pd.Series:
+        r"""Like process_signal_from_index, but does not apply segmentation."""
+
+        if index.empty:
+            return pd.Series(None, index=index, dtype=float)
+
+        if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'start': start, 'end': end},
+                ) for start, end in index
+            ]
+        else:
+            index = audformat.utils.to_segmented_index(index)
+            params = [
+                (
+                    (signal, sampling_rate),
+                    {'file': file, 'start': start, 'end': end},
+                ) for file, start, end in index
+            ]
+
+        y = audeer.run_tasks(
+            self._process_signal,
+            params,
+            num_workers=self.num_workers,
+            multiprocessing=self.multiprocessing,
+            progress_bar=self.verbose,
+            task_description=f'Process {len(index)} segments',
+        )
+
+        return pd.concat(y)
+
     def process_signal_from_index(
             self,
             signal: np.ndarray,
             sampling_rate: int,
-            index: pd.MultiIndex,
+            index: pd.Index,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -439,32 +483,11 @@ class Process:
                 index,
             )
 
-        if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
-            params = [
-                (
-                    (signal, sampling_rate),
-                    {'start': start, 'end': end},
-                ) for start, end in index
-            ]
-        else:
-            index = audformat.utils.to_segmented_index(index)
-            params = [
-                (
-                    (signal, sampling_rate),
-                    {'file': file, 'start': start, 'end': end},
-                ) for file, start, end in index
-            ]
-
-        y = audeer.run_tasks(
-            self._process_signal,
-            params,
-            num_workers=self.num_workers,
-            multiprocessing=self.multiprocessing,
-            progress_bar=self.verbose,
-            task_description=f'Process {len(index)} segments',
+        return self._process_signal_from_index_wo_segment(
+            signal,
+            sampling_rate,
+            index,
         )
-
-        return pd.concat(y)
 
     @audeer.deprecated(
         removal_version='0.8.0',
@@ -691,7 +714,7 @@ class ProcessWithContext:
             self,
             signal: np.ndarray,
             sampling_rate: int,
-            index: pd.MultiIndex,
+            index: pd.Index,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
