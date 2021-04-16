@@ -187,10 +187,6 @@ class Segment:
         )
         r"""Processing object."""
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_file(
             self,
             file: str,
@@ -234,10 +230,6 @@ class Segment:
             names=['file', 'start', 'end'],
         )
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_files(
             self,
             files: typing.Sequence[str],
@@ -286,10 +278,6 @@ class Segment:
             )
         return audformat.utils.union(objs)
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_folder(
             self,
             root: str,

@@ -86,12 +86,6 @@ class Feature:
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     """
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='num_channels',
-        removal_version='0.6.0',
-        new_argument='channels',
-        mapping=lambda x: range(x),
-    )
     def __init__(
             self,
             feature_names: typing.Sequence[str],
@@ -183,10 +177,6 @@ class Feature:
         self.verbose = verbose
         r"""Show debug messages."""
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_file(
             self,
             file: str,
@@ -211,10 +201,6 @@ class Feature:
         series = self.process.process_file(file, start=start, end=end)
         return self._series_to_frame(series)
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_files(
             self,
             files: typing.Sequence[str],
@@ -241,10 +227,6 @@ class Feature:
         series = self.process.process_files(files, starts=starts, ends=ends)
         return self._series_to_frame(series)
 
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='channel',
-        removal_version='0.6.0',
-    )
     def process_folder(
             self,
             root: str,
