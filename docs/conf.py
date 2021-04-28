@@ -53,6 +53,7 @@ html_theme = 'sphinx_audeering_theme'
 html_theme_options = {
     'display_version': True,
     'logo_only': False,
+    'footer_links': False,
 }
 html_context = {
     'display_github': True,
