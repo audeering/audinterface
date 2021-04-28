@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.2 (2021-04-28)
+--------------------------
+
+* Added: open source release on Github
+* Changed: switch to MIT license
+
+
 Version 0.6.1 (2021-04-16)
 --------------------------
 
