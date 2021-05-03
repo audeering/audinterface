@@ -32,9 +32,11 @@ jobs:
         python setup.py sdist bdist_wheel
         python -m twine upload dist/*
 
-    # Docuemntation
+    # Documentation
     - name: Install doc dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes libsndfile1 sox
         pip install -r requirements.txt
         pip install -r docs/requirements.txt
 
