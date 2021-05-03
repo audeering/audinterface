@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.3 (2021-05-03)
+--------------------------
+
+* Fixed: empty API section in documentation
+
+
 Version 0.6.2 (2021-04-28)
 --------------------------
 
