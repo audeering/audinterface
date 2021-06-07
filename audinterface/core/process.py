@@ -317,9 +317,7 @@ class Process:
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
         if end is None or (pd.isna(end) and not self.keep_nat):
-            end = pd.to_timedelta(
-                signal.shape[-1] / sampling_rate, unit='sec'
-            )
+            end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
         start_i, end_i = utils.segment_to_indices(
             signal, sampling_rate, start, end,
         )
