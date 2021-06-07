@@ -29,7 +29,7 @@ SEGMENT = audinterface.Segment(
                     pd.to_timedelta(0),
                 ],
                 [
-                    pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                 ],
             ],
             names=['start', 'end'],
@@ -181,7 +181,7 @@ def test_process_file(tmpdir, start, end, segment):
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     if end is None or pd.isna(end):
-        end = pd.to_timedelta(af.duration(file), unit='sec')
+        end = pd.to_timedelta(af.duration(file), unit='s')
 
     if segment is not None:
         index = segment.process_file(file)

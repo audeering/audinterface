@@ -26,7 +26,7 @@ SEGMENT = audinterface.Segment(
                     pd.to_timedelta(0),
                 ],
                 [
-                    pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                 ],
             ],
             names=['start', 'end'],
@@ -989,7 +989,7 @@ def test_process_signal_from_index(
                             pd.to_timedelta(0),
                         ],
                         [
-                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                         ],
                     ],
                     names=['start', 'end'],
@@ -1000,10 +1000,10 @@ def test_process_signal_from_index(
             pd.MultiIndex.from_arrays(
                 [
                     [
-                        pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                     ],
                     [
-                        pd.to_timedelta(x.shape[1] / sr, unit='sec'),
+                        pd.to_timedelta(x.shape[1] / sr, unit='s'),
                     ],
                 ],
                 names=['start', 'end'],
@@ -1015,10 +1015,10 @@ def test_process_signal_from_index(
                     [
                         [
                             pd.to_timedelta(0),
-                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                         ],
                         [
-                            pd.to_timedelta(x.shape[1] / sr, unit='sec') / 2,
+                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                             pd.to_timedelta(x.shape[1] / sr),
                         ],
                     ],
