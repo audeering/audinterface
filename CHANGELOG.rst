@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.4 (2021-06-07)
+--------------------------
+
+* Fixed: avoid using 'sec' as unit in ``pd.to_timedelta()`` for backward compatibility
+
+
 Version 0.6.3 (2021-05-03)
 --------------------------
 
