@@ -7,6 +7,12 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.5 (2021-06-08)
+--------------------------
+
+* Added: ``root`` argument to all functions processing file input
+
+
 Version 0.6.4 (2021-06-07)
 --------------------------
 
