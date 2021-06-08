@@ -325,16 +325,32 @@ def test_process_file(
         keep_nat=keep_nat,
         verbose=False,
     )
-    path = str(tmpdir.mkdir('wav'))
-    filename = f'{path}/channel.wav'
-    af.write(filename, signal, sampling_rate)
-    output = process.process_file(
-        filename,
+
+    # create test file
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, signal, sampling_rate)
+
+    # test absolute path
+    y = process.process_file(
+        path,
         start=start,
         end=end,
     )
     np.testing.assert_almost_equal(
-        output.values, expected_output, decimal=4,
+        y.values, expected_output, decimal=4,
+    )
+
+    # test relative path
+    y = process.process_file(
+        file,
+        start=start,
+        end=end,
+        root=root,
+    )
+    np.testing.assert_almost_equal(
+        y.values, expected_output, decimal=4,
     )
 
 
@@ -423,15 +439,36 @@ def test_process_files(
         resample=False,
         verbose=False,
     )
+
+    # create files
     files = []
+    paths = []
+    root = tmpdir
     for idx in range(num_files):
-        file = f'{tmpdir}/file{idx}.wav'
-        af.write(file, signal, sampling_rate)
+        file = f'file{idx}.wav'
+        path = os.path.join(root, file)
+        af.write(path, signal, sampling_rate)
         files.append(file)
+        paths.append(path)
+
+    # test absolute paths
+    output = process.process_files(
+        paths,
+        starts=starts,
+        ends=ends,
+    )
+    np.testing.assert_almost_equal(
+        output.values,
+        expected_output,
+        decimal=4,
+    )
+
+    # test relative paths
     output = process.process_files(
         files,
         starts=starts,
         ends=ends,
+        root=root,
     )
     np.testing.assert_almost_equal(
         output.values,
@@ -517,34 +554,59 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
     )
     sampling_rate = 8000
     signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, signal, sampling_rate)
+
+    # create file
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, signal, sampling_rate)
 
     # empty index
     index = audformat.segmented_index()
-    result = process.process_index(index)
-    assert result.empty
+    y = process.process_index(index)
+    assert y.empty
 
-    # segmented index
+    # segmented index with absolute paths
+    index = audformat.segmented_index(
+        [path] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    y = process.process_index(index)
+    for (path, start, end), value in y.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            path, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
+
+    # filewise index with absolute paths
+    index = audformat.filewise_index(path)
+    y = process.process_index(index)
+    for (path, start, end), value in y.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            path, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
+
+    # segmented index with relative paths
     index = audformat.segmented_index(
         [file] * 3,
         pd.timedelta_range('0s', '2s', 3),
         pd.timedelta_range('1s', '3s', 3),
     )
-    result = process.process_index(index)
-    for (file, start, end), value in result.items():
+    y = process.process_index(index, root=root)
+    for (file, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end
+            file, start=start, end=end, root=root
         )
         np.testing.assert_equal(signal, value)
 
-    # filewise index
-    index = audformat.filewise_index(file)
-    result = process.process_index(index)
-    for (file, start, end), value in result.items():
+    # filewise index with relative paths
+    index = audformat.filewise_index(path)
+    y = process.process_index(index, root=root)
+    for (file, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end
+            file, start=start, end=end, root=root
         )
         np.testing.assert_equal(signal, value)
 
@@ -1029,29 +1091,40 @@ def test_process_signal_from_index(
 )
 def test_process_with_segment(tmpdir, segment):
 
-    sampling_rate = 8000
-    signal = np.zeros((1, sampling_rate))
-    file = os.path.join(tmpdir, 'file.wav')
-    audiofile.write(file, signal, sampling_rate)
-
     process = audinterface.Process()
     process_with_segment = audinterface.Process(
         segment=segment,
     )
 
-    index = segment.process_signal(signal, sampling_rate, file=file)
-    pd.testing.assert_series_equal(
-        process.process_index(index),
-        process_with_segment.process_signal(signal, sampling_rate, file=file)
-    )
+    # create signal and file
+    sampling_rate = 8000
+    signal = np.zeros((1, sampling_rate))
+    root = tmpdir
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    audiofile.write(path, signal, sampling_rate)
 
+    # process signal
+    index = segment.process_signal(
+        signal,
+        sampling_rate,
+        file=file,
+    )
+    pd.testing.assert_series_equal(
+        process.process_index(index, root=root),
+        process_with_segment.process_signal(
+            signal,
+            sampling_rate,
+            file=file,
+        )
+    )
     index = segment.process_signal_from_index(
         signal,
         sampling_rate,
         audformat.filewise_index(file),
     )
     pd.testing.assert_series_equal(
-        process.process_index(index),
+        process.process_index(index, root=root),
         process_with_segment.process_signal_from_index(
             signal,
             sampling_rate,
@@ -1059,16 +1132,22 @@ def test_process_with_segment(tmpdir, segment):
         )
     )
 
-    index = segment.process_file(file)
+    # process file
+    index = segment.process_file(file, root=root)
     pd.testing.assert_series_equal(
-        process.process_index(index),
-        process_with_segment.process_file(file)
+        process.process_index(index, root=root),
+        process_with_segment.process_file(file, root=root)
     )
-
-    index = segment.process_index(audformat.filewise_index(file))
+    index = segment.process_index(
+        audformat.filewise_index(file),
+        root=root,
+    )
     pd.testing.assert_series_equal(
-        process.process_index(index),
-        process_with_segment.process_index(audformat.filewise_index(file))
+        process.process_index(index, root=root),
+        process_with_segment.process_index(
+            audformat.filewise_index(file),
+            root=root,
+        )
     )
 
 

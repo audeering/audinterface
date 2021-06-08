@@ -1,3 +1,4 @@
+import os
 import typing
 
 import numpy as np
@@ -65,22 +66,28 @@ def preprocess_signal(
 
 
 def read_audio(
-        path: str,
+        file: str,
+        *,
         start: pd.Timedelta = None,
         end: pd.Timedelta = None,
+        root: str = None,
 ) -> typing.Tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
     Args:
-        path: path to audio file
+        file: path to audio file
         start: read from this position
         end: read until this position
+        root: root folder
 
     Returns:
         signal: array with signal values in shape ``(channels, samples)``
         sampling_rate: sampling rate in Hz
 
     """
+    if root is not None and not os.path.isabs(file):
+        file = os.path.join(root, file)
+
     if start is None or pd.isna(start):
         offset = 0
     else:
@@ -92,7 +99,7 @@ def read_audio(
         duration = end.total_seconds() - offset
 
     signal, sampling_rate = af.read(
-        audeer.safe_path(path),
+        audeer.safe_path(file),
         always_2d=True,
         offset=offset,
         duration=duration,
