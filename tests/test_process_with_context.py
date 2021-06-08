@@ -1,10 +1,13 @@
-import audiofile as af
+
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
 
-import audinterface
 import audformat
+import audinterface
+import audiofile as af
 
 
 def signal_max(signal, sampling_rate):
@@ -16,6 +19,58 @@ def signal_max_with_context(signal, sampling_rate, starts, ends):
     for idx, (start, end) in enumerate(zip(starts, ends)):
         result[idx] = signal_max(signal[:, start:end], sampling_rate)
     return result
+
+
+def test_process_index(tmpdir):
+
+    process = audinterface.ProcessWithContext(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        verbose=False,
+    )
+
+    # empty
+
+    index = audformat.segmented_index()
+    result = process.process_index(index)
+    assert result.empty
+
+    # non-empty
+
+    # create file
+    sampling_rate = 8000
+    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, signal, sampling_rate)
+
+    # absolute paths
+    index = audformat.segmented_index(
+        [path] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    result = process.process_index(index)
+    for (path, start, end), value in result.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            path, start=start, end=end
+        )
+        np.testing.assert_equal(signal, value)
+
+    # relative paths
+    index = audformat.segmented_index(
+        [file] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    result = process.process_index(index, root=root)
+    for (file, start, end), value in result.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(signal, value)
 
 
 @pytest.mark.parametrize(
@@ -210,37 +265,3 @@ def test_sampling_rate_mismatch(
         names=['start', 'end']
     )
     model.process_signal_from_index(signal, signal_sampling_rate, index)
-
-
-def test_index(tmpdir):
-
-    model = audinterface.ProcessWithContext(
-        process_func=None,
-        sampling_rate=None,
-        resample=False,
-        verbose=False,
-    )
-
-    sampling_rate = 8000
-    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, signal, sampling_rate)
-
-    # empty index
-    index = audformat.segmented_index()
-    result = model.process_index(index)
-    assert result.empty
-
-    # valid index
-    index = audformat.segmented_index(
-        [file] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
-    )
-    result = model.process_index(index)
-    for (file, start, end), value in result.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end
-        )
-        np.testing.assert_equal(signal, value)

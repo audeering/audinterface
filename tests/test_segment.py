@@ -1,4 +1,5 @@
-import audiofile as af
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -6,6 +7,7 @@ import pytest
 import audeer
 import audformat
 import audinterface
+import audiofile as af
 
 
 def create_index(starts, ends):
@@ -52,20 +54,35 @@ def test_call(signal, sampling_rate, segment_func, result):
 
 
 def test_file(tmpdir):
-    model = audinterface.Segment(
+    segment = audinterface.Segment(
         process_func=lambda s, sr: INDEX,
         sampling_rate=None,
         resample=False,
         verbose=False,
     )
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, SIGNAL, SAMPLING_RATE)
-    result = model.process_file(file)
+
+    # create test file
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, SIGNAL, SAMPLING_RATE)
+
+    # test absolute path
+    result = segment.process_file(path)
+    assert all(result.levels[0] == path)
+    assert all(result.levels[1] == INDEX.levels[0])
+    assert all(result.levels[2] == INDEX.levels[1])
+    result = segment.process_file(path, start=pd.to_timedelta('1s'))
+    assert all(result.levels[0] == path)
+    assert all(result.levels[1] == INDEX.levels[0] + pd.to_timedelta('1s'))
+    assert all(result.levels[2] == INDEX.levels[1] + pd.to_timedelta('1s'))
+
+    # test relative path
+    result = segment.process_file(file, root=root)
     assert all(result.levels[0] == file)
     assert all(result.levels[1] == INDEX.levels[0])
     assert all(result.levels[2] == INDEX.levels[1])
-    result = model.process_file(file, start=pd.to_timedelta('1s'))
+    result = segment.process_file(file, root=root, start=pd.to_timedelta('1s'))
     assert all(result.levels[0] == file)
     assert all(result.levels[1] == INDEX.levels[0] + pd.to_timedelta('1s'))
     assert all(result.levels[2] == INDEX.levels[1] + pd.to_timedelta('1s'))
@@ -120,11 +137,14 @@ def test_index(tmpdir, num_workers, multiprocessing):
         multiprocessing=multiprocessing,
         verbose=False,
     )
+
+    # create signal and file
     sampling_rate = 8000
     signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, signal, sampling_rate)
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, signal, sampling_rate)
 
     # empty index
     index = audformat.segmented_index()
@@ -132,22 +152,6 @@ def test_index(tmpdir, num_workers, multiprocessing):
     assert result.empty
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     assert result.empty
-
-    # segmented index
-    index = audformat.segmented_index(
-        [file] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
-    )
-    expected = audformat.segmented_index(
-        [file] * 3,
-        index.get_level_values('start') + pd.to_timedelta('0.1s'),
-        index.get_level_values('end') - pd.to_timedelta('0.1s'),
-    )
-    result = segment.process_index(index)
-    pd.testing.assert_index_equal(result, expected)
-    result = segment.process_signal_from_index(signal, sampling_rate, index)
-    pd.testing.assert_index_equal(result, expected)
 
     # segmented index without file level
     index = create_index(
@@ -161,10 +165,50 @@ def test_index(tmpdir, num_workers, multiprocessing):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
-    # filewise index
+    # segmented index with absolute paths
+    index = audformat.segmented_index(
+        [path] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    expected = audformat.segmented_index(
+        [path] * 3,
+        index.get_level_values('start') + pd.to_timedelta('0.1s'),
+        index.get_level_values('end') - pd.to_timedelta('0.1s'),
+    )
+    result = segment.process_index(index)
+    pd.testing.assert_index_equal(result, expected)
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
+    pd.testing.assert_index_equal(result, expected)
+
+    # filewise index with absolute paths
+    index = pd.Index([path], name='file')
+    expected = audformat.segmented_index(path, '0.1s', '2.9s')
+    result = segment.process_index(index)
+    pd.testing.assert_index_equal(result, expected)
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
+    pd.testing.assert_index_equal(result, expected)
+
+    # segmented index with relative paths
+    index = audformat.segmented_index(
+        [file] * 3,
+        pd.timedelta_range('0s', '2s', 3),
+        pd.timedelta_range('1s', '3s', 3),
+    )
+    expected = audformat.segmented_index(
+        [file] * 3,
+        index.get_level_values('start') + pd.to_timedelta('0.1s'),
+        index.get_level_values('end') - pd.to_timedelta('0.1s'),
+    )
+    result = segment.process_index(index, root=root)
+    pd.testing.assert_index_equal(result, expected)
+    result = segment.process_signal_from_index(signal, sampling_rate, index)
+    pd.testing.assert_index_equal(result, expected)
+
+    # filewise index with relative paths
     index = pd.Index([file], name='file')
     expected = audformat.segmented_index(file, '0.1s', '2.9s')
-    result = segment.process_index(index)
+    result = segment.process_index(index, root=root)
     pd.testing.assert_index_equal(result, expected)
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)

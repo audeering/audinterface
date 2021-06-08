@@ -104,12 +104,14 @@ class Process:
             *,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
+            root: str = None,
     ) -> pd.Series:
 
         signal, sampling_rate = utils.read_audio(
             file,
             start=start,
             end=end,
+            root=root,
         )
         y = self._process_signal(
             signal,
@@ -132,6 +134,7 @@ class Process:
             *,
             start: Timestamp = None,
             end: Timestamp = None,
+            root: str = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
@@ -141,6 +144,7 @@ class Process:
                 If value is as a float or integer it is treated as seconds
             end: end processing at this position.
                 If value is as a float or integer it is treated as seconds
+            root: root folder to expand relative file path
 
         Returns:
             Series with processed file conform to audformat_
@@ -155,10 +159,15 @@ class Process:
         start = utils.to_timedelta(start)
         end = utils.to_timedelta(end)
         if self.segment is not None:
-            index = self.segment.process_file(file, start=start, end=end)
-            return self._process_index_wo_segment(index)
+            index = self.segment.process_file(
+                file,
+                start=start,
+                end=end,
+                root=root,
+            )
+            return self._process_index_wo_segment(index, root)
         else:
-            return self._process_file(file, start=start, end=end)
+            return self._process_file(file, start=start, end=end, root=root)
 
     def process_files(
             self,
@@ -166,6 +175,7 @@ class Process:
             *,
             starts: Timestamps = None,
             ends: Timestamps = None,
+            root: str = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
@@ -177,6 +187,7 @@ class Process:
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
                 If a scalar is given, it is applied to all files
+            root: root folder to expand relative file paths
 
         Returns:
             Series with processed files conform to audformat_
@@ -202,6 +213,7 @@ class Process:
                 {
                     'start': start,
                     'end': end,
+                    'root': root,
                 },
             ) for file, start, end in zip(files, starts, ends)
         ]
@@ -249,6 +261,7 @@ class Process:
     def _process_index_wo_segment(
             self,
             index: pd.Index,
+            root: typing.Optional[str],
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
@@ -260,6 +273,7 @@ class Process:
                 {
                     'start': start,
                     'end': end,
+                    'root': root,
                 },
             )
             for file, start, end in index
@@ -278,11 +292,14 @@ class Process:
     def process_index(
             self,
             index: pd.Index,
+            *,
+            root: str = None,
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
 
         Args:
             index: index with segment information
+            root: root folder to expand relative file paths
 
         Returns:
             Series with processed segments conform to audformat_
@@ -297,9 +314,9 @@ class Process:
         index = audformat.utils.to_segmented_index(index)
 
         if self.segment is not None:
-            index = self.segment.process_index(index)
+            index = self.segment.process_index(index, root=root)
 
-        return self._process_index_wo_segment(index)
+        return self._process_index_wo_segment(index, root)
 
     def _process_signal(
             self,
@@ -652,11 +669,14 @@ class ProcessWithContext:
     def process_index(
             self,
             index: pd.Index,
+            *,
+            root: str = None,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
         Args:
             index: index with segment information
+            root: root folder to expand relative file paths
 
         Returns:
             Series with processed segments conform to audformat_
@@ -686,7 +706,7 @@ class ProcessWithContext:
                 pbar.set_description(desc, refresh=True)
                 mask = index.isin([file], 0)
                 select = index[mask].droplevel(0)
-                signal, sampling_rate = utils.read_audio(file)
+                signal, sampling_rate = utils.read_audio(file, root=root)
                 ys[idx] = pd.Series(
                     self.process_signal_from_index(
                         signal, sampling_rate, select,

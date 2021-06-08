@@ -193,6 +193,7 @@ class Segment:
             *,
             start: Timestamp = None,
             end: Timestamp = None,
+            root: str = None,
     ) -> pd.Index:
         r"""Segment the content of an audio file.
 
@@ -202,6 +203,7 @@ class Segment:
                 If value is as a float or integer it is treated as seconds
             end: end processing at this position.
                 If value is as a float or integer it is treated as seconds
+            root: root folder to expand relative file path
 
         Returns:
             Segmented index conform to audformat_
@@ -215,7 +217,12 @@ class Segment:
         """
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
-        index = self.process.process_file(file, start=start, end=end).values[0]
+        index = self.process.process_file(
+            file,
+            start=start,
+            end=end,
+            root=root,
+        ).values[0]
         return pd.MultiIndex(
             levels=[
                 [file],
@@ -236,6 +243,7 @@ class Segment:
             *,
             starts: Timestamps = None,
             ends: Timestamps = None,
+            root: str = None,
     ) -> pd.Index:
         r"""Segment a list of files.
 
@@ -247,6 +255,7 @@ class Segment:
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
                 If a scalar is given, it is applied to all files
+            root: root folder to expand relative file paths
 
         Returns:
             Segmented index conform to audformat_
@@ -258,7 +267,12 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series = self.process.process_files(files, starts=starts, ends=ends)
+        series = self.process.process_files(
+            files,
+            starts=starts,
+            ends=ends,
+            root=root,
+        )
         objs = []
         for idx, ((file, start, _), index) in enumerate(series.items()):
             objs.append(
@@ -309,11 +323,14 @@ class Segment:
     def process_index(
             self,
             index: pd.Index,
+            *,
+            root: str = None,
     ) -> pd.Index:
         r"""Segment files or segments from an index.
 
         Args:
             index: index conform to audformat_
+            root: root folder to expand relative file paths
 
         Returns:
             Segmented index conform to audformat_
@@ -335,6 +352,7 @@ class Segment:
             index.get_level_values('file'),
             starts=index.get_level_values('start'),
             ends=index.get_level_values('end'),
+            root=root,
         )
 
     def process_signal(

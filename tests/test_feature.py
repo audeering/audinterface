@@ -164,7 +164,11 @@ def test_process_callable(signal, feature, expected):
     ]
 )
 def test_process_file(tmpdir, start, end, segment):
-    extractor = audinterface.Feature(
+
+    start_org = start
+    end_org = end
+
+    feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
         sampling_rate=None,
@@ -173,25 +177,53 @@ def test_process_file(tmpdir, start, end, segment):
         segment=segment,
         verbose=False,
     )
-    expected_features = np.ones((1, NUM_CHANNELS * NUM_FEATURES))
-    path = str(tmpdir.mkdir('wav'))
-    file = os.path.join(path, 'file.wav')
-    af.write(file, SIGNAL_2D, SAMPLING_RATE)
-    features = extractor.process_file(file, start=start, end=end)
+    y_expected = np.ones((1, NUM_CHANNELS * NUM_FEATURES))
+
+    # create test file
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, SIGNAL_2D, SAMPLING_RATE)
+
+    # test absolute path
+    start = start_org
+    end = end_org
+
+    y = feature.process_file(path, start=start, end=end)
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     if end is None or pd.isna(end):
-        end = pd.to_timedelta(af.duration(file), unit='s')
+        end = pd.to_timedelta(af.duration(path), unit='s')
 
     if segment is not None:
-        index = segment.process_file(file)
+        index = segment.process_file(path)
         start = index[0][1]
         end = index[0][2]
 
-    assert features.index.levels[0][0] == file
-    assert features.index.levels[1][0] == start
-    assert features.index.levels[2][0] == end
-    np.testing.assert_array_equal(features, expected_features)
+    assert y.index.levels[0][0] == path
+    assert y.index.levels[1][0] == start
+    assert y.index.levels[2][0] == end
+    np.testing.assert_array_equal(y, y_expected)
+
+    # test relative path
+    start = start_org
+    end = end_org
+
+    y = feature.process_file(file, start=start, end=end, root=root)
+    if start is None or pd.isna(start):
+        start = pd.to_timedelta(0)
+    if end is None or pd.isna(end):
+        end = pd.to_timedelta(af.duration(path), unit='s')
+
+    if segment is not None:
+        index = segment.process_file(file, root=root)
+        start = index[0][1]
+        end = index[0][2]
+
+    assert y.index.levels[0][0] == file
+    assert y.index.levels[1][0] == start
+    assert y.index.levels[2][0] == end
+    np.testing.assert_array_equal(y, y_expected)
 
 
 def test_process_folder(tmpdir):
@@ -445,35 +477,41 @@ def test_process_signal_from_index(index, expected_features):
 
 def test_process_index(tmpdir):
 
+    feature = audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=feature_extractor,
+        channels=range(NUM_CHANNELS),
+    )
+
     # empty
 
     index = audformat.segmented_index()
-    extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extractor,
-        channels=range(NUM_CHANNELS),
-    )
-    features = extractor.process_index(index)
-    assert features.empty
-    assert features.columns.tolist() == extractor.column_names
+    y = feature.process_index(index)
+    assert y.empty
+    assert y.columns.tolist() == feature.column_names
 
     # non-empty
 
-    path = str(tmpdir.mkdir('wav'))
-    file = f'{path}/file.wav'
-    af.write(file, SIGNAL_2D, SAMPLING_RATE)
+    # create file
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, SIGNAL_2D, SAMPLING_RATE)
+    y_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
+
+    # absolute paths
+    index = audformat.segmented_index([path] * 2, [0, 1], [2, 3])
+    y = feature.process_index(index)
+    assert y.index.get_level_values('file')[0] == path
+    np.testing.assert_array_equal(y.values, y_expected)
+    assert y.columns.tolist() == feature.column_names
+
+    # relative paths
     index = audformat.segmented_index([file] * 2, [0, 1], [2, 3])
-    expected_features = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
-    extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extractor,
-        channels=range(NUM_CHANNELS),
-    )
-    features = extractor.process_index(
-        index,
-    )
-    np.testing.assert_array_equal(features.values, expected_features)
-    assert features.columns.tolist() == extractor.column_names
+    y = feature.process_index(index, root=root)
+    assert y.index.get_level_values('file')[0] == file
+    np.testing.assert_array_equal(y.values, y_expected)
+    assert y.columns.tolist() == feature.column_names
 
 
 @pytest.mark.parametrize(
