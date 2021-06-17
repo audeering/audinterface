@@ -237,7 +237,9 @@ def test_process_folder(tmpdir):
     )
     expected_features = np.ones((3, NUM_CHANNELS * NUM_FEATURES))
     path = str(tmpdir.mkdir('wav'))
-    files = [f'{path}/file{n}.wav' for n in range(3)]
+    files = [
+        os.path.join(path, f'file{n}.wav') for n in range(3)
+    ]
     for file in files:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)
     features = extractor.process_folder(path)

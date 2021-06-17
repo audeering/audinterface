@@ -504,9 +504,12 @@ def test_process_folder(
     )
     sampling_rate = 8000
     path = str(tmpdir.mkdir('wav'))
-    files = [f'{path}/file{n}.wav' for n in range(num_files)]
+    files = [
+        os.path.join(path, f'file{n}.wav') for n in range(num_files)
+    ]
     rel_path = os.path.relpath(path)
-    rel_files = [f'{rel_path}/file{n}.wav' for n in range(num_files)]
+    rel_files = [
+        os.path.join(rel_path, f'file{n}.wav') for n in range(num_files)]
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)

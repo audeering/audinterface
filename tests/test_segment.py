@@ -106,7 +106,8 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         verbose=False,
     )
     path = str(tmpdir.mkdir('wav'))
-    files = [f'{path}/file{n}.wav' for n in range(3)]
+    files = [
+        os.path.join(path, f'file{n}.wav') for n in range(3)]
     for file in files:
         af.write(file, SIGNAL, SAMPLING_RATE)
     result = model.process_folder(path)
