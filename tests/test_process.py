@@ -504,34 +504,17 @@ def test_process_folder(
     )
     sampling_rate = 8000
     path = str(tmpdir.mkdir('wav'))
-    files = [f'{path}/file{n}.wav' for n in range(num_files)]
-    rel_path = os.path.relpath(path)
-    rel_files = [f'{rel_path}/file{n}.wav' for n in range(num_files)]
+    files = [
+        os.path.join(path, f'file{n}.wav') for n in range(num_files)
+    ]
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)
-    result = process.process_folder(path)
-    rel_result = process.process_folder(rel_path)
-    for idx, (index, values) in enumerate(result.iteritems()):
-        file = index[0] if isinstance(index, tuple) else index
-        assert file == files[idx]
-        signal, sampling_rate = audinterface.utils.read_audio(file)
-        if segment is not None:
-            start, end = segment.process_signal(signal, sampling_rate)[0]
-            start_idx = int(start.total_seconds() * sampling_rate)
-            end_idx = int(end.total_seconds() * sampling_rate)
-            signal = signal[:, start_idx:end_idx]
-        np.testing.assert_equal(values, signal)
-    for idx, (index, values) in enumerate(rel_result.iteritems()):
-        file = index[0] if isinstance(index, tuple) else index
-        assert file == rel_files[idx]
-        signal, sampling_rate = audinterface.utils.read_audio(file)
-        if segment is not None:
-            start, end = segment.process_signal(signal, sampling_rate)[0]
-            start_idx = int(start.total_seconds() * sampling_rate)
-            end_idx = int(end.total_seconds() * sampling_rate)
-            signal = signal[:, start_idx:end_idx]
-        np.testing.assert_equal(values, signal)
+    y = process.process_folder(path)
+    pd.testing.assert_series_equal(
+        y,
+        process.process_files(files),
+    )
 
 
 @pytest.mark.parametrize(
