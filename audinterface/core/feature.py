@@ -33,8 +33,8 @@ class Feature:
 
     Args:
         feature_names: features are stored as columns in a data frame,
-            `feature_names` defines the names of the columns.
-            If `num_channels` > 1,
+            ``feature_names`` defines the names of the columns.
+            If ``num_channels`` > 1,
             the channel number will be appended to the column names.
         name: name of the feature set, e.g. ``'stft'``
         params: parameters that describe the feature set,
@@ -53,7 +53,6 @@ class Feature:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal.
-        num_channels: the expected number of channels
         win_dur: window size in ``unit``,
             if features are extracted with a sliding window
         hop_dur: hop size in ``unit``,
