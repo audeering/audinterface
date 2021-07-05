@@ -124,7 +124,10 @@ class Process:
         if end is None or (pd.isna(end) and not self.keep_nat):
             end = y.index.levels[2][0] + start
 
-        y.index = y.index.set_levels([[start], [end]], [1, 2])
+        y.index = y.index.set_levels(
+            [[start], [end]],
+            level=[1, 2],
+        )
 
         return y
 
