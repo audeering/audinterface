@@ -469,6 +469,7 @@ class Process:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if index contains duplicates
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -737,6 +738,7 @@ class ProcessWithContext:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if index contains duplicates
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 

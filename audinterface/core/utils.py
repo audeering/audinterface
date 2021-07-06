@@ -16,6 +16,22 @@ def assert_index(obj: pd.Index):
     r"""Check if index is conform to audformat."""
 
     if isinstance(obj, pd.MultiIndex) and len(obj.levels) == 2:
+
+        if obj.has_duplicates:
+            max_display = 10
+            duplicates = obj[obj.duplicated()]
+            msg_tail = '\n...' if len(duplicates) > max_display else ''
+            msg_duplicates = '\n'.join(
+                [
+                    str(duplicate) for duplicate
+                    in duplicates[:max_display].tolist()
+                ]
+            )
+            raise ValueError(
+                'Found duplicates:\n'
+                f'{msg_duplicates}{msg_tail}'
+            )
+
         if not (
                 obj.names[0] == audformat.define.IndexField.START
                 and obj.names[1] == audformat.define.IndexField.END

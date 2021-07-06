@@ -84,6 +84,11 @@ def test_assert_index(obj):
             [pd.Timedelta('1s')],
             marks=pytest.mark.xfail(raises=ValueError),
         ),
+        pytest.param(  # duplicates
+            [pd.Timedelta('0s'), pd.Timedelta('0s')],
+            [pd.Timedelta('1s'), pd.Timedelta('1s')],
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
     ]
 )
 def test_create_segmented_index(starts, ends):
