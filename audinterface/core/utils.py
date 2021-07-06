@@ -231,19 +231,20 @@ def signal_index(
         names=[
             audformat.define.IndexField.START,
             audformat.define.IndexField.END,
-        ])
+        ],
+    )
     assert_index(index)
 
     return index
 
 
-def to_array(value: typing.Any) -> typing.Union[list, np.ndarray]:
-    r"""Convert value to list or array."""
+def to_array(value: typing.Any) -> np.ndarray:
+    r"""Convert value to numpy array."""
     if value is not None:
         if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
             value = value.to_numpy()
         elif is_scalar(value):
-            value = [value]
+            value = np.array([value])
     return value
 
 
