@@ -160,6 +160,10 @@ def signal_index(
 ) -> pd.MultiIndex:
     r"""Create signal index.
 
+    Returns a segmented index like
+    :func:`audformat.segmented_index`,
+    but without the ``'file'`` level.
+
     Args:
         starts: segment start positions.
             Time values given as float or integers are treated as seconds
@@ -167,10 +171,7 @@ def signal_index(
             Time values given as float or integers are treated as seconds
 
     Returns:
-        signal index
-
-    Raises:
-        ValueError: if created index contains duplicates
+        index with start and end times
 
     Raises:
         ValueError: if ``start`` and ``ends`` differ in size
@@ -192,6 +193,14 @@ def signal_index(
         ... )
         MultiIndex([('0 days 00:00:00', '0 days 00:00:01'),
                     ('0 days 00:00:01', '0 days 00:00:02')],
+                   names=['start', 'end'])
+        >>> signal_index([0, 1])
+        MultiIndex([('0 days 00:00:00', NaT),
+                    ('0 days 00:00:01', NaT)],
+                   names=['start', 'end'])
+        >>> signal_index(ends=[1, 2])
+        MultiIndex([('0 days', '0 days 00:00:01'),
+                    ('0 days', '0 days 00:00:02')],
                    names=['start', 'end'])
 
     """
