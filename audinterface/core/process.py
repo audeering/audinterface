@@ -346,9 +346,7 @@ class Process:
         if file is not None:
             index = audformat.segmented_index(file, start, end)
         else:
-            index = pd.MultiIndex.from_tuples(
-                [(start, end)], names=['start', 'end']
-            )
+            index = utils.signal_index(start, end)
 
         return pd.Series([y], index)
 
@@ -474,7 +472,7 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        utils.check_index(index)
+        utils.assert_index(index)
 
         if index.empty:
             return pd.Series(None, index=index, dtype=float)
@@ -521,7 +519,7 @@ class Process:
         """
 
         index = audformat.utils.to_segmented_index(index)
-        utils.check_index(index)
+        utils.assert_index(index)
 
         if index.empty:
             return pd.Series(None, index=index, dtype=float)
@@ -741,7 +739,7 @@ class ProcessWithContext:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        utils.check_index(index)
+        utils.assert_index(index)
 
         starts_i, ends_i = utils.segments_to_indices(
             signal, sampling_rate, index,

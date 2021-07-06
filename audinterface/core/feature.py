@@ -13,6 +13,7 @@ from audinterface.core.typing import (
     Timestamp,
     Timestamps,
 )
+import audinterface.core.utils as utils
 
 
 class Feature:
@@ -507,10 +508,7 @@ class Feature:
             ends = [end]
 
         if file is None:
-            index = pd.MultiIndex.from_arrays(
-                [starts, ends],
-                names=['start', 'end'],
-            )
+            index = utils.signal_index(starts, ends)
         else:
             files = [file] * len(starts)
             index = audformat.segmented_index(files, starts, ends)

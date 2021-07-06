@@ -15,24 +15,11 @@ NUM_FEATURES = 3
 NUM_FRAMES = 5
 SIGNAL_1D = np.ones((1, SAMPLING_RATE))
 SIGNAL_2D = np.ones((NUM_CHANNELS, SAMPLING_RATE))
-STARTS = [pd.to_timedelta('0s')] * 3
-ENDS = [pd.to_timedelta('1s')] * 3
-INDEX = pd.MultiIndex.from_arrays(
-    [STARTS, ENDS],
-    names=['start', 'end']
-)
 SEGMENT = audinterface.Segment(
     process_func=lambda x, sr:
-        pd.MultiIndex.from_arrays(
-            [
-                [
-                    pd.to_timedelta(0),
-                ],
-                [
-                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                ],
-            ],
-            names=['start', 'end'],
+        audinterface.utils.signal_index(
+            pd.to_timedelta(0),
+            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
         )
 )
 
@@ -227,7 +214,12 @@ def test_process_file(tmpdir, start, end, segment):
 
 
 def test_process_folder(tmpdir):
-    extractor = audinterface.Feature(
+
+    starts = [0] * 3
+    ends = [1] * 3
+    index = audinterface.utils.signal_index(starts, ends)
+
+    feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
         sampling_rate=None,
@@ -235,18 +227,21 @@ def test_process_folder(tmpdir):
         resample=False,
         verbose=False,
     )
-    expected_features = np.ones((3, NUM_CHANNELS * NUM_FEATURES))
+
     path = str(tmpdir.mkdir('wav'))
     files = [
         os.path.join(path, f'file{n}.wav') for n in range(3)
     ]
     for file in files:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)
-    features = extractor.process_folder(path)
-    assert all(features.index.levels[0] == files)
-    assert all(features.index.levels[1] == INDEX.levels[0])
-    assert all(features.index.levels[2] == INDEX.levels[1])
-    np.testing.assert_array_equal(features.values, expected_features)
+
+    y = feature.process_folder(path)
+    y_expected = np.ones((3, NUM_CHANNELS * NUM_FEATURES))
+
+    assert all(y.index.levels[0] == files)
+    assert all(y.index.levels[1] == index.levels[0])
+    assert all(y.index.levels[2] == index.levels[1])
+    np.testing.assert_array_equal(y.values, y_expected)
 
 
 @pytest.mark.parametrize(
@@ -452,12 +447,9 @@ def test_process_signal(
     'index,expected_features',
     [
         (
-            pd.MultiIndex.from_arrays(
-                [
-                    (pd.to_timedelta('0s'), pd.to_timedelta('1s')),
-                    (pd.to_timedelta('2s'), pd.to_timedelta('3s')),
-                ],
-                names=['start', 'end'],
+            audinterface.utils.signal_index(
+                [pd.to_timedelta('0s'), pd.to_timedelta('1s')],
+                [pd.to_timedelta('2s'), pd.to_timedelta('3s')],
             ),
             np.ones((2, NUM_CHANNELS * NUM_FEATURES)),
         ),
@@ -565,10 +557,7 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
             periods=n_time_steps,
         )
         ends = starts + pd.to_timedelta(win_dur, unit=unit)
-    index = pd.MultiIndex.from_arrays(
-        [starts, ends],
-        names=['start', 'end'],
-    )
+    index = audinterface.utils.signal_index(starts, ends)
     pd.testing.assert_frame_equal(
         features,
         pd.DataFrame(
