@@ -362,7 +362,7 @@ class Feature:
             RuntimeError: if channel selection is invalid
             RuntimeError: if multiple frames are returned,
                 but ``win_dur`` is not set
-            ValueError: if given index has wrong format
+            ValueError: if index contains duplicates
 
         """
         series = self.process.process_signal_from_index(
