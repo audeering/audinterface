@@ -7,11 +7,16 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.6.8 (2021-07-06)
+--------------------------
+
+* Fixed: CHANGELOG
+
 Version 0.6.7 (2021-07-06)
 --------------------------
 
 * Added: ``utils.signal_index()`` to create a segmented index without file level
-* Changed: use keyword argument with ``pandas.MultiIndex.set_levels()`
+* Changed: use keyword argument with ``pandas.MultiIndex.set_levels()``
 * Fixed: raise error if multiple frames are returned but ``win_dur`` is not set
 * Fixed: remove ``num_channels`` from ``Feature`` docstring
 
