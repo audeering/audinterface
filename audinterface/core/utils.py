@@ -163,6 +163,12 @@ def signal_index(
     Returns a segmented index like
     :func:`audformat.segmented_index`,
     but without the ``'file'`` level.
+    Can be used with the following methods:
+
+    * :meth:`audinterface.Feature.process_signal_from_index`
+    * :meth:`audinterface.Process.process_signal_from_index`
+    * :meth:`audinterface.ProcessWithContext.process_signal_from_index`
+    * :meth:`audinterface.Segment.process_signal_from_index`
 
     Args:
         starts: segment start positions.

@@ -461,6 +461,7 @@ class Process:
                 or a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
+                See also :func:`audinterface.utils.signal_index`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -728,6 +729,7 @@ class ProcessWithContext:
             index: a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
+                See also :func:`audinterface.utils.signal_index`
 
         Returns:
             Series with processed segments conform to audformat_

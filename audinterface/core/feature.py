@@ -345,6 +345,7 @@ class Feature:
             index: a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
+                See also :func:`audinterface.utils.signal_index`
 
         Raises:
             RuntimeError: if sampling rates do not match
