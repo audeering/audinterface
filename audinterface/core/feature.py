@@ -198,6 +198,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
 
         """
         series = self.process.process_file(
@@ -231,6 +233,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
 
         """
         series = self.process.process_files(
@@ -258,6 +262,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
 
         """
         files = audeer.list_file_names(root, filetype=filetype)
@@ -279,6 +285,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
             ValueError: if index is not conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
@@ -320,6 +328,8 @@ class Feature:
                 but ``self.win_dur`` is not specified
             RuntimeError: if number of features does not match
                 number of feature names
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
 
         """
         series = self.process.process_signal(
@@ -350,6 +360,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
             ValueError: if given index has wrong format
 
         """
@@ -379,6 +391,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
             ValueError: if index is not conform to the `Unified Format`_
 
         .. _`Unified Format`: http://tools.pp.audeering.com/audata/
@@ -543,6 +557,8 @@ class Feature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if multiple frames are returned,
+                but ``win_dur`` is not set
 
         """
         y = self.process(

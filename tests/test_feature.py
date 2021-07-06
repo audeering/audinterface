@@ -215,10 +215,7 @@ def test_process_file(tmpdir, start, end, segment):
 
 def test_process_folder(tmpdir):
 
-    starts = [0] * 3
-    ends = [1] * 3
-    index = audinterface.utils.signal_index(starts, ends)
-
+    index = audinterface.utils.signal_index(0, 1)
     feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
