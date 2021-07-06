@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.8
               </div>
             
           
@@ -293,7 +293,10 @@
         <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">end</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_nat</span><span class="p">):</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span>
 
-        <span class="n">y</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_levels</span><span class="p">([[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_levels</span><span class="p">(</span>
+            <span class="p">[[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">]],</span>
+            <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">y</span>
 
@@ -515,9 +518,7 @@
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
-                <span class="p">[(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">y</span><span class="p">],</span> <span class="n">index</span><span class="p">)</span>
 
@@ -632,6 +633,7 @@
 <span class="sd">                or a :class:`pandas.MultiIndex` with two levels</span>
 <span class="sd">                named `start` and `end` that hold start and end</span>
 <span class="sd">                positions as :class:`pandas.Timedelta` objects.</span>
+<span class="sd">                See also :func:`audinterface.utils.signal_index`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Series with processed segments conform to audformat_</span>
@@ -639,11 +641,12 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            ValueError: if index contains duplicates</span>
 
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -690,7 +693,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_segmented_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -899,6 +902,7 @@
 <span class="sd">            index: a :class:`pandas.MultiIndex` with two levels</span>
 <span class="sd">                named `start` and `end` that hold start and end</span>
 <span class="sd">                positions as :class:`pandas.Timedelta` objects.</span>
+<span class="sd">                See also :func:`audinterface.utils.signal_index`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Series with processed segments conform to audformat_</span>
@@ -906,11 +910,12 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            ValueError: if index contains duplicates</span>
 
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="n">starts_i</span><span class="p">,</span> <span class="n">ends_i</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">segments_to_indices</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span>
@@ -1025,7 +1030,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/06/18 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

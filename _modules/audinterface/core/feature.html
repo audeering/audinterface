@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.8
               </div>
             
           
@@ -182,6 +182,7 @@
     <span class="n">Timestamp</span><span class="p">,</span>
     <span class="n">Timestamps</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">import</span> <span class="nn">audinterface.core.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 
 
 <div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../../api.html#audinterface.Feature">[docs]</a><span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
@@ -202,8 +203,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        feature_names: features are stored as columns in a data frame,</span>
-<span class="sd">            `feature_names` defines the names of the columns.</span>
-<span class="sd">            If `num_channels` &gt; 1,</span>
+<span class="sd">            ``feature_names`` defines the names of the columns.</span>
+<span class="sd">            If ``num_channels`` &gt; 1,</span>
 <span class="sd">            the channel number will be appended to the column names.</span>
 <span class="sd">        name: name of the feature set, e.g. ``&#39;stft&#39;``</span>
 <span class="sd">        params: parameters that describe the feature set,</span>
@@ -222,7 +223,6 @@
 <span class="sd">        sampling_rate: sampling rate in Hz.</span>
 <span class="sd">            If ``None`` it will call ``process_func`` with the actual</span>
 <span class="sd">            sampling rate of the signal.</span>
-<span class="sd">        num_channels: the expected number of channels</span>
 <span class="sd">        win_dur: window size in ``unit``,</span>
 <span class="sd">            if features are extracted with a sliding window</span>
 <span class="sd">        hop_dur: hop size in ``unit``,</span>
@@ -367,6 +367,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_file</span><span class="p">(</span>
@@ -400,6 +402,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span>
@@ -427,6 +431,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">files</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">list_file_names</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="n">filetype</span><span class="p">)</span>
@@ -448,6 +454,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 <span class="sd">            ValueError: if index is not conform to audformat_</span>
 
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
@@ -489,6 +497,8 @@
 <span class="sd">                but ``self.win_dur`` is not specified</span>
 <span class="sd">            RuntimeError: if number of features does not match</span>
 <span class="sd">                number of feature names</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
@@ -514,11 +524,14 @@
 <span class="sd">            index: a :class:`pandas.MultiIndex` with two levels</span>
 <span class="sd">                named `start` and `end` that hold start and end</span>
 <span class="sd">                positions as :class:`pandas.Timedelta` objects.</span>
+<span class="sd">                See also :func:`audinterface.utils.signal_index`</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
-<span class="sd">            ValueError: if given index has wrong format</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
+<span class="sd">            ValueError: if index contains duplicates</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_signal_from_index</span><span class="p">(</span>
@@ -547,6 +560,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 <span class="sd">            ValueError: if index is not conform to the `Unified Format`_</span>
 
 <span class="sd">        .. _`Unified Format`: http://tools.pp.audeering.com/audata/</span>
@@ -662,25 +677,26 @@
         <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="k">if</span> <span class="n">n_time_steps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
             <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">starts</span> <span class="o">=</span> <span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_time_steps</span>
-                <span class="n">ends</span> <span class="o">=</span> <span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_time_steps</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">starts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
-                    <span class="n">start</span><span class="p">,</span>
-                    <span class="n">freq</span><span class="o">=</span><span class="n">hop_dur</span><span class="p">,</span>
-                    <span class="n">periods</span><span class="o">=</span><span class="n">n_time_steps</span><span class="p">,</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Got &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_time_steps</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;frames, but &#39;win_dur&#39; is not set.&quot;</span>
                 <span class="p">)</span>
-                <span class="n">ends</span> <span class="o">=</span> <span class="n">starts</span> <span class="o">+</span> <span class="n">win_dur</span>
+
+            <span class="n">starts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
+                <span class="n">start</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">hop_dur</span><span class="p">,</span>
+                <span class="n">periods</span><span class="o">=</span><span class="n">n_time_steps</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ends</span> <span class="o">=</span> <span class="n">starts</span> <span class="o">+</span> <span class="n">win_dur</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">starts</span> <span class="o">=</span> <span class="p">[</span><span class="n">start</span><span class="p">]</span>
             <span class="n">ends</span> <span class="o">=</span> <span class="p">[</span><span class="n">end</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">],</span>
-                <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
-            <span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
@@ -710,6 +726,8 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            RuntimeError: if multiple frames are returned,</span>
+<span class="sd">                but ``win_dur`` is not set</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span>
@@ -734,7 +752,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/06/18 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

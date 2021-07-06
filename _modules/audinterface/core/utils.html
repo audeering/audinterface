@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.8
               </div>
             
           
@@ -181,24 +181,56 @@
 <span class="kn">from</span> <span class="nn">audinterface.core.typing</span> <span class="kn">import</span> <span class="n">Timestamps</span>
 
 
-<span class="k">def</span> <span class="nf">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">assert_index</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if index is conform to audformat.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">is_datetime_or_timedelta_dtype</span><span class="p">(</span>
-                    <span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Level 0 has type &#39;</span>
-                                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-                                 <span class="sa">f</span><span class="s1">&#39;, expected timedelta64[ns].&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">is_datetime_or_timedelta_dtype</span><span class="p">(</span>
-                    <span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Level 1 has type &#39;</span>
-                                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-                                 <span class="sa">f</span><span class="s1">&#39;, expected timedelta64[ns].&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">has_duplicates</span><span class="p">:</span>
+            <span class="n">max_display</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="n">duplicates</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()]</span>
+            <span class="n">msg_tail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">...&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">duplicates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_display</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">msg_duplicates</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">duplicate</span><span class="p">)</span> <span class="k">for</span> <span class="n">duplicate</span>
+                    <span class="ow">in</span> <span class="n">duplicates</span><span class="p">[:</span><span class="n">max_display</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Found duplicates:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">msg_duplicates</span><span class="si">}{</span><span class="n">msg_tail</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span>
+                <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span>
+        <span class="p">):</span>
+            <span class="n">expected_names</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span><span class="p">,</span>
+                <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Found two levels with names &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="si">}</span><span class="s1">, &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;but expected names &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">expected_names</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_timedelta64_dtype</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Level &#39;start&#39; must contain values of type &#39;timedelta64[ns]&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_timedelta64_dtype</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Level &#39;end&#39; must contain values of type &#39;timedelta64[ns]&#39;.&quot;</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">audformat</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">audformat</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">is_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if value is scalar&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
+           <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">preprocess_signal</span><span class="p">(</span>
@@ -307,6 +339,106 @@
     <span class="k">return</span> <span class="n">starts_i</span><span class="p">,</span> <span class="n">ends_i</span>
 
 
+<div class="viewcode-block" id="signal_index"><a class="viewcode-back" href="../../../api-utils.html#audinterface.utils.signal_index">[docs]</a><span class="k">def</span> <span class="nf">signal_index</span><span class="p">(</span>
+        <span class="n">starts</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create signal index.</span>
+
+<span class="sd">    Returns a segmented index like</span>
+<span class="sd">    :func:`audformat.segmented_index`,</span>
+<span class="sd">    but without the ``&#39;file&#39;`` level.</span>
+<span class="sd">    Can be used with the following methods:</span>
+
+<span class="sd">    * :meth:`audinterface.Feature.process_signal_from_index`</span>
+<span class="sd">    * :meth:`audinterface.Process.process_signal_from_index`</span>
+<span class="sd">    * :meth:`audinterface.ProcessWithContext.process_signal_from_index`</span>
+<span class="sd">    * :meth:`audinterface.Segment.process_signal_from_index`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        starts: segment start positions.</span>
+<span class="sd">            Time values given as float or integers are treated as seconds</span>
+<span class="sd">        ends: segment end positions.</span>
+<span class="sd">            Time values given as float or integers are treated as seconds</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        index with start and end times</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if ``start`` and ``ends`` differ in size</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; signal_index(0, 1.1)</span>
+<span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01.100000&#39;)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; signal_index(&#39;0ms&#39;, &#39;1ms&#39;)</span>
+<span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:00.001000&#39;)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; signal_index([None, 1], [1, None])</span>
+<span class="sd">        MultiIndex([(              NaT, &#39;0 days 00:00:01&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:01&#39;,              NaT)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; signal_index(</span>
+<span class="sd">        ...     starts=[0, 1],</span>
+<span class="sd">        ...     ends=pd.to_timedelta([1000, 2000], unit=&#39;ms&#39;),</span>
+<span class="sd">        ... )</span>
+<span class="sd">        MultiIndex([(&#39;0 days 00:00:00&#39;, &#39;0 days 00:00:01&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:01&#39;, &#39;0 days 00:00:02&#39;)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; signal_index([0, 1])</span>
+<span class="sd">        MultiIndex([(&#39;0 days 00:00:00&#39;, NaT),</span>
+<span class="sd">                    (&#39;0 days 00:00:01&#39;, NaT)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; signal_index(ends=[1, 2])</span>
+<span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01&#39;),</span>
+<span class="sd">                    (&#39;0 days&#39;, &#39;0 days 00:00:02&#39;)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">starts</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
+    <span class="n">ends</span> <span class="o">=</span> <span class="n">to_array</span><span class="p">(</span><span class="n">ends</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">starts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ends</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ends</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">ends</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">NaT</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ends</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot create index,&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;starts&#39; and &#39;ends&#39; differ in length: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ends</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">to_timedelta</span><span class="p">(</span><span class="n">starts</span><span class="p">),</span>
+            <span class="n">to_timedelta</span><span class="p">(</span><span class="n">ends</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">names</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span><span class="p">,</span>
+            <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">index</span></div>
+
+
+<span class="k">def</span> <span class="nf">to_array</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert value to numpy array.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">)):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">is_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">value</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
 <span class="k">def</span> <span class="nf">to_timedelta</span><span class="p">(</span><span class="n">times</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert time value to pd.Timedelta.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -328,7 +460,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/06/18 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

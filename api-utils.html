@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.8
               </div>
             
           
@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">audinterface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">audinterface.utils</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#read-audio">read_audio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#signal-index">signal_index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
@@ -162,7 +163,7 @@
         
             
             
-              <a href="https://github.com/audeering/audinterface/blob/v0.6.6/docs/api-utils.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/audeering/audinterface/blob/v0.6.8/docs/api-utils.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -204,6 +205,72 @@ sampling_rate: sampling rate in Hz</p>
 </dd></dl>
 
 </section>
+<section id="signal-index">
+<h2>signal_index<a class="headerlink" href="#signal-index" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="audinterface.utils.signal_index">
+<span class="sig-prename descclassname"><span class="pre">audinterface.utils.</span></span><span class="sig-name descname"><span class="pre">signal_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ends</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/audinterface/core/utils.html#signal_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.utils.signal_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create signal index.</p>
+<p>Returns a segmented index like
+<a class="reference external" href="https://audeering.github.io/audformat/api.html#audformat.segmented_index" title="(in audformat vv0.11.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">audformat.segmented_index()</span></code></a>,
+but without the <code class="docutils literal notranslate"><span class="pre">'file'</span></code> level.
+Can be used with the following methods:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api.html#audinterface.Feature.process_signal_from_index" title="audinterface.Feature.process_signal_from_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">audinterface.Feature.process_signal_from_index()</span></code></a></p></li>
+<li><p><a class="reference internal" href="api.html#audinterface.Process.process_signal_from_index" title="audinterface.Process.process_signal_from_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">audinterface.Process.process_signal_from_index()</span></code></a></p></li>
+<li><p><a class="reference internal" href="api.html#audinterface.ProcessWithContext.process_signal_from_index" title="audinterface.ProcessWithContext.process_signal_from_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">audinterface.ProcessWithContext.process_signal_from_index()</span></code></a></p></li>
+<li><p><a class="reference internal" href="api.html#audinterface.Segment.process_signal_from_index" title="audinterface.Segment.process_signal_from_index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">audinterface.Segment.process_signal_from_index()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>starts</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – segment start positions.
+Time values given as float or integers are treated as seconds</p></li>
+<li><p><strong>ends</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – segment end positions.
+Time values given as float or integers are treated as seconds</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>index with start and end times</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">ends</span></code> differ in size</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+<span class="go">MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01.100000&#39;)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">(</span><span class="s1">&#39;0ms&#39;</span><span class="p">,</span> <span class="s1">&#39;1ms&#39;</span><span class="p">)</span>
+<span class="go">MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:00.001000&#39;)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
+<span class="go">MultiIndex([(              NaT, &#39;0 days 00:00:01&#39;),</span>
+<span class="go">            (&#39;0 days 00:00:01&#39;,              NaT)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">starts</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">ends</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">([</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ms&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">MultiIndex([(&#39;0 days 00:00:00&#39;, &#39;0 days 00:00:01&#39;),</span>
+<span class="go">            (&#39;0 days 00:00:01&#39;, &#39;0 days 00:00:02&#39;)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">MultiIndex([(&#39;0 days 00:00:00&#39;, NaT),</span>
+<span class="go">            (&#39;0 days 00:00:01&#39;, NaT)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal_index</span><span class="p">(</span><span class="n">ends</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="go">MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01&#39;),</span>
+<span class="go">            (&#39;0 days&#39;, &#39;0 days 00:00:02&#39;)],</span>
+<span class="go">           names=[&#39;start&#39;, &#39;end&#39;])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -229,7 +296,7 @@ sampling_rate: sampling rate in Hz</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/06/18 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

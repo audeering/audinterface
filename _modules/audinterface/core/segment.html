@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.8
               </div>
             
           
@@ -191,13 +191,7 @@
 
     <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">([]),</span>
-                    <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">([]),</span>
-                <span class="p">],</span>
-                <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
-            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">process_func_invert</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -222,13 +216,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)],</span>
-                <span class="p">[</span><span class="n">dur</span><span class="p">],</span>
-            <span class="p">],</span>
-            <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dur</span><span class="p">)</span>
 
     <span class="n">starts</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">)</span>
     <span class="n">ends</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">)</span>
@@ -240,13 +228,7 @@
     <span class="k">if</span> <span class="n">ends</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dur</span><span class="p">:</span>
         <span class="n">new_starts</span> <span class="o">=</span> <span class="n">new_starts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_starts</span><span class="p">),</span> <span class="n">ends</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">new_ends</span> <span class="o">=</span> <span class="n">new_ends</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ends</span><span class="p">),</span> <span class="n">dur</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">new_starts</span><span class="p">,</span>
-            <span class="n">new_ends</span><span class="p">,</span>
-        <span class="p">],</span>
-        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">merge_index</span><span class="p">(</span>
@@ -277,13 +259,7 @@
     <span class="n">new_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_start</span><span class="p">)</span>
     <span class="n">new_ends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_end</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">new_starts</span><span class="p">,</span>
-            <span class="n">new_ends</span><span class="p">,</span>
-        <span class="p">],</span>
-        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Segment"><a class="viewcode-back" href="../../../api.html#audinterface.Segment">[docs]</a><span class="k">class</span> <span class="nc">Segment</span><span class="p">:</span>
@@ -512,7 +488,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_segmented_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">index</span>
@@ -565,13 +541,15 @@
             <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
             <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">set_levels</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span>
                     <span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span>
-                <span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="p">],</span>
+                <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
                 <span class="n">levels</span><span class="o">=</span><span class="p">[</span>
@@ -603,6 +581,7 @@
 <span class="sd">                or a :class:`pandas.MultiIndex` with two levels</span>
 <span class="sd">                named `start` and `end` that hold start and end</span>
 <span class="sd">                positions as :class:`pandas.Timedelta` objects.</span>
+<span class="sd">                See also :func:`audinterface.utils.signal_index`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Segmented index conform to audformat_</span>
@@ -610,11 +589,12 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
+<span class="sd">            ValueError: if index contains duplicates</span>
 
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">utils</span><span class="o">.</span><span class="n">check_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">index</span>
@@ -694,7 +674,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/06/18 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
