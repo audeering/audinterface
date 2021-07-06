@@ -378,7 +378,9 @@ class Segment:
                 [
                     index.levels[0] + start,
                     index.levels[1] + start,
-                ], [0, 1])
+                ],
+                level=[0, 1],
+            )
         if file is not None:
             index = pd.MultiIndex(
                 levels=[
