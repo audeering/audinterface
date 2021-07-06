@@ -4,20 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import audeer
 import audformat
 import audinterface
 import audiofile as af
-
-
-def create_index(starts, ends):
-    return pd.MultiIndex.from_arrays(
-        [
-            pd.to_timedelta(audeer.to_list(starts)),
-            pd.to_timedelta(audeer.to_list(ends)),
-        ],
-        names=['start', 'end'],
-    )
 
 
 SAMPLING_RATE = 8000
@@ -25,7 +14,7 @@ SIGNAL = np.ones((3, SAMPLING_RATE * 10))
 SIGNAL_DUR = pd.to_timedelta(SIGNAL.shape[-1] / SAMPLING_RATE, unit='s')
 STARTS = pd.timedelta_range('0s', '10s', 3)
 ENDS = STARTS + pd.to_timedelta('1s')
-INDEX = create_index(STARTS, ENDS)
+INDEX = audinterface.utils.signal_index(STARTS, ENDS)
 
 
 @pytest.mark.parametrize(
@@ -35,13 +24,13 @@ INDEX = create_index(STARTS, ENDS)
             SIGNAL,
             SAMPLING_RATE,
             None,
-            create_index([], []),
+            audinterface.utils.signal_index([], []),
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
             lambda x, sr: INDEX,
-            create_index(STARTS, ENDS),
+            audinterface.utils.signal_index(STARTS, ENDS),
         ),
     ]
 )
@@ -128,7 +117,10 @@ def test_index(tmpdir, num_workers, multiprocessing):
 
     def process_func(x, sr):
         dur = pd.to_timedelta(x.shape[-1] / sr, unit='s')
-        return create_index('0.1s', dur - pd.to_timedelta('0.1s'))
+        return audinterface.utils.signal_index(
+            '0.1s',
+            dur - pd.to_timedelta('0.1s'),
+        )
 
     segment = audinterface.Segment(
         process_func=process_func,
@@ -155,11 +147,11 @@ def test_index(tmpdir, num_workers, multiprocessing):
     assert result.empty
 
     # segmented index without file level
-    index = create_index(
+    index = audinterface.utils.signal_index(
         pd.timedelta_range('0s', '2s', 3),
         pd.timedelta_range('1s', '3s', 3),
     )
-    expected = create_index(
+    expected = audinterface.utils.signal_index(
         index.get_level_values('start') + pd.to_timedelta('0.1s'),
         index.get_level_values('end') - pd.to_timedelta('0.1s'),
     )
@@ -222,55 +214,85 @@ def test_index(tmpdir, num_workers, multiprocessing):
             SIGNAL,
             SAMPLING_RATE,
             None,
-            create_index(0, SIGNAL_DUR),
+            audinterface.utils.signal_index(0, SIGNAL_DUR),
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(0, SIGNAL_DUR),
-            create_index([], []),
+            lambda x, sr: audinterface.utils.signal_index(0, SIGNAL_DUR),
+            audinterface.utils.signal_index([], []),
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(0, '1s'),
-            create_index('1s', SIGNAL_DUR)
+            lambda x, sr: audinterface.utils.signal_index(0, '1s'),
+            audinterface.utils.signal_index('1s', SIGNAL_DUR)
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index('1s', SIGNAL_DUR),
-            create_index(0, '1s')
+            lambda x, sr: audinterface.utils.signal_index('1s', SIGNAL_DUR),
+            audinterface.utils.signal_index(0, '1s')
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(['1s', '4s'], ['2s', '5s']),
-            create_index([0, '2s', '5s'], ['1s', '4s', SIGNAL_DUR])
+            lambda x, sr: audinterface.utils.signal_index(
+                ['1s', '4s'],
+                ['2s', '5s'],
+            ),
+            audinterface.utils.signal_index(
+                [0, '2s', '5s'],
+                ['1s', '4s', SIGNAL_DUR],
+            )
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(['4s', '1s'], ['5s', '2s']),
-            create_index([0, '2s', '5s'], ['1s', '4s', SIGNAL_DUR])
+            lambda x, sr: audinterface.utils.signal_index(
+                ['4s', '1s'],
+                ['5s', '2s'],
+            ),
+            audinterface.utils.signal_index(
+                [0, '2s', '5s'],
+                ['1s', '4s', SIGNAL_DUR],
+            )
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(['1s', '2s'], ['5s', '4s']),
-            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+            lambda x, sr: audinterface.utils.signal_index(
+                ['1s', '2s'],
+                ['5s', '4s'],
+            ),
+            audinterface.utils.signal_index(
+                [0, '5s'],
+                ['1s', SIGNAL_DUR],
+            )
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(['2s', '1s'], ['4s', '5s']),
-            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+            lambda x, sr: audinterface.utils.signal_index(
+                ['2s', '1s'],
+                ['4s', '5s'],
+            ),
+            audinterface.utils.signal_index(
+                [0, '5s'],
+                ['1s', SIGNAL_DUR],
+            )
         ),
         (
             SIGNAL,
             SAMPLING_RATE,
-            lambda x, sr: create_index(['2s', '1s'], ['5s', '4s']),
-            create_index([0, '5s'], ['1s', SIGNAL_DUR])
+            lambda x, sr: audinterface.utils.signal_index(
+                ['2s', '1s'],
+                ['5s', '4s'],
+            ),
+            audinterface.utils.signal_index(
+                [0, '5s'],
+                ['1s', SIGNAL_DUR],
+            )
         ),
     ]
 )
@@ -292,7 +314,7 @@ def test_invert(signal, sampling_rate, segment_func, result):
             None,
             None,
             None,
-            create_index([], []),
+            audinterface.utils.signal_index([], []),
         ),
         (
             SIGNAL,
@@ -300,7 +322,7 @@ def test_invert(signal, sampling_rate, segment_func, result):
             lambda x, sr: INDEX,
             None,
             None,
-            create_index(STARTS, ENDS)
+            audinterface.utils.signal_index(STARTS, ENDS)
         ),
         (
             SIGNAL,
@@ -308,7 +330,7 @@ def test_invert(signal, sampling_rate, segment_func, result):
             lambda x, sr: INDEX,
             pd.to_timedelta('1s'),
             pd.to_timedelta('10s'),
-            create_index(
+            audinterface.utils.signal_index(
                 STARTS + pd.to_timedelta('1s'),
                 ENDS + pd.to_timedelta('1s'),
             )

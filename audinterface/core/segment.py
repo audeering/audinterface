@@ -22,13 +22,7 @@ def create_process_func(
 
     if process_func is None:
         def process_func(signal, sr, **kwargs):
-            return pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([]),
-                ],
-                names=['start', 'end'],
-            )
+            return utils.signal_index()
 
     if invert:
         def process_func_invert(signal, sr, **kwargs):
@@ -53,13 +47,7 @@ def invert_index(
 
     """
     if index.empty:
-        return pd.MultiIndex.from_arrays(
-            [
-                [pd.to_timedelta(0)],
-                [dur],
-            ],
-            names=['start', 'end'],
-        )
+        return utils.signal_index(0, dur)
 
     starts = index.get_level_values('start')
     ends = index.get_level_values('end')
@@ -71,13 +59,7 @@ def invert_index(
     if ends[-1] != dur:
         new_starts = new_starts.insert(len(new_starts), ends[-1])
         new_ends = new_ends.insert(len(new_ends), dur)
-    return pd.MultiIndex.from_arrays(
-        [
-            new_starts,
-            new_ends,
-        ],
-        names=['start', 'end'],
-    )
+    return utils.signal_index(new_starts, new_ends)
 
 
 def merge_index(
@@ -108,13 +90,7 @@ def merge_index(
     new_starts.append(new_start)
     new_ends.append(new_end)
 
-    return pd.MultiIndex.from_arrays(
-        [
-            new_starts,
-            new_ends,
-        ],
-        names=['start', 'end'],
-    )
+    return utils.signal_index(new_starts, new_ends)
 
 
 class Segment:
@@ -343,7 +319,7 @@ class Segment:
 
         """
         index = audformat.utils.to_segmented_index(index)
-        utils.check_index(index)
+        utils.assert_index(index)
 
         if index.empty:
             return index
@@ -396,7 +372,7 @@ class Segment:
             start=start,
             end=end,
         ).values[0]
-        utils.check_index(index)
+        utils.assert_index(index)
         if start is not None:
             index = index.set_levels(
                 [
@@ -434,6 +410,7 @@ class Segment:
                 or a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
+                See also :func:`audinterface.utils.signal_index`
 
         Returns:
             Segmented index conform to audformat_
@@ -445,7 +422,7 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        utils.check_index(index)
+        utils.assert_index(index)
 
         if index.empty:
             return index

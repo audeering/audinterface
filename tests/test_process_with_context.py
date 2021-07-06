@@ -81,25 +81,16 @@ def test_process_index(tmpdir):
             None,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([]),
-                ],
-                names=['start', 'end']
-            ),
+            audinterface.utils.signal_index(),
         ),
         (
             None,
             None,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.timedelta_range('0s', '3s', 3),
-                    pd.timedelta_range('1s', '4s', 3),
-                ],
-                names=['start', 'end']
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
             ),
         ),
         (
@@ -107,12 +98,9 @@ def test_process_index(tmpdir):
             signal_max_with_context,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.timedelta_range('0s', '3s', 3),
-                    pd.timedelta_range('1s', '4s', 3),
-                ],
-                names=['start', 'end']
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
             ),
         ),
         (
@@ -120,13 +108,7 @@ def test_process_index(tmpdir):
             signal_max_with_context,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([]),
-                ],
-                names=['start', 'end']
-            ),
+            audinterface.utils.signal_index(),
         ),
         pytest.param(
             signal_max,
@@ -257,11 +239,8 @@ def test_sampling_rate_mismatch(
         verbose=False,
     )
     signal = np.random.random(5 * 44100)
-    index = pd.MultiIndex.from_arrays(
-        [
-            pd.timedelta_range('0s', '3s', 3),
-            pd.timedelta_range('1s', '4s', 3),
-        ],
-        names=['start', 'end']
+    index = audinterface.utils.signal_index(
+        pd.timedelta_range('0s', '3s', 3),
+        pd.timedelta_range('1s', '4s', 3),
     )
     model.process_signal_from_index(signal, signal_sampling_rate, index)

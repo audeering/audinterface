@@ -12,24 +12,40 @@ import audiofile as af
 from audinterface.core.typing import Timestamps
 
 
-def check_index(index: pd.Index):
+def assert_index(obj: pd.Index):
     r"""Check if index is conform to audformat."""
-    if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
-        if not index.empty:
-            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
-                    index.levels[0]
-            ):
-                raise ValueError(f'Level 0 has type '
-                                 f'{type(index.levels[0].dtype)}'
-                                 f', expected timedelta64[ns].')
-            if not pd.core.dtypes.common.is_datetime_or_timedelta_dtype(
-                    index.levels[1]
-            ):
-                raise ValueError(f'Level 1 has type '
-                                 f'{type(index.levels[1].dtype)}'
-                                 f', expected timedelta64[ns].')
+
+    if isinstance(obj, pd.MultiIndex) and len(obj.levels) == 2:
+        if not (
+                obj.names[0] == audformat.define.IndexField.START
+                and obj.names[1] == audformat.define.IndexField.END
+        ):
+            expected_names = [
+                audformat.define.IndexField.START,
+                audformat.define.IndexField.END,
+            ]
+            raise ValueError(
+                'Found two levels with names '
+                f'{obj.names}, '
+                f'but expected names '
+                f'{expected_names}.'
+            )
+        if not pd.api.types.is_timedelta64_dtype(obj.levels[0].dtype):
+            raise ValueError(
+                "Level 'start' must contain values of type 'timedelta64[ns]'."
+            )
+        if not pd.api.types.is_timedelta64_dtype(obj.levels[1].dtype):
+            raise ValueError(
+                "Level 'end' must contain values of type 'timedelta64[ns]'."
+            )
     else:
-        audformat.assert_index(index)
+        audformat.assert_index(obj)
+
+
+def is_scalar(value: typing.Any) -> bool:
+    r"""Check if value is scalar"""
+    return (value is not None) and \
+           (isinstance(value, str) or not hasattr(value, '__len__'))
 
 
 def preprocess_signal(
@@ -136,6 +152,106 @@ def segments_to_indices(
         starts_i[idx] = start_i
         ends_i[idx] = end_i
     return starts_i, ends_i
+
+
+def signal_index(
+        starts: Timestamps = None,
+        ends: Timestamps = None,
+) -> pd.MultiIndex:
+    r"""Create signal index.
+
+    Returns a segmented index like
+    :func:`audformat.segmented_index`,
+    but without the ``'file'`` level.
+    Can be used with the following methods:
+
+    * :meth:`audinterface.Feature.process_signal_from_index`
+    * :meth:`audinterface.Process.process_signal_from_index`
+    * :meth:`audinterface.ProcessWithContext.process_signal_from_index`
+    * :meth:`audinterface.Segment.process_signal_from_index`
+
+    Args:
+        starts: segment start positions.
+            Time values given as float or integers are treated as seconds
+        ends: segment end positions.
+            Time values given as float or integers are treated as seconds
+
+    Returns:
+        index with start and end times
+
+    Raises:
+        ValueError: if ``start`` and ``ends`` differ in size
+
+    Example:
+        >>> signal_index(0, 1.1)
+        MultiIndex([('0 days', '0 days 00:00:01.100000')],
+                   names=['start', 'end'])
+        >>> signal_index('0ms', '1ms')
+        MultiIndex([('0 days', '0 days 00:00:00.001000')],
+                   names=['start', 'end'])
+        >>> signal_index([None, 1], [1, None])
+        MultiIndex([(              NaT, '0 days 00:00:01'),
+                    ('0 days 00:00:01',              NaT)],
+                   names=['start', 'end'])
+        >>> signal_index(
+        ...     starts=[0, 1],
+        ...     ends=pd.to_timedelta([1000, 2000], unit='ms'),
+        ... )
+        MultiIndex([('0 days 00:00:00', '0 days 00:00:01'),
+                    ('0 days 00:00:01', '0 days 00:00:02')],
+                   names=['start', 'end'])
+        >>> signal_index([0, 1])
+        MultiIndex([('0 days 00:00:00', NaT),
+                    ('0 days 00:00:01', NaT)],
+                   names=['start', 'end'])
+        >>> signal_index(ends=[1, 2])
+        MultiIndex([('0 days', '0 days 00:00:01'),
+                    ('0 days', '0 days 00:00:02')],
+                   names=['start', 'end'])
+
+    """
+    starts = to_array(starts)
+    ends = to_array(ends)
+
+    if starts is None:
+        if ends is not None:
+            starts = [0] * len(ends)
+        else:
+            starts = []
+
+    if ends is None:
+        ends = [pd.NaT] * len(starts)
+
+    if len(starts) != len(ends):
+        raise ValueError(
+            f"Cannot create index,"
+            f"'starts' and 'ends' differ in length: "
+            f"{len(starts)} != {len(ends)}.",
+        )
+
+    index = pd.MultiIndex.from_arrays(
+        [
+            to_timedelta(starts),
+            to_timedelta(ends),
+        ],
+        names=[
+            audformat.define.IndexField.START,
+            audformat.define.IndexField.END,
+        ],
+    )
+    assert_index(index)
+
+    return index
+
+
+def to_array(value: typing.Any) -> np.ndarray:
+    r"""Convert value to numpy array."""
+    if value is not None:
+        if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
+            value = value.to_numpy()
+        elif is_scalar(value):
+            value = np.array([value])
+    return value
 
 
 def to_timedelta(times: Timestamps):

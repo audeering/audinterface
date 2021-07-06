@@ -20,16 +20,9 @@ def signal_max(signal, sampling_rate):
 
 SEGMENT = audinterface.Segment(
     process_func=lambda x, sr:
-        pd.MultiIndex.from_arrays(
-            [
-                [
-                    pd.to_timedelta(0),
-                ],
-                [
-                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                ],
-            ],
-            names=['start', 'end'],
+        audinterface.utils.signal_index(
+            pd.to_timedelta(0),
+            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
         )
 )
 
@@ -874,9 +867,7 @@ def test_process_signal(
     if file is None:
         y = pd.Series(
             [expected_signal],
-            index=pd.MultiIndex.from_arrays(
-                [[start], [end]], names=['start', 'end']
-            ),
+            index=audinterface.utils.signal_index(start, end),
         )
     else:
         y = pd.Series(
@@ -901,49 +892,31 @@ def test_process_signal(
             None,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([]),
-                ],
-                names=['start', 'end']
-            ),
+            audinterface.utils.signal_index(),
         ),
         (
             None,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.timedelta_range('0s', '3s', 3),
-                    pd.timedelta_range('1s', '4s', 3),
-                ],
-                names=['start', 'end']
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3)
             ),
         ),
         (
             signal_max,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.timedelta_range('0s', '3s', 3),
-                    pd.timedelta_range('1s', '4s', 3),
-                ],
-                names=['start', 'end']
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
             ),
         ),
         (
             signal_max,
             np.random.random(5 * 44100),
             44100,
-            pd.MultiIndex.from_arrays(
-                [
-                    pd.to_timedelta([]),
-                    pd.to_timedelta([]),
-                ],
-                names=['start', 'end']
-            ),
+            audinterface.utils.signal_index(),
         ),
         pytest.param(
             signal_max,
@@ -1020,54 +993,33 @@ def test_process_signal_from_index(
     'segment',
     [
         audinterface.Segment(
+            process_func=lambda x, sr: audinterface.utils.signal_index()
+        ),
+        audinterface.Segment(
             process_func=lambda x, sr:
-                pd.MultiIndex.from_arrays(
-                    [pd.to_timedelta([]), pd.to_timedelta([])],
-                    names=['start', 'end'],
+                audinterface.utils.signal_index(
+                    pd.to_timedelta(0),
+                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                 )
         ),
         audinterface.Segment(
             process_func=lambda x, sr:
-                pd.MultiIndex.from_arrays(
-                    [
-                        [
-                            pd.to_timedelta(0),
-                        ],
-                        [
-                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                        ],
-                    ],
-                    names=['start', 'end'],
-                )
-        ),
-        audinterface.Segment(
-            process_func=lambda x, sr:
-            pd.MultiIndex.from_arrays(
-                [
-                    [
-                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                    ],
-                    [
-                        pd.to_timedelta(x.shape[1] / sr, unit='s'),
-                    ],
-                ],
-                names=['start', 'end'],
+            audinterface.utils.signal_index(
+                pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
+                pd.to_timedelta(x.shape[1] / sr, unit='s'),
             )
         ),
         audinterface.Segment(
             process_func=lambda x, sr:
-                pd.MultiIndex.from_arrays(
+                audinterface.utils.signal_index(
                     [
-                        [
-                            pd.to_timedelta(0),
-                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                        ],
-                        [
-                            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                            pd.to_timedelta(x.shape[1] / sr),
-                        ],
+                        pd.to_timedelta(0),
+                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
                     ],
-                    names=['start', 'end'],
+                    [
+                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
+                        pd.to_timedelta(x.shape[1] / sr),
+                    ],
                 )
         )
     ]

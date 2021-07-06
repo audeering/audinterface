@@ -13,6 +13,7 @@ from audinterface.core.typing import (
     Timestamp,
     Timestamps,
 )
+import audinterface.core.utils as utils
 
 
 class Feature:
@@ -344,6 +345,7 @@ class Feature:
             index: a :class:`pandas.MultiIndex` with two levels
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
+                See also :func:`audinterface.utils.signal_index`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -507,10 +509,7 @@ class Feature:
             ends = [end]
 
         if file is None:
-            index = pd.MultiIndex.from_arrays(
-                [starts, ends],
-                names=['start', 'end'],
-            )
+            index = utils.signal_index(starts, ends)
         else:
             files = [file] * len(starts)
             index = audformat.segmented_index(files, starts, ends)
