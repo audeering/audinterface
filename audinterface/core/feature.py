@@ -494,16 +494,20 @@ class Feature:
         features = features.reshape(new_shape).T
 
         if n_time_steps > 1:
+
             if win_dur is None:
-                starts = [start] * n_time_steps
-                ends = [end] * n_time_steps
-            else:
-                starts = pd.timedelta_range(
-                    start,
-                    freq=hop_dur,
-                    periods=n_time_steps,
+                raise RuntimeError(
+                    f"Got "
+                    f"{n_time_steps} "
+                    f"frames, but 'win_dur' is not set."
                 )
-                ends = starts + win_dur
+
+            starts = pd.timedelta_range(
+                start,
+                freq=hop_dur,
+                periods=n_time_steps,
+            )
+            ends = starts + win_dur
         else:
             starts = [start]
             ends = [end]

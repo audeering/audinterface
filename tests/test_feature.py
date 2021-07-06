@@ -433,6 +433,7 @@ def test_process_signal(
         process_func=process_func,
         channels=range(signal.shape[0]),
         process_func_is_mono=expand,
+        win_dur=1,
     )
     features = extractor.process_signal(
         signal,
@@ -513,10 +514,13 @@ def test_process_index(tmpdir):
     [
         (1, 0.5, 'seconds'),
         (1, None, 'seconds'),
+        (16000, None, 'samples'),
         (1000, 500, 'milliseconds'),
-        (None, None, 'seconds'),
         (SAMPLING_RATE, SAMPLING_RATE // 2, 'samples'),
-        (None, None, 'samples'),
+        pytest.param(  # multiple frames, but win_dur is None
+            None, None, 'seconds',
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
     ],
 )
 def test_signal_sliding_window(win_dur, hop_dur, unit):
@@ -537,26 +541,22 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
         SAMPLING_RATE,
     )
     n_time_steps = len(features)
-    start = pd.to_timedelta(0)
-    end = pd.to_timedelta(SIGNAL_2D.shape[-1] / SAMPLING_RATE, unit='seconds')
-    if win_dur is None:
-        starts = [start] * n_time_steps
-        ends = [end] * n_time_steps
-    else:
-        if unit == 'samples':
-            win_dur = win_dur / SAMPLING_RATE
-            if hop_dur is not None:
-                hop_dur /= SAMPLING_RATE
-            unit = 'seconds'
-        if hop_dur is None:
-            hop_dur = win_dur / 2
 
-        starts = pd.timedelta_range(
-            start,
-            freq=pd.to_timedelta(hop_dur, unit=unit),
-            periods=n_time_steps,
-        )
-        ends = starts + pd.to_timedelta(win_dur, unit=unit)
+    if unit == 'samples':
+        win_dur = win_dur / SAMPLING_RATE
+        if hop_dur is not None:
+            hop_dur /= SAMPLING_RATE
+        unit = 'seconds'
+    if hop_dur is None:
+        hop_dur = win_dur / 2
+
+    starts = pd.timedelta_range(
+        pd.to_timedelta(0),
+        freq=pd.to_timedelta(hop_dur, unit=unit),
+        periods=n_time_steps,
+    )
+    ends = starts + pd.to_timedelta(win_dur, unit=unit)
+
     index = audinterface.utils.signal_index(starts, ends)
     pd.testing.assert_frame_equal(
         features,
