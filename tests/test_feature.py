@@ -69,7 +69,23 @@ def test_feature():
             SIGNAL_1D,
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones(3),
+            ),
+            np.ones((1, 3, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
+            ),
+            np.ones((1, 3, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((3, 1)),
             ),
             np.ones((1, 3, 1)),
         ),
@@ -122,6 +138,16 @@ def test_feature():
             SIGNAL_2D,
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3)),
+                channels=range(2),
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3, 1)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 1)),
                 channels=range(2),
                 process_func_is_mono=True,
@@ -150,7 +176,7 @@ def test_feature():
         ),
     ]
 )
-def test_process_callable(signal, feature, expected):
+def test_process_call(signal, feature, expected):
     np.testing.assert_array_equal(
         feature(signal, SAMPLING_RATE),
         expected,
@@ -354,7 +380,7 @@ def test_process_folder(tmpdir):
             False,
             np.ones((5, 2 * 3)),
         ),
-        # 1 channel, 1 feature + expand
+        # 1 channel, 1 feature + mono processing
         (
             lambda s, sr: np.ones(1),
             1,
@@ -373,7 +399,7 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 1)),
         ),
-        # 2 channels, 1 feature + expand
+        # 2 channels, 1 feature + mono processing
         (
             lambda s, sr: np.ones(1),
             1,
@@ -392,7 +418,7 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 2)),
         ),
-        # 2 channels, 3 features + expand
+        # 2 channels, 3 features + mono processing
         (
             lambda s, sr: np.ones(3),
             3,
@@ -402,7 +428,16 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 2 * 3)),
         ),
-        # 2 channels, 3 features, 5 frames + expand
+        (
+            lambda s, sr: np.ones((1, 3, 1)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2 * 3)),
+        ),
+        # 2 channels, 3 features, 5 frames + mono processing
         (
             lambda s, sr: np.ones((3, 5)),
             3,
@@ -434,7 +469,7 @@ def test_process_folder(tmpdir):
         ),
         # Feature extractor function returns too less dimensions
         pytest.param(
-            lambda s, sr: np.ones((1, )),
+            lambda s, sr: np.ones(1),
             3,
             SIGNAL_2D,
             None,

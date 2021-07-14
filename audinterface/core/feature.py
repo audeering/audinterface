@@ -425,9 +425,24 @@ class Feature:
 
         if self.process.process_func_is_mono:
             features = np.array(features)
-            if features.ndim == 4 and features.shape[1] == 1:
-                # mono processing turned on
-                # and process function returns (1, features, frames)
+            # when mono processing is turned on
+            # the channel dimension has to be 1
+            # so we would usually omit it,
+            # but since older versions required
+            # a channel dimension we have to
+            # consider two special cases
+            if (features.ndim == 4) and \
+                    (features.shape[1] == 1):
+                # (1, features, frames)
+                # -> (channels, 1, features, frames)
+                # -> (channels, features, frames)
+                features = features.squeeze(axis=1)
+            elif (features.ndim == 3) and \
+                    (self.win_dur is None) and \
+                    (features.shape[1] == 1):
+                # (1, features)
+                # -> (channels, 1, features)
+                # -> (channels, features)
                 features = features.squeeze(axis=1)
 
         if not isinstance(features, np.ndarray):
