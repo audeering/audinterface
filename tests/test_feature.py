@@ -402,15 +402,6 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 2 * 3)),
         ),
-        # (
-        #     lambda s, sr: np.ones((1, 3)),
-        #     3,
-        #     SIGNAL_2D,
-        #     None,
-        #     None,
-        #     True,
-        #     np.ones((1, 2 * 3)),
-        # ),
         # 2 channels, 3 features, 5 frames + expand
         (
             lambda s, sr: np.ones((3, 5)),
