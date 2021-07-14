@@ -47,8 +47,10 @@ class Feature:
             and ``sampling_rate``
             and any number of additional keyword arguments.
             The function must return features in the shape of
-            ``(num_channels, num_features)``
-            or ``(num_channels, num_features, num_time_steps)``.
+            ``(num_features),
+            ``(num_channels, num_features)``,
+            ``(num_features, num_frames)``,
+            or ``(num_channels, num_features, num_frames)``.
         process_func_is_mono: apply ``process_func`` to every channel
             individually
         sampling_rate: sampling rate in Hz.
@@ -593,7 +595,8 @@ class Feature:
             sampling_rate: sampling rate in Hz
 
         Returns:
-            Processed signal
+            feature array with shape
+            ``(num_channels, num_features, num_frames)``
 
         Raises:
             RuntimeError: if sampling rates do not match
