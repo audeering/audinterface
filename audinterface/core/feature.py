@@ -457,7 +457,7 @@ class Feature:
                 f'not {features.ndim}.'
             )
 
-        # reshape features to (channels x features x frames)
+        # figure out channels, feature, frames
         if features.ndim == 1:
             n_channels = 1
             n_features = features.size
@@ -484,8 +484,7 @@ class Feature:
             n_features = features.shape[1]
             n_frames = features.shape[2]
 
-        features = features.reshape([n_channels, n_features, n_frames])
-
+        # assert channels and features have expected length
         if n_channels != self.num_channels:
             raise RuntimeError(
                 f'Number of channels must be'
@@ -501,7 +500,8 @@ class Feature:
                 f'{n_features}.'
             )
 
-        return features
+        # reshape features to (channels,  features, frames)
+        return features.reshape([n_channels, n_features, n_frames])
 
     def _series_to_frame(
             self,
