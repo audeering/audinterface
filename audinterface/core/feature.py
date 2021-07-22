@@ -561,7 +561,7 @@ class Feature:
         n_channels, n_features, n_frames = features.shape
 
         # Combine features and channels into one dimension
-        # f1-c1, f2-c1, fN-c1, ..., f1-cM, f2-cM,..., fN-cM
+        # f1-c1, f2-c1, ..., fN-c1, ..., f1-cM, f2-cM, ..., fN-cM
         new_shape = (n_channels * n_features, n_frames)
         features = features.reshape(new_shape).T
 
