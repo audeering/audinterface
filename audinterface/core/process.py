@@ -583,7 +583,7 @@ class Process:
             self.channels,
             self.mixdown,
         )
-        if self.process_func_is_mono and signal.shape[0] > 1:
+        if self.process_func_is_mono:
             return [
                 self.process_func(
                     np.atleast_2d(channel),

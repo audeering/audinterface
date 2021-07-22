@@ -69,9 +69,25 @@ def test_feature():
             SIGNAL_1D,
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones(3),
+            ),
+            np.ones((1, 3, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
             ),
-            np.ones((1, 3)),
+            np.ones((1, 3, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((3, 1)),
+            ),
+            np.ones((1, 3, 1)),
         ),
         (
             SIGNAL_1D,
@@ -97,7 +113,7 @@ def test_feature():
                 process_func=lambda x, sr: np.ones((2, 3)),
                 channels=range(2),
             ),
-            np.ones((2, 3)),
+            np.ones((2, 3, 1)),
         ),
         (
             SIGNAL_2D,
@@ -112,11 +128,41 @@ def test_feature():
             SIGNAL_2D,
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones(3),
+                channels=range(2),
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3, 1)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
                 channels=range(2),
                 process_func_is_mono=True,
             ),
-            np.ones((2, 3)),
+            np.ones((2, 3, 1)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((1, 3, 1)),
+                channels=range(2),
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3, 1)),
+        ),
+        (
+            SIGNAL_2D,
+            audinterface.Feature(
+                feature_names=['f1', 'f2', 'f3'],
+                process_func=lambda x, sr: np.ones((3, 5)),
+                channels=range(2),
+                process_func_is_mono=True,
+            ),
+            np.ones((2, 3, 5)),
         ),
         (
             SIGNAL_2D,
@@ -130,7 +176,7 @@ def test_feature():
         ),
     ]
 )
-def test_process_callable(signal, feature, expected):
+def test_process_call(signal, feature, expected):
     np.testing.assert_array_equal(
         feature(signal, SAMPLING_RATE),
         expected,
@@ -256,6 +302,16 @@ def test_process_folder(tmpdir):
         ),
         # 1 channel, 1 feature
         (
+            lambda s, sr: np.ones(1),
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 1)),
+        ),
+        # 1 channel, 1 feature
+        (
             lambda s, sr: np.ones((1, 1)),
             1,
             SIGNAL_1D,
@@ -263,6 +319,16 @@ def test_process_folder(tmpdir):
             None,
             False,
             np.ones((1, 1)),
+        ),
+        # 1 channel, 3 features
+        (
+            lambda s, sr: np.ones(3),
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 3)),
         ),
         # 1 channel, 3 features
         (
@@ -304,7 +370,7 @@ def test_process_folder(tmpdir):
             False,
             np.ones((1, 2 * 3)),
         ),
-        # 2 channels, 3 features, 5 steps
+        # 2 channels, 3 features, 5 frames
         (
             lambda s, sr: np.ones((2, 3, 5)),
             3,
@@ -314,7 +380,16 @@ def test_process_folder(tmpdir):
             False,
             np.ones((5, 2 * 3)),
         ),
-        # 1 channel, 1 feature + expand
+        # 1 channel, 1 feature + mono processing
+        (
+            lambda s, sr: np.ones(1),
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            True,
+            np.ones((1, 1)),
+        ),
         (
             lambda s, sr: np.ones((1, 1)),
             1,
@@ -324,7 +399,16 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 1)),
         ),
-        # 2 channels, 1 feature + expand
+        # 2 channels, 1 feature + mono processing
+        (
+            lambda s, sr: np.ones(1),
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2)),
+        ),
         (
             lambda s, sr: np.ones((1, 1)),
             1,
@@ -334,9 +418,9 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 2)),
         ),
-        # 2 channels, 3 features + expand
+        # 2 channels, 3 features + mono processing
         (
-            lambda s, sr: np.ones((1, 3)),
+            lambda s, sr: np.ones(3),
             3,
             SIGNAL_2D,
             None,
@@ -344,7 +428,25 @@ def test_process_folder(tmpdir):
             True,
             np.ones((1, 2 * 3)),
         ),
-        # 2 channels, 3 features, 5 steps + expand
+        (
+            lambda s, sr: np.ones((1, 3, 1)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2 * 3)),
+        ),
+        # 2 channels, 3 features, 5 frames + mono processing
+        (
+            lambda s, sr: np.ones((3, 5)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((5, 2 * 3)),
+        ),
         (
             lambda s, sr: np.ones((1, 3, 5)),
             3,
@@ -354,20 +456,30 @@ def test_process_folder(tmpdir):
             True,
             np.ones((5, 2 * 3)),
         ),
-        # Feature extractor function is not a np.ndarray
+        # Feature extractor function returns not a np.ndarray
         pytest.param(
-            lambda s, sr: 1,
+            lambda s, sr: [1, 1, 1],
             3,
             SIGNAL_2D,
             None,
             None,
-            None,
             False,
+            None,
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(
+            lambda s, sr: [1, 1, 1],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            None,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns too less dimensions
         pytest.param(
-            lambda s, sr: np.ones((1, )),
+            lambda s, sr: np.ones(1),
             3,
             SIGNAL_2D,
             None,
@@ -420,25 +532,36 @@ def test_process_folder(tmpdir):
             False,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
+        # Feature extractor function returns wrong number of features
+        pytest.param(
+            lambda s, sr: np.ones((2, 3 + 1, 1)),
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            None,
+            False,
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
     ]
 )
 def test_process_signal(
         process_func, num_feat, signal, start, end, expand, expected,
 ):
-    extractor = audinterface.Feature(
+    feature = audinterface.Feature(
         feature_names=[f'f{i}' for i in range(num_feat)],
         process_func=process_func,
         channels=range(signal.shape[0]),
         process_func_is_mono=expand,
         win_dur=1,
     )
-    features = extractor.process_signal(
+    y = feature.process_signal(
         signal,
         SAMPLING_RATE,
         start=start,
         end=end,
     )
-    np.testing.assert_array_equal(features.values, expected)
+    np.testing.assert_array_equal(y.values, expected)
 
 
 @pytest.mark.parametrize(

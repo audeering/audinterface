@@ -47,8 +47,10 @@ class Feature:
             and ``sampling_rate``
             and any number of additional keyword arguments.
             The function must return features in the shape of
-            ``(num_channels, num_features)``
-            or ``(num_channels, num_features, num_time_steps)``.
+            ``(num_features),
+            ``(num_channels, num_features)``,
+            ``(num_features, num_frames)``,
+            or ``(num_channels, num_features, num_frames)``.
         process_func_is_mono: apply ``process_func`` to every channel
             individually
         sampling_rate: sampling rate in Hz.
@@ -415,6 +417,96 @@ class Feature:
         """
         return frame.values.T.reshape(self.num_channels, self.num_features, -1)
 
+    def _reshape_3d(
+            self,
+            features: typing.Union[np.ndarray, pd.Series]
+    ):
+        r"""Reshape to [n_channels, n_features, n_frames]."""
+
+        if self.process.process_func_is_mono:
+            for channels_features in features:
+                if not isinstance(channels_features, np.ndarray):
+                    raise RuntimeError(
+                        "Features must be a 'np.ndarray', "
+                        f"not '{type(channels_features)}'."
+                    )
+            features = np.array(features)
+            # when mono processing is turned on
+            # the channel dimension has to be 1
+            # so we would usually omit it,
+            # but since older versions required
+            # a channel dimension we have to
+            # consider two special cases
+            if (features.ndim == 4) and \
+                    (features.shape[1] == 1):
+                # (channels, 1, features, frames)
+                # -> (channels, features, frames)
+                features = features.squeeze(axis=1)
+            elif (features.ndim == 3) and \
+                    (self.win_dur is None) and \
+                    (features.shape[1] == 1):
+                # (channels, 1, features)
+                # -> (channels, features)
+                features = features.squeeze(axis=1)
+
+        if not isinstance(features, np.ndarray):
+            raise RuntimeError(
+                "Features must be a 'np.ndarray', "
+                f"not '{type(features)}'."
+            )
+
+        if features.ndim > 3:
+            raise RuntimeError(
+                f'Dimension of extracted features must be 1, 2 or 3, '
+                f'not {features.ndim}.'
+            )
+
+        # figure out channels, feature, frames
+        if features.ndim == 1:
+            n_channels = 1
+            n_features = features.size
+            n_frames = 1
+        elif features.ndim == 2:
+            if (features.shape[0] == self.num_channels) and \
+                    (features.shape[1] == self.num_features):
+                n_channels = features.shape[0]
+                n_features = features.shape[1]
+                n_frames = 1
+            elif features.shape[0] == self.num_features:
+                n_channels = 1
+                n_features = features.shape[0]
+                n_frames = features.shape[1]
+            else:
+                raise RuntimeError(
+                    f'Cannot determine feature shape from '
+                    f'{features.shape}, ',
+                    f'when expected shape is '
+                    f'({self.num_channels, self.num_features, -1}).'
+                )
+        else:
+            n_channels = features.shape[0]
+            n_features = features.shape[1]
+            n_frames = features.shape[2]
+
+        # assert channels and features have expected length
+        if n_channels != self.num_channels:
+            raise RuntimeError(
+                f'Number of channels must be'
+                f' {self.num_channels}, '
+                f'not '
+                f'{n_channels}.'
+            )
+        if n_features != self.num_features:
+            raise RuntimeError(
+                f'Number of features must be '
+                f'{self.num_features}, '
+                f'not '
+                f'{n_features}.'
+            )
+
+        # reshape features to (channels,  features, frames)
+        return features.reshape([n_channels, n_features, n_frames])
+
     def _series_to_frame(
             self,
             series: pd.Series,
@@ -448,10 +540,11 @@ class Feature:
     ) -> pd.DataFrame:
 
         # Convert features to a pd.DataFrame
-        # Assumed format
-        # [n_channels, n_features, n_time_steps]
-        # or
+        # Assumed formats are:
+        # [n_channels, n_features, n_frames]
         # [n_channels, n_features]
+        # [n_features, n_frames]
+        # [n_features]
 
         if self.win_dur is not None:
             if self.unit == 'samples':
@@ -468,58 +561,26 @@ class Feature:
             win_dur = None
             hop_dur = None
 
-        if self.process.process_func_is_mono and self.num_channels > 1:
-            features = np.concatenate(features)
+        features = self._reshape_3d(features)
+        n_channels, n_features, n_frames = features.shape
 
-        if not isinstance(features, np.ndarray):
-            raise RuntimeError(
-                "Features must be a 'np.ndarray', "
-                f"not '{type(features)}'."
-            )
-
-        # features = np.array(features)
-        if features.ndim < 2 or features.ndim > 3:
-            raise RuntimeError(
-                f'Dimension of extracted features must be 2 or 3, '
-                f'not {features.ndim}.'
-            )
-
-        # Force third time step dimension
-        features = np.atleast_3d(features)
-        n_channels = features.shape[0]
-        n_features = features.shape[1]
-        n_time_steps = features.shape[2]
-
-        if n_channels != self.num_channels:
-            raise RuntimeError(
-                f'Number of channels must be {self.num_channels}, '
-                f'not {n_channels}.'
-            )
-        if n_features != len(self.feature_names):
-            raise RuntimeError(
-                f'Number of features must be {len(self.feature_names)}, '
-                f'not {n_features}.'
-            )
-
-        # Reshape features and store channel number as first feature
-        # [n_channels, n_features, n_time_steps] =>
-        # [n_channels * n_features + 1, n_time_steps]
-        new_shape = (n_channels * n_features, n_time_steps)
+        # Combine features and channels into one dimension
+        # f1-c1, f2-c1, ..., fN-c1, ..., f1-cM, f2-cM, ..., fN-cM
+        new_shape = (n_channels * n_features, n_frames)
         features = features.reshape(new_shape).T
 
-        if n_time_steps > 1:
+        if n_frames > 1 and win_dur is None:
+            raise RuntimeError(
+                f"Got "
+                f"{n_frames} "
+                f"frames, but 'win_dur' is not set."
+            )
 
-            if win_dur is None:
-                raise RuntimeError(
-                    f"Got "
-                    f"{n_time_steps} "
-                    f"frames, but 'win_dur' is not set."
-                )
-
+        if win_dur is not None:
             starts = pd.timedelta_range(
                 start,
                 freq=hop_dur,
-                periods=n_time_steps,
+                periods=n_frames,
             )
             ends = starts + win_dur
         else:
@@ -552,7 +613,8 @@ class Feature:
             sampling_rate: sampling rate in Hz
 
         Returns:
-            Processed signal
+            feature array with shape
+            ``(num_channels, num_features, num_frames)``
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -565,6 +627,4 @@ class Feature:
             signal,
             sampling_rate,
         )
-        if self.process.process_func_is_mono and self.num_channels > 1:
-            y = np.concatenate(y)
-        return y
+        return self._reshape_3d(y)
