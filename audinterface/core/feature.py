@@ -433,15 +433,13 @@ class Feature:
             # consider two special cases
             if (features.ndim == 4) and \
                     (features.shape[1] == 1):
-                # (1, features, frames)
-                # -> (channels, 1, features, frames)
+                # (channels, 1, features, frames)
                 # -> (channels, features, frames)
                 features = features.squeeze(axis=1)
             elif (features.ndim == 3) and \
                     (self.win_dur is None) and \
                     (features.shape[1] == 1):
-                # (1, features)
-                # -> (channels, 1, features)
+                # (channels, 1, features)
                 # -> (channels, features)
                 features = features.squeeze(axis=1)
 
