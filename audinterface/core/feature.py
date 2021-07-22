@@ -560,7 +560,8 @@ class Feature:
         features = self._reshape_3d(features)
         n_channels, n_features, n_frames = features.shape
 
-        # Reshape features and store channel number as first feature
+        # Combine features and channels into one dimension
+        # f1-c1, f2-c1, fN-c1, ..., f1-cM, f2-cM,..., fN-cM
         new_shape = (n_channels * n_features, n_frames)
         features = features.reshape(new_shape).T
 
