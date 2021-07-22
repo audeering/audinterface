@@ -94,7 +94,7 @@ class Feature:
             *,
             name: str = None,
             params: typing.Dict = None,
-            process_func: typing.Callable[..., np.ndarray] = None,
+            process_func: typing.Callable[..., typing.Any] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
             win_dur: typing.Union[int, float] = None,
@@ -423,14 +423,10 @@ class Feature:
     ):
         r"""Reshape to [n_channels, n_features, n_frames]."""
 
+        features = np.array(features)
+        features = np.atleast_1d(features)
+
         if self.process.process_func_is_mono:
-            for channels_features in features:
-                if not isinstance(channels_features, np.ndarray):
-                    raise RuntimeError(
-                        "Features must be a 'np.ndarray', "
-                        f"not '{type(channels_features)}'."
-                    )
-            features = np.array(features)
             # when mono processing is turned on
             # the channel dimension has to be 1
             # so we would usually omit it,
@@ -448,12 +444,6 @@ class Feature:
                 # (channels, 1, features)
                 # -> (channels, features)
                 features = features.squeeze(axis=1)
-
-        if not isinstance(features, np.ndarray):
-            raise RuntimeError(
-                "Features must be a 'np.ndarray', "
-                f"not '{type(features)}'."
-            )
 
         if features.ndim > 3:
             raise RuntimeError(

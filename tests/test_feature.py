@@ -302,6 +302,24 @@ def test_process_folder(tmpdir):
         ),
         # 1 channel, 1 feature
         (
+            lambda s, sr: 1,
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 1)),
+        ),
+        (
+            lambda s, sr: 'f',
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.array([['f']]),
+        ),
+        (
             lambda s, sr: np.ones(1),
             1,
             SIGNAL_1D,
@@ -311,6 +329,24 @@ def test_process_folder(tmpdir):
             np.ones((1, 1)),
         ),
         # 1 channel, 1 feature
+        (
+            lambda s, sr: [1],
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 1)),
+        ),
+        (
+            lambda s, sr: ['f'],
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.array([['f']]),
+        ),
         (
             lambda s, sr: np.ones((1, 1)),
             1,
@@ -322,6 +358,24 @@ def test_process_folder(tmpdir):
         ),
         # 1 channel, 3 features
         (
+            lambda s, sr: [1, 1, 1],
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 3)),
+        ),
+        (
+            lambda s, sr: ['a', 1, 1.0],
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.array([['a', 1, 1.0]]),
+        ),
+        (
             lambda s, sr: np.ones(3),
             3,
             SIGNAL_1D,
@@ -331,6 +385,24 @@ def test_process_folder(tmpdir):
             np.ones((1, 3)),
         ),
         # 1 channel, 3 features
+        (
+            lambda s, sr: [[1, 1, 1]],
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.ones((1, 3)),
+        ),
+        (
+            lambda s, sr: [['a', 1, 1.0]],
+            3,
+            SIGNAL_1D,
+            None,
+            None,
+            False,
+            np.array([['a', 1, 1.0]]),
+        ),
         (
             lambda s, sr: np.ones((1, 3)),
             3,
@@ -342,6 +414,24 @@ def test_process_folder(tmpdir):
         ),
         # 2 channels, 1 feature
         (
+            lambda s, sr: [[1], [1]],
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.ones((1, 2)),
+        ),
+        (
+            lambda s, sr: [['a'], ['b']],
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.array([['a', 'b']]),
+        ),
+        (
             lambda s, sr: np.ones((2, 1)),
             1,
             SIGNAL_2D,
@@ -351,6 +441,27 @@ def test_process_folder(tmpdir):
             np.ones((1, 2)),
         ),
         # 2 channels, 3 features
+        (
+            lambda s, sr: [[1, 1, 1], [1, 1, 1]],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.ones((1, 2 * 3)),
+        ),
+        (
+            lambda s, sr: [
+                ['a', 1, 1.0],
+                ['b', 2, 2.0],
+            ],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.array([['a', 1, 1.0, 'b', 2, 2.0]]),
+        ),
         (
             lambda s, sr: np.ones((2, 3)),
             3,
@@ -372,6 +483,15 @@ def test_process_folder(tmpdir):
         ),
         # 2 channels, 3 features, 5 frames
         (
+            lambda s, sr: [[[1] * 5] * 3] * 2,
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            False,
+            np.ones((5, 2 * 3)),
+        ),
+        (
             lambda s, sr: np.ones((2, 3, 5)),
             3,
             SIGNAL_2D,
@@ -381,6 +501,15 @@ def test_process_folder(tmpdir):
             np.ones((5, 2 * 3)),
         ),
         # 1 channel, 1 feature + mono processing
+        (
+            lambda s, sr: 1,
+            1,
+            SIGNAL_1D,
+            None,
+            None,
+            True,
+            np.ones((1, 1)),
+        ),
         (
             lambda s, sr: np.ones(1),
             1,
@@ -401,6 +530,15 @@ def test_process_folder(tmpdir):
         ),
         # 2 channels, 1 feature + mono processing
         (
+            lambda s, sr: [1],
+            1,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2)),
+        ),
+        (
             lambda s, sr: np.ones(1),
             1,
             SIGNAL_2D,
@@ -419,6 +557,15 @@ def test_process_folder(tmpdir):
             np.ones((1, 2)),
         ),
         # 2 channels, 3 features + mono processing
+        (
+            lambda s, sr: [1, 1, 1],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((1, 2 * 3)),
+        ),
         (
             lambda s, sr: np.ones(3),
             3,
@@ -439,6 +586,19 @@ def test_process_folder(tmpdir):
         ),
         # 2 channels, 3 features, 5 frames + mono processing
         (
+            lambda s, sr: [
+                [1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1],
+            ],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            np.ones((5, 2 * 3)),
+        ),
+        (
             lambda s, sr: np.ones((3, 5)),
             3,
             SIGNAL_2D,
@@ -455,27 +615,6 @@ def test_process_folder(tmpdir):
             None,
             True,
             np.ones((5, 2 * 3)),
-        ),
-        # Feature extractor function returns not a np.ndarray
-        pytest.param(
-            lambda s, sr: [1, 1, 1],
-            3,
-            SIGNAL_2D,
-            None,
-            None,
-            False,
-            None,
-            marks=pytest.mark.xfail(raises=RuntimeError),
-        ),
-        pytest.param(
-            lambda s, sr: [1, 1, 1],
-            3,
-            SIGNAL_2D,
-            None,
-            None,
-            True,
-            None,
-            marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns too less dimensions
         pytest.param(
