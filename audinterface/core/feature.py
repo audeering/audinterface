@@ -417,7 +417,7 @@ class Feature:
         """
         return frame.values.T.reshape(self.num_channels, self.num_features, -1)
 
-    def _assert_shape_3d(
+    def _reshape_3d(
             self,
             features: typing.Union[np.ndarray, pd.Series]
     ):
@@ -557,12 +557,10 @@ class Feature:
             win_dur = None
             hop_dur = None
 
-        features = self._assert_shape_3d(features)
+        features = self._reshape_3d(features)
         n_channels, n_features, n_frames = features.shape
 
         # Reshape features and store channel number as first feature
-        # [n_channels, n_features, n_time_steps] =>
-        # [n_channels * n_features + 1, n_time_steps]
         new_shape = (n_channels * n_features, n_frames)
         features = features.reshape(new_shape).T
 
@@ -624,4 +622,4 @@ class Feature:
             signal,
             sampling_rate,
         )
-        return self._assert_shape_3d(y)
+        return self._reshape_3d(y)
