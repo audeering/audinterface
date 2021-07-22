@@ -311,15 +311,6 @@ def test_process_folder(tmpdir):
             np.ones((1, 1)),
         ),
         (
-            lambda s, sr: 'f',
-            1,
-            SIGNAL_1D,
-            None,
-            None,
-            False,
-            np.array([['f']]),
-        ),
-        (
             lambda s, sr: np.ones(1),
             1,
             SIGNAL_1D,
@@ -337,15 +328,6 @@ def test_process_folder(tmpdir):
             None,
             False,
             np.ones((1, 1)),
-        ),
-        (
-            lambda s, sr: ['f'],
-            1,
-            SIGNAL_1D,
-            None,
-            None,
-            False,
-            np.array([['f']]),
         ),
         (
             lambda s, sr: np.ones((1, 1)),
@@ -367,15 +349,6 @@ def test_process_folder(tmpdir):
             np.ones((1, 3)),
         ),
         (
-            lambda s, sr: ['a', 1, 1.0],
-            3,
-            SIGNAL_1D,
-            None,
-            None,
-            False,
-            np.array([['a', 1, 1.0]]),
-        ),
-        (
             lambda s, sr: np.ones(3),
             3,
             SIGNAL_1D,
@@ -393,15 +366,6 @@ def test_process_folder(tmpdir):
             None,
             False,
             np.ones((1, 3)),
-        ),
-        (
-            lambda s, sr: [['a', 1, 1.0]],
-            3,
-            SIGNAL_1D,
-            None,
-            None,
-            False,
-            np.array([['a', 1, 1.0]]),
         ),
         (
             lambda s, sr: np.ones((1, 3)),
@@ -423,15 +387,6 @@ def test_process_folder(tmpdir):
             np.ones((1, 2)),
         ),
         (
-            lambda s, sr: [['a'], ['b']],
-            1,
-            SIGNAL_2D,
-            None,
-            None,
-            False,
-            np.array([['a', 'b']]),
-        ),
-        (
             lambda s, sr: np.ones((2, 1)),
             1,
             SIGNAL_2D,
@@ -449,18 +404,6 @@ def test_process_folder(tmpdir):
             None,
             False,
             np.ones((1, 2 * 3)),
-        ),
-        (
-            lambda s, sr: [
-                ['a', 1, 1.0],
-                ['b', 2, 2.0],
-            ],
-            3,
-            SIGNAL_2D,
-            None,
-            None,
-            False,
-            np.array([['a', 1, 1.0, 'b', 2, 2.0]]),
         ),
         (
             lambda s, sr: np.ones((2, 3)),
