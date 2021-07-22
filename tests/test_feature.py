@@ -456,15 +456,25 @@ def test_process_folder(tmpdir):
             True,
             np.ones((5, 2 * 3)),
         ),
-        # Feature extractor function is not a np.ndarray
+        # Feature extractor function returns not a np.ndarray
         pytest.param(
-            lambda s, sr: 1,
+            lambda s, sr: [1, 1, 1],
             3,
             SIGNAL_2D,
             None,
             None,
-            None,
             False,
+            None,
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(
+            lambda s, sr: [1, 1, 1],
+            3,
+            SIGNAL_2D,
+            None,
+            None,
+            True,
+            None,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
         # Feature extractor function returns too less dimensions

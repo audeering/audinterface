@@ -424,6 +424,12 @@ class Feature:
         r"""Reshape to [n_channels, n_features, n_frames]."""
 
         if self.process.process_func_is_mono:
+            for channels_features in features:
+                if not isinstance(channels_features, np.ndarray):
+                    raise RuntimeError(
+                        "Features must be a 'np.ndarray', "
+                        f"not '{type(channels_features)}'."
+                    )
             features = np.array(features)
             # when mono processing is turned on
             # the channel dimension has to be 1
