@@ -5,8 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>audinterface &mdash; audinterface Documentation</title>
@@ -69,7 +68,7 @@
             
             
               <div class="version">
-                v0.6.8
+                v0.7.0
               </div>
             
           
@@ -93,11 +92,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API Documentation</span></p>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">audinterface</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#feature">Feature</a></li>
@@ -109,7 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api-utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -165,7 +164,7 @@
         
             
             
-              <a href="https://github.com/audeering/audinterface/blob/v0.6.8/docs/api.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/audeering/audinterface/blob/v0.7.0/docs/api.rst" class="fa fa-github"> Edit on GitHub</a>
             
           
         
@@ -179,7 +178,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-audinterface">
+  <div class="section" id="module-audinterface">
 <span id="audinterface"></span><h1>audinterface<a class="headerlink" href="#module-audinterface" title="Permalink to this headline">¶</a></h1>
 <p>Generic processing interfaces.</p>
 <p><a class="reference internal" href="#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> provides you classes
@@ -215,7 +214,7 @@ to get some standard implementations of those methods.</p>
 <span class="go">dtype: float64</span>
 </pre></div>
 </div>
-<section id="feature">
+<div class="section" id="feature">
 <h2>Feature<a class="headerlink" href="#feature" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="audinterface.Feature">
@@ -245,13 +244,15 @@ the channel number will be appended to the column names.</p></li>
 e.g. <code class="docutils literal notranslate"><span class="pre">{'win_size':</span> <span class="pre">512,</span> <span class="pre">'hop_size':</span> <span class="pre">256,</span> <span class="pre">'num_fft':</span> <span class="pre">512}</span></code>.
 With the parameters you can differentiate different flavors of
 the same feature set</p></li>
-<li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[…, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]]) – feature extraction function,
+<li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[…, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – feature extraction function,
 which expects the two positional arguments <code class="docutils literal notranslate"><span class="pre">signal</span></code>
 and <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code>
 and any number of additional keyword arguments.
 The function must return features in the shape of
-<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features)</span></code>
-or <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_time_steps)</span></code>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">(num_features)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(num_features,</span> <span class="pre">num_frames)</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_frames)</span></code>.</p></li>
 <li><p><strong>process_func_is_mono</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – apply <code class="docutils literal notranslate"><span class="pre">process_func</span></code> to every channel
 individually</p></li>
 <li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – sampling rate in Hz.
@@ -312,7 +313,8 @@ input sampling rate does not fit the expected sampling rate.</p>
 <dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Processed signal</p>
+<dd class="field-odd"><p>feature array with shape
+<code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_frames)</span></code></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
@@ -597,8 +599,8 @@ shape, i.e. <code class="docutils literal notranslate"><span class="pre">(channe
 
 </dd></dl>
 
-</section>
-<section id="process">
+</div>
+<div class="section" id="process">
 <h2>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="audinterface.Process">
@@ -931,8 +933,8 @@ See also <a class="reference internal" href="api-utils.html#audinterface.utils.s
 
 </dd></dl>
 
-</section>
-<section id="processwithcontext">
+</div>
+<div class="section" id="processwithcontext">
 <h2>ProcessWithContext<a class="headerlink" href="#processwithcontext" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="audinterface.ProcessWithContext">
@@ -1103,8 +1105,8 @@ See also <a class="reference internal" href="api-utils.html#audinterface.utils.s
 
 </dd></dl>
 
-</section>
-<section id="segment">
+</div>
+<div class="section" id="segment">
 <h2>Segment<a class="headerlink" href="#segment" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="audinterface.Segment">
@@ -1377,8 +1379,8 @@ See also <a class="reference internal" href="api-utils.html#audinterface.utils.s
 
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
            </div>
@@ -1403,7 +1405,7 @@ See also <a class="reference internal" href="api-utils.html#audinterface.utils.s
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/23 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
