@@ -7,10 +7,24 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.7.0 (2021-07-23)
+--------------------------
+
+* Changed: ``Feature.process_func()`` supports more shapes, namely
+  ``(features)``
+  ``(channels, features)``
+  ``(features, frames)``
+  ``(channels, features, frames)``
+* Changed: ``Feature.process_func()`` supports more types
+  (e.g. scalars, lists, strings, etc.)
+* Fixed: ``Feature.__call__()`` always returns ``(channels, features, frames)``
+
+
 Version 0.6.8 (2021-07-06)
 --------------------------
 
 * Fixed: CHANGELOG
+
 
 Version 0.6.7 (2021-07-06)
 --------------------------
