@@ -47,7 +47,7 @@ class Feature:
             and ``sampling_rate``
             and any number of additional keyword arguments.
             The function must return features in the shape of
-            ``(num_features),
+            ``(num_features)``,
             ``(num_channels, num_features)``,
             ``(num_features, num_frames)``,
             or ``(num_channels, num_features, num_frames)``.
