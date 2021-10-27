@@ -510,6 +510,26 @@ def test_process_folder(
     )
 
 
+def test_process_func_args():
+    def process_func(s, sr, arg1, arg2):
+        assert arg1 == 'foo'
+        assert arg2 == 'bar'
+    audinterface.Process(
+        process_func=process_func,
+        process_func_args={
+            'arg1': 'foo',
+            'arg2': 'bar',
+        }
+    )
+    with pytest.warns(UserWarning):
+        audinterface.Process(
+            feature_names=('o1', 'o2', 'o3'),
+            process_func=process_func,
+            arg1='foo',
+            arg2='bar',
+        )
+
+
 @pytest.mark.parametrize(
     'num_workers, multiprocessing',
     [
@@ -588,7 +608,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize(
-    'process_func, process_func_kwargs, segment, signal, '
+    'process_func, process_func_args, segment, signal, '
     'sampling_rate, file, start, end, keep_nat, expected_signal',
     [
         (
@@ -811,7 +831,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
 )
 def test_process_signal(
         process_func,
-        process_func_kwargs,
+        process_func_args,
         segment,
         signal,
         sampling_rate,
@@ -828,7 +848,7 @@ def test_process_signal(
         segment=segment,
         keep_nat=keep_nat,
         verbose=False,
-        **process_func_kwargs,
+        process_func_args=process_func_args,
     )
     x = process.process_signal(
         signal,

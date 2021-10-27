@@ -1,5 +1,6 @@
 import os
 import typing
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -50,12 +51,14 @@ class Feature:
             ``(num_features)``,
             ``(num_channels, num_features)``,
             ``(num_features, num_frames)``,
-            or ``(num_channels, num_features, num_frames)``.
+            or ``(num_channels, num_features, num_frames)``
+        process_func_args: additional keyword arguments to the processing
+            function
         process_func_is_mono: apply ``process_func`` to every channel
             individually
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
-            sampling rate of the signal.
+            sampling rate of the signal
         win_dur: window size in ``unit``,
             if features are extracted with a sliding window
         hop_dur: hop size in ``unit``,
@@ -80,7 +83,6 @@ class Feature:
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
-        kwargs: additional keyword arguments to the processing function
 
     Raises:
         ValueError: if ``unit == 'samples'``, ``sampling_rate is None``
@@ -95,6 +97,7 @@ class Feature:
             name: str = None,
             params: typing.Dict = None,
             process_func: typing.Callable[..., typing.Any] = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
             win_dur: typing.Union[int, float] = None,
@@ -110,6 +113,15 @@ class Feature:
             verbose: bool = False,
             **kwargs,
     ):
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
 
         if win_dur is None and hop_dur is not None:
             raise ValueError(
@@ -135,6 +147,7 @@ class Feature:
 
         self.process = Process(
             process_func=process_func,
+            process_func_args=process_func_args,
             process_func_is_mono=process_func_is_mono,
             sampling_rate=sampling_rate,
             resample=resample,
@@ -145,7 +158,6 @@ class Feature:
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
-            **kwargs,
         )
         r"""Processing object."""
         self.name = name
