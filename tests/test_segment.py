@@ -305,6 +305,25 @@ def test_invert(signal, sampling_rate, segment_func, result):
     pd.testing.assert_index_equal(index, result)
 
 
+def test_process_func_args():
+    def segment_func(s, sr, arg1, arg2):
+        assert arg1 == 'foo'
+        assert arg2 == 'bar'
+    audinterface.Segment(
+        process_func=segment_func,
+        process_func_args={
+            'arg1': 'foo',
+            'arg2': 'bar',
+        }
+    )
+    with pytest.warns(UserWarning):
+        audinterface.Segment(
+            process_func=segment_func,
+            arg1='foo',
+            arg2='bar',
+        )
+
+
 @pytest.mark.parametrize(
     'signal, sampling_rate, segment_func, start, end, result',
     [
@@ -376,14 +395,3 @@ def test_signal(signal, sampling_rate, segment_func, start, end, result):
     )
     index = model.process_signal(signal, sampling_rate, start=start, end=end)
     pd.testing.assert_index_equal(index, result)
-
-
-def test_signal_kwargs():
-    def segment_func(s, sr, arg1, arg2):
-        assert arg1 == 'foo'
-        assert arg2 == 'bar'
-    audinterface.Segment(
-        process_func=segment_func,
-        arg1='foo',
-        arg2='bar',
-    )

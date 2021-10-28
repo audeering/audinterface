@@ -21,6 +21,26 @@ def signal_max_with_context(signal, sampling_rate, starts, ends):
     return result
 
 
+def test_process_func_args():
+    def process_func(s, sr, starts, ends, arg1, arg2):
+        assert arg1 == 'foo'
+        assert arg2 == 'bar'
+    audinterface.ProcessWithContext(
+        process_func=process_func,
+        process_func_args={
+            'arg1': 'foo',
+            'arg2': 'bar',
+        }
+    )
+    with pytest.warns(UserWarning):
+        audinterface.ProcessWithContext(
+            feature_names=('o1', 'o2', 'o3'),
+            process_func=process_func,
+            arg1='foo',
+            arg2='bar',
+        )
+
+
 def test_process_index(tmpdir):
 
     process = audinterface.ProcessWithContext(

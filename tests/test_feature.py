@@ -287,6 +287,27 @@ def test_process_folder(tmpdir):
     np.testing.assert_array_equal(y.values, y_expected)
 
 
+def test_process_func_args():
+    def process_func(s, sr, arg1, arg2):
+        assert arg1 == 'foo'
+        assert arg2 == 'bar'
+    audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=process_func,
+        process_func_args={
+            'arg1': 'foo',
+            'arg2': 'bar',
+        }
+    )
+    with pytest.warns(UserWarning):
+        audinterface.Feature(
+            feature_names=('o1', 'o2', 'o3'),
+            process_func=process_func,
+            arg1='foo',
+            arg2='bar',
+        )
+
+
 @pytest.mark.parametrize(
     'process_func, num_feat, signal, start, end, expand, expected',
     [
@@ -731,12 +752,14 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=features_extractor_sliding_window,
+        process_func_args={
+            'hop_size': SAMPLING_RATE // 2,  # argument to process_func
+        },
         channels=range(NUM_CHANNELS),
         win_dur=win_dur,
         hop_dur=hop_dur,
         sampling_rate=SAMPLING_RATE,
         unit=unit,
-        hop_size=SAMPLING_RATE // 2,  # argument to process_func
     )
     features = extractor.process_signal(
         SIGNAL_2D,
@@ -767,18 +790,6 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
             index=index,
             columns=extractor.column_names,
         ),
-    )
-
-
-def test_signal_kwargs():
-    def process_func(s, sr, arg1, arg2):
-        assert arg1 == 'foo'
-        assert arg2 == 'bar'
-    audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=process_func,
-        arg1='foo',
-        arg2='bar',
     )
 
 

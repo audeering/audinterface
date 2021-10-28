@@ -1,5 +1,6 @@
 import os
 import typing
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -22,13 +23,15 @@ class Process:
         process_func: processing function,
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
-            and any number of additional keyword arguments.
+            and any number of additional keyword arguments
+        process_func_args: (keyword) arguments passed on to the processing
+            function
         process_func_is_mono: if set to ``True`` and the input signal
             has multiple channels, ``process_func`` will be applied to
             every channel individually
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
-            sampling rate of the signal.
+            sampling rate of the signal
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
@@ -44,7 +47,6 @@ class Process:
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
-        kwargs: additional keyword arguments to the processing function
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
@@ -54,6 +56,7 @@ class Process:
             self,
             *,
             process_func: typing.Callable[..., typing.Any] = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
             resample: bool = False,
@@ -95,7 +98,16 @@ class Process:
         r"""Processing function."""
         self.process_func_is_mono = process_func_is_mono
         r"""Process channels individually."""
-        self.process_func_kwargs = kwargs
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
+        self.process_func_args = process_func_args
         r"""Additional keyword arguments to processing function."""
 
     def _process_file(
@@ -533,13 +545,13 @@ class Process:
                 self.process_func(
                     np.atleast_2d(channel),
                     sampling_rate,
-                    **self.process_func_kwargs,
+                    **self.process_func_args,
                 ) for channel in signal
             ]
         return self.process_func(
             signal,
             sampling_rate,
-            **self.process_func_kwargs,
+            **self.process_func_args,
         )
 
 
@@ -562,15 +574,16 @@ class ProcessWithContext:
             * ``ends`` sequence with end indices
 
             and any number of additional keyword arguments.
-            Must return a sequence of results for every segment.
+            Must return a sequence of results for every segment
+        process_func_args: (keyword) arguments passed on to the processing
+            function
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
-            sampling rate of the signal.
+            sampling rate of the signal
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
         verbose: show debug messages
-        kwargs: additional keyword arguments to the processing function
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
@@ -583,6 +596,7 @@ class ProcessWithContext:
                 ...,
                 typing.Sequence[typing.Any]
             ] = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
             sampling_rate: int = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = None,
@@ -611,7 +625,16 @@ class ProcessWithContext:
                 ]
         self.process_func = process_func
         r"""Process function."""
-        self.process_func_kwargs = kwargs
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
+        self.process_func_args = process_func_args
         r"""Additional keyword arguments to processing function."""
 
     def process_index(
@@ -740,5 +763,5 @@ class ProcessWithContext:
             sampling_rate,
             starts,
             ends,
-            **self.process_func_kwargs,
+            **self.process_func_args,
         )

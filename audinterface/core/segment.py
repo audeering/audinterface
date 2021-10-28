@@ -1,5 +1,6 @@
 import os
 import typing
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -106,11 +107,13 @@ class Segment:
             and any number of additional keyword arguments.
             Must return a :class:`pandas.MultiIndex` with two levels
             named `start` and `end` that hold start and end
-            positions as :class:`pandas.Timedelta` objects.
+            positions as :class:`pandas.Timedelta` objects
+        process_func_args: (keyword) arguments passed on to the processing
+            function
         invert: Invert the segmentation
-        sampling_rate: sampling rate in Hz.
+        sampling_rate: sampling rate in Hz
             If ``None`` it will call ``process_func`` with the actual
-            sampling rate of the signal.
+            sampling rate of the signal
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
@@ -123,7 +126,6 @@ class Segment:
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
-        kwargs: additional keyword arguments to the processing function
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
@@ -133,6 +135,7 @@ class Segment:
             self,
             *,
             process_func: typing.Callable[..., pd.MultiIndex] = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
             invert: bool = False,
             sampling_rate: int = None,
             resample: bool = False,
@@ -144,6 +147,16 @@ class Segment:
             verbose: bool = False,
             **kwargs,
     ):
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
+
         self.invert = invert
         r"""Invert segmentation."""
 
@@ -151,6 +164,7 @@ class Segment:
         from audinterface.core.process import Process
         self.process = Process(
             process_func=create_process_func(process_func, invert),
+            process_func_args=process_func_args,
             sampling_rate=sampling_rate,
             resample=resample,
             channels=channels,
@@ -159,7 +173,6 @@ class Segment:
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
-            **kwargs,
         )
         r"""Processing object."""
 
