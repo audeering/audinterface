@@ -24,7 +24,7 @@ class Process:
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
             and any number of additional keyword arguments
-        process_func_args: additional keyword arguments to the processing
+        process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: if set to ``True`` and the input signal
             has multiple channels, ``process_func`` will be applied to
@@ -630,7 +630,7 @@ class ProcessWithContext:
 
             and any number of additional keyword arguments.
             Must return a sequence of results for every segment
-        process_func_args: additional keyword arguments to the processing
+        process_func_args: (keyword) arguments passed on to the processing
             function
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual

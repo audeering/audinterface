@@ -108,7 +108,7 @@ class Segment:
             Must return a :class:`pandas.MultiIndex` with two levels
             named `start` and `end` that hold start and end
             positions as :class:`pandas.Timedelta` objects
-        process_func_args: additional keyword arguments to the processing
+        process_func_args: (keyword) arguments passed on to the processing
             function
         invert: Invert the segmentation
         sampling_rate: sampling rate in Hz

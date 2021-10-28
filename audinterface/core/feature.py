@@ -52,7 +52,7 @@ class Feature:
             ``(num_channels, num_features)``,
             ``(num_features, num_frames)``,
             or ``(num_channels, num_features, num_frames)``
-        process_func_args: additional keyword arguments to the processing
+        process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: apply ``process_func`` to every channel
             individually
