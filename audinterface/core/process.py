@@ -495,61 +495,6 @@ class Process:
             index,
         )
 
-    @audeer.deprecated(
-        removal_version='0.8.0',
-        alternative='process_index',
-    )
-    def process_unified_format_index(
-            self,
-            index: pd.Index,
-    ) -> pd.Series:  # pragma: nocover
-        r"""Process from an index conform to the `Unified Format`_.
-
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
-
-        Args:
-            index: index with segment information
-
-        Returns:
-            Series with processed segments in the Unified Format
-
-        Raises:
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-
-        .. _`Unified Format`: http://tools.pp.audeering.com/audata/
-            data-tables.html
-
-        """
-
-        index = audformat.utils.to_segmented_index(index)
-        utils.assert_index(index)
-
-        if index.empty:
-            return pd.Series(None, index=index, dtype=float)
-
-        params = [
-            (
-                (file, ),
-                {
-                    'start': start,
-                    'end': end,
-                },
-            )
-            for file, start, end in index
-        ]
-        y = audeer.run_tasks(
-            self._process_file,
-            params,
-            num_workers=self.num_workers,
-            multiprocessing=self.multiprocessing,
-            progress_bar=self.verbose,
-            task_description=f'Process {len(index)} segments',
-        )
-
-        return pd.concat(y)
-
     def __call__(
             self,
             signal: np.ndarray,
@@ -754,55 +699,6 @@ class ProcessWithContext:
         y = self(signal, sampling_rate, starts_i, ends_i)
 
         return pd.Series(y, index=index)
-
-    @audeer.deprecated(
-        removal_version='0.8.0',
-        alternative='process_index',
-    )
-    def process_unified_format_index(
-            self,
-            index: pd.Index,
-    ) -> pd.Series:  # pragma: nocover
-        r"""Process from a index conform to the `Unified Format`_.
-
-        Args:
-            index: index with segment information
-
-        Returns:
-            Series with processed segments in the Unified Format
-
-        Raises:
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-
-        """
-        index = audformat.utils.to_segmented_index(index)
-
-        if index.empty:
-            return pd.Series(index=index, dtype=float)
-
-        files = index.levels[0]
-        ys = [None] * len(files)
-
-        with audeer.progress_bar(
-                files,
-                total=len(files),
-                disable=not self.verbose,
-        ) as pbar:
-            for idx, file in enumerate(pbar):
-                desc = audeer.format_display_message(file, pbar=True)
-                pbar.set_description(desc, refresh=True)
-                mask = index.isin([file], 0)
-                select = index[mask].droplevel(0)
-                signal, sampling_rate = utils.read_audio(file)
-                ys[idx] = pd.Series(
-                    self.process_signal_from_index(
-                        signal, sampling_rate, select,
-                    ).values,
-                    index=index[mask],
-                )
-
-        return pd.concat(ys)
 
     def __call__(
         self,

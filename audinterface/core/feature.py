@@ -374,36 +374,6 @@ class Feature:
         )
         return self._series_to_frame(series)
 
-    @audeer.deprecated(
-        removal_version='0.8.0',
-        alternative='process_index',
-    )
-    def process_unified_format_index(
-            self,
-            index: pd.Index,
-    ) -> pd.DataFrame:  # pragma: nocover
-        r"""Extract features from an index conform to the `Unified Format`_.
-
-        .. note:: It is assumed that the index already holds segments,
-            i.e. in case a ``segment`` object is given, it will be ignored.
-
-        Args:
-            index: index with segment information
-
-        Raises:
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-            RuntimeError: if multiple frames are returned,
-                but ``win_dur`` is not set
-            ValueError: if index is not conform to the `Unified Format`_
-
-        .. _`Unified Format`: http://tools.pp.audeering.com/audata/
-             data-tables.html
-
-        """
-        series = self.process.process_unified_format_index(index)
-        return self._series_to_frame(series)
-
     def to_numpy(
             self,
             frame: pd.DataFrame,
