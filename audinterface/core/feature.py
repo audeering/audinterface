@@ -137,7 +137,7 @@ class Feature:
             def process_func(signal, _):
                 return np.zeros(
                     (num_channels, len(feature_names)),
-                    dtype=np.float,
+                    dtype=float,
                 )
 
         if mixdown or isinstance(channels, int):
