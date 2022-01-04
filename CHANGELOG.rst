@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.8.0 (2022-01-04)
+--------------------------
+
+* Added: Python 3.9 support
+* Added: ``process_func_args`` argument to process methods
+* Deprecated: ``**kwargs`` in process methods,
+  use ``process_func_args`` argument instead
+* Removed: deprecated ``process_unified_format_index()`` methods
+* Removed: Python 3.6 support
+
+
 Version 0.7.0 (2021-07-23)
 --------------------------
 
