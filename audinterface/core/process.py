@@ -721,7 +721,13 @@ class ProcessWithContext:
         )
         y = self(signal, sampling_rate, starts_i, ends_i)
 
-        return pd.Series(y, index=index)
+        # For an empty Series we force the dtype
+        if len(y) == 0:
+            y = pd.Series(y, index=index, dtype='float64')
+        else:
+            y = pd.Series(y, index=index)
+
+        return y
 
     def __call__(
         self,
