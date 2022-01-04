@@ -55,7 +55,7 @@
 
           <a href="../../../index.html">
           
-            <img src="../../../_static/images/audeering.svg" class="logo" alt="audEERING"/>
+            <img src="../../../_static/images/audeering.png" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v0.7.0
+                v0.8.0
               </div>
             
           
@@ -127,40 +127,14 @@
         
         <div class="rst-content">
         
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
       <li>audinterface.core.segment</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -169,6 +143,7 @@
   <h1>Source code for audinterface.core.segment</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -275,11 +250,13 @@
 <span class="sd">            and any number of additional keyword arguments.</span>
 <span class="sd">            Must return a :class:`pandas.MultiIndex` with two levels</span>
 <span class="sd">            named `start` and `end` that hold start and end</span>
-<span class="sd">            positions as :class:`pandas.Timedelta` objects.</span>
+<span class="sd">            positions as :class:`pandas.Timedelta` objects</span>
+<span class="sd">        process_func_args: (keyword) arguments passed on to the processing</span>
+<span class="sd">            function</span>
 <span class="sd">        invert: Invert the segmentation</span>
-<span class="sd">        sampling_rate: sampling rate in Hz.</span>
+<span class="sd">        sampling_rate: sampling rate in Hz</span>
 <span class="sd">            If ``None`` it will call ``process_func`` with the actual</span>
-<span class="sd">            sampling rate of the signal.</span>
+<span class="sd">            sampling rate of the signal</span>
 <span class="sd">        resample: if ``True`` enforces given sampling rate by resampling</span>
 <span class="sd">        channels: channel selection, see :func:`audresample.remix`</span>
 <span class="sd">        mixdown: apply mono mix-down on selection</span>
@@ -292,7 +269,6 @@
 <span class="sd">            multiprocessing</span>
 <span class="sd">        multiprocessing: use multiprocessing instead of multithreading</span>
 <span class="sd">        verbose: show debug messages</span>
-<span class="sd">        kwargs: additional keyword arguments to the processing function</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``resample = True``, but ``sampling_rate = None``</span>
@@ -302,6 +278,7 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">process_func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">process_func_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -313,6 +290,16 @@
             <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="n">utils</span><span class="o">.</span><span class="n">kwargs_deprecation_warning</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">process_func_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">invert</span> <span class="o">=</span> <span class="n">invert</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert segmentation.&quot;&quot;&quot;</span>
 
@@ -320,6 +307,7 @@
         <span class="kn">from</span> <span class="nn">audinterface.core.process</span> <span class="kn">import</span> <span class="n">Process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
             <span class="n">process_func</span><span class="o">=</span><span class="n">create_process_func</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">invert</span><span class="p">),</span>
+            <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
             <span class="n">channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
@@ -328,7 +316,6 @@
             <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="o">=</span><span class="n">multiprocessing</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
 
@@ -674,7 +661,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2021/07/23 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/01/04 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -682,7 +669,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2021 audEERING GmbH
+      &copy; 2020-2022 audEERING GmbH
     </p>
   </div> 
 
