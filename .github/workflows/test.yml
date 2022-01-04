@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        python-version: [ 3.6, 3.7, 3.8 ]
+        python-version: [ 3.7, 3.8, 3.9 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes libsndfile1 sox
-      if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-18.04'
+      if: matrix.os == 'ubuntu-latest'
 
     - name: Install dependencies
       run: |
@@ -46,10 +46,10 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
-      if: matrix.os == 'ubuntu-18.04'
+      if: matrix.os == 'ubuntu-latest'
 
     - name: Test building documentation
       run: |
         python -m sphinx docs/ docs/_build/ -b html -W
-        # python -m sphinx docs/ build/sphinx/html -b linkcheck
-      if: matrix.os == 'ubuntu-18.04'
+        python -m sphinx docs/ build/sphinx/html -b linkcheck
+      if: matrix.os == 'ubuntu-latest'
