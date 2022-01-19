@@ -267,6 +267,7 @@ class Process:
             Series with processed files conform to audformat_
 
         Raises:
+            FileNotFoundError: if folder does not exist
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 

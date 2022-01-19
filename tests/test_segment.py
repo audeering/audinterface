@@ -86,7 +86,7 @@ def test_file(tmpdir):
     ]
 )
 def test_folder(tmpdir, num_workers, multiprocessing):
-    model = audinterface.Segment(
+    segment = audinterface.Segment(
         process_func=lambda s, sr: INDEX,
         sampling_rate=None,
         resample=False,
@@ -99,10 +99,19 @@ def test_folder(tmpdir, num_workers, multiprocessing):
         os.path.join(path, f'file{n}.wav') for n in range(3)]
     for file in files:
         af.write(file, SIGNAL, SAMPLING_RATE)
-    result = model.process_folder(path)
+    result = segment.process_folder(path)
     assert all(result.levels[0] == files)
     assert all(result.levels[1] == INDEX.levels[0])
     assert all(result.levels[2] == INDEX.levels[1])
+
+    # non-existing folder
+    with pytest.raises(FileNotFoundError):
+        segment.process_folder('bad-folder')
+
+    # empty folder
+    root = str(tmpdir.mkdir('empty'))
+    y = segment.process_folder(root)
+    pd.testing.assert_index_equal(y, audformat.filewise_index())
 
 
 @pytest.mark.parametrize(
