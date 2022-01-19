@@ -293,9 +293,9 @@ def test_process_folder(tmpdir):
 
     # empty folder
     root = str(tmpdir.mkdir('empty'))
-    y = feature.process_folder(root)
+    df = feature.process_folder(root)
     pd.testing.assert_frame_equal(
-        y,
+        df,
         pd.DataFrame(
             dtype=float,
             columns=feature.column_names,
