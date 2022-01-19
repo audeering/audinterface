@@ -497,6 +497,7 @@ class Feature:
         if series.empty:
             return pd.DataFrame(
                 columns=self.column_names,
+                dtype=float,
             )
 
         frames = [None] * len(series)

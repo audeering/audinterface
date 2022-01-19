@@ -297,7 +297,7 @@ def test_process_folder(tmpdir):
     pd.testing.assert_frame_equal(
         y,
         pd.DataFrame(
-            dtype=object,
+            dtype=float,
             columns=feature.column_names,
         ),
     )
