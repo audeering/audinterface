@@ -1,3 +1,4 @@
+import errno
 import os
 import typing
 import warnings
@@ -214,6 +215,9 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
+        if len(files) == 0:
+            return pd.Series(dtype=float)
+
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
             starts = [starts] * len(files)
         if isinstance(ends, (type(None), float, int, str, pd.Timedelta)):
@@ -269,6 +273,14 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
+        root = audeer.safe_path(root)
+        if not os.path.exists(root):
+            raise FileNotFoundError(
+                errno.ENOENT,
+                os.strerror(errno.ENOENT),
+                root,
+            )
+
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
