@@ -110,8 +110,8 @@ def test_folder(tmpdir, num_workers, multiprocessing):
 
     # empty folder
     root = str(tmpdir.mkdir('empty'))
-    y = segment.process_folder(root)
-    pd.testing.assert_index_equal(y, audformat.filewise_index())
+    index = segment.process_folder(root)
+    pd.testing.assert_index_equal(index, audformat.filewise_index())
 
 
 @pytest.mark.parametrize(
