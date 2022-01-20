@@ -1,3 +1,4 @@
+import errno
 import os
 import typing
 import warnings
@@ -214,6 +215,9 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
+        if len(files) == 0:
+            return pd.Series(dtype=object)
+
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
             starts = [starts] * len(files)
         if isinstance(ends, (type(None), float, int, str, pd.Timedelta)):
@@ -263,12 +267,21 @@ class Process:
             Series with processed files conform to audformat_
 
         Raises:
+            FileNotFoundError: if folder does not exist
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
+        root = audeer.safe_path(root)
+        if not os.path.exists(root):
+            raise FileNotFoundError(
+                errno.ENOENT,
+                os.strerror(errno.ENOENT),
+                root,
+            )
+
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
@@ -280,7 +293,7 @@ class Process:
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         params = [
             (
@@ -432,7 +445,7 @@ class Process:
         r"""Like process_signal_from_index, but does not apply segmentation."""
 
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
             params = [
@@ -492,7 +505,7 @@ class Process:
         utils.assert_index(index)
 
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         if self.segment is not None:
             index = self.segment.process_signal_from_index(
@@ -662,7 +675,7 @@ class ProcessWithContext:
         index = audformat.utils.to_segmented_index(index)
 
         if index.empty:
-            return pd.Series(index=index, dtype=float)
+            return pd.Series(index=index, dtype=object)
 
         files = index.levels[0]
         ys = [None] * len(files)
@@ -723,7 +736,7 @@ class ProcessWithContext:
 
         # For an empty Series we force the dtype
         if len(y) == 0:
-            y = pd.Series(y, index=index, dtype='float64')
+            y = pd.Series(y, index=index, dtype=object)
         else:
             y = pd.Series(y, index=index)
 

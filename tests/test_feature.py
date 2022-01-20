@@ -262,8 +262,9 @@ def test_process_file(tmpdir, start, end, segment):
 def test_process_folder(tmpdir):
 
     index = audinterface.utils.signal_index(0, 1)
+    feature_names = ['o1', 'o2', 'o3']
     feature = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names,
         process_func=feature_extractor,
         sampling_rate=None,
         channels=range(NUM_CHANNELS),
@@ -285,6 +286,21 @@ def test_process_folder(tmpdir):
     assert all(y.index.levels[1] == index.levels[0])
     assert all(y.index.levels[2] == index.levels[1])
     np.testing.assert_array_equal(y.values, y_expected)
+
+    # non-existing folder
+    with pytest.raises(FileNotFoundError):
+        feature.process_folder('bad-folder')
+
+    # empty folder
+    root = str(tmpdir.mkdir('empty'))
+    df = feature.process_folder(root)
+    pd.testing.assert_frame_equal(
+        df,
+        pd.DataFrame(
+            dtype=object,
+            columns=feature.column_names,
+        ),
+    )
 
 
 def test_process_func_args():

@@ -1,3 +1,4 @@
+import errno
 import os
 import typing
 import warnings
@@ -137,7 +138,7 @@ class Feature:
             def process_func(signal, _):
                 return np.zeros(
                     (num_channels, len(feature_names)),
-                    dtype=float,
+                    dtype=object,
                 )
 
         if mixdown or isinstance(channels, int):
@@ -274,12 +275,21 @@ class Feature:
             filetype: file extension
 
         Raises:
+            FileNotFoundError: if folder does not exist
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
             RuntimeError: if multiple frames are returned,
                 but ``win_dur`` is not set
 
         """
+        root = audeer.safe_path(root)
+        if not os.path.exists(root):
+            raise FileNotFoundError(
+                errno.ENOENT,
+                os.strerror(errno.ENOENT),
+                root,
+            )
+
         files = audeer.list_file_names(root, filetype=filetype)
         files = [os.path.join(root, os.path.basename(f)) for f in files]
         return self.process_files(files)
@@ -487,6 +497,7 @@ class Feature:
         if series.empty:
             return pd.DataFrame(
                 columns=self.column_names,
+                dtype=object,
             )
 
         frames = [None] * len(series)

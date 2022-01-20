@@ -496,18 +496,27 @@ def test_process_folder(
         verbose=False,
     )
     sampling_rate = 8000
-    path = str(tmpdir.mkdir('wav'))
+    root = str(tmpdir.mkdir('wav'))
     files = [
-        os.path.join(path, f'file{n}.wav') for n in range(num_files)
+        os.path.join(root, f'file{n}.wav') for n in range(num_files)
     ]
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)
-    y = process.process_folder(path)
+    y = process.process_folder(root)
     pd.testing.assert_series_equal(
         y,
         process.process_files(files),
     )
+
+    # non-existing folder
+    with pytest.raises(FileNotFoundError):
+        process.process_folder('bad-folder')
+
+    # empty folder
+    root = str(tmpdir.mkdir('empty'))
+    y = process.process_folder(root)
+    pd.testing.assert_series_equal(y, pd.Series(dtype=object))
 
 
 def test_process_func_args():
@@ -1000,7 +1009,7 @@ def test_process_signal_from_index(
     if not expected:
         pd.testing.assert_series_equal(
             result,
-            pd.Series([], index, dtype=float),
+            pd.Series([], index, dtype=object),
         )
     else:
         pd.testing.assert_series_equal(

@@ -201,7 +201,7 @@ def test_process_signal_from_index(
     if not expected:
         pd.testing.assert_series_equal(
             result,
-            pd.Series([], index, dtype=float),
+            pd.Series([], index, dtype=object),
         )
     else:
         pd.testing.assert_series_equal(
