@@ -516,7 +516,7 @@ def test_process_folder(
     # empty folder
     root = str(tmpdir.mkdir('empty'))
     y = process.process_folder(root)
-    pd.testing.assert_series_equal(y, pd.Series(dtype=float))
+    pd.testing.assert_series_equal(y, pd.Series(dtype=object))
 
 
 def test_process_func_args():
@@ -1009,7 +1009,7 @@ def test_process_signal_from_index(
     if not expected:
         pd.testing.assert_series_equal(
             result,
-            pd.Series([], index, dtype=float),
+            pd.Series([], index, dtype=object),
         )
     else:
         pd.testing.assert_series_equal(

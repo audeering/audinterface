@@ -216,7 +216,7 @@ class Process:
 
         """
         if len(files) == 0:
-            return pd.Series(dtype=float)
+            return pd.Series(dtype=object)
 
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
             starts = [starts] * len(files)
@@ -293,7 +293,7 @@ class Process:
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         params = [
             (
@@ -445,7 +445,7 @@ class Process:
         r"""Like process_signal_from_index, but does not apply segmentation."""
 
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
             params = [
@@ -505,7 +505,7 @@ class Process:
         utils.assert_index(index)
 
         if index.empty:
-            return pd.Series(None, index=index, dtype=float)
+            return pd.Series(None, index=index, dtype=object)
 
         if self.segment is not None:
             index = self.segment.process_signal_from_index(
@@ -675,7 +675,7 @@ class ProcessWithContext:
         index = audformat.utils.to_segmented_index(index)
 
         if index.empty:
-            return pd.Series(index=index, dtype=float)
+            return pd.Series(index=index, dtype=object)
 
         files = index.levels[0]
         ys = [None] * len(files)
@@ -736,7 +736,7 @@ class ProcessWithContext:
 
         # For an empty Series we force the dtype
         if len(y) == 0:
-            y = pd.Series(y, index=index, dtype='float64')
+            y = pd.Series(y, index=index, dtype=object)
         else:
             y = pd.Series(y, index=index)
 

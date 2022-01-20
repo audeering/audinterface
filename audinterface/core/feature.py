@@ -138,7 +138,7 @@ class Feature:
             def process_func(signal, _):
                 return np.zeros(
                     (num_channels, len(feature_names)),
-                    dtype=float,
+                    dtype=object,
                 )
 
         if mixdown or isinstance(channels, int):
@@ -497,7 +497,7 @@ class Feature:
         if series.empty:
             return pd.DataFrame(
                 columns=self.column_names,
-                dtype=float,
+                dtype=object,
             )
 
         frames = [None] * len(series)
