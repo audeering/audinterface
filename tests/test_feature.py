@@ -68,6 +68,22 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
+                feature_names='feature',
+                process_func=lambda x, sr: 1,
+            ),
+            np.ones((1, 1, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
+                feature_names=['feature'],
+                process_func=lambda x, sr: 1,
+            ),
+            np.ones((1, 1, 1)),
+        ),
+        (
+            SIGNAL_1D,
+            audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones(3),
             ),

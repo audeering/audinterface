@@ -93,7 +93,7 @@ class Feature:
     """
     def __init__(
             self,
-            feature_names: typing.Sequence[str],
+            feature_names: typing.Union[str, typing.Sequence[str]],
             *,
             name: str = None,
             params: typing.Dict = None,
@@ -114,6 +114,8 @@ class Feature:
             verbose: bool = False,
             **kwargs,
     ):
+        feature_names = audeer.to_list(feature_names)
+
         process_func_args = process_func_args or {}
         if kwargs:
             warnings.warn(
