@@ -1173,5 +1173,5 @@ def test_sampling_rate_mismatch(
         resample=resample,
         verbose=False,
     )
-    signal = np.array([1., 2., 3.])
+    signal = np.array([1., 2., 3.]).astype('float32')
     process.process_signal(signal, signal_sampling_rate)

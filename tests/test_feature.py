@@ -200,6 +200,38 @@ def test_process_call(signal, feature, expected):
 
 
 @pytest.mark.parametrize(
+    'signal, extractor',
+    [
+        (
+            np.random.randn(1, SAMPLING_RATE),
+            audinterface.Feature(
+                feature_names='mean',
+                process_func=lambda x, sr: np.mean(x, axis=1),
+            ),
+        ),
+        (
+            np.random.randn(2, SAMPLING_RATE),
+            audinterface.Feature(
+                feature_names='mean',
+                process_func=lambda x, sr: np.mean(x, axis=1),
+            ),
+        ),
+        (
+            np.random.randn(2, SAMPLING_RATE),
+            audinterface.Feature(
+                feature_names='mean',
+                process_func=lambda x, sr: np.mean(x, axis=1),
+                channels=0,
+            ),
+        ),
+    ]
+)
+def test_process_call_datatype(signal, extractor):
+    features = extractor(signal, SAMPLING_RATE)
+    assert signal.dtype == features.dtype
+
+
+@pytest.mark.parametrize(
     'start, end, segment',
     [
         (None, None, None),
