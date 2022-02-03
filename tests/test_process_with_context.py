@@ -258,7 +258,7 @@ def test_sampling_rate_mismatch(
         resample=resample,
         verbose=False,
     )
-    signal = np.random.random(5 * 44100)
+    signal = np.random.random(5 * 44100).astype('float32')
     index = audinterface.utils.signal_index(
         pd.timedelta_range('0s', '3s', 3),
         pd.timedelta_range('1s', '4s', 3),
