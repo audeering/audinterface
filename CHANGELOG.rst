@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.8.1 (2022-02-07)
+--------------------------
+
+* Added: ``audinterface.Feature`` does support
+  specification of single feature as string
+  in addition to list
+* Changed: depend on ``audresample>=1.1``
+* Fixed: handle empty and non-existing folder
+  in ``process_folder()`` methods
+
+
 Version 0.8.0 (2022-01-04)
 --------------------------
 
