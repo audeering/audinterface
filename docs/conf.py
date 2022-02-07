@@ -32,7 +32,7 @@ extensions = [
 ]
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'audformat': ('https://audeering.github.io/audformat/', None),
     'audresample': ('https://audeering.github.io/audresample/', None),
