@@ -309,7 +309,7 @@ class Feature:
             index: index with segment information
             root: root folder to expand relative file paths
             cache_root: cache result under this folder.
-                Filename is created with
+                Filename will be created with
                 :func:`audformat.utils.hash`
 
         Raises:

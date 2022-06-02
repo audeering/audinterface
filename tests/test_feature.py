@@ -759,6 +759,8 @@ def test_process_signal_from_index(index, expected_features):
 
 def test_process_index(tmpdir):
 
+    cache_root = os.path.join(tmpdir, 'cache')
+
     feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
@@ -787,6 +789,7 @@ def test_process_index(tmpdir):
     assert y.index.get_level_values('file')[0] == path
     np.testing.assert_array_equal(y.values, y_expected)
     assert y.columns.tolist() == feature.column_names
+    y = feature.process_index(index)
 
     # relative paths
     index = audformat.segmented_index([file] * 2, [0, 1], [2, 3])
@@ -794,6 +797,44 @@ def test_process_index(tmpdir):
     assert y.index.get_level_values('file')[0] == file
     np.testing.assert_array_equal(y.values, y_expected)
     assert y.columns.tolist() == feature.column_names
+
+    # cache result
+    y = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    os.remove(path)
+
+    # fails because file does not exist
+    with pytest.raises(RuntimeError):
+        feature.process_index(
+            index,
+            root=root,
+        )
+
+    # loading from cache still works
+    y_cached = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_frame_equal(y, y_cached)
+
+    # interface with different feature names
+    feature = audinterface.Feature(
+        feature_names=('some', 'other', 'names'),
+        process_func=feature_extractor,
+        channels=range(NUM_CHANNELS),
+    )
+
+    # fails because column names do not match
+    with pytest.raises(ValueError):
+        feature.process_index(
+            index,
+            root=root,
+            cache_root=cache_root,
+        )
 
 
 @pytest.mark.parametrize(
