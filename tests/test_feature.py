@@ -778,23 +778,24 @@ def test_process_index(tmpdir):
 
     # create file
     root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
-    path = os.path.join(root, file)
-    af.write(path, SIGNAL_2D, SAMPLING_RATE)
+    files = ['file-1.wav', 'file-2.wav']
+    paths = [os.path.join(root, file) for file in files]
+    for path in paths:
+        af.write(path, SIGNAL_2D, SAMPLING_RATE)
     y_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
 
     # absolute paths
-    index = audformat.segmented_index([path] * 2, [0, 1], [2, 3])
+    index = audformat.segmented_index(paths, [0, 1], [2, 3])
     y = feature.process_index(index)
-    assert y.index.get_level_values('file')[0] == path
+    assert y.index.get_level_values('file')[0] == paths[0]
     np.testing.assert_array_equal(y.values, y_expected)
     assert y.columns.tolist() == feature.column_names
     y = feature.process_index(index)
 
     # relative paths
-    index = audformat.segmented_index([file] * 2, [0, 1], [2, 3])
+    index = audformat.segmented_index(files, [0, 1], [2, 3])
     y = feature.process_index(index, root=root)
-    assert y.index.get_level_values('file')[0] == file
+    assert y.index.get_level_values('file')[0] == files[0]
     np.testing.assert_array_equal(y.values, y_expected)
     assert y.columns.tolist() == feature.column_names
 
@@ -804,9 +805,9 @@ def test_process_index(tmpdir):
         root=root,
         cache_root=cache_root,
     )
-    os.remove(path)
+    os.remove(paths[1])
 
-    # fails because file does not exist
+    # fails because second file does not exist
     with pytest.raises(RuntimeError):
         feature.process_index(
             index,
@@ -828,8 +829,23 @@ def test_process_index(tmpdir):
         channels=range(NUM_CHANNELS),
     )
 
-    # fails because column names do not match
-    with pytest.raises(ValueError):
+    # fails because columns do not match
+    with pytest.raises(RuntimeError, match='different columns'):
+        feature.process_index(
+            index,
+            root=root,
+            cache_root=cache_root,
+        )
+
+    # interface with different processing function
+    feature = audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=lambda x, sr: feature_extractor(x, sr) * 2,
+        channels=range(NUM_CHANNELS),
+    )
+
+    # fails because values do not match
+    with pytest.raises(RuntimeError, match='different values'):
         feature.process_index(
             index,
             root=root,

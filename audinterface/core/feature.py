@@ -305,20 +305,29 @@ class Feature:
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
+        If cache folder is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        features will be read from the cached file.
+        As a sanity check,
+        columns and values of the first segment are compared.
+
         Args:
             index: index with segment information
             root: root folder to expand relative file paths
-            cache_root: cache result under this folder.
-                Filename will be created with
-                :func:`audformat.utils.hash`
+            cache_root: cache folder (see description)
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
             RuntimeError: if multiple frames are returned,
                 but ``win_dur`` is not set
+            RuntimeError: if a cached file is found that was
+                generated with a different processing function
             ValueError: if index is not conform to audformat_
-            ValueError: if cached file has different column names
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -333,13 +342,27 @@ class Feature:
         if cache_path and os.path.exists(cache_path):
 
             df = pd.read_pickle(cache_path)
+
             if list(df.columns) != self.column_names:
-                raise ValueError(
-                    f'Found cached file with different column names: '
-                    f'{list(df.columns)} '
-                    f'!= '
-                    f'{self.column_names}'
+                raise RuntimeError(
+                    'Found cached file with same index '
+                    'but different columns. '
+                    'Disable caching '
+                    'or choose another cache folder.'
                 )
+
+            if len(index) > 0:
+                df_verify = self.process_index(
+                    index[:1],
+                    root=root,
+                )
+                if not df[:1].equals(df_verify):
+                    raise RuntimeError(
+                        'Found cached file with same index '
+                        'but different values. '
+                        'Disable caching '
+                        'or choose another cache folder.'
+                    )
 
         else:
 
