@@ -314,6 +314,11 @@ class Feature:
         features will be read from the cached file.
         As a sanity check,
         columns and values of the first segment are compared.
+        Note that it can still happen
+        that two different processing functions
+        produce the same values for the first segment.
+        We recommend to use unique cache folders
+        for every processing function.
 
         Args:
             index: index with segment information
