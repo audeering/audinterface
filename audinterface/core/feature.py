@@ -305,7 +305,7 @@ class Feature:
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
-        If cache folder is not ``None``,
+        If ``cache_root`` is not ``None``,
         a hash value is created from the index
         using :func:`audformat.utils.hash` and
         the result is stored as
