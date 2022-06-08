@@ -759,6 +759,8 @@ def test_process_signal_from_index(index, expected_features):
 
 def test_process_index(tmpdir):
 
+    cache_root = os.path.join(tmpdir, 'cache')
+
     feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
@@ -776,24 +778,49 @@ def test_process_index(tmpdir):
 
     # create file
     root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
-    path = os.path.join(root, file)
-    af.write(path, SIGNAL_2D, SAMPLING_RATE)
+    files = ['file-1.wav', 'file-2.wav']
+    paths = [os.path.join(root, file) for file in files]
+    for path in paths:
+        af.write(path, SIGNAL_2D, SAMPLING_RATE)
     y_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
 
     # absolute paths
-    index = audformat.segmented_index([path] * 2, [0, 1], [2, 3])
+    index = audformat.segmented_index(paths, [0, 1], [2, 3])
     y = feature.process_index(index)
-    assert y.index.get_level_values('file')[0] == path
+    assert y.index.get_level_values('file')[0] == paths[0]
+    np.testing.assert_array_equal(y.values, y_expected)
+    assert y.columns.tolist() == feature.column_names
+    y = feature.process_index(index)
+
+    # relative paths
+    index = audformat.segmented_index(files, [0, 1], [2, 3])
+    y = feature.process_index(index, root=root)
+    assert y.index.get_level_values('file')[0] == files[0]
     np.testing.assert_array_equal(y.values, y_expected)
     assert y.columns.tolist() == feature.column_names
 
-    # relative paths
-    index = audformat.segmented_index([file] * 2, [0, 1], [2, 3])
-    y = feature.process_index(index, root=root)
-    assert y.index.get_level_values('file')[0] == file
-    np.testing.assert_array_equal(y.values, y_expected)
-    assert y.columns.tolist() == feature.column_names
+    # cache result
+    y = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    os.remove(paths[1])
+
+    # fails because second file does not exist
+    with pytest.raises(RuntimeError):
+        feature.process_index(
+            index,
+            root=root,
+        )
+
+    # loading from cache still works
+    y_cached = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_frame_equal(y, y_cached)
 
 
 @pytest.mark.parametrize(

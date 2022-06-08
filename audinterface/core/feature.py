@@ -301,12 +301,22 @@ class Feature:
             index: pd.Index,
             *,
             root: str = None,
+            cache_root: str = None,
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
+
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        features will be read from the cached file.
 
         Args:
             index: index with segment information
             root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -318,8 +328,28 @@ class Feature:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series = self.process.process_index(index, root=root)
-        return self._series_to_frame(series)
+        cache_path = None
+
+        if cache_root is not None:
+            cache_root = audeer.mkdir(cache_root)
+            hash = audformat.utils.hash(index)
+            cache_path = os.path.join(cache_root, f'{hash}.pkl')
+
+        if cache_path and os.path.exists(cache_path):
+            return pd.read_pickle(cache_path)
+
+        else:
+
+            y = self.process.process_index(
+                index,
+                root=root,
+            )
+            df = self._series_to_frame(y)
+
+            if cache_path is not None:
+                df.to_pickle(cache_path, protocol=4)
+
+        return df
 
     def process_signal(
             self,
