@@ -312,13 +312,6 @@ class Feature:
         ``<cache_root>/<hash>.pkl``.
         When called again with the same index,
         features will be read from the cached file.
-        As a sanity check,
-        columns and values of the first segment are compared.
-        Note that it can still happen
-        that two different processing functions
-        produce the same values for the first segment.
-        We recommend to use unique cache folders
-        for every processing function.
 
         Args:
             index: index with segment information
@@ -330,8 +323,6 @@ class Feature:
             RuntimeError: if channel selection is invalid
             RuntimeError: if multiple frames are returned,
                 but ``win_dur`` is not set
-            RuntimeError: if a cached file is found that was
-                generated with a different processing function
             ValueError: if index is not conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
@@ -345,29 +336,7 @@ class Feature:
             cache_path = os.path.join(cache_root, f'{hash}.pkl')
 
         if cache_path and os.path.exists(cache_path):
-
-            df = pd.read_pickle(cache_path)
-
-            if list(df.columns) != self.column_names:
-                raise RuntimeError(
-                    'Found cached file with same index '
-                    'but different columns. '
-                    'Disable caching '
-                    'or choose another cache folder.'
-                )
-
-            if len(index) > 0:
-                df_verify = self.process_index(
-                    index[:1],
-                    root=root,
-                )
-                if not df[:1].equals(df_verify):
-                    raise RuntimeError(
-                        'Found cached file with same index '
-                        'but different values. '
-                        'Disable caching '
-                        'or choose another cache folder.'
-                    )
+            return pd.read_pickle(cache_path)
 
         else:
 

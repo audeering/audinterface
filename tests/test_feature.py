@@ -822,36 +822,6 @@ def test_process_index(tmpdir):
     )
     pd.testing.assert_frame_equal(y, y_cached)
 
-    # interface with different feature names
-    feature = audinterface.Feature(
-        feature_names=('some', 'other', 'names'),
-        process_func=feature_extractor,
-        channels=range(NUM_CHANNELS),
-    )
-
-    # fails because columns do not match
-    with pytest.raises(RuntimeError, match='different columns'):
-        feature.process_index(
-            index,
-            root=root,
-            cache_root=cache_root,
-        )
-
-    # interface with different processing function
-    feature = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=lambda x, sr: feature_extractor(x, sr) * 2,
-        channels=range(NUM_CHANNELS),
-    )
-
-    # fails because values do not match
-    with pytest.raises(RuntimeError, match='different values'):
-        feature.process_index(
-            index,
-            root=root,
-            cache_root=cache_root,
-        )
-
 
 @pytest.mark.parametrize(
     'win_dur, hop_dur, unit',
