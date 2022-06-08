@@ -322,12 +322,22 @@ class Process:
             index: pd.Index,
             *,
             root: str = None,
+            cache_root: str = None,
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
+
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        features will be read from the cached file.
 
         Args:
             index: index with segment information
             root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
 
         Returns:
             Series with processed segments conform to audformat_
@@ -339,12 +349,27 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        index = audformat.utils.to_segmented_index(index)
+        cache_path = None
 
-        if self.segment is not None:
-            index = self.segment.process_index(index, root=root)
+        if cache_root is not None:
+            cache_root = audeer.mkdir(cache_root)
+            hash = audformat.utils.hash(index)
+            cache_path = os.path.join(cache_root, f'{hash}.pkl')
 
-        return self._process_index_wo_segment(index, root)
+        if cache_path and os.path.exists(cache_path):
+            y = pd.read_pickle(cache_path)
+        else:
+            index = audformat.utils.to_segmented_index(index)
+
+            if self.segment is not None:
+                index = self.segment.process_index(index, root=root)
+
+            y = self._process_index_wo_segment(index, root)
+
+            if cache_path is not None:
+                y.to_pickle(cache_path, protocol=4)
+
+        return y
 
     def _process_signal(
             self,
