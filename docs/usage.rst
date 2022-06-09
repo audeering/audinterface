@@ -28,7 +28,7 @@ Usage
 The basic idea of :mod:`audinterface` is
 to provide easy and standardized interfaces
 to apply a machine learning model,
-or other digital signal processing algorithms (DSP)
+or other digital signal processing algorithms
 to audio files.
 The only prerequisite is
 the algorithm provides a callable
@@ -59,8 +59,8 @@ and an index.
     index = db['emotion'].index
 
 
-DSP algorithm returning a series
---------------------------------
+Create a processing interface
+-----------------------------
 
 Let's assume we want to calculate the root mean square (RMS)
 value in dB.
@@ -80,7 +80,7 @@ and create an interface for it using :class:`audinterface.Process`.
 The following three commands
 apply the algorithm
 and all return the same result
-as a :class:`pd.Series`.
+as a :class:`pandas.Series`.
 
 .. jupyter-execute::
 
@@ -90,13 +90,13 @@ as a :class:`pd.Series`.
     y
 
 
-DSP algorithm returning a dataframe
------------------------------------
+Create a feature extractor
+--------------------------
 
-When using a DSP algorithm as feature extractor,
+When using an algorithm as feature extractor,
 it is recommended to use :class:`audinterface.Feature`,
-which returns results as a :class:`pd.DataFrame`
-and assigns names to the single features.
+which returns results as a :class:`pandas.DataFrame`
+and assigns names to single features.
 
 .. jupyter-execute::
 
@@ -112,8 +112,8 @@ and assigns names to the single features.
     df
 
 
-Creating a feature extraction object
-------------------------------------
+Create a serializable feature extractor
+---------------------------------------
 
 To use a feature extractor as an input transform
 of a machine learning model
