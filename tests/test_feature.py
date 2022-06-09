@@ -770,9 +770,9 @@ def test_process_index(tmpdir):
     # empty
 
     index = audformat.segmented_index()
-    y = feature.process_index(index)
-    assert y.empty
-    assert y.columns.tolist() == feature.column_names
+    df = feature.process_index(index)
+    assert df.empty
+    assert df.columns.tolist() == feature.column_names
 
     # non-empty
 
@@ -782,25 +782,25 @@ def test_process_index(tmpdir):
     paths = [os.path.join(root, file) for file in files]
     for path in paths:
         af.write(path, SIGNAL_2D, SAMPLING_RATE)
-    y_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
+    df_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
 
     # absolute paths
     index = audformat.segmented_index(paths, [0, 1], [2, 3])
-    y = feature.process_index(index)
-    assert y.index.get_level_values('file')[0] == paths[0]
-    np.testing.assert_array_equal(y.values, y_expected)
-    assert y.columns.tolist() == feature.column_names
-    y = feature.process_index(index)
+    df = feature.process_index(index)
+    assert df.index.get_level_values('file')[0] == paths[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    assert df.columns.tolist() == feature.column_names
+    df = feature.process_index(index)
 
     # relative paths
     index = audformat.segmented_index(files, [0, 1], [2, 3])
-    y = feature.process_index(index, root=root)
-    assert y.index.get_level_values('file')[0] == files[0]
-    np.testing.assert_array_equal(y.values, y_expected)
-    assert y.columns.tolist() == feature.column_names
+    df = feature.process_index(index, root=root)
+    assert df.index.get_level_values('file')[0] == files[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    assert df.columns.tolist() == feature.column_names
 
     # cache result
-    y = feature.process_index(
+    df = feature.process_index(
         index,
         root=root,
         cache_root=cache_root,
@@ -815,12 +815,12 @@ def test_process_index(tmpdir):
         )
 
     # loading from cache still works
-    y_cached = feature.process_index(
+    df_cached = feature.process_index(
         index,
         root=root,
         cache_root=cache_root,
     )
-    pd.testing.assert_frame_equal(y, y_cached)
+    pd.testing.assert_frame_equal(df, df_cached)
 
 
 @pytest.mark.parametrize(

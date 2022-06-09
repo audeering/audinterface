@@ -549,6 +549,8 @@ def test_process_func_args():
 )
 def test_process_index(tmpdir, num_workers, multiprocessing):
 
+    cache_root = os.path.join(tmpdir, 'cache')
+
     process = audinterface.Process(
         process_func=None,
         sampling_rate=None,
@@ -614,6 +616,29 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             file, start=start, end=end, root=root
         )
         np.testing.assert_equal(signal, value)
+
+    # cache result
+    y = process.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    os.remove(path)
+
+    # fails because second file does not exist
+    with pytest.raises(RuntimeError):
+        process.process_index(
+            index,
+            root=root,
+        )
+
+    # loading from cache still works
+    y_cached = process.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_series_equal(y, y_cached)
 
 
 @pytest.mark.parametrize(
