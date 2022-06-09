@@ -59,8 +59,8 @@ and an index.
     index = db['emotion'].index
 
 
-Create a processing interface
------------------------------
+Processing interface
+--------------------
 
 Let's assume we want to calculate the root mean square (RMS)
 value in dB.
@@ -90,8 +90,8 @@ as a :class:`pandas.Series`.
     y
 
 
-Create a feature extractor
---------------------------
+Feature extractor
+-----------------
 
 When using an algorithm as feature extractor,
 it is recommended to use :class:`audinterface.Feature`,
@@ -112,8 +112,8 @@ and assigns names to single features.
     df
 
 
-Create a framewise feature extractor
-------------------------------------
+Framewise feature extractor
+---------------------------
 
 If the feature extractor does not return
 one set of features for the whole signal,
@@ -159,8 +159,8 @@ whereas the first dimension is optionally.
     df
 
 
-Create a serializable feature extractor
----------------------------------------
+Serializable feature extractor
+------------------------------
 
 To use a feature extractor as an input transform
 of a machine learning model
