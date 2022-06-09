@@ -151,8 +151,8 @@ and re-instantiate it from there.
 
 .. jupyter-execute::
 
-    fex.to_yaml('mean-std.yml')
-    fex2 = audobject.from_yaml('mean-std.yml')
+    fex.to_yaml('mean-std.yaml')
+    fex2 = audobject.from_yaml('mean-std.yaml')
     df = fex2.process_index(index)
     df
 
