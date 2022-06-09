@@ -23,19 +23,23 @@ source_suffix = '.rst'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 pygments_style = None
 extensions = [
+    'jupyter_sphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',  # support for Google-style docstrings
     'sphinx_autodoc_typehints',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
+    'sphinx_copybutton',  # for "copy to clipboard" buttons
 ]
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'audformat': ('https://audeering.github.io/audformat/', None),
+    'audobject': ('https://audeering.github.io/audobject/', None),
     'audresample': ('https://audeering.github.io/audresample/', None),
+    'opensmile': ('https://audeering.github.io/opensmile-python/', None),
 }
 # Disable Gitlab as we need to sign in
 linkcheck_ignore = [
