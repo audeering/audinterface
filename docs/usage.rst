@@ -33,7 +33,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a :class:`np.ndarray`
+as a :class:`numpy.ndarray`
 and the sampling rate as input.
 
 The interface can then apply the algorithm
