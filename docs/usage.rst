@@ -122,6 +122,10 @@ in a framewise manner,
 you should specify the ``win_dur``
 and ``hop_dur`` arguments
 of :class:`audinterface.Feature`.
+It's also important the feature extraction function
+returns the value in the correct shape,
+namely ``(num_channels, num_features, num_frames)``,
+whereas the first dimension is optionally.
 
 .. jupyter-execute::
 
