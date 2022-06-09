@@ -336,10 +336,8 @@ class Feature:
             cache_path = os.path.join(cache_root, f'{hash}.pkl')
 
         if cache_path and os.path.exists(cache_path):
-            return pd.read_pickle(cache_path)
-
+            df = pd.read_pickle(cache_path)
         else:
-
             y = self.process.process_index(
                 index,
                 root=root,
