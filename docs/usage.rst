@@ -112,6 +112,49 @@ and assigns names to single features.
     df
 
 
+Create a framewise feature extractor
+------------------------------------
+
+If the feature extractor does not return
+one set of features for the whole signal,
+but does return features
+in a framewise manner,
+you should specify the ``win_dur``
+and ``hop_dur`` arguments
+of :class:`audinterface.Feature`.
+
+.. jupyter-execute::
+
+    def features(signal, sampling_rate, win_dur, hop_dur):
+        win_dur = int(win_dur * sampling_rate)
+        hop_dur = int(hop_dur * sampling_rate)
+        dur = signal.shape[1]
+        starts = np.arange(0, dur - win_dur, hop_dur)
+        ends = np.arange(win_dur, dur, hop_dur)
+        mean = np.array(
+            [
+                [signal[:, s:e].mean()]
+                for s, e in zip(starts, ends)
+            ]
+        )
+        return mean.T  # return with shape (num_features, num_frames)
+
+    win_dur = 0.2
+    hop_dur = 0.1
+    interface = audinterface.Feature(
+        ['mean'],
+        process_func=features,
+        process_func_args={
+            'win_dur': win_dur,
+            'hop_dur': hop_dur,
+        },
+        win_dur=win_dur,
+        hop_dur=hop_dur,
+    )
+    df = interface.process_index(index)
+    df
+
+
 Create a serializable feature extractor
 ---------------------------------------
 
