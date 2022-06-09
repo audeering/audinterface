@@ -15,6 +15,12 @@
     setattr(pd.Series, '_repr_html_', series_to_html)
     pd.set_option('display.max_rows', 6)
 
+.. Specify version for storing and loading objects to YAML
+.. jupyter-execute::
+    :hide-code:
+
+    __version__ = '1.0.0'
+
 
 Usage
 =====
@@ -134,7 +140,7 @@ and :class:`audobject.Object`.
 
         def features(self, signal, sampling_rate):
             return [signal.mean(), signal.std()]
-            
+
     fex = MeanStd()
     df = fex.process_index(index)
     df
