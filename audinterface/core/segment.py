@@ -131,7 +131,49 @@ class Segment:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    """
+    Example:
+        >>> def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):
+        ...     size = signal.shape[1] / sampling_rate
+        ...     starts = np.arange(0, size - win_size, hop_size)
+        ...     ends = np.arange(win_size, size, hop_size)
+        ...     return pd.MultiIndex.from_tuples(
+        ...         [
+        ...             (pd.Timedelta(s, unit='s'), pd.Timedelta(e, unit='s'))
+        ...             for s, e in zip(starts, ends)
+        ...         ],
+        ...         names=['start', 'end'],
+        ...     )
+        >>> interface = Segment(process_func=segment)
+        >>> signal = np.array([1., 2., 3.])
+        >>> interface(signal, sampling_rate=3)
+        MultiIndex([(       '0 days 00:00:00', '0 days 00:00:00.200000'),
+                    ('0 days 00:00:00.100000', '0 days 00:00:00.300000'),
+                    ('0 days 00:00:00.200000', '0 days 00:00:00.400000'),
+                    ('0 days 00:00:00.300000', '0 days 00:00:00.500000'),
+                    ('0 days 00:00:00.400000', '0 days 00:00:00.600000'),
+                    ('0 days 00:00:00.500000', '0 days 00:00:00.700000'),
+                    ('0 days 00:00:00.600000', '0 days 00:00:00.800000'),
+                    ('0 days 00:00:00.700000', '0 days 00:00:00.900000')],
+                   names=['start', 'end'])
+        >>> import audb
+        >>> import audformat
+        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> interface = Segment(
+        ...     process_func=segment,
+        ...     process_func_args={'win_size': 0.5, 'hop_size': 0.25},
+        ... )
+        >>> index = interface.process_index(db['emotion'].index)
+        >>> index = audformat.utils.map_file_path(index, os.path.basename)
+        >>> index
+        MultiIndex([('03a01Fa.wav',        '0 days 00:00:00', ...),
+                    ('03a01Fa.wav', '0 days 00:00:00.250000', ...),
+                    ('03a01Fa.wav', '0 days 00:00:00.500000', ...),
+                    ('03a01Fa.wav', '0 days 00:00:00.750000', ...),
+                    ('03a01Fa.wav',        '0 days 00:00:01', ...),
+                    ('03a01Fa.wav', '0 days 00:00:01.250000', ...)],
+                   names=['file', 'start', 'end'])
+
+    """  # noqa: E501
     def __init__(
             self,
             *,

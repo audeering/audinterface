@@ -90,7 +90,30 @@ class Feature:
             and ``win_dur is not None``
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
-    """
+    Example:
+        >>> def mean_std(signal, sampling_rate):
+        ...     return [signal.mean(), signal.std()]
+        >>> interface = Feature(['mean', 'std'], process_func=mean_std)
+        >>> signal = np.array([1., 2., 3.])
+        >>> interface(signal, sampling_rate=3)
+        array([[[2.        ],
+                [0.81649658]]])
+        >>> interface.process_signal(signal, sampling_rate=3)
+                                mean       std
+        start  end
+        0 days 0 days 00:00:01   2.0  0.816497
+        >>> import audb
+        >>> import audformat
+        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> index = db['emotion'].index
+        >>> df = interface.process_index(index)
+        >>> df.index = audformat.utils.map_file_path(df.index, os.path.basename)
+        >>> df
+                                                       mean       std
+        file        start  end
+        03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
+
+    """  # noqa: E501
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],

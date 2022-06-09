@@ -123,7 +123,14 @@ def read_audio(
         signal: array with signal values in shape ``(channels, samples)``
         sampling_rate: sampling rate in Hz
 
-    """
+    Example:
+        >>> import audb
+        >>> media = audb.load_media('emodb', 'wav/03a01Fa.wav', version='1.2.0', verbose=False)
+        >>> signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit='s'))
+        >>> signal.shape
+        (1, 160)
+
+    """  # noqa: E501
     if root is not None and not os.path.isabs(file):
         file = os.path.join(root, file)
 

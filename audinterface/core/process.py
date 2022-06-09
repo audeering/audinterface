@@ -52,7 +52,29 @@ class Process:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    """
+    Example:
+        >>> def mean(signal, sampling_rate):
+        ...     return signal.mean()
+        >>> interface = Process(process_func=mean)
+        >>> signal = np.array([1., 2., 3.])
+        >>> interface(signal, sampling_rate=3)
+        2.0
+        >>> interface.process_signal(signal, sampling_rate=3)
+        start   end
+        0 days  0 days 00:00:01   2.0
+        dtype: float64
+        >>> import audb
+        >>> import audformat
+        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> index = db['emotion'].index
+        >>> y = interface.process_index(index)
+        >>> y.index = audformat.utils.map_file_path(y.index, os.path.basename)
+        >>> y
+        file         start   end
+        03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
+        dtype: float32
+
+    """  # noqa: E501
     def __init__(
             self,
             *,
@@ -626,7 +648,33 @@ class ProcessWithContext:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    """
+    Example:
+        >>> def mean(signal, sampling_rate, starts, ends):
+        ...     aggregated_mean = 0
+        ...     for start, end in zip(starts, ends):
+        ...         start *= sampling_rate
+        ...         end *= sampling_rate
+        ...         aggregated_mean += signal[:, start:end].mean()
+        ...     return aggregated_mean
+        >>> interface = ProcessWithContext(process_func=mean)
+        >>> signal = np.array([1., 2., 3., 1., 2., 3.])
+        >>> sampling_rate = 3
+        >>> starts = [0, 1]
+        >>> ends = [1, 2]
+        >>> interface(signal, sampling_rate, starts, ends)
+        4.0
+        >>> import audb
+        >>> import audformat
+        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> files = list(db.files) * 3
+        >>> starts = [0, 0.1, 0.2]
+        >>> ends = [0.5, 0.6, 0.7]
+        >>> index = audformat.segmented_index(files, starts, ends)
+        >>> # y = interface.process_index(index)
+        >>> # y.index = audformat.utils.map_file_path(y.index, os.path.basename)
+        >>> # y
+
+    """  # noqa: E501
     def __init__(
             self,
             *,
@@ -716,6 +764,8 @@ class ProcessWithContext:
                 mask = index.isin([file], 0)
                 select = index[mask].droplevel(0)
                 signal, sampling_rate = utils.read_audio(file, root=root)
+                print(idx)
+                print(file)
                 ys[idx] = pd.Series(
                     self.process_signal_from_index(
                         signal, sampling_rate, select,
