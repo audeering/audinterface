@@ -22,18 +22,6 @@ You can inherit from the classes
 or just instantiate them
 to get some standard implementations of those methods.
 
-Example:
-    >>> import numpy as np
-    >>> def process_func(signal, sampling_rate):
-    ...     return signal.shape[1] / sampling_rate
-    ...
-    >>> model = Process(process_func=process_func)
-    >>> signal = np.array([1., 2., 3.])
-    >>> model.process_signal(signal, sampling_rate=3)
-    start   end
-    0 days  0 days 00:00:01    1.0
-    dtype: float64
-
 """
 from audinterface import utils
 from audinterface.core.feature import (

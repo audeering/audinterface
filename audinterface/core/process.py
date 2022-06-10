@@ -52,6 +52,31 @@ class Process:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
+    Example:
+        >>> def mean(signal, sampling_rate):
+        ...     return signal.mean()
+        >>> interface = Process(process_func=mean)
+        >>> signal = np.array([1., 2., 3.])
+        >>> interface(signal, sampling_rate=3)
+        2.0
+        >>> interface.process_signal(signal, sampling_rate=3)
+        start   end
+        0 days  0 days 00:00:01   2.0
+        dtype: float64
+        >>> import audb
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
+        >>> index = db['emotion'].index
+        >>> interface.process_index(index, root=db.root)
+        file             start   end
+        wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
+        dtype: float32
+
     """
     def __init__(
             self,
@@ -626,7 +651,41 @@ class ProcessWithContext:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    """
+    Example:
+        >>> def running_mean(signal, sampling_rate, starts, ends):
+        ...     means_per_segment = [
+        ...         signal[:, start:end].mean()
+        ...         for start, end in zip(starts, ends)
+        ...     ]
+        ...     cumsum = np.cumsum(np.pad(means_per_segment, 1))
+        ...     return (cumsum[2:] - cumsum[:-2]) / float(2)
+        >>> interface = ProcessWithContext(process_func=running_mean)
+        >>> signal = np.array([1., 2., 3., 1., 2., 3.])
+        >>> sampling_rate = 3
+        >>> starts = [0, sampling_rate]
+        >>> ends = [sampling_rate, 2 * sampling_rate]
+        >>> interface(signal, sampling_rate, starts, ends)
+        array([2., 1.])
+        >>> import audb
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
+        >>> files = list(db.files) * 3
+        >>> starts = [0, 0.1, 0.2]
+        >>> ends = [0.5, 0.6, 0.7]
+        >>> index = audformat.segmented_index(files, starts, ends)
+        >>> interface.process_index(index, root=db.root)
+        file             start                   end
+        wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:00.500000   -0.000261
+                         0 days 00:00:00.100000  0 days 00:00:00.600000   -0.000199
+                         0 days 00:00:00.200000  0 days 00:00:00.700000   -0.000111
+        dtype: float32
+
+    """  # noqa: E501
     def __init__(
             self,
             *,
