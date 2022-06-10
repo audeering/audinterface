@@ -246,7 +246,7 @@ Segmentation interface
         )
         return index
 
-    interafce = audinterface.Segment(process_func=segments)
+    interface = audinterface.Segment(process_func=segments)
     idx = interafce.process_file(files[0])
     idx
 
