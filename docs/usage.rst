@@ -96,7 +96,7 @@ as a :class:`pandas.Series`.
     y
 
 
-Feature interafce
+Feature interface
 -----------------
 
 When the result of the processing function has multiple dimensions
@@ -118,7 +118,7 @@ and assigns names to the dimensions/features.
     df
 
 
-Framewise feature interafce
+Framewise feature interface
 ---------------------------
 
 If a processing function does not return
@@ -167,7 +167,7 @@ whereas the first dimension is optionally.
     df
 
 
-Serializable feature interafce
+Serializable feature interface
 ------------------------------
 
 To use a feature extractor as an input transform
