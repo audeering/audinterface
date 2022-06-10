@@ -156,24 +156,27 @@ class Segment:
                     ('0 days 00:00:00.700000', '0 days 00:00:00.900000')],
                    names=['start', 'end'])
         >>> import audb
-        >>> import audformat
-        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
         >>> interface = Segment(
         ...     process_func=segment,
         ...     process_func_args={'win_size': 0.5, 'hop_size': 0.25},
         ... )
-        >>> index = interface.process_index(db['emotion'].index)
-        >>> index = audformat.utils.map_file_path(index, os.path.basename)
-        >>> index
-        MultiIndex([('03a01Fa.wav',        '0 days 00:00:00', ...),
-                    ('03a01Fa.wav', '0 days 00:00:00.250000', ...),
-                    ('03a01Fa.wav', '0 days 00:00:00.500000', ...),
-                    ('03a01Fa.wav', '0 days 00:00:00.750000', ...),
-                    ('03a01Fa.wav',        '0 days 00:00:01', ...),
-                    ('03a01Fa.wav', '0 days 00:00:01.250000', ...)],
+        >>> interface.process_index(db['emotion'].index, root=db.root)
+        MultiIndex([('wav/03a01Fa.wav',        '0 days 00:00:00', ...),
+                    ('wav/03a01Fa.wav', '0 days 00:00:00.250000', ...),
+                    ('wav/03a01Fa.wav', '0 days 00:00:00.500000', ...),
+                    ('wav/03a01Fa.wav', '0 days 00:00:00.750000', ...),
+                    ('wav/03a01Fa.wav',        '0 days 00:00:01', ...),
+                    ('wav/03a01Fa.wav', '0 days 00:00:01.250000', ...)],
                    names=['file', 'start', 'end'])
 
-    """  # noqa: E501
+    """
     def __init__(
             self,
             *,

@@ -64,17 +64,20 @@ class Process:
         0 days  0 days 00:00:01   2.0
         dtype: float64
         >>> import audb
-        >>> import audformat
-        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
         >>> index = db['emotion'].index
-        >>> y = interface.process_index(index)
-        >>> y.index = audformat.utils.map_file_path(y.index, os.path.basename)
-        >>> y
-        file         start   end
-        03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
+        >>> interface.process_index(index, root=db.root)
+        file             start   end
+        wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
         dtype: float32
 
-    """  # noqa: E501
+    """
     def __init__(
             self,
             *,
@@ -664,17 +667,20 @@ class ProcessWithContext:
         >>> interface(signal, sampling_rate, starts, ends)
         4.0
         >>> import audb
-        >>> import audformat
-        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
         >>> files = list(db.files) * 3
         >>> starts = [0, 0.1, 0.2]
         >>> ends = [0.5, 0.6, 0.7]
         >>> index = audformat.segmented_index(files, starts, ends)
-        >>> # y = interface.process_index(index)
-        >>> # y.index = audformat.utils.map_file_path(y.index, os.path.basename)
-        >>> # y
+        >>> # y = interface.process_index(index, root=db.root)
 
-    """  # noqa: E501
+    """
     def __init__(
             self,
             *,

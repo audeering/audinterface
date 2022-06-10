@@ -103,17 +103,20 @@ class Feature:
         start  end
         0 days 0 days 00:00:01   2.0  0.816497
         >>> import audb
-        >>> import audformat
-        >>> db = audb.load('emodb', version='1.2.0', media='wav/03a01Fa.wav', verbose=False)
+        >>> db = audb.load(
+        ...     'emodb',
+        ...     version='1.2.0',
+        ...     media='wav/03a01Fa.wav',
+        ...     full_path=False,
+        ...     verbose=False,
+        ... )
         >>> index = db['emotion'].index
-        >>> df = interface.process_index(index)
-        >>> df.index = audformat.utils.map_file_path(df.index, os.path.basename)
-        >>> df
-                                                       mean       std
-        file        start  end
-        03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
+        >>> interface.process_index(index, root=db.root)
+                                                           mean       std
+        file            start  end
+        wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
 
-    """  # noqa: E501
+    """
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
