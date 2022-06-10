@@ -53,6 +53,11 @@ autodoc_mock_imports = [
 autosectionlabel_prefix_document = True
 autosectionlabel_maxdepth = 2
 
+# Do not copy prompot output
+copybutton_prompt_text = r'>>> |\.\.\. |$ '
+copybutton_prompt_is_regexp = True
+
+
 # HTML --------------------------------------------------------------------
 html_theme = 'sphinx_audeering_theme'
 html_theme_options = {
