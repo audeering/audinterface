@@ -1,5 +1,6 @@
 audb
 audeer
+auditok
 jupyter-sphinx
 librosa
 sphinx

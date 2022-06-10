@@ -12,7 +12,12 @@
         return df._repr_html_()
 
 
+    def index_to_html(self):
+        return self.to_frame(index=False)._repr_html_()
+
+
     setattr(pd.Series, '_repr_html_', series_to_html)
+    setattr(pd.Index, '_repr_html_', index_to_html)
     pd.set_option('display.max_rows', 6)
     pd.set_option('display.max_columns', 3)
 
@@ -91,7 +96,7 @@ as a :class:`pandas.Series`.
     y
 
 
-Feature extractor
+Feature interafce
 -----------------
 
 When the result of the processing function has multiple dimensions
@@ -113,17 +118,17 @@ and assigns names to the dimensions/features.
     df
 
 
-Framewise feature extractor
+Framewise feature interafce
 ---------------------------
 
-If the feature extractor does not return
+If a processing function does not return
 one set of features for the whole signal,
 but does return features
 in a framewise manner,
 you should specify the ``win_dur``
 and ``hop_dur`` arguments
 of :class:`audinterface.Feature`.
-It's also important the feature extraction function
+It's also important the processing function
 returns the value in the correct shape,
 namely ``(num_channels, num_features, num_frames)``,
 whereas the first dimension is optionally.
@@ -162,7 +167,7 @@ whereas the first dimension is optionally.
     df
 
 
-Serializable feature extractor
+Serializable feature interafce
 ------------------------------
 
 To use a feature extractor as an input transform
@@ -205,6 +210,46 @@ and re-instantiate it from there.
     fex2 = audobject.from_yaml('mean-std.yaml')
     df = fex2.process_index(index)
     df
+
+
+Segmentation interface
+----------------------
+
+.. jupyter-execute::
+
+    import auditok
+
+    def segments(signal, sampling_rate):
+
+        # Convert floating point array to 16bit PCM little-endian
+        ints = (signal[0, :] * 32767).astype(np.int16)
+        little_endian = ints.astype('<u2')
+        signal = little_endian.tobytes()
+
+        regions = auditok.split(
+            signal,
+            sampling_rate=sampling_rate,
+            sample_width=2,
+            channels=1,
+            min_dur=0.2,
+            energy_threshold=70,
+        )
+        index = pd.MultiIndex.from_tuples(
+            [
+                (
+                    pd.Timedelta(region.meta.start, unit='s'),
+                    pd.Timedelta(region.meta.end, unit='s'),
+                )
+                for region in regions
+            ],
+            names=['start', 'end'],
+        )
+        return index
+
+    interafce = audinterface.Segment(process_func=segments)
+    idx = interafce.process_file(files[0])
+    idx
+
 
 .. _audformat: https://audeering.github.io/audformat/
 .. _emodb: http://emodb.bilderbar.info
