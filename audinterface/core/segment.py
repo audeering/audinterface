@@ -134,15 +134,9 @@ class Segment:
     Example:
         >>> def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):
         ...     size = signal.shape[1] / sampling_rate
-        ...     starts = np.arange(0, size - win_size, hop_size)
-        ...     ends = np.arange(win_size, size, hop_size)
-        ...     return pd.MultiIndex.from_tuples(
-        ...         [
-        ...             (pd.Timedelta(s, unit='s'), pd.Timedelta(e, unit='s'))
-        ...             for s, e in zip(starts, ends)
-        ...         ],
-        ...         names=['start', 'end'],
-        ...     )
+        ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit='s')
+        ...     ends = pd.to_timedelta(np.arange(win_size, size, hop_size), unit='s')
+        ...     return pd.MultiIndex.from_tuples(zip(starts, ends), names=['start', 'end'])
         >>> interface = Segment(process_func=segment)
         >>> signal = np.array([1., 2., 3.])
         >>> interface(signal, sampling_rate=3)
@@ -176,7 +170,7 @@ class Segment:
                     ('wav/03a01Fa.wav', '0 days 00:00:01.250000', ...)],
                    names=['file', 'start', 'end'])
 
-    """
+    """  # noqa: E501
     def __init__(
             self,
             *,
