@@ -94,10 +94,10 @@ as a :class:`pandas.Series`.
 Feature extractor
 -----------------
 
-When using an algorithm as feature extractor,
+When the result of the processing function has multiple dimensions
 it is recommended to use :class:`audinterface.Feature`,
-which returns results as a :class:`pandas.DataFrame`
-and assigns names to single features.
+which returns a :class:`pandas.DataFrame`
+and assigns names to the dimensions/features.
 
 .. jupyter-execute::
 
