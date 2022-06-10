@@ -1,3 +1,4 @@
+import collections
 import errno
 import os
 import typing
@@ -819,7 +820,7 @@ class ProcessWithContext:
         y = self(signal, sampling_rate, starts_i, ends_i)
 
         # For an empty Series we force the dtype
-        if len(y) == 0:
+        if isinstance(y, collections.abc.Iterable) and len(y) == 0:
             y = pd.Series(y, index=index, dtype=object)
         else:
             y = pd.Series(y, index=index)

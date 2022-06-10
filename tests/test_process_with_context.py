@@ -41,6 +41,29 @@ def test_process_func_args():
         )
 
 
+def test_process_func_single_value(tmpdir):
+    # Test context functions that return only a single value
+    # https://github.com/audeering/audinterface/issues/47
+
+    def process_func(signal, sampling_rate, starts, ends):
+        return 1
+
+    process = audinterface.ProcessWithContext(process_func=process_func)
+
+    # create file
+    sampling_rate = 8000
+    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
+    root = str(tmpdir.mkdir('wav'))
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    af.write(path, signal, sampling_rate)
+    index = audformat.segmented_index([path] * 2, [0, 1], [1, 2])
+
+    y = process.process_index(index)
+    y_expected = pd.Series([1, 1], index=index)
+    pd.testing.assert_series_equal(y, y_expected)
+
+
 def test_process_index(tmpdir):
 
     process = audinterface.ProcessWithContext(
