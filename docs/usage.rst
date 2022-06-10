@@ -13,7 +13,7 @@
 
 
     def index_to_html(self):
-        return self.to_frame(index=False)._repr_html_()
+        return self.to_frame(index=False).to_html(index=False)
 
 
     setattr(pd.Series, '_repr_html_', series_to_html)
