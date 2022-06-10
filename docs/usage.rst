@@ -14,6 +14,7 @@
 
     setattr(pd.Series, '_repr_html_', series_to_html)
     pd.set_option('display.max_rows', 6)
+    pd.set_option('display.max_columns', 3)
 
 .. Specify version for storing and loading objects to YAML
 .. jupyter-execute::
@@ -129,31 +130,33 @@ whereas the first dimension is optionally.
 
 .. jupyter-execute::
 
-    def features(signal, sampling_rate, win_dur, hop_dur):
-        win_dur = int(win_dur * sampling_rate)
-        hop_dur = int(hop_dur * sampling_rate)
-        dur = signal.shape[1]
-        starts = np.arange(0, dur - win_dur, hop_dur)
-        ends = np.arange(win_dur, dur, hop_dur)
-        mean = np.array(
-            [
-                [signal[:, s:e].mean()]
-                for s, e in zip(starts, ends)
-            ]
-        )
-        return mean.T  # return with shape (num_features, num_frames)
+    import librosa
 
-    win_dur = 0.2
-    hop_dur = 0.1
+    def features(signal, sampling_rate, win_dur, hop_dur, n_mfcc):
+        hop_length = int(hop_dur * sampling_rate)
+        win_length = int(win_dur * sampling_rate)
+        mfcc = librosa.feature.mfcc(
+            y=signal,
+            sr=sampling_rate,
+            n_mfcc=13,
+            hop_length=hop_length,
+            win_length=win_length,
+        )
+        return mfcc
+
+    win_dur = 0.02
+    hop_dur = 0.01
+    n_mfcc = 13
     interface = audinterface.Feature(
-        ['mean'],
+        [f'mfcc-{idx}' for idx in range(n_mfcc)],
         process_func=features,
         process_func_args={
             'win_dur': win_dur,
             'hop_dur': hop_dur,
+            'n_mfcc': n_mfcc,
         },
-        win_dur=win_dur,
         hop_dur=hop_dur,
+        win_dur=win_dur,
     )
     df = interface.process_index(index)
     df

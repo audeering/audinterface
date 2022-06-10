@@ -1,6 +1,7 @@
 audb
 audeer
 jupyter-sphinx
+librosa
 sphinx
 sphinx-audeering-theme
 sphinx-autodoc-typehints
