@@ -1,4 +1,9 @@
+audb
 audeer
+auditok
+jupyter-sphinx
+librosa
 sphinx
 sphinx-audeering-theme
 sphinx-autodoc-typehints
+sphinx-copybutton
