@@ -215,6 +215,12 @@ and re-instantiate it from there.
 Segmentation interface
 ----------------------
 
+When the result of the processing function is an index
+it is recommended to use :class:`audinterface.Segment`,
+which returns a segmented index conform to audformat_.
+An example for such a processing function
+would be a voice activity detection algorithm.
+
 .. jupyter-execute::
 
     import auditok
