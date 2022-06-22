@@ -6,6 +6,17 @@ audinterface
 
 Generic interfaces for signal processing.
 
+**audinterface** provides user interfaces
+to apply any machine learning model
+or digital signal processing algorithm
+to audio files or databases_.
+
+Have a look at the installation_ and usage_ instructions.
+
+.. _databases: https://audeering.github.io/audformat/
+.. _installation: https://audeering.github.io/audinterface/install.html
+.. _usage: https://audeering.github.io/audinterface/usage.html
+
 
 .. badges images and links:
 .. |tests| image:: https://github.com/audeering/audinterface/workflows/Test/badge.svg
