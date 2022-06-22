@@ -42,6 +42,14 @@ class Process:
             Afterwards processing is applied to each segment
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
+        min_signal_length: minimum signal length in samples
+            required by ``process_func``.
+            If provided signal is shorter,
+            it will be zero padded at the end
+        max_signal_length: maximum signal length in samples
+            required by ``process_func``.
+            If provided signal is longer,
+            it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -91,6 +99,8 @@ class Process:
             mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
+            min_signal_length: int = None,
+            max_signal_length: int = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -112,6 +122,10 @@ class Process:
         r"""Segmentation object."""
         self.keep_nat = keep_nat
         r"""Keep NaT in results."""
+        self.min_signal_length = min_signal_length
+        r"""Minimum signal length."""
+        self.max_signal_length = max_signal_length
+        r"""Maximum signal length."""
         self.num_workers = num_workers
         r"""Number of workers."""
         self.multiprocessing = multiprocessing
@@ -431,8 +445,23 @@ class Process:
             signal, sampling_rate, start, end,
         )
 
-        # Trim and process signal
-        y = self(signal[:, start_i:end_i], sampling_rate)
+        # Trim signal and ensure it has requested min/max length
+        signal = signal[:, start_i:end_i]
+        num_samples = signal.shape[1]
+        if (
+                self.max_signal_length is not None
+                and num_samples > self.max_signal_length
+        ):
+            signal = signal[:, :self.max_signal_length]
+        if (
+                self.min_signal_length is not None
+                and num_samples < self.min_signal_length
+        ):
+            num_pad = self.min_signal_length - num_samples
+            signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
+
+        # Process signal
+        y = self(signal, sampling_rate)
 
         # Create index
         if file is not None:
