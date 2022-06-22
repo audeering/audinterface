@@ -452,11 +452,21 @@ class Process:
                 self.max_signal_length is not None
                 and num_samples > self.max_signal_length
         ):
+            length = pd.to_timedelta(
+                self.max_signal_length / sampling_rate,
+                unit='s',
+            )
+            end = start + length
             signal = signal[:, :self.max_signal_length]
         if (
                 self.min_signal_length is not None
                 and num_samples < self.min_signal_length
         ):
+            length = pd.to_timedelta(
+                self.min_signal_length / sampling_rate,
+                unit='s',
+            )
+            end = start + length
             num_pad = self.min_signal_length - num_samples
             signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
 

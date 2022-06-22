@@ -1044,6 +1044,70 @@ def test_process_signal_from_index(
 
 
 @pytest.mark.parametrize(
+    'process_func, signal, sampling_rate, min_signal_length, '
+    'max_signal_length, expected',
+    [
+        (
+            None,
+            np.ones((1, 44100)),
+            44100,
+            None,
+            None,
+            np.ones((1, 44100)),
+        ),
+        (
+            None,
+            np.ones((1, 44100)),
+            44100,
+            48000,
+            None,
+            np.concatenate(
+                [
+                    np.ones((1, 44100)),
+                    np.zeros((1, (48000 - 44100))),
+                ],
+                axis=1,
+            ),
+        ),
+        (
+            None,
+            np.ones((1, 44100)),
+            44100,
+            None,
+            100,
+            np.ones((1, 100)),
+        ),
+    ]
+)
+def test_process_signal_min_max(
+        process_func,
+        signal,
+        sampling_rate,
+        min_signal_length,
+        max_signal_length,
+        expected,
+):
+    process = audinterface.Process(
+        process_func=process_func,
+        sampling_rate=None,
+        resample=False,
+        min_signal_length=min_signal_length,
+        max_signal_length=max_signal_length,
+        verbose=False,
+    )
+    result = process.process_signal(signal, sampling_rate)
+    print(result)
+    expected = pd.Series(
+        [expected],
+        index=audinterface.utils.signal_index(
+            pd.to_timedelta(0),
+            pd.to_timedelta(expected.shape[1] / sampling_rate, unit='s'),
+        )
+    )
+    pd.testing.assert_series_equal(result, expected)
+
+
+@pytest.mark.parametrize(
     'segment',
     [
         audinterface.Segment(

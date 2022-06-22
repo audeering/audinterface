@@ -120,6 +120,14 @@ class Segment:
         mixdown: apply mono mix-down on selection
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
+        min_signal_length: minimum signal length in samples
+            required by ``process_func``.
+            If provided signal is shorter,
+            it will be zero padded at the end
+        max_signal_length: maximum signal length in samples
+            required by ``process_func``.
+            If provided signal is longer,
+            it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -182,6 +190,8 @@ class Segment:
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
             keep_nat: bool = False,
+            min_signal_length: int = None,
+            max_signal_length: int = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -210,6 +220,8 @@ class Segment:
             channels=channels,
             mixdown=mixdown,
             keep_nat=keep_nat,
+            min_signal_length=min_signal_length,
+            max_signal_length=max_signal_length,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
