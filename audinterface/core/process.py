@@ -1,3 +1,4 @@
+import collections
 import errno
 import os
 import typing
@@ -806,6 +807,8 @@ class ProcessWithContext:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            RuntimeError: if sequence returned by ``self.process_func``
+                does not match length of ``index``
             ValueError: if index contains duplicates
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
@@ -813,15 +816,21 @@ class ProcessWithContext:
         """
         utils.assert_index(index)
 
-        starts_i, ends_i = utils.segments_to_indices(
-            signal, sampling_rate, index,
-        )
-        y = self(signal, sampling_rate, starts_i, ends_i)
-
-        # For an empty Series we force the dtype
-        if len(y) == 0:
-            y = pd.Series(y, index=index, dtype=object)
+        if len(index) == 0:
+            y = pd.Series([], index=index, dtype=object)
         else:
+            starts_i, ends_i = utils.segments_to_indices(
+                signal, sampling_rate, index,
+            )
+            y = self(signal, sampling_rate, starts_i, ends_i)
+            if (
+                    not isinstance(y, collections.abc.Iterable)
+                    or len(y) != len(index)
+            ):
+                raise RuntimeError(
+                    'process_func has to return a sequence of results, '
+                    f'matching the length {len(index)} of the index. '
+                )
             y = pd.Series(y, index=index)
 
         return y

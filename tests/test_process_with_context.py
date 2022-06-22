@@ -21,6 +21,22 @@ def signal_max_with_context(signal, sampling_rate, starts, ends):
     return result
 
 
+def signal_no_value(signal, sampling_rate):
+    return None
+
+
+def signal_with_context_no_value(signal, sampling_rate, starts, ends):
+    return None
+
+
+def signal_single_value(signal, sampling_rate):
+    return 0
+
+
+def signal_with_context_single_value(signal, sampling_rate, starts, ends):
+    return 0
+
+
 def test_process_func_args():
     def process_func(s, sr, starts, ends, arg1, arg2):
         assert arg1 == 'foo'
@@ -168,6 +184,39 @@ def test_process_index(tmpdir):
             ),
             marks=pytest.mark.xfail(raises=ValueError)
         ),
+        pytest.param(  # process_func returns None
+            signal_no_value,
+            signal_with_context_no_value,
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(  # process_func returns single value
+            signal_single_value,
+            signal_with_context_single_value,
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(  # process_func returns array with wrong length
+            signal_single_value,
+            lambda sig, fs, starts, ends: [0, 1],
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
     ],
 )
 def test_process_signal_from_index(
@@ -192,6 +241,10 @@ def test_process_signal_from_index(
     result = model_with_context.process_signal_from_index(
         signal, sampling_rate, index,
     )
+
+    if process_func == signal_no_value:
+        print(result)
+        assert True
 
     expected = []
     for start, end in index:
