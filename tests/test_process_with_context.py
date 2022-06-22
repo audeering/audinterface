@@ -242,10 +242,6 @@ def test_process_signal_from_index(
         signal, sampling_rate, index,
     )
 
-    if process_func == signal_no_value:
-        print(result)
-        assert True
-
     expected = []
     for start, end in index:
         expected.append(
