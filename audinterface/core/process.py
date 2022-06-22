@@ -753,7 +753,7 @@ class ProcessWithContext:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
-            RuntimeError: if sequence returned by ``self.process_func``
+            RuntimeError: if sequence returned by ``process_func``
                 does not match length of ``index``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
@@ -809,7 +809,7 @@ class ProcessWithContext:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
-            RuntimeError: if sequence returned by ``self.process_func``
+            RuntimeError: if sequence returned by ``process_func``
                 does not match length of ``index``
             ValueError: if index contains duplicates
 
