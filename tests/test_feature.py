@@ -837,7 +837,7 @@ def test_process_index(tmpdir):
     'win_dur, hop_dur',
     [
         (1, 0.5),
-        (1, None),
+        (pd.to_timedelta(1, unit='s'), None),
         ('16000', None),
         ('1000ms', '500ms'),
         (f'{SAMPLING_RATE}', f'{SAMPLING_RATE // 2}'),
