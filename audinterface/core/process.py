@@ -186,13 +186,13 @@ class Process:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             end: end processing at this position.
                 If value is as a float or integer it is treated as seconds.
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             root: root folder to expand relative file path
 
         Returns:
@@ -235,14 +235,14 @@ class Process:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``.
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``.
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
 
@@ -465,12 +465,12 @@ class Process:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             end: end processing at this position.
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
                 If value is as a float or integer it is treated as seconds.
 
         Returns:

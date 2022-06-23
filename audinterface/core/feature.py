@@ -67,7 +67,7 @@ class Feature:
             To specify a unit provide as string,
             e.g. ``'2ms'``.
             To specify in samples provide as string without unit,
-            e.g. ``2000``
+            e.g. ``'2000'``
         hop_dur: hop size,
             if features are extracted with a sliding window.
             This defines the shift between two windows.
@@ -76,7 +76,7 @@ class Feature:
             To specify a unit provide as string,
             e.g. ``'2ms'``.
             To specify in samples provide a string without unit,
-            e.g. ``2000``.
+            e.g. ``'2000'``.
             Defaults to ``win_dur / 2``
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
@@ -243,13 +243,13 @@ class Feature:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             end: end processing at this position.
                 If value is as a float or integer it is treated as seconds.
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             root: root folder to expand relative file path
 
         Raises:
@@ -284,14 +284,14 @@ class Feature:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``.
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``.
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
 
@@ -421,13 +421,13 @@ class Feature:
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
             end: end processing at this position.
                 If value is as a float or integer it is treated as seconds.
                 To specify a unit provide as string,
                 e.g. ``'2ms'``.
                 To specify in samples provide as string without unit,
-                e.g. ``2000``
+                e.g. ``'2000'``
 
         Raises:
             RuntimeError: if sampling rates do not match
