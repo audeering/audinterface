@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import audeer
 import audformat
 import audinterface
 import audiofile as af
@@ -33,19 +34,29 @@ def features_extractor_sliding_window(signal, _, hop_size):
     return np.ones((NUM_CHANNELS, NUM_FEATURES, num_time_steps))
 
 
+def test_deprecated_unit_argument():
+    if (
+            audeer.LooseVersion(audinterface.__version__)
+            < audeer.LooseVersion('1.2.0')
+    ):
+        with pytest.warns(UserWarning, match='is deprecated'):
+            audinterface.Feature(['a'], unit='samples')
+    else:
+        with pytest.raises(TypeError, match='unexpected keyword argument'):
+            audinterface.Feature(['a'], unit='samples')
+
+
 def test_feature():
-    # You have to specify sampling rate with unit == 'samples' and win_dur
+    # You have to specify sampling rate when win_dur is in samples
     with pytest.raises(ValueError):
         audinterface.Feature(
             feature_names=('o1', 'o2', 'o3'),
             sampling_rate=None,
-            unit='samples',
-            win_dur=2048,
+            win_dur='2048',
         )
     # If no win_dur is given, no error should occur
     audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        unit='samples',
         sampling_rate=None,
     )
     # Only hop_dur is given
@@ -56,8 +67,7 @@ def test_feature():
         )
     audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
-        win_dur=2048,
-        unit='samples',
+        win_dur='2048',
         sampling_rate=8000,
     )
 
@@ -824,20 +834,20 @@ def test_process_index(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'win_dur, hop_dur, unit',
+    'win_dur, hop_dur',
     [
-        (1, 0.5, 'seconds'),
-        (1, None, 'seconds'),
-        (16000, None, 'samples'),
-        (1000, 500, 'milliseconds'),
-        (SAMPLING_RATE, SAMPLING_RATE // 2, 'samples'),
+        (1, 0.5),
+        (1, None),
+        ('16000', None),
+        ('1000ms', '500ms'),
+        (f'{SAMPLING_RATE}', f'{SAMPLING_RATE // 2}'),
         pytest.param(  # multiple frames, but win_dur is None
-            None, None, 'seconds',
+            None, None,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
     ],
 )
-def test_signal_sliding_window(win_dur, hop_dur, unit):
+def test_signal_sliding_window(win_dur, hop_dur):
     # Test sliding window with two time steps
     expected_features = np.ones((NUM_CHANNELS, 2 * NUM_FEATURES))
     extractor = audinterface.Feature(
@@ -850,7 +860,6 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
         win_dur=win_dur,
         hop_dur=hop_dur,
         sampling_rate=SAMPLING_RATE,
-        unit=unit,
     )
     features = extractor.process_signal(
         SIGNAL_2D,
@@ -858,20 +867,32 @@ def test_signal_sliding_window(win_dur, hop_dur, unit):
     )
     n_time_steps = len(features)
 
-    if unit == 'samples':
-        win_dur = win_dur / SAMPLING_RATE
-        if hop_dur is not None:
-            hop_dur /= SAMPLING_RATE
-        unit = 'seconds'
+    if isinstance(win_dur, str):
+        if all(s.isdigit() for s in win_dur):
+            # samples
+            win_dur = pd.to_timedelta(int(win_dur) / SAMPLING_RATE, unit='s')
+        else:
+            win_dur = pd.to_timedelta(win_dur)
+    else:
+        win_dur = pd.to_timedelta(win_dur, unit='s')
+
     if hop_dur is None:
         hop_dur = win_dur / 2
+    elif isinstance(hop_dur, str):
+        if all(s.isdigit() for s in hop_dur):
+            # samples
+            hop_dur = pd.to_timedelta(int(hop_dur) / SAMPLING_RATE, unit='s')
+        else:
+            hop_dur = pd.to_timedelta(hop_dur)
+    else:
+        hop_dur = pd.to_timedelta(hop_dur, unit='s')
 
     starts = pd.timedelta_range(
         pd.to_timedelta(0),
-        freq=pd.to_timedelta(hop_dur, unit=unit),
+        freq=hop_dur,
         periods=n_time_steps,
     )
-    ends = starts + pd.to_timedelta(win_dur, unit=unit)
+    ends = starts + win_dur
 
     index = audinterface.utils.signal_index(starts, ends)
     pd.testing.assert_frame_equal(

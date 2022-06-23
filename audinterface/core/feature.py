@@ -60,15 +60,24 @@ class Feature:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal
-        win_dur: window size in ``unit``,
-            if features are extracted with a sliding window
-        hop_dur: hop size in ``unit``,
+        win_dur: window size,
+            if features are extracted with a sliding window.
+            If value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``2000``
+        hop_dur: hop size,
             if features are extracted with a sliding window.
             This defines the shift between two windows.
-            Defaults to ``win_dur / 2``.
-        unit: unit of ``win_dur`` and ``hop_dur``.
-            Can be ``'samples'``,
-            or any unit supported by :func:`pandas.to_timedelta`
+            If value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide a string without unit,
+            e.g. ``2000``.
+            Defaults to ``win_dur / 2``
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
@@ -86,8 +95,8 @@ class Feature:
         verbose: show debug messages
 
     Raises:
-        ValueError: if ``unit == 'samples'``, ``sampling_rate is None``
-            and ``win_dur is not None``
+        ValueError: if ``win_dur`` or ``hop_dur`` are given in samples
+            and ``sampling_rate is None``
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     Example:
@@ -117,6 +126,10 @@ class Feature:
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
 
     """
+    @audeer.deprecated_keyword_argument(
+        deprecated_argument='unit',
+        removal_version='1.2.0',
+    )
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
@@ -127,9 +140,8 @@ class Feature:
             process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
-            win_dur: typing.Union[int, float] = None,
-            hop_dur: typing.Union[int, float] = None,
-            unit: str = 'seconds',
+            win_dur: Timestamp = None,
+            hop_dur: Timestamp = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = 0,
             mixdown: bool = False,
@@ -155,11 +167,6 @@ class Feature:
         if win_dur is None and hop_dur is not None:
             raise ValueError(
                 "You have to specify 'win_dur' if 'hop_dur' is given."
-            )
-        if unit == 'samples' and sampling_rate is None and win_dur is not None:
-            raise ValueError(
-                "You have specified 'samples' as unit, "
-                "but haven't provided a sampling rate."
             )
 
         if process_func is None:
@@ -214,9 +221,8 @@ class Feature:
         self.hop_dur = hop_dur
         r"""Hop duration."""
         if win_dur is not None and hop_dur is None:
-            self.hop_dur = win_dur // 2 if unit == 'samples' else win_dur / 2
-        self.unit = unit
-        r"""Unit of ``win_dur`` and ``hop dur``"""
+            win_dur = utils.to_timedelta(win_dur, sampling_rate)
+            self.hop_dur = win_dur / 2
         self.verbose = verbose
         r"""Show debug messages."""
 
@@ -233,9 +239,17 @@ class Feature:
         Args:
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``
             root: root folder to expand relative file path
 
         Raises:
@@ -267,9 +281,17 @@ class Feature:
             files: list of file paths
             starts: segment start positions.
                 Time values given as float or integers are treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``.
                 If a scalar is given, it is applied to all files
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
 
@@ -395,9 +417,17 @@ class Feature:
             sampling_rate: sampling rate in Hz
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``2000``
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -585,20 +615,11 @@ class Feature:
         # [n_features, n_frames]
         # [n_features]
 
-        if self.win_dur is not None:
-            if self.unit == 'samples':
-                win_dur = pd.to_timedelta(
-                    self.win_dur / self.process.sampling_rate, unit='seconds',
-                )
-                hop_dur = pd.to_timedelta(
-                    self.hop_dur / self.process.sampling_rate, unit='seconds',
-                )
-            else:
-                win_dur = pd.to_timedelta(self.win_dur, unit=self.unit)
-                hop_dur = pd.to_timedelta(self.hop_dur, unit=self.unit)
-        else:
-            win_dur = None
-            hop_dur = None
+        win_dur = self.win_dur
+        hop_dur = self.hop_dur
+        if win_dur is not None:
+            win_dur = utils.to_timedelta(win_dur, self.process.sampling_rate)
+            hop_dur = utils.to_timedelta(hop_dur, self.process.sampling_rate)
 
         features = self._reshape_3d(features)
         n_channels, n_features, n_frames = features.shape

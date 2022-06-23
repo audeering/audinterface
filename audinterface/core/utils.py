@@ -1,3 +1,4 @@
+import collections
 import os
 import typing
 
@@ -289,8 +290,43 @@ def to_array(value: typing.Any) -> np.ndarray:
     return value
 
 
-def to_timedelta(times: Timestamps):
-    r"""Convert time value to pd.Timedelta."""
+def to_timedelta(
+        times: Timestamps,
+        sampling_rate: int = None,
+) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
+    r"""Convert time value to pd.Timedelta.
+
+    If time is given as string without unit,
+    it is treated as samples
+    and requires that ``'sampling_rate'`` is not ``None``.
+
+    """
+
+    def convert_samples_to_seconds(time):
+        if isinstance(time, str):
+            # ensure we have a str and not numpy.str_
+            time = str(time)
+            # string without unit represents samples
+            if all(t.isdigit() for t in time):
+                if sampling_rate is None:
+                    raise ValueError(
+                        "You have to provide 'sampling_rate' "
+                        "when specifying the duration in samples "
+                        "as you did with '{time}'"
+                    )
+                time = int(time) / sampling_rate
+        return time
+
+    if (
+            not isinstance(times, str)
+            and isinstance(times, collections.abc.Iterable)
+    ):
+        # sequence of time entries
+        times = [convert_samples_to_seconds(t) for t in times]
+    else:
+        # single time entry
+        times = convert_samples_to_seconds(times)
+
     try:
         return pd.to_timedelta(times, unit='s')
     except ValueError:  # catches values like '1s'
