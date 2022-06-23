@@ -40,7 +40,20 @@ def test_deprecated_unit_argument():
             < audeer.LooseVersion('1.2.0')
     ):
         with pytest.warns(UserWarning, match='is deprecated'):
-            audinterface.Feature(['a'], unit='samples')
+            interface = audinterface.Feature(
+                ['a'],
+                win_dur=1000,
+                unit='samples',
+            )
+            assert interface.win_dur == '1000'
+            interface = audinterface.Feature(
+                ['a'],
+                win_dur=1000,
+                hop_dur=500,
+                unit='milliseconds',
+            )
+            assert interface.win_dur == '1000milliseconds'
+            assert interface.hop_dur == '500milliseconds'
     else:
         with pytest.raises(TypeError, match='unexpected keyword argument'):
             audinterface.Feature(['a'], unit='samples')
@@ -840,6 +853,7 @@ def test_process_index(tmpdir):
         (pd.to_timedelta(1, unit='s'), None),
         ('16000', None),
         ('1000ms', '500ms'),
+        ('1000milliseconds', '500milliseconds'),
         (f'{SAMPLING_RATE}', f'{SAMPLING_RATE // 2}'),
         pytest.param(  # multiple frames, but win_dur is None
             None, None,

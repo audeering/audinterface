@@ -154,6 +154,22 @@ class Feature:
     ):
         feature_names = audeer.to_list(feature_names)
 
+        # ------
+        # Handle deprecated 'unit' keyword argument
+        def add_unit(dur, unit):
+            if unit == 'samples':
+                return str(dur)
+            else:
+                return f'{dur}{unit}'
+
+        if 'unit' in kwargs:
+            unit = kwargs['unit']
+            if win_dur is not None:
+                win_dur = add_unit(win_dur, unit)
+            if hop_dur is not None:
+                hop_dur = add_unit(hop_dur, unit)
+        # ------
+
         process_func_args = process_func_args or {}
         if kwargs:
             warnings.warn(
