@@ -42,12 +42,16 @@ class Process:
             Afterwards processing is applied to each segment
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
-        min_signal_length: minimum signal length in samples
+        min_signal_length: minimum signal length
             required by ``process_func``.
+            If value is as a float or integer
+            it is treated as seconds.
             If provided signal is shorter,
             it will be zero padded at the end
-        max_signal_length: maximum signal length in samples
+        max_signal_length: maximum signal length
             required by ``process_func``.
+            If value is as a float or integer
+            it is treated as seconds.
             If provided signal is longer,
             it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
@@ -99,8 +103,8 @@ class Process:
             mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
-            min_signal_length: int = None,
-            max_signal_length: int = None,
+            min_signal_length: Timestamp = None,
+            max_signal_length: Timestamp = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -122,9 +126,9 @@ class Process:
         r"""Segmentation object."""
         self.keep_nat = keep_nat
         r"""Keep NaT in results."""
-        self.min_signal_length = min_signal_length
+        self.min_signal_length = utils.to_timedelta(min_signal_length)
         r"""Minimum signal length."""
-        self.max_signal_length = max_signal_length
+        self.max_signal_length = utils.to_timedelta(max_signal_length)
         r"""Maximum signal length."""
         self.num_workers = num_workers
         r"""Number of workers."""
@@ -448,27 +452,23 @@ class Process:
         # Trim signal and ensure it has requested min/max length
         signal = signal[:, start_i:end_i]
         num_samples = signal.shape[1]
-        if (
-                self.max_signal_length is not None
-                and num_samples > self.max_signal_length
-        ):
-            length = pd.to_timedelta(
-                self.max_signal_length / sampling_rate,
-                unit='s',
+        if self.max_signal_length is not None:
+            max_samples = int(
+                self.max_signal_length.total_seconds()
+                * sampling_rate
             )
-            end = start + length
-            signal = signal[:, :self.max_signal_length]
-        if (
-                self.min_signal_length is not None
-                and num_samples < self.min_signal_length
-        ):
-            length = pd.to_timedelta(
-                self.min_signal_length / sampling_rate,
-                unit='s',
+            if num_samples > max_samples:
+                end = start + self.max_signal_length
+                signal = signal[:, :max_samples]
+        if self.min_signal_length is not None:
+            min_samples = int(
+                self.min_signal_length.total_seconds()
+                * sampling_rate
             )
-            end = start + length
-            num_pad = self.min_signal_length - num_samples
-            signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
+            if num_samples < min_samples:
+                end = start + self.min_signal_length
+                num_pad = min_samples - num_samples
+                signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
 
         # Process signal
         y = self(signal, sampling_rate)

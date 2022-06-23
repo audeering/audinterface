@@ -86,12 +86,16 @@ class Feature:
             Afterwards processing is applied to each segment
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
-        min_signal_length: minimum signal length in samples
+        min_signal_length: minimum signal length
             required by ``process_func``.
+            If value is as a float or integer
+            it is treated as seconds.
             If provided signal is shorter,
             it will be zero padded at the end
-        max_signal_length: maximum signal length in samples
+        max_signal_length: maximum signal length
             required by ``process_func``.
+            If value is as a float or integer
+            it is treated as seconds.
             If provided signal is longer,
             it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
@@ -151,8 +155,8 @@ class Feature:
             mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
-            min_signal_length: int = None,
-            max_signal_length: int = None,
+            min_signal_length: Timestamp = None,
+            max_signal_length: Timestamp = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,

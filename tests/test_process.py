@@ -1059,12 +1059,12 @@ def test_process_signal_from_index(
             None,
             np.ones((1, 44100)),
             44100,
-            48000,
+            2,
             None,
             np.concatenate(
                 [
                     np.ones((1, 44100)),
-                    np.zeros((1, (48000 - 44100))),
+                    np.zeros((1, 44100)),
                 ],
                 axis=1,
             ),
@@ -1074,8 +1074,8 @@ def test_process_signal_from_index(
             np.ones((1, 44100)),
             44100,
             None,
-            100,
-            np.ones((1, 100)),
+            0.01,
+            np.ones((1, 441)),
         ),
     ]
 )
@@ -1096,7 +1096,6 @@ def test_process_signal_min_max(
         verbose=False,
     )
     result = process.process_signal(signal, sampling_rate)
-    print(result)
     expected = pd.Series(
         [expected],
         index=audinterface.utils.signal_index(
