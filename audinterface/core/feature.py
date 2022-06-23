@@ -126,10 +126,6 @@ class Feature:
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
 
     """
-    @audeer.deprecated_keyword_argument(
-        deprecated_argument='unit',
-        removal_version='1.2.0',
-    )
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
@@ -163,7 +159,16 @@ class Feature:
                 return f'{dur}{unit}'
 
         if 'unit' in kwargs:
-            unit = kwargs['unit']
+            message = (
+                "'unit' argument is deprecated "
+                "and will be removed with version '1.2.0'."
+            )
+            warnings.warn(
+                message,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            unit = kwargs.pop('unit')
             if win_dur is not None:
                 win_dur = add_unit(win_dur, unit)
             if hop_dur is not None:

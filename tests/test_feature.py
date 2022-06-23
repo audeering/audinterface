@@ -44,6 +44,7 @@ def test_deprecated_unit_argument():
                 ['a'],
                 win_dur=1000,
                 unit='samples',
+                sampling_rate=16000,
             )
             assert interface.win_dur == '1000'
             interface = audinterface.Feature(
