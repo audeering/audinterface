@@ -170,8 +170,6 @@ class Feature:
             verbose: bool = False,
             **kwargs,
     ):
-        feature_names = audeer.to_list(feature_names)
-
         # ------
         # Handle deprecated 'unit' keyword argument
         def add_unit(dur, unit):
@@ -199,6 +197,28 @@ class Feature:
                 hop_dur = add_unit(hop_dur, unit)
         # ------
 
+        if mixdown or isinstance(channels, int):
+            num_channels = 1
+        else:
+            num_channels = len(channels)
+
+        feature_names = audeer.to_list(feature_names)
+        if num_channels > 1:
+            column_names = []
+            for channel in range(num_channels):
+                column_names.extend(
+                    [f'{name}-{channel}' for name in feature_names]
+                )
+        else:
+            column_names = feature_names
+
+        if process_func is None:
+            def process_func(signal, _):
+                return np.zeros(
+                    (num_channels, len(feature_names)),
+                    dtype=object,
+                )
+
         process_func_args = process_func_args or {}
         if kwargs:
             warnings.warn(
@@ -216,28 +236,7 @@ class Feature:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
-        if process_func is None:
-            def process_func(signal, _):
-                return np.zeros(
-                    (num_channels, len(feature_names)),
-                    dtype=object,
-                )
-
-        if mixdown or isinstance(channels, int):
-            num_channels = 1
-        else:
-            num_channels = len(channels)
-
-        if num_channels > 1:
-            column_names = []
-            for channel in range(num_channels):
-                column_names.extend(
-                    [f'{name}-{channel}' for name in feature_names]
-                )
-        else:
-            column_names = feature_names
-
-        self.process = Process(
+        process = Process(
             process_func=process_func,
             process_func_args=process_func_args,
             process_func_is_mono=process_func_is_mono,
@@ -253,25 +252,36 @@ class Feature:
             multiprocessing=multiprocessing,
             verbose=verbose,
         )
-        r"""Processing object."""
-        self.name = name
-        r"""Name of the feature set."""
-        self.params = params
-        r"""Dictionary of parameters describing the feature set."""
-        self.num_channels = num_channels
-        r"""Expected number of channels"""
-        self.num_features = len(feature_names)
-        r"""Number of features."""
-        self.feature_names = feature_names
-        r"""Feature names."""
+
         self.column_names = column_names
         r"""Feature column names."""
-        self.win_dur = win_dur
-        r"""Window duration."""
+
+        self.feature_names = feature_names
+        r"""Feature names."""
+
         self.hop_dur = hop_dur
         r"""Hop duration."""
+
+        self.name = name
+        r"""Name of the feature set."""
+
+        self.num_channels = num_channels
+        r"""Expected number of channels"""
+
+        self.num_features = len(feature_names)
+        r"""Number of features."""
+
+        self.params = params
+        r"""Dictionary of parameters describing the feature set."""
+
+        self.process = process
+        r"""Processing object."""
+
         self.verbose = verbose
         r"""Show debug messages."""
+
+        self.win_dur = win_dur
+        r"""Window duration."""
 
     def process_file(
             self,

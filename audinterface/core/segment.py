@@ -219,12 +219,9 @@ class Segment:
             for key, value in kwargs.items():
                 process_func_args[key] = value
 
-        self.invert = invert
-        r"""Invert segmentation."""
-
         # avoid cycling imports
         from audinterface.core.process import Process
-        self.process = Process(
+        process = Process(
             process_func=create_process_func(process_func, invert),
             process_func_args=process_func_args,
             sampling_rate=sampling_rate,
@@ -238,7 +235,12 @@ class Segment:
             multiprocessing=multiprocessing,
             verbose=verbose,
         )
+
+        self.process = process
         r"""Processing object."""
+
+        self.invert = invert
+        r"""Invert segmentation."""
 
     def process_file(
             self,

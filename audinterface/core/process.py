@@ -118,6 +118,13 @@ class Process:
             verbose: bool = False,
             **kwargs,
     ):
+        if channels is not None:
+            channels = audeer.to_list(channels)
+
+        if process_func is None:
+            def process_func(signal, _):
+                return signal
+
         process_func_args = process_func_args or {}
         if kwargs:
             warnings.warn(
@@ -128,46 +135,52 @@ class Process:
             for key, value in kwargs.items():
                 process_func_args[key] = value
 
-        if process_func is None:
-            def process_func(signal, _):
-                return signal
-
         if resample and sampling_rate is None:
             raise ValueError(
                 'sampling_rate has to be provided for resample = True.'
             )
 
-        if channels is not None:
-            channels = audeer.to_list(channels)
+        self.channels = channels
+        r"""Channel selection."""
+
+        self.keep_nat = keep_nat
+        r"""Keep NaT in results."""
+
+        self.max_signal_dur = max_signal_dur
+        r"""Maximum signal length."""
+
+        self.min_signal_dur = min_signal_dur
+        r"""Minimum signal length."""
+
+        self.mixdown = mixdown
+        r"""Mono mixdown."""
+
+        self.multiprocessing = multiprocessing
+        r"""Use multiprocessing."""
+
+        self.num_workers = num_workers
+        r"""Number of workers."""
+
+        self.process_func = process_func
+        r"""Processing function."""
+
+        self.process_func_args = process_func_args
+        r"""Additional keyword arguments to processing function."""
+
+        self.process_func_is_mono = process_func_is_mono
+        r"""Process channels individually."""
+
+        self.resample = resample
+        r"""Resample signal."""
 
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
-        self.resample = resample
-        r"""Resample signal."""
-        self.channels = channels
-        r"""Channel selection."""
-        self.mixdown = mixdown
-        r"""Mono mixdown."""
+
         self.segment = segment
         r"""Segmentation object."""
-        self.keep_nat = keep_nat
-        r"""Keep NaT in results."""
-        self.min_signal_dur = min_signal_dur
-        r"""Minimum signal length."""
-        self.max_signal_dur = max_signal_dur
-        r"""Maximum signal length."""
-        self.num_workers = num_workers
-        r"""Number of workers."""
-        self.multiprocessing = multiprocessing
-        r"""Use multiprocessing."""
+
         self.verbose = verbose
         r"""Show debug messages."""
-        self.process_func = process_func
-        r"""Processing function."""
-        self.process_func_is_mono = process_func_is_mono
-        r"""Process channels individually."""
-        self.process_func_args = process_func_args
-        r"""Additional keyword arguments to processing function."""
 
     def _process_file(
             self,
@@ -784,6 +797,15 @@ class ProcessWithContext:
             verbose: bool = False,
             **kwargs,
     ):
+        if channels is not None:
+            channels = audeer.to_list(channels)
+
+        if process_func is None:
+            def process_func(signal, _, starts, ends):
+                return [
+                    signal[:, start:end] for start, end in zip(starts, ends)
+                ]
+
         process_func_args = process_func_args or {}
         if kwargs:
             warnings.warn(
@@ -799,26 +821,26 @@ class ProcessWithContext:
                 'sampling_rate has to be provided for resample = True.'
             )
 
-        if process_func is None:
-            def process_func(signal, _, starts, ends):
-                return [
-                    signal[:, start:end] for start, end in zip(starts, ends)
-                ]
+        self.channels = channels
+        r"""Channel selection."""
+
+        self.mixdown = mixdown
+        r"""Mono mixdown."""
+
+        self.process_func = process_func
+        r"""Process function."""
+
+        self.process_func_args = process_func_args
+        r"""Additional keyword arguments to processing function."""
+
+        self.resample = resample
+        r"""Resample signal."""
 
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
-        self.resample = resample
-        r"""Resample signal."""
-        self.channels = None if channels is None else audeer.to_list(channels)
-        r"""Channel selection."""
-        self.mixdown = mixdown
-        r"""Mono mixdown."""
+
         self.verbose = verbose
         r"""Show debug messages."""
-        self.process_func = process_func
-        r"""Process function."""
-        self.process_func_args = process_func_args
-        r"""Additional keyword arguments to processing function."""
 
     def process_index(
             self,
