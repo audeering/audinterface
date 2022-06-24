@@ -74,10 +74,10 @@ def test_process_index(tmpdir):
     )
     result = process.process_index(index)
     for (path, start, end), value in result.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
+        x, sampling_rate = audinterface.utils.read_audio(
             path, start=start, end=end
         )
-        np.testing.assert_equal(signal, value)
+        np.testing.assert_equal(x, value)
 
     # relative paths
     index = audformat.segmented_index(
@@ -87,10 +87,52 @@ def test_process_index(tmpdir):
     )
     result = process.process_index(index, root=root)
     for (file, start, end), value in result.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
+        x, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end, root=root
         )
-        np.testing.assert_equal(signal, value)
+        np.testing.assert_equal(x, value)
+
+    # multiple channels
+    signal = np.concatenate([signal] * 3)
+    af.write(path, signal, sampling_rate)
+    result = process.process_index(index, root=root)
+    for (file, start, end), value in result.items():
+        x, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(x, value)
+
+    # specific channels
+    channels = [0, 2]
+    process = audinterface.ProcessWithContext(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        channels=channels,
+        verbose=False,
+    )
+    result = process.process_index(index, root=root)
+    for (file, start, end), value in result.items():
+        x, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(x[channels, :], value)
+
+    # specific channel
+    channel = 1
+    process = audinterface.ProcessWithContext(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        channels=channel,
+        verbose=False,
+    )
+    result = process.process_index(index, root=root)
+    for (file, start, end), value in result.items():
+        x, sampling_rate = audinterface.utils.read_audio(
+            file, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(np.atleast_2d(x[channel]), value)
 
 
 @pytest.mark.parametrize(
