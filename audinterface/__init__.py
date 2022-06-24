@@ -24,16 +24,10 @@ to get some standard implementations of those methods.
 
 """
 from audinterface import utils
-from audinterface.core.feature import (
-    Feature,
-)
-from audinterface.core.process import (
-    Process,
-    ProcessWithContext,
-)
-from audinterface.core.segment import (
-    Segment,
-)
+from audinterface.core.feature import Feature
+from audinterface.core.process import Process
+from audinterface.core.process_with_context import ProcessWithContext
+from audinterface.core.segment import Segment
 
 
 # Disencourage from audinterface import *
