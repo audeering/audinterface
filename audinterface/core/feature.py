@@ -60,6 +60,8 @@ class Feature:
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal
+        resample: if ``True`` enforces given sampling rate by resampling
+        channels: channel selection, see :func:`audresample.remix`
         win_dur: window size,
             if features are extracted with a sliding window.
             If value is as a float or integer
@@ -78,14 +80,6 @@ class Feature:
             To specify in samples provide a string without unit,
             e.g. ``'2000'``.
             Defaults to ``win_dur / 2``
-        resample: if ``True`` enforces given sampling rate by resampling
-        channels: channel selection, see :func:`audresample.remix`
-        mixdown: apply mono mix-down on selection
-        segment: when a :class:`audinterface.Segment` object is provided,
-            it will be used to find a segmentation of the input signal.
-            Afterwards processing is applied to each segment
-        keep_nat: if the end of segment is set to ``NaT`` do not replace
-            with file duration in the result
         min_signal_dur: minimum signal duration
             required by ``process_func``.
             If value is as a float or integer
@@ -106,6 +100,12 @@ class Feature:
             e.g. ``'2000'``
             If provided signal is longer,
             it will be cut at the end
+        mixdown: apply mono mix-down on selection
+        segment: when a :class:`audinterface.Segment` object is provided,
+            it will be used to find a segmentation of the input signal.
+            Afterwards processing is applied to each segment
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -156,15 +156,15 @@ class Feature:
             process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
             sampling_rate: int = None,
-            win_dur: Timestamp = None,
-            hop_dur: Timestamp = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = 0,
             mixdown: bool = False,
-            segment: Segment = None,
-            keep_nat: bool = False,
+            win_dur: Timestamp = None,
+            hop_dur: Timestamp = None,
             min_signal_dur: Timestamp = None,
             max_signal_dur: Timestamp = None,
+            segment: Segment = None,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -213,6 +213,8 @@ class Feature:
             raise ValueError(
                 "You have to specify 'win_dur' if 'hop_dur' is given."
             )
+        if win_dur is not None and hop_dur is None:
+            hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
         if process_func is None:
             def process_func(signal, _):
@@ -226,6 +228,15 @@ class Feature:
         else:
             num_channels = len(channels)
 
+        if num_channels > 1:
+            column_names = []
+            for channel in range(num_channels):
+                column_names.extend(
+                    [f'{name}-{channel}' for name in feature_names]
+                )
+        else:
+            column_names = feature_names
+
         self.process = Process(
             process_func=process_func,
             process_func_args=process_func_args,
@@ -234,9 +245,9 @@ class Feature:
             resample=resample,
             channels=channels,
             mixdown=mixdown,
-            segment=segment,
             min_signal_dur=min_signal_dur,
             max_signal_dur=max_signal_dur,
+            segment=segment,
             keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
@@ -251,25 +262,14 @@ class Feature:
         r"""Expected number of channels"""
         self.num_features = len(feature_names)
         r"""Number of features."""
-        self.feature_names = list(feature_names)
+        self.feature_names = feature_names
         r"""Feature names."""
-        self.column_names = None
+        self.column_names = column_names
         r"""Feature column names."""
-        if num_channels > 1:
-            self.column_names = []
-            for channel in range(num_channels):
-                self.column_names.extend(
-                    [f'{name}-{channel}' for name in feature_names]
-                )
-        else:
-            self.column_names = self.feature_names
         self.win_dur = win_dur
         r"""Window duration."""
         self.hop_dur = hop_dur
         r"""Hop duration."""
-        if win_dur is not None and hop_dur is None:
-            win_dur = utils.to_timedelta(win_dur, sampling_rate)
-            self.hop_dur = win_dur / 2
         self.verbose = verbose
         r"""Show debug messages."""
 

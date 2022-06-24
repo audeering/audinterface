@@ -37,11 +37,6 @@ class Process:
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
-        segment: when a :class:`audinterface.Segment` object is provided,
-            it will be used to find a segmentation of the input signal.
-            Afterwards processing is applied to each segment
-        keep_nat: if the end of segment is set to ``NaT`` do not replace
-            with file duration in the result
         min_signal_dur: minimum signal length
             required by ``process_func``.
             If value is as a float or integer
@@ -62,6 +57,11 @@ class Process:
             e.g. ``'2000'``
             If provided signal is longer,
             it will be cut at the end
+        segment: when a :class:`audinterface.Segment` object is provided,
+            it will be used to find a segmentation of the input signal.
+            Afterwards processing is applied to each segment
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -109,24 +109,42 @@ class Process:
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
-            segment: Segment = None,
-            keep_nat: bool = False,
             min_signal_dur: Timestamp = None,
             max_signal_dur: Timestamp = None,
+            segment: Segment = None,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
             **kwargs,
     ):
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
+
+        if process_func is None:
+            def process_func(signal, _):
+                return signal
+
         if resample and sampling_rate is None:
             raise ValueError(
                 'sampling_rate has to be provided for resample = True.'
             )
+
+        if channels is not None:
+            channels = audeer.to_list(channels)
+
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
         self.resample = resample
         r"""Resample signal."""
-        self.channels = None if channels is None else audeer.to_list(channels)
+        self.channels = channels
         r"""Channel selection."""
         self.mixdown = mixdown
         r"""Mono mixdown."""
@@ -144,22 +162,10 @@ class Process:
         r"""Use multiprocessing."""
         self.verbose = verbose
         r"""Show debug messages."""
-        if process_func is None:
-            def process_func(signal, _):
-                return signal
         self.process_func = process_func
         r"""Processing function."""
         self.process_func_is_mono = process_func_is_mono
         r"""Process channels individually."""
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
         self.process_func_args = process_func_args
         r"""Additional keyword arguments to processing function."""
 
@@ -778,10 +784,27 @@ class ProcessWithContext:
             verbose: bool = False,
             **kwargs,
     ):
+        process_func_args = process_func_args or {}
+        if kwargs:
+            warnings.warn(
+                utils.kwargs_deprecation_warning,
+                category=UserWarning,
+                stacklevel=2,
+            )
+            for key, value in kwargs.items():
+                process_func_args[key] = value
+
         if resample and sampling_rate is None:
             raise ValueError(
                 'sampling_rate has to be provided for resample = True.'
             )
+
+        if process_func is None:
+            def process_func(signal, _, starts, ends):
+                return [
+                    signal[:, start:end] for start, end in zip(starts, ends)
+                ]
+
         self.sampling_rate = sampling_rate
         r"""Sampling rate in Hz."""
         self.resample = resample
@@ -792,22 +815,8 @@ class ProcessWithContext:
         r"""Mono mixdown."""
         self.verbose = verbose
         r"""Show debug messages."""
-        if process_func is None:
-            def process_func(signal, _, starts, ends):
-                return [
-                    signal[:, start:end] for start, end in zip(starts, ends)
-                ]
         self.process_func = process_func
         r"""Process function."""
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
         self.process_func_args = process_func_args
         r"""Additional keyword arguments to processing function."""
 
