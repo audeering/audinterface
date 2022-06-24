@@ -86,16 +86,24 @@ class Feature:
             Afterwards processing is applied to each segment
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
-        min_signal_length: minimum signal length
+        min_signal_dur: minimum signal duration
             required by ``process_func``.
             If value is as a float or integer
             it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
             If provided signal is shorter,
             it will be zero padded at the end
-        max_signal_length: maximum signal length
+        max_signal_dur: maximum signal duraton
             required by ``process_func``.
             If value is as a float or integer
             it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
             If provided signal is longer,
             it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
@@ -155,8 +163,8 @@ class Feature:
             mixdown: bool = False,
             segment: Segment = None,
             keep_nat: bool = False,
-            min_signal_length: Timestamp = None,
-            max_signal_length: Timestamp = None,
+            min_signal_dur: Timestamp = None,
+            max_signal_dur: Timestamp = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -227,8 +235,8 @@ class Feature:
             channels=channels,
             mixdown=mixdown,
             segment=segment,
-            min_signal_length=min_signal_length,
-            max_signal_length=max_signal_length,
+            min_signal_dur=min_signal_dur,
+            max_signal_dur=max_signal_dur,
             keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,

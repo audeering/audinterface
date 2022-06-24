@@ -120,16 +120,24 @@ class Segment:
         mixdown: apply mono mix-down on selection
         keep_nat: if the end of segment is set to ``NaT`` do not replace
             with file duration in the result
-        min_signal_length: minimum signal length
+        min_signal_dur: minimum signal length
             required by ``process_func``.
             If value is as a float or integer
             it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
             If provided signal is shorter,
             it will be zero padded at the end
-        max_signal_length: maximum signal length
+        max_signal_dur: maximum signal length
             required by ``process_func``.
             If value is as a float or integer
             it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
             If provided signal is longer,
             it will be cut at the end
         num_workers: number of parallel jobs or 1 for sequential
@@ -194,8 +202,8 @@ class Segment:
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
             keep_nat: bool = False,
-            min_signal_length: Timestamp = None,
-            max_signal_length: Timestamp = None,
+            min_signal_dur: Timestamp = None,
+            max_signal_dur: Timestamp = None,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -224,8 +232,8 @@ class Segment:
             channels=channels,
             mixdown=mixdown,
             keep_nat=keep_nat,
-            min_signal_length=min_signal_length,
-            max_signal_length=max_signal_length,
+            min_signal_dur=min_signal_dur,
+            max_signal_dur=max_signal_dur,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
