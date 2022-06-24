@@ -116,7 +116,6 @@ class Process:
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
-            **kwargs,
     ):
         if resample and sampling_rate is None:
             raise ValueError(
@@ -151,16 +150,7 @@ class Process:
         r"""Processing function."""
         self.process_func_is_mono = process_func_is_mono
         r"""Process channels individually."""
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
-        self.process_func_args = process_func_args
+        self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
     def _process_file(
@@ -776,7 +766,6 @@ class ProcessWithContext:
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
             verbose: bool = False,
-            **kwargs,
     ):
         if resample and sampling_rate is None:
             raise ValueError(
@@ -799,16 +788,7 @@ class ProcessWithContext:
                 ]
         self.process_func = process_func
         r"""Process function."""
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
-        self.process_func_args = process_func_args
+        self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
     def process_index(
