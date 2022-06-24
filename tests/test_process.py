@@ -10,7 +10,7 @@ import audinterface
 import audformat
 
 
-def signal_dur(signal, sampling_rate):
+def signal_duration(signal, sampling_rate):
     return signal.shape[1] / sampling_rate
 
 
@@ -150,7 +150,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -162,7 +162,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -174,7 +174,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -186,7 +186,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -198,7 +198,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             2.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -210,7 +210,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             2.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -222,7 +222,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             2.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -234,7 +234,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             2.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -246,7 +246,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -258,7 +258,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -270,7 +270,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -282,7 +282,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             None,
             np.zeros((1, 24000)),
             8000,
@@ -352,7 +352,7 @@ def test_process_file(
     'expected_output',
     [
         (
-            signal_dur,
+            signal_duration,
             2,
             np.zeros((1, 24000)),
             8000,
@@ -361,7 +361,7 @@ def test_process_file(
             [3.0] * 2,
         ),
         (
-            signal_dur,
+            signal_duration,
             2,
             np.zeros((1, 24000)),
             8000,
@@ -370,7 +370,7 @@ def test_process_file(
             [1.0] * 2,
         ),
         (
-            signal_dur,
+            signal_duration,
             2,
             np.zeros((1, 24000)),
             8000,
@@ -379,7 +379,7 @@ def test_process_file(
             [1.0] * 2,
         ),
         (
-            signal_dur,
+            signal_duration,
             2,
             np.zeros((1, 24000)),
             8000,
@@ -388,7 +388,7 @@ def test_process_file(
             [3.0, 1.0],
         ),
         (
-            signal_dur,
+            signal_duration,
             2,
             np.zeros((1, 24000)),
             8000,
@@ -397,7 +397,7 @@ def test_process_file(
             [3.0, 1.0],
         ),
         (
-            signal_dur,
+            signal_duration,
             3,
             np.zeros((1, 24000)),
             8000,
@@ -406,7 +406,7 @@ def test_process_file(
             [3.0, 1.0],
         ),
         (
-            signal_dur,
+            signal_duration,
             1,
             np.zeros((1, 24000)),
             8000,
@@ -706,7 +706,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -718,7 +718,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -730,7 +730,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -742,7 +742,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -754,7 +754,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -766,7 +766,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             3.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -778,7 +778,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -790,7 +790,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -802,7 +802,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
@@ -814,7 +814,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
             1.0,
         ),
         (
-            signal_dur,
+            signal_duration,
             {},
             None,
             np.array([1., 2., 3.]),
