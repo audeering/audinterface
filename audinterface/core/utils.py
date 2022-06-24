@@ -312,7 +312,7 @@ def to_timedelta(
                     raise ValueError(
                         "You have to provide 'sampling_rate' "
                         "when specifying the duration in samples "
-                        "as you did with '{time}'"
+                        f"as you did with '{time}'."
                     )
                 time = int(time) / sampling_rate
         return time
