@@ -168,6 +168,39 @@ def test_process_index(tmpdir):
             ),
             marks=pytest.mark.xfail(raises=ValueError)
         ),
+        pytest.param(  # process_func returns None
+            lambda signal, sampling_rate: None,
+            lambda signal, sampling_rate, starts, ends: None,
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(  # process_func returns single value
+            lambda signal, sampling_rate: 0,
+            lambda signal, sampling_rate, starts, ends: 0,
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(  # process_func returns array with wrong length
+            lambda signal, sampling_rate: [0, 1],
+            lambda signal, sampling_rate, starts, ends: [0, 1],
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(
+                pd.timedelta_range('0s', '3s', 3),
+                pd.timedelta_range('1s', '4s', 3),
+            ),
+            marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
     ],
 )
 def test_process_signal_from_index(
