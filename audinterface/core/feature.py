@@ -162,6 +162,8 @@ class Feature:
             message = (
                 "'unit' argument is deprecated "
                 "and will be removed with version '1.2.0'."
+                "The unit can now directly specified "
+                "within the 'win_dur' and 'hop_dur' arguments."
             )
             warnings.warn(
                 message,
