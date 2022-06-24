@@ -183,9 +183,17 @@ class Process:
         Args:
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``
             root: root folder to expand relative file path
 
         Returns:
@@ -198,8 +206,6 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        start = utils.to_timedelta(start)
-        end = utils.to_timedelta(end)
         if self.segment is not None:
             index = self.segment.process_file(
                 file,
@@ -209,6 +215,8 @@ class Process:
             )
             return self._process_index_wo_segment(index, root)
         else:
+            start = utils.to_timedelta(start, self.sampling_rate)
+            end = utils.to_timedelta(end, self.sampling_rate)
             return self._process_file(file, start=start, end=end, root=root)
 
     def process_files(
@@ -225,9 +233,17 @@ class Process:
             files: list of file paths
             starts: segment start positions.
                 Time values given as float or integers are treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             ends: segment end positions.
                 Time values given as float or integers are treated as seconds
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
 
@@ -248,9 +264,6 @@ class Process:
             starts = [starts] * len(files)
         if isinstance(ends, (type(None), float, int, str, pd.Timedelta)):
             ends = [ends] * len(files)
-
-        starts = utils.to_timedelta(starts)
-        ends = utils.to_timedelta(ends)
 
         params = [
             (
@@ -449,9 +462,17 @@ class Process:
             sampling_rate: sampling rate in Hz
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds
+                If value is as a float or integer it is treated as seconds.
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds
+                To specify a unit provide as string,
+                e.g. ``'2ms'``.
+                To specify in samples provide as string without unit,
+                e.g. ``'2000'``
+                If value is as a float or integer it is treated as seconds.
 
         Returns:
             Series with processed signal conform to audformat_
@@ -463,8 +484,6 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        start = utils.to_timedelta(start)
-        end = utils.to_timedelta(end)
         if self.segment is not None:
             index = self.segment.process_signal(
                 signal,
@@ -479,6 +498,8 @@ class Process:
                 index,
             )
         else:
+            start = utils.to_timedelta(start, sampling_rate)
+            end = utils.to_timedelta(end, sampling_rate)
             return self._process_signal(
                 signal,
                 sampling_rate,
