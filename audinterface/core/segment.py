@@ -118,8 +118,6 @@ class Segment:
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
-        keep_nat: if the end of segment is set to ``NaT`` do not replace
-            with file duration in the result
         min_signal_dur: minimum signal length
             required by ``process_func``.
             If value is as a float or integer
@@ -140,6 +138,8 @@ class Segment:
             e.g. ``'2000'``
             If provided signal is longer,
             it will be cut at the end
+        keep_nat: if the end of segment is set to ``NaT`` do not replace
+            with file duration in the result
         num_workers: number of parallel jobs or 1 for sequential
             processing. If ``None`` will be set to the number of
             processors on the machine multiplied by 5 in case of
@@ -201,9 +201,9 @@ class Segment:
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
-            keep_nat: bool = False,
             min_signal_dur: Timestamp = None,
             max_signal_dur: Timestamp = None,
+            keep_nat: bool = False,
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
@@ -219,26 +219,28 @@ class Segment:
             for key, value in kwargs.items():
                 process_func_args[key] = value
 
-        self.invert = invert
-        r"""Invert segmentation."""
-
         # avoid cycling imports
         from audinterface.core.process import Process
-        self.process = Process(
+        process = Process(
             process_func=create_process_func(process_func, invert),
             process_func_args=process_func_args,
             sampling_rate=sampling_rate,
             resample=resample,
             channels=channels,
             mixdown=mixdown,
-            keep_nat=keep_nat,
             min_signal_dur=min_signal_dur,
             max_signal_dur=max_signal_dur,
+            keep_nat=keep_nat,
             num_workers=num_workers,
             multiprocessing=multiprocessing,
             verbose=verbose,
         )
+
+        self.process = process
         r"""Processing object."""
+
+        self.invert = invert
+        r"""Invert segmentation."""
 
     def process_file(
             self,
