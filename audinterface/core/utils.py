@@ -346,8 +346,8 @@ def window(
 
     Args:
         signal: input signal in shape
-            ``(samples, )``
-            or``(channels, samples)``
+            ``(samples,)``
+            or ``(channels, samples)``
         sampling_rate: sampling rate in Hz
         win_dur: window duration,
             if value is as a float or integer
