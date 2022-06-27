@@ -345,13 +345,31 @@ def window(
     r"""Reshape signal by applying sliding window.
 
     Args:
-        signal: input signal
+        signal: input signal in shape
+            ``(samples, )``
+            or``(channels, samples)``
         sampling_rate: sampling rate in Hz
-        win_dur: window length in samples
-        hop_dur: hop length in samples
+        win_dur: window duration,
+            if value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+        hop_dur: hop duration,
+            if value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
 
     Returns:
-        signal with new shape ``(channels, time, frames)``
+        view of signal with shape ``(frames, channels, samples)``
+
+    Raises:
+        ValueError: if ``win_dur`` or ``hop_dur``
+            is smaller than ``1/sampling_rate``
 
     Examples:
         >>> signal = np.array(
@@ -377,10 +395,35 @@ def window(
                [20, 30, 40]])
 
     """
+    signal = np.atleast_2d(signal)
+
     win_dur = to_timedelta(win_dur, sampling_rate)
     hop_dur = to_timedelta(hop_dur, sampling_rate)
     win_length = int(win_dur.total_seconds() * sampling_rate)
     hop_length = int(hop_dur.total_seconds() * sampling_rate)
+
+    if win_length <= 0:
+        raise ValueError(
+            f'When the sampling rate is '
+            f'{sampling_rate} '
+            f'Hz the window duration must be at least '
+            f'{1.0/sampling_rate}s, '
+            f'but got '
+            f'{win_dur.total_seconds()}s.'
+        )
+
+    if hop_length <= 0:
+        raise ValueError(
+            f'When the sampling rate is '
+            f'{sampling_rate} '
+            f'Hz the hop duration must be at least '
+            f'{1.0/sampling_rate}s, '
+            f'but got '
+            f'{win_dur.total_seconds()}s.'
+        )
+
+    if signal.shape[1] < win_length:  # signal too short
+        return np.array([], dtype=signal.dtype)
 
     shape = (signal.shape[0], signal.shape[1] - win_length + 1, win_length)
     strides = (signal.strides[0], signal.strides[1], signal.strides[1])

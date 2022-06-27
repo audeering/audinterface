@@ -62,7 +62,7 @@ class Feature:
             sampling rate of the signal
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
-        win_dur: window size,
+        win_dur: window duration,
             if features are extracted with a sliding window.
             If value is as a float or integer
             it is treated as seconds.
@@ -70,7 +70,7 @@ class Feature:
             e.g. ``'2ms'``.
             To specify in samples provide as string without unit,
             e.g. ``'2000'``
-        hop_dur: hop size,
+        hop_dur: hop duration,
             if features are extracted with a sliding window.
             This defines the shift between two windows.
             If value is as a float or integer

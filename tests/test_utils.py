@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -126,3 +127,187 @@ def test_create_segmented_index(starts, ends):
             assert index.get_level_values(
                 audformat.define.IndexField.END
             ).tolist() == [pd.NaT] * len(starts)
+
+
+@pytest.mark.parametrize(
+    'signal, sampling_rate, win_dur, hop_dur, expected',
+    [
+        # empty
+        (
+            np.array([]),
+            1, 1, 1,
+            np.array([]),
+        ),
+        # single dimension
+        (
+            np.array([0, 1, 2, 3]),
+            1, 1, 1,
+            np.array([[[0]], [[1]], [[2]], [[3]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 1, 1,
+            np.array([[[0]], [[1]], [[2]], [[3]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 2, 1,
+            np.array([[[0, 1]], [[1, 2]], [[2, 3]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 2, 2,
+            np.array([[[0, 1]], [[2, 3]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 2, 3,
+            np.array([[[0, 1]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 1, 2,
+            np.array([[[0]], [[2]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 2, 10,
+            np.array([[[0, 1]]]),
+        ),
+        (
+            np.array([[0, 1, 2, 3]]),
+            1, 10, 2,
+            np.array([]),
+        ),
+        # multiple dimensions
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 1, 1,
+            np.array(
+                [
+                    [[10], [20], [30]],
+                    [[11], [21], [31]],
+                    [[12], [22], [32]],
+                    [[13], [23], [33]]],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 2, 1,
+            np.array(
+                [
+                    [[10, 11], [20, 21], [30, 31]],
+                    [[11, 12], [21, 22], [31, 32]],
+                    [[12, 13], [22, 23], [32, 33]],
+                ],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 2, 2,
+            np.array(
+                [
+                    [[10, 11], [20, 21], [30, 31]],
+                    [[12, 13], [22, 23], [32, 33]],
+                ],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 2, 3,
+            np.array(
+                [
+                    [[10, 11], [20, 21], [30, 31]],
+                ],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 1, 2,
+            np.array(
+                [
+                    [[10], [20], [30]],
+                    [[12], [22], [32]],
+                ],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 2, 10,
+            np.array(
+                [
+                    [[10, 11], [20, 21], [30, 31]],
+                ],
+            ),
+        ),
+        (
+            np.array(
+                [
+                    [10, 11, 12, 13],
+                    [20, 21, 22, 23],
+                    [30, 31, 32, 33],
+                ],
+            ),
+            1, 10, 2,
+            np.array([]),
+        ),
+        # invalid win duration
+        pytest.param(
+            np.array([]),
+            1, 0.999, 1,
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        # invalid hop duration
+        pytest.param(
+            np.array([]),
+            1, 1, 0.999,
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+    ]
+)
+def test_window(signal, sampling_rate, win_dur, hop_dur, expected):
+    frames = audinterface.utils.window(
+        signal,
+        sampling_rate,
+        win_dur,
+        hop_dur,
+    )
+    np.testing.assert_equal(frames, expected)
