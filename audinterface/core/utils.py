@@ -315,7 +315,7 @@ def sliding_window(
             e.g. ``'2000'``
 
     Returns:
-        view of signal with shape ``(frames, channels, samples)``
+        view of signal with shape ``(channels, samples, frames)``
 
     Raises:
         ValueError: if ``win_dur`` or ``hop_dur``
@@ -337,12 +337,15 @@ def sliding_window(
         ...     win_dur=3,
         ...     hop_dur=2,
         ... )
-        >>> for frame in frames:
-        ...     frame
+        >>> frames[..., 0]  # first frame
         array([[ 0,  1,  2],
                [ 0, 10, 20]])
+        >>> frames[..., -1]  # last frame
         array([[ 2,  3,  4],
                [20, 30, 40]])
+        >>> frames.mean(axis=1)  # mean per frame
+        array([[ 1.,  3.],
+               [10., 30.]])
 
     """
     signal = np.atleast_2d(signal)
@@ -377,15 +380,14 @@ def sliding_window(
 
     shape = (signal.shape[0], signal.shape[1] - win_length + 1, win_length)
     strides = (signal.strides[0], signal.strides[1], signal.strides[1])
-    signal = np.lib.stride_tricks.as_strided(
+    frames = np.lib.stride_tricks.as_strided(
         signal,
         strides=strides,
         shape=shape,
     )[:, 0::hop_length]
+    frames = frames.swapaxes(1, 2)  # make frames last axis
 
-    signal = signal.swapaxes(0, 1)  # make frames first axis
-
-    return signal
+    return frames
 
 
 def to_array(value: typing.Any) -> np.ndarray:
