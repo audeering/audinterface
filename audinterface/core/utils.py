@@ -291,6 +291,9 @@ def sliding_window(
 ):
     r"""Reshape signal by applying a sliding window.
 
+    Windows that do not match the specified duration
+    at the end of the signals will be dropped.
+
     Args:
         signal: input signal in shape
             ``(samples,)``
