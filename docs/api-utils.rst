@@ -13,7 +13,7 @@ signal_index
 
 .. autofunction:: signal_index
 
-window
-------
+sliding_window
+--------------
 
-.. autofunction:: window
+.. autofunction:: sliding_window

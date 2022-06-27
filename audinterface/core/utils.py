@@ -283,60 +283,7 @@ def signal_index(
     return index
 
 
-def to_array(value: typing.Any) -> np.ndarray:
-    r"""Convert value to numpy array."""
-    if value is not None:
-        if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
-            value = value.to_numpy()
-        elif is_scalar(value):
-            value = np.array([value])
-    return value
-
-
-def to_timedelta(
-        times: Timestamps,
-        sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
-    r"""Convert time value to pd.Timedelta.
-
-    If time is given as string without unit,
-    it is treated as samples
-    and requires that ``'sampling_rate'`` is not ``None``.
-
-    """
-
-    def convert_samples_to_seconds(time):
-        if isinstance(time, str):
-            # ensure we have a str and not numpy.str_
-            time = str(time)
-            # string without unit represents samples
-            if all(t.isdigit() for t in time):
-                if sampling_rate is None:
-                    raise ValueError(
-                        "You have to provide 'sampling_rate' "
-                        "when specifying the duration in samples "
-                        f"as you did with '{time}'."
-                    )
-                time = int(time) / sampling_rate
-        return time
-
-    if (
-            not isinstance(times, str)
-            and isinstance(times, collections.abc.Iterable)
-    ):
-        # sequence of time entries
-        times = [convert_samples_to_seconds(t) for t in times]
-    else:
-        # single time entry
-        times = convert_samples_to_seconds(times)
-
-    try:
-        return pd.to_timedelta(times, unit='s')
-    except ValueError:  # catches values like '1s'
-        return pd.to_timedelta(times)
-
-
-def window(
+def sliding_window(
         signal: np.ndarray,
         sampling_rate: int,
         win_dur: Timestamp,
@@ -381,7 +328,7 @@ def window(
         >>> signal
         array([[ 0,  1,  2,  3,  4,  5],
                [ 0, 10, 20, 30, 40, 50]])
-        >>> frames = window(
+        >>> frames = sliding_window(
         ...     signal,
         ...     sampling_rate=1,
         ...     win_dur=3,
@@ -436,3 +383,56 @@ def window(
     signal = signal.swapaxes(0, 1)  # make frames first axis
 
     return signal
+
+
+def to_array(value: typing.Any) -> np.ndarray:
+    r"""Convert value to numpy array."""
+    if value is not None:
+        if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
+            value = value.to_numpy()
+        elif is_scalar(value):
+            value = np.array([value])
+    return value
+
+
+def to_timedelta(
+        times: Timestamps,
+        sampling_rate: int = None,
+) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
+    r"""Convert time value to pd.Timedelta.
+
+    If time is given as string without unit,
+    it is treated as samples
+    and requires that ``'sampling_rate'`` is not ``None``.
+
+    """
+
+    def convert_samples_to_seconds(time):
+        if isinstance(time, str):
+            # ensure we have a str and not numpy.str_
+            time = str(time)
+            # string without unit represents samples
+            if all(t.isdigit() for t in time):
+                if sampling_rate is None:
+                    raise ValueError(
+                        "You have to provide 'sampling_rate' "
+                        "when specifying the duration in samples "
+                        f"as you did with '{time}'."
+                    )
+                time = int(time) / sampling_rate
+        return time
+
+    if (
+            not isinstance(times, str)
+            and isinstance(times, collections.abc.Iterable)
+    ):
+        # sequence of time entries
+        times = [convert_samples_to_seconds(t) for t in times]
+    else:
+        # single time entry
+        times = convert_samples_to_seconds(times)
+
+    try:
+        return pd.to_timedelta(times, unit='s')
+    except ValueError:  # catches values like '1s'
+        return pd.to_timedelta(times)

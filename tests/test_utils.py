@@ -304,8 +304,8 @@ def test_create_segmented_index(starts, ends):
         ),
     ]
 )
-def test_window(signal, sampling_rate, win_dur, hop_dur, expected):
-    frames = audinterface.utils.window(
+def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
+    frames = audinterface.utils.sliding_window(
         signal,
         sampling_rate,
         win_dur,
