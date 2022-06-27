@@ -10,7 +10,10 @@ import audformat
 import audresample
 import audiofile as af
 
-from audinterface.core.typing import Timestamps
+from audinterface.core.typing import (
+    Timestamp,
+    Timestamps,
+)
 
 
 def assert_index(obj: pd.Index):
@@ -331,3 +334,62 @@ def to_timedelta(
         return pd.to_timedelta(times, unit='s')
     except ValueError:  # catches values like '1s'
         return pd.to_timedelta(times)
+
+
+def window(
+        signal: np.ndarray,
+        sampling_rate: int,
+        win_dur: Timestamp,
+        hop_dur: Timestamp,
+):
+    r"""Reshape signal by applying sliding window.
+
+    Args:
+        signal: input signal
+        sampling_rate: sampling rate in Hz
+        win_dur: window length in samples
+        hop_dur: hop length in samples
+
+    Returns:
+        signal with new shape ``(channels, time, frames)``
+
+    Examples:
+        >>> signal = np.array(
+        ...     [
+        ...         [0, 1, 2, 3, 4, 5],
+        ...         [0, 10, 20, 30, 40, 50],
+        ...     ],
+        ... )
+        >>> signal
+        array([[ 0,  1,  2,  3,  4,  5],
+               [ 0, 10, 20, 30, 40, 50]])
+        >>> frames = window(
+        ...     signal,
+        ...     sampling_rate=1,
+        ...     win_dur=3,
+        ...     hop_dur=2,
+        ... )
+        >>> for frame in frames:
+        ...     frame
+        array([[ 0,  1,  2],
+               [ 0, 10, 20]])
+        array([[ 2,  3,  4],
+               [20, 30, 40]])
+
+    """
+    win_dur = to_timedelta(win_dur, sampling_rate)
+    hop_dur = to_timedelta(hop_dur, sampling_rate)
+    win_length = int(win_dur.total_seconds() * sampling_rate)
+    hop_length = int(hop_dur.total_seconds() * sampling_rate)
+
+    shape = (signal.shape[0], signal.shape[1] - win_length + 1, win_length)
+    strides = (signal.strides[0], signal.strides[1], signal.strides[1])
+    signal = np.lib.stride_tricks.as_strided(
+        signal,
+        strides=strides,
+        shape=shape,
+    )[:, 0::hop_length]
+
+    signal = signal.swapaxes(0, 1)  # make frames first axis
+
+    return signal
