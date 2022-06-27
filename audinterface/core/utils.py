@@ -342,7 +342,7 @@ def window(
         win_dur: Timestamp,
         hop_dur: Timestamp,
 ):
-    r"""Reshape signal by applying sliding window.
+    r"""Reshape signal by applying a sliding window.
 
     Args:
         signal: input signal in shape
