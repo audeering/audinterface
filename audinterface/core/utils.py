@@ -10,7 +10,10 @@ import audformat
 import audresample
 import audiofile as af
 
-from audinterface.core.typing import Timestamps
+from audinterface.core.typing import (
+    Timestamp,
+    Timestamps,
+)
 
 
 def assert_index(obj: pd.Index):
@@ -278,6 +281,113 @@ def signal_index(
     assert_index(index)
 
     return index
+
+
+def sliding_window(
+        signal: np.ndarray,
+        sampling_rate: int,
+        win_dur: Timestamp,
+        hop_dur: Timestamp,
+):
+    r"""Reshape signal by applying a sliding window.
+
+    Windows that do not match the specified duration
+    at the end of the signals will be dropped.
+
+    Args:
+        signal: input signal in shape
+            ``(samples,)``
+            or ``(channels, samples)``
+        sampling_rate: sampling rate in Hz
+        win_dur: window duration,
+            if value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+        hop_dur: hop duration,
+            if value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+
+    Returns:
+        view of signal with shape ``(channels, samples, frames)``
+
+    Raises:
+        ValueError: if ``win_dur`` or ``hop_dur``
+            is smaller than ``1/sampling_rate``
+
+    Examples:
+        >>> signal = np.array(
+        ...     [
+        ...         [0, 1, 2, 3, 4, 5],
+        ...         [0, 10, 20, 30, 40, 50],
+        ...     ],
+        ... )
+        >>> signal
+        array([[ 0,  1,  2,  3,  4,  5],
+               [ 0, 10, 20, 30, 40, 50]])
+        >>> frames = sliding_window(
+        ...     signal,
+        ...     sampling_rate=1,
+        ...     win_dur=3,
+        ...     hop_dur=2,
+        ... )
+        >>> frames[..., 0]  # first frame
+        array([[ 0,  1,  2],
+               [ 0, 10, 20]])
+        >>> frames[..., -1]  # last frame
+        array([[ 2,  3,  4],
+               [20, 30, 40]])
+        >>> frames.mean(axis=1)  # mean per frame
+        array([[ 1.,  3.],
+               [10., 30.]])
+
+    """
+    signal = np.atleast_2d(signal)
+
+    win_dur = to_timedelta(win_dur, sampling_rate)
+    hop_dur = to_timedelta(hop_dur, sampling_rate)
+    win_length = int(win_dur.total_seconds() * sampling_rate)
+    hop_length = int(hop_dur.total_seconds() * sampling_rate)
+
+    if win_length <= 0:
+        raise ValueError(
+            f'When the sampling rate is '
+            f'{sampling_rate} '
+            f'Hz the window duration must be at least '
+            f'{1.0/sampling_rate}s, '
+            f'but got '
+            f'{win_dur.total_seconds()}s.'
+        )
+
+    if hop_length <= 0:
+        raise ValueError(
+            f'When the sampling rate is '
+            f'{sampling_rate} '
+            f'Hz the hop duration must be at least '
+            f'{1.0/sampling_rate}s, '
+            f'but got '
+            f'{win_dur.total_seconds()}s.'
+        )
+
+    if signal.shape[1] < win_length:  # signal too short
+        return np.array([], dtype=signal.dtype)
+
+    shape = (signal.shape[0], signal.shape[1] - win_length + 1, win_length)
+    strides = (signal.strides[0], signal.strides[1], signal.strides[1])
+    frames = np.lib.stride_tricks.as_strided(
+        signal,
+        strides=strides,
+        shape=shape,
+    )[:, 0::hop_length]
+    frames = frames.swapaxes(1, 2)  # make frames last axis
+
+    return frames
 
 
 def to_array(value: typing.Any) -> np.ndarray:

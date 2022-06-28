@@ -1,4 +1,5 @@
 from audinterface.core.utils import (
-    signal_index,
     read_audio,
+    signal_index,
+    sliding_window,
 )
