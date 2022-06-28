@@ -95,6 +95,19 @@ as a :class:`pandas.Series`.
     y = interface.process_index(index)
     y
 
+To calculate RMS with a sliding window,
+we create a new interface
+and set a window and hop duration.
+
+.. jupyter-execute::
+
+    interface = audinterface.Process(
+        process_func=rms,
+        win_dur=1.0,
+        hop_dur=0.5,
+    )
+    y = interface.process_files(files)
+    y
 
 Feature interface
 -----------------
