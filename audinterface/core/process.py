@@ -89,7 +89,7 @@ class Process:
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
-        ValueError: if ``hop_dur`` is specified, but not ``win_dur``        
+        ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     Example:
         >>> def mean(signal, sampling_rate):
@@ -584,7 +584,10 @@ class Process:
         else:
             index = utils.signal_index(starts, ends)
 
-        return pd.Series(y, index)
+        if len(y) == 0:
+            return pd.Series([], index, dtype=object)
+        else:
+            return pd.Series(y, index)
 
     def process_signal(
             self,

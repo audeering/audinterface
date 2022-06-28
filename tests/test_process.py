@@ -1123,8 +1123,7 @@ def test_process_signal_min_max(
             None, None, 4, None,
             pd.Series(
                 [0, 0.5, 1],
-                audformat.segmented_index(
-                    ['file.wav'] * 3,
+                audinterface.utils.signal_index(
                     [0, 2, 4],
                     [4, 6, 8],
                 ),
@@ -1135,8 +1134,7 @@ def test_process_signal_min_max(
             None, None, 4, 2,
             pd.Series(
                 [0, 0.5, 1],
-                audformat.segmented_index(
-                    ['file.wav'] * 3,
+                audinterface.utils.signal_index(
                     [0, 2, 4],
                     [4, 6, 8],
                 ),
@@ -1147,8 +1145,7 @@ def test_process_signal_min_max(
             1.0, None, 4, 2,
             pd.Series(
                 [0.25, 0.75],
-                audformat.segmented_index(
-                    ['file.wav'] * 2,
+                audinterface.utils.signal_index(
                     [1, 3],
                     [5, 7],
                 ),
@@ -1159,7 +1156,7 @@ def test_process_signal_min_max(
             1.0, 5.0, 4, 2,
             pd.Series(
                 [0.25],
-                audformat.segmented_index('file.wav', 1, 5),
+                audinterface.utils.signal_index(1, 5),
                 dtype=np.float32,
             ),
         ),
@@ -1167,8 +1164,8 @@ def test_process_signal_min_max(
             1.0, 2.0, 4, 2,
             pd.Series(
                 [],
-                audformat.segmented_index(),
-                dtype=np.float64,
+                audinterface.utils.signal_index(),
+                dtype=object,
             ),
         ),
         # missing win duration
@@ -1189,18 +1186,59 @@ def test_process_with_sliding_window(
         hop_dur,
         expected,
 ):
+    # save signal to file
+    root = tmpdir
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    audiofile.write(path, signal, sampling_rate)
+
+    # create interface
     process = audinterface.Process(
         process_func=process_func,
         hop_dur=hop_dur,
         win_dur=win_dur,
     )
 
-    root = tmpdir
-    file = 'file.wav'
-    path = os.path.join(root, file)
-    audiofile.write(path, signal, sampling_rate)
+    # process signal
+    y = process.process_signal(
+        signal,
+        sampling_rate,
+        start=start,
+        end=end,
+    )
+    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
 
+    # process signal from index
+    y = process.process_signal_from_index(
+        signal,
+        sampling_rate,
+        expected.index,
+    )
+    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+
+    # add file to expected index
+    expected.index = audformat.segmented_index(
+        [file] * len(expected.index),
+        expected.index.get_level_values('start'),
+        expected.index.get_level_values('end'),
+    )
+
+    # process signal with file
+    y = process.process_signal(
+        signal,
+        sampling_rate,
+        file=file,
+        start=start,
+        end=end,
+    )
+    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+
+    # process file
     y = process.process_file(file, start=start, end=end, root=root)
+    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+
+    # process index
+    y = process.process_index(expected.index, root=root)
     pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
 
 
