@@ -1107,6 +1107,104 @@ def test_process_signal_min_max(
 
 
 @pytest.mark.parametrize(
+    'process_func, signal, sampling_rate',
+    [
+        (
+            lambda x, sr: x.mean(),
+            np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=np.float32),
+            1,
+        ),
+    ]
+)
+@pytest.mark.parametrize(
+    'start, end, win_dur, hop_dur, expected',
+    [
+        (
+            None, None, 4, None,
+            pd.Series(
+                [0, 0.5, 1],
+                audformat.segmented_index(
+                    ['file.wav'] * 3,
+                    [0, 2, 4],
+                    [4, 6, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 2,
+            pd.Series(
+                [0, 0.5, 1],
+                audformat.segmented_index(
+                    ['file.wav'] * 3,
+                    [0, 2, 4],
+                    [4, 6, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, None, 4, 2,
+            pd.Series(
+                [0.25, 0.75],
+                audformat.segmented_index(
+                    ['file.wav'] * 2,
+                    [1, 3],
+                    [5, 7],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, 5.0, 4, 2,
+            pd.Series(
+                [0.25],
+                audformat.segmented_index('file.wav', 1, 5),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, 2.0, 4, 2,
+            pd.Series(
+                [],
+                audformat.segmented_index(),
+                dtype=np.float64,
+            ),
+        ),
+        # missing win duration
+        pytest.param(
+            None, None, None, 2, None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        )
+    ]
+)
+def test_process_with_sliding_window(
+        tmpdir,
+        process_func,
+        signal,
+        sampling_rate,
+        start,
+        end,
+        win_dur,
+        hop_dur,
+        expected,
+):
+    process = audinterface.Process(
+        process_func=process_func,
+        hop_dur=hop_dur,
+        win_dur=win_dur,
+    )
+
+    root = tmpdir
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    audiofile.write(path, signal, sampling_rate)
+
+    y = process.process_file(file, start=start, end=end, root=root)
+    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+
+
+@pytest.mark.parametrize(
     'segment',
     [
         audinterface.Segment(
