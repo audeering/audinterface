@@ -36,6 +36,24 @@ class Process:
         resample: if ``True`` enforces given sampling rate by resampling
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
+        win_dur: window duration,
+            if features are extracted with a sliding window.
+            If value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+        hop_dur: hop duration,
+            if features are extracted with a sliding window.
+            This defines the shift between two windows.
+            If value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide a string without unit,
+            e.g. ``'2000'``.
+            Defaults to ``win_dur / 2``
         min_signal_dur: minimum signal length
             required by ``process_func``.
             If value is as a float or integer
@@ -96,8 +114,18 @@ class Process:
         file             start   end
         wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
         dtype: float32
+        >>> interface = Process(
+        ...     process_func=mean,
+        ...     win_dur=1.0,
+        ...     hop_dur=0.5,
+        ... )
+        >>> interface.process_index(index, root=db.root)
+        file             start                   end
+        wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -0.000329
+                         0 days 00:00:00.500000  0 days 00:00:01.500000   -0.000285
+        dtype: float32
 
-    """
+    """  # noqa: E501
     def __init__(
             self,
             *,
@@ -108,6 +136,8 @@ class Process:
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
+            win_dur: Timestamp = None,
+            hop_dur: Timestamp = None,
             min_signal_dur: Timestamp = None,
             max_signal_dur: Timestamp = None,
             segment: Segment = None,
@@ -139,11 +169,21 @@ class Process:
                 'sampling_rate has to be provided for resample = True.'
             )
 
+        if win_dur is None and hop_dur is not None:
+            raise ValueError(
+                "You have to specify 'win_dur' if 'hop_dur' is given."
+            )
+        if win_dur is not None and hop_dur is None:
+            hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
+
         self.channels = channels
         r"""Channel selection."""
 
         self.keep_nat = keep_nat
         r"""Keep NaT in results."""
+
+        self.hop_dur = hop_dur
+        r"""Hop duration."""
 
         self.max_signal_dur = max_signal_dur
         r"""Maximum signal length."""
@@ -181,6 +221,9 @@ class Process:
         self.verbose = verbose
         r"""Show debug messages."""
 
+        self.win_dur = win_dur
+        r"""Window duration."""
+
     def _process_file(
             self,
             file: str,
@@ -202,15 +245,27 @@ class Process:
             file=file,
         )
 
-        if start is None or pd.isna(start):
-            start = y.index.levels[1][0]
-        if end is None or (pd.isna(end) and not self.keep_nat):
-            end = y.index.levels[2][0] + start
+        if self.win_dur is not None:
 
-        y.index = y.index.set_levels(
-            [[start], [end]],
-            level=[1, 2],
-        )
+            if start is not None:
+                starts = y.index.levels[1] + start
+                ends = y.index.levels[2] + start
+                y.index = y.index.set_levels(
+                    [starts, ends],
+                    level=[1, 2],
+                )
+
+        else:
+
+            if start is None or pd.isna(start):
+                start = y.index.levels[1][0]
+            if end is None or (pd.isna(end) and not self.keep_nat):
+                end = y.index.levels[2][0] + start
+
+            y.index = y.index.set_levels(
+                [[start], [end]],
+                level=[1, 2],
+            )
 
         return y
 
@@ -508,12 +563,27 @@ class Process:
         y = self(signal, sampling_rate)
 
         # Create index
-        if file is not None:
-            index = audformat.segmented_index(file, start, end)
+        if self.win_dur is not None:
+            win_dur = utils.to_timedelta(self.win_dur, sampling_rate)
+            hop_dur = utils.to_timedelta(self.hop_dur, sampling_rate)
+            starts = pd.timedelta_range(
+                start,
+                freq=hop_dur,
+                periods=len(y),
+            )
+            ends = starts + win_dur
         else:
-            index = utils.signal_index(start, end)
+            starts = [start]
+            ends = [end]
+            y = [y]
 
-        return pd.Series([y], index)
+        if file is not None:
+            files = [file] * len(starts)
+            index = audformat.segmented_index(files, starts, ends)
+        else:
+            index = utils.signal_index(starts, ends)
+
+        return pd.Series(y, index)
 
     def process_signal(
             self,
@@ -698,16 +768,33 @@ class Process:
             self.channels,
             self.mixdown,
         )
-        if self.process_func_is_mono:
-            return [
-                self.process_func(
-                    np.atleast_2d(channel),
+
+        def _helper(x):
+            if self.process_func_is_mono:
+                return [
+                    self.process_func(
+                        np.atleast_2d(channel),
+                        sampling_rate,
+                        **self.process_func_args,
+                    ) for channel in x
+                ]
+            else:
+                return self.process_func(
+                    x,
                     sampling_rate,
                     **self.process_func_args,
-                ) for channel in signal
-            ]
-        return self.process_func(
-            signal,
-            sampling_rate,
-            **self.process_func_args,
-        )
+                )
+
+        if self.win_dur is not None:
+            frames = utils.sliding_window(
+                signal,
+                sampling_rate,
+                self.win_dur,
+                self.hop_dur,
+            )
+            num_frames = frames.shape[-1]
+            y = [_helper(frames[..., idx]) for idx in range(num_frames)]
+        else:
+            y = _helper(signal)
+
+        return y
