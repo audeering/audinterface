@@ -37,7 +37,7 @@ class Process:
         channels: channel selection, see :func:`audresample.remix`
         mixdown: apply mono mix-down on selection
         win_dur: window duration,
-            if features are extracted with a sliding window.
+            if processing should be applied on a sliding window.
             If value is as a float or integer
             it is treated as seconds.
             To specify a unit provide as string,
@@ -45,7 +45,7 @@ class Process:
             To specify in samples provide as string without unit,
             e.g. ``'2000'``
         hop_dur: hop duration,
-            if features are extracted with a sliding window.
+            if processing should be applied on a sliding window.
             This defines the shift between two windows.
             If value is as a float or integer
             it is treated as seconds.
@@ -89,6 +89,7 @@ class Process:
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
+        ValueError: if ``hop_dur`` is specified, but not ``win_dur``        
 
     Example:
         >>> def mean(signal, sampling_rate):
