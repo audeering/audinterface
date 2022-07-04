@@ -1190,7 +1190,7 @@ def test_process_with_sliding_window(
     root = tmpdir
     file = 'file.wav'
     path = os.path.join(root, file)
-    audiofile.write(path, signal, sampling_rate)
+    audiofile.write(path, signal, sampling_rate, bit_depth=32)
 
     # create interface
     process = audinterface.Process(
@@ -1206,7 +1206,7 @@ def test_process_with_sliding_window(
         start=start,
         end=end,
     )
-    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+    pd.testing.assert_series_equal(y, expected)
 
     # process signal from index
     y = process.process_signal_from_index(
@@ -1214,7 +1214,7 @@ def test_process_with_sliding_window(
         sampling_rate,
         expected.index,
     )
-    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+    pd.testing.assert_series_equal(y, expected)
 
     # add file to expected index
     expected.index = audformat.segmented_index(
@@ -1231,15 +1231,15 @@ def test_process_with_sliding_window(
         start=start,
         end=end,
     )
-    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+    pd.testing.assert_series_equal(y, expected)
 
     # process file
     y = process.process_file(file, start=start, end=end, root=root)
-    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+    pd.testing.assert_series_equal(y, expected)
 
     # process index
     y = process.process_index(expected.index, root=root)
-    pd.testing.assert_series_equal(y, expected, atol=1.0e-4)
+    pd.testing.assert_series_equal(y, expected)
 
 
 @pytest.mark.parametrize(
