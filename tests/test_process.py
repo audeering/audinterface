@@ -1142,6 +1142,39 @@ def test_process_signal_min_max(
             ),
         ),
         (
+            None, None, 4, 3,
+            pd.Series(
+                [0, 0.75],
+                audinterface.utils.signal_index(
+                    [0, 3],
+                    [4, 7],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 4,
+            pd.Series(
+                [0, 1],
+                audinterface.utils.signal_index(
+                    [0, 4],
+                    [4, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 2,
+            pd.Series(
+                [0, 0.5, 1.0],
+                audinterface.utils.signal_index(
+                    [0, 2, 4],
+                    [4, 6, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
             1.0, None, 4, 2,
             pd.Series(
                 [0.25, 0.75],
@@ -1162,6 +1195,14 @@ def test_process_signal_min_max(
         ),
         (
             1.0, 2.0, 4, 2,
+            pd.Series(
+                [],
+                audinterface.utils.signal_index(),
+                dtype=object,
+            ),
+        ),
+        (
+            9.0, 15.0, 4, 2,
             pd.Series(
                 [],
                 audinterface.utils.signal_index(),
