@@ -1164,12 +1164,12 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            None, None, 4, 2,
+            None, None, 2, 4,
             pd.Series(
-                [0, 0.5, 1.0],
+                [0, 1.0],
                 audinterface.utils.signal_index(
-                    [0, 2, 4],
-                    [4, 6, 8],
+                    [0, 4],
+                    [2, 6],
                 ),
                 dtype=np.float32,
             ),
