@@ -1107,6 +1107,183 @@ def test_process_signal_min_max(
 
 
 @pytest.mark.parametrize(
+    'process_func, signal, sampling_rate',
+    [
+        (
+            lambda x, sr: x.mean(),
+            np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=np.float32),
+            1,
+        ),
+    ]
+)
+@pytest.mark.parametrize(
+    'start, end, win_dur, hop_dur, expected',
+    [
+        (
+            None, None, 4, None,
+            pd.Series(
+                [0, 0.5, 1],
+                audinterface.utils.signal_index(
+                    [0, 2, 4],
+                    [4, 6, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 2,
+            pd.Series(
+                [0, 0.5, 1],
+                audinterface.utils.signal_index(
+                    [0, 2, 4],
+                    [4, 6, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 3,
+            pd.Series(
+                [0, 0.75],
+                audinterface.utils.signal_index(
+                    [0, 3],
+                    [4, 7],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 4, 4,
+            pd.Series(
+                [0, 1],
+                audinterface.utils.signal_index(
+                    [0, 4],
+                    [4, 8],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            None, None, 2, 4,
+            pd.Series(
+                [0, 1.0],
+                audinterface.utils.signal_index(
+                    [0, 4],
+                    [2, 6],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, None, 4, 2,
+            pd.Series(
+                [0.25, 0.75],
+                audinterface.utils.signal_index(
+                    [1, 3],
+                    [5, 7],
+                ),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, 5.0, 4, 2,
+            pd.Series(
+                [0.25],
+                audinterface.utils.signal_index(1, 5),
+                dtype=np.float32,
+            ),
+        ),
+        (
+            1.0, 2.0, 4, 2,
+            pd.Series(
+                [],
+                audinterface.utils.signal_index(),
+                dtype=object,
+            ),
+        ),
+        (
+            9.0, 15.0, 4, 2,
+            pd.Series(
+                [],
+                audinterface.utils.signal_index(),
+                dtype=object,
+            ),
+        ),
+        # missing win duration
+        pytest.param(
+            None, None, None, 2, None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        )
+    ]
+)
+def test_process_with_sliding_window(
+        tmpdir,
+        process_func,
+        signal,
+        sampling_rate,
+        start,
+        end,
+        win_dur,
+        hop_dur,
+        expected,
+):
+    # save signal to file
+    root = tmpdir
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    audiofile.write(path, signal, sampling_rate, bit_depth=32)
+
+    # create interface
+    process = audinterface.Process(
+        process_func=process_func,
+        hop_dur=hop_dur,
+        win_dur=win_dur,
+    )
+
+    # process signal
+    y = process.process_signal(
+        signal,
+        sampling_rate,
+        start=start,
+        end=end,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process signal from index
+    y = process.process_signal_from_index(
+        signal,
+        sampling_rate,
+        expected.index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # add file to expected index
+    expected.index = audformat.segmented_index(
+        [file] * len(expected.index),
+        expected.index.get_level_values('start'),
+        expected.index.get_level_values('end'),
+    )
+
+    # process signal with file
+    y = process.process_signal(
+        signal,
+        sampling_rate,
+        file=file,
+        start=start,
+        end=end,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process file
+    y = process.process_file(file, start=start, end=end, root=root)
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index
+    y = process.process_index(expected.index, root=root)
+    pd.testing.assert_series_equal(y, expected)
+
+
+@pytest.mark.parametrize(
     'segment',
     [
         audinterface.Segment(
