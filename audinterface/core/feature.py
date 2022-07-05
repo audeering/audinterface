@@ -57,6 +57,18 @@ class Feature:
             function
         process_func_is_mono: apply ``process_func`` to every channel
             individually
+        process_func_applies_sliding_window:
+            if ``True``
+            the processing function receives
+            whole segments and is responsible
+            for applying a sliding window itself.
+            If ``False``,
+            the sliding window is applied internally
+            and the processing function
+            receives invidual frames instead.
+            Applies only if
+            features are extracted in a framewise manner
+            (see ``win_dur`` and ``hop_dur``)
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal
@@ -155,6 +167,7 @@ class Feature:
             process_func: typing.Callable[..., typing.Any] = None,
             process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
+            process_func_applies_sliding_window: bool = True,
             sampling_rate: int = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = 0,
@@ -244,6 +257,8 @@ class Feature:
             resample=resample,
             channels=channels,
             mixdown=mixdown,
+            win_dur=None if process_func_applies_sliding_window else win_dur,
+            hop_dur=None if process_func_applies_sliding_window else hop_dur,
             min_signal_dur=min_signal_dur,
             max_signal_dur=max_signal_dur,
             segment=segment,
@@ -276,6 +291,10 @@ class Feature:
 
         self.process = process
         r"""Processing object."""
+
+        self.process_func_applies_sliding_window = \
+            process_func_applies_sliding_window
+        r"""Controls if processing function applies sliding window."""
 
         self.verbose = verbose
         r"""Show debug messages."""
@@ -563,7 +582,7 @@ class Feature:
 
         if self.process.process_func_is_mono:
             # when mono processing is turned on
-            # the channel dimension has to be 1
+            # the channel dimension has to be 1,
             # so we would usually omit it,
             # but since older versions required
             # a channel dimension we have to
@@ -579,6 +598,11 @@ class Feature:
                 # (channels, 1, features)
                 # -> (channels, features)
                 features = features.squeeze(axis=1)
+
+            if self.win_dur and not self.process_func_applies_sliding_window:
+                # (channels, features)
+                # -> (channels, features, 1)
+                features = features.reshape(self.num_channels, -1, 1)
 
         if features.ndim > 3:
             raise RuntimeError(
@@ -720,7 +744,7 @@ class Feature:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.DataFrame`. Instead it will return the raw processed
+        into a :class:`pd.DataFrame`. Instead, it will return the raw processed
         signal. However, if channel selection, mixdown and/or resampling
         is enabled, the signal will be first remixed and resampled if the
         input sampling rate does not fit the expected sampling rate.

@@ -29,9 +29,32 @@ def feature_extractor(signal, _):
     return np.ones((NUM_CHANNELS, NUM_FEATURES))
 
 
-def features_extractor_sliding_window(signal, _, hop_size):
-    num_time_steps = int(np.ceil(signal.shape[1] / hop_size))
-    return np.ones((NUM_CHANNELS, NUM_FEATURES, num_time_steps))
+def mean(signal, sampling_rate):
+    return signal.mean(axis=1, keepdims=True)
+
+
+def mean_mono(signal, sampling_rate):
+    return signal.mean()
+
+
+def mean_sliding_window(signal, sampling_rate, win_dur, hop_dur):
+    frames = audinterface.utils.sliding_window(
+        signal,
+        sampling_rate,
+        win_dur,
+        hop_dur,
+    )
+    return frames.mean(axis=1, keepdims=True)
+
+
+def mean_sliding_window_mono(signal, sampling_rate, win_dur, hop_dur):
+    frames = audinterface.utils.sliding_window(
+        signal,
+        sampling_rate,
+        win_dur,
+        hop_dur,
+    )
+    return frames.mean(axis=1, keepdims=False)
 
 
 def test_deprecated_unit_argument():
@@ -848,39 +871,52 @@ def test_process_index(tmpdir):
 
 
 @pytest.mark.parametrize(
+    'process_func, is_mono, applies_sliding_window, feature_names',
+    [
+        (mean, False, False, 'mean'),
+        (mean_mono, True, False, 'mean'),
+        (mean_sliding_window, False, True, 'mean'),
+        (mean_sliding_window_mono, True, True, 'mean'),
+    ]
+)
+@pytest.mark.parametrize(
     'win_dur, hop_dur',
     [
-        (1, 0.5),
-        (pd.to_timedelta(1, unit='s'), None),
-        ('16000', None),
-        ('1000ms', '500ms'),
-        ('1000milliseconds', '500milliseconds'),
-        (f'{SAMPLING_RATE}', f'{SAMPLING_RATE // 2}'),
-        pytest.param(  # multiple frames, but win_dur is None
-            None, None,
-            marks=pytest.mark.xfail(raises=RuntimeError),
-        ),
+        (0.5, 0.25),
+        (0.5, 0.5),
+        (0.25, 0.5),
+        (pd.to_timedelta(1, unit='s'), pd.to_timedelta(0.5, unit='s')),
+        ('4000', '2000'),
+        ('500ms', '250ms'),
+        ('500milliseconds', '250milliseconds'),
+        (f'{SAMPLING_RATE // 2}', f'{SAMPLING_RATE // 4}'),
     ],
 )
-def test_signal_sliding_window(win_dur, hop_dur):
-    # Test sliding window with two time steps
-    expected_features = np.ones((NUM_CHANNELS, 2 * NUM_FEATURES))
-    extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=features_extractor_sliding_window,
-        process_func_args={
-            'hop_size': SAMPLING_RATE // 2,  # argument to process_func
-        },
+def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
+                               feature_names, win_dur, hop_dur):
+
+    process_func_args = {}
+    if applies_sliding_window:
+        process_func_args['win_dur'] = win_dur
+        process_func_args['hop_dur'] = hop_dur
+
+    interface = audinterface.Feature(
+        feature_names=feature_names,
+        process_func=process_func,
+        process_func_args=process_func_args,
+        process_func_is_mono=is_mono,
+        process_func_applies_sliding_window=applies_sliding_window,
         channels=range(NUM_CHANNELS),
         win_dur=win_dur,
         hop_dur=hop_dur,
         sampling_rate=SAMPLING_RATE,
     )
-    features = extractor.process_signal(
+
+    df = interface.process_signal(
         SIGNAL_2D,
         SAMPLING_RATE,
     )
-    n_time_steps = len(features)
+    n_time_steps = len(df)
 
     if isinstance(win_dur, str):
         if all(s.isdigit() for s in win_dur):
@@ -910,14 +946,37 @@ def test_signal_sliding_window(win_dur, hop_dur):
     ends = starts + win_dur
 
     index = audinterface.utils.signal_index(starts, ends)
-    pd.testing.assert_frame_equal(
-        features,
-        pd.DataFrame(
-            expected_features,
-            index=index,
-            columns=extractor.column_names,
-        ),
+    expected = pd.DataFrame(
+        np.ones((n_time_steps, len(interface.column_names))),
+        index=index,
+        columns=interface.column_names,
     )
+    pd.testing.assert_frame_equal(df, expected)
+
+
+def test_signal_sliding_window_error():
+
+    interface = audinterface.Feature(
+        feature_names='mean',
+        process_func=mean_sliding_window,
+        process_func_args={
+            'win_dur': 0.5,
+            'hop_dur': 0.25,
+        },
+        process_func_is_mono=False,
+        process_func_applies_sliding_window=True,
+        channels=range(NUM_CHANNELS),
+        win_dur=None,
+        hop_dur=None,
+        sampling_rate=SAMPLING_RATE,
+    )
+
+    # returns multiple frames but win_dur is None
+    with pytest.raises(RuntimeError):
+        interface.process_signal(
+            SIGNAL_2D,
+            SAMPLING_RATE,
+        )
 
 
 def test_to_numpy():
