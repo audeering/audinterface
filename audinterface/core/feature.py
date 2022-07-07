@@ -790,7 +790,7 @@ class Feature:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.DataFrame`. Instead, it will return the raw processed
+        into a :class:`pandas.DataFrame`. Instead, it will return the raw processed
         signal. However, if channel selection, mixdown and/or resampling
         is enabled, the signal will be first remixed and resampled if the
         input sampling rate does not fit the expected sampling rate.
