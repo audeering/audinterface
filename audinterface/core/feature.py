@@ -264,6 +264,20 @@ class Feature:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
+        # add 'win_dur' and 'hop_dur' to process_func_args
+        # if expected by function but not yet set
+        signature = inspect.signature(process_func)
+        if (
+            'win_dur' in signature.parameters
+            and 'win_dur' not in process_func_args
+        ):
+            process_func_args['win_dur'] = win_dur
+        if (
+            'hop_dur' in signature.parameters
+            and 'hop_dur' not in process_func_args
+        ):
+            process_func_args['hop_dur'] = hop_dur
+
         process = Process(
             process_func=process_func,
             process_func_args=process_func_args,

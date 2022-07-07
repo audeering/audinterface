@@ -895,15 +895,9 @@ def test_process_index(tmpdir):
 def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
                                feature_names, win_dur, hop_dur):
 
-    process_func_args = {}
-    if applies_sliding_window:
-        process_func_args['win_dur'] = win_dur
-        process_func_args['hop_dur'] = hop_dur
-
     interface = audinterface.Feature(
         feature_names=feature_names,
         process_func=process_func,
-        process_func_args=process_func_args,
         process_func_is_mono=is_mono,
         process_func_applies_sliding_window=applies_sliding_window,
         channels=range(NUM_CHANNELS),
