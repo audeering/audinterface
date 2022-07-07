@@ -1,4 +1,5 @@
 import errno
+import inspect
 import os
 import typing
 import warnings
@@ -156,8 +157,22 @@ class Feature:
                                                            mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
+        >>> interface_with_sliding_window = Feature(
+        ...     ['mean', 'std'],
+        ...     process_func=mean_std,
+        ...     process_func_applies_sliding_window=False,
+        ...     win_dur=1.0,
+        ...     hop_dur=0.25,
+        ... )
+        >>> interface_with_sliding_window.process_index(index, root=db.root)
+                                                                           mean       std
+        file            start                  end
+        wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
+                        0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917
+                        0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
+                        0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
 
-    """
+    """  # noqa: E501
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
