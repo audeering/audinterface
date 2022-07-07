@@ -906,46 +906,31 @@ def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
         sampling_rate=SAMPLING_RATE,
     )
 
-    df = interface.process_signal(
-        SIGNAL_2D,
-        SAMPLING_RATE,
-    )
-    n_time_steps = len(df)
+    for signal in [SIGNAL_1D, SIGNAL_2D]:
 
-    if isinstance(win_dur, str):
-        if all(s.isdigit() for s in win_dur):
-            # samples
-            win_dur = pd.to_timedelta(int(win_dur) / SAMPLING_RATE, unit='s')
-        else:
-            win_dur = pd.to_timedelta(win_dur)
-    else:
-        win_dur = pd.to_timedelta(win_dur, unit='s')
+        df = interface.process_signal(
+            SIGNAL_2D,
+            SAMPLING_RATE,
+        )
+        n_time_steps = len(df)
 
-    if hop_dur is None:
-        hop_dur = win_dur / 2
-    elif isinstance(hop_dur, str):
-        if all(s.isdigit() for s in hop_dur):
-            # samples
-            hop_dur = pd.to_timedelta(int(hop_dur) / SAMPLING_RATE, unit='s')
-        else:
-            hop_dur = pd.to_timedelta(hop_dur)
-    else:
-        hop_dur = pd.to_timedelta(hop_dur, unit='s')
+        win_dur = audinterface.core.utils.to_timedelta(win_dur, SAMPLING_RATE)
+        hop_dur = audinterface.core.utils.to_timedelta(hop_dur, SAMPLING_RATE)
 
-    starts = pd.timedelta_range(
-        pd.to_timedelta(0),
-        freq=hop_dur,
-        periods=n_time_steps,
-    )
-    ends = starts + win_dur
+        starts = pd.timedelta_range(
+            pd.to_timedelta(0),
+            freq=hop_dur,
+            periods=n_time_steps,
+        )
+        ends = starts + win_dur
 
-    index = audinterface.utils.signal_index(starts, ends)
-    expected = pd.DataFrame(
-        np.ones((n_time_steps, len(interface.column_names))),
-        index=index,
-        columns=interface.column_names,
-    )
-    pd.testing.assert_frame_equal(df, expected)
+        index = audinterface.utils.signal_index(starts, ends)
+        expected = pd.DataFrame(
+            np.ones((n_time_steps, len(interface.column_names))),
+            index=index,
+            columns=interface.column_names,
+        )
+        pd.testing.assert_frame_equal(df, expected)
 
 
 def test_signal_sliding_window_error():
