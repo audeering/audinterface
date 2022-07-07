@@ -130,19 +130,43 @@ and assigns names to the dimensions/features.
     df = interface.process_index(index)
     df
 
+To calculate features with a sliding window,
+we create a new interface
+and set a window and hop duration.
+By setting
+``process_func_applies_sliding_window=False``
+the windowing is automatically handeled
+and single frames are passed on to the processing function.
 
-Framewise feature interface
----------------------------
+.. jupyter-execute::
 
-If a processing function does not return
-one set of features for the whole signal,
-but does return features
-in a framewise manner,
-you should specify the ``win_dur``
-and ``hop_dur`` arguments
-of :class:`audinterface.Feature`.
-It's also important the processing function
-returns the value in the correct shape,
+    interface = audinterface.Feature(
+        ['mean', 'std'],
+        process_func=features,
+        process_func_applies_sliding_window=False,
+        win_dur=1.0,
+        hop_dur=0.5,
+    )
+    y = interface.process_files(files)
+    y
+
+
+Feature interface for external function
+---------------------------------------
+
+If we interface a function from an external library
+that already applies a sliding window,
+we again specfiy the
+``win_dur`` and ``hop_dur``
+arguments.
+However,
+by setting
+``process_func_applies_sliding_window=True``
+we still request that the whole signal is passed on.
+Now,
+the processing function is responsible
+for extracting the features in a framewise manner
+and returning the values in the correct shape,
 namely ``(num_channels, num_features, num_frames)``,
 whereas the first dimension is optionally.
 
@@ -162,19 +186,14 @@ whereas the first dimension is optionally.
         )
         return mfcc
 
-    win_dur = 0.02
-    hop_dur = 0.01
     n_mfcc = 13
     interface = audinterface.Feature(
         [f'mfcc-{idx}' for idx in range(n_mfcc)],
         process_func=features,
-        process_func_args={
-            'win_dur': win_dur,
-            'hop_dur': hop_dur,
-            'n_mfcc': n_mfcc,
-        },
-        hop_dur=hop_dur,
-        win_dur=win_dur,
+        process_func_args={'n_mfcc': n_mfcc},  # 'win_dur' and 'hop_dur' can be omitted
+        process_func_applies_sliding_window=True,
+        win_dur=0.02,
+        hop_dur=0.01,
     )
     df = interface.process_index(index)
     df

@@ -22,11 +22,11 @@ import audinterface.core.utils as utils
 class Feature:
     r"""Feature extraction interface.
 
-    The features are returned as a :class:`pd.DataFrame`.
+    The features are returned as a :class:`pandas.DataFrame`.
     If your input signal is of size ``(num_channels, num_time_steps)``,
-    the returned dataframe will have ``num_channels * num_features``
-    columns.
+    the returned object has ``num_channels * num_features`` columns.
     It will have one row per file or signal.
+
     If features are extracted using a sliding window,
     each window will be stored as one row.
     If ``win_dur`` is specified ``start`` and ``end`` indices
@@ -34,6 +34,23 @@ class Feature:
     and the window positions.
     Otherwise, the original ``start`` and ``end`` indices
     are kept.
+    If
+    ``process_func_applies_sliding_window``
+    is set to ``True``
+    the processing function
+    is responsible to apply the sliding window.
+    Otherwise,
+    the sliding window is applied before
+    the processing function is called.
+
+    If the arguments
+    ``win_dur`` and ``hop_dur``
+    are not specified in
+    ``process_func_args``,
+    but
+    ``process_func``
+    expects them,
+    they are passed on automatically.
 
     Args:
         feature_names: features are stored as columns in a data frame,
