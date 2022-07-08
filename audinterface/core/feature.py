@@ -190,6 +190,11 @@ class Feature:
                         0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
 
     """  # noqa: E501
+    @audeer.deprecated_default_value(
+        argument='process_func_applies_sliding_window',
+        change_in_version='1.2.0',
+        new_default_value=False,
+    )
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],

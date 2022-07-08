@@ -57,6 +57,20 @@ def mean_sliding_window_mono(signal, sampling_rate, win_dur, hop_dur):
     return frames.mean(axis=1, keepdims=False)
 
 
+def test_deprecated_process_func_applies_sliding_window_argument():
+    interface = audinterface.Feature(
+        'mean',
+        process_func=mean,
+    )
+    if (
+            audeer.LooseVersion(audinterface.__version__)
+            < audeer.LooseVersion('1.2.0')
+    ):
+        assert interface.process_func_applies_sliding_window
+    else:
+        assert not interface.process_func_applies_sliding_window
+
+
 def test_deprecated_unit_argument():
     if (
             audeer.LooseVersion(audinterface.__version__)
@@ -80,7 +94,11 @@ def test_deprecated_unit_argument():
             assert interface.hop_dur == '500milliseconds'
     else:
         with pytest.raises(TypeError, match='unexpected keyword argument'):
-            audinterface.Feature(['a'], unit='samples')
+            audinterface.Feature(
+                ['a'],
+                process_func_applies_sliding_window=False,
+                unit='samples',
+            )
 
 
 def test_feature():
@@ -88,22 +106,26 @@ def test_feature():
     with pytest.raises(ValueError):
         audinterface.Feature(
             feature_names=('o1', 'o2', 'o3'),
+            process_func_applies_sliding_window=False,
             sampling_rate=None,
             win_dur='2048',
         )
     # If no win_dur is given, no error should occur
     audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
+        process_func_applies_sliding_window=False,
         sampling_rate=None,
     )
     # Only hop_dur is given
     with pytest.raises(ValueError):
         audinterface.Feature(
             feature_names=('o1', 'o2', 'o3'),
+            process_func_applies_sliding_window=False,
             hop_dur=0.1,
         )
     audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
+        process_func_applies_sliding_window=False,
         win_dur='2048',
         sampling_rate=8000,
     )
@@ -117,6 +139,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names='feature',
                 process_func=lambda x, sr: 1,
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 1, 1)),
         ),
@@ -125,6 +148,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['feature'],
                 process_func=lambda x, sr: 1,
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 1, 1)),
         ),
@@ -133,6 +157,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones(3),
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 3, 1)),
         ),
@@ -141,6 +166,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 3, 1)),
         ),
@@ -149,6 +175,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((3, 1)),
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 3, 1)),
         ),
@@ -157,6 +184,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
+                process_func_applies_sliding_window=False,
             ),
             np.ones((1, 3, 5)),
         ),
@@ -165,6 +193,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
+                process_func_applies_sliding_window=False,
                 channels=1,
             ),
             np.ones((1, 3, 5)),
@@ -174,6 +203,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((2, 3)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
             ),
             np.ones((2, 3, 1)),
@@ -183,6 +213,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((2, 3, 5)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
             ),
             np.ones((2, 3, 5)),
@@ -192,6 +223,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones(3),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
                 process_func_is_mono=True,
             ),
@@ -202,6 +234,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
                 process_func_is_mono=True,
             ),
@@ -212,6 +245,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 1)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
                 process_func_is_mono=True,
             ),
@@ -222,6 +256,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((3, 5)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
                 process_func_is_mono=True,
             ),
@@ -232,6 +267,7 @@ def test_feature():
             audinterface.Feature(
                 feature_names=['f1', 'f2', 'f3'],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
+                process_func_applies_sliding_window=False,
                 channels=range(2),
                 process_func_is_mono=True,
             ),
@@ -254,6 +290,7 @@ def test_process_call(signal, feature, expected):
             audinterface.Feature(
                 feature_names='mean',
                 process_func=lambda x, sr: np.mean(x, axis=1),
+                process_func_applies_sliding_window=False,
             ),
         ),
         (
@@ -261,6 +298,7 @@ def test_process_call(signal, feature, expected):
             audinterface.Feature(
                 feature_names='mean',
                 process_func=lambda x, sr: np.mean(x, axis=1),
+                process_func_applies_sliding_window=False,
             ),
         ),
         (
@@ -268,6 +306,7 @@ def test_process_call(signal, feature, expected):
             audinterface.Feature(
                 feature_names='mean',
                 process_func=lambda x, sr: np.mean(x, axis=1),
+                process_func_applies_sliding_window=False,
                 channels=0,
             ),
         ),
@@ -299,6 +338,7 @@ def test_process_file(tmpdir, start, end, segment):
     feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
+        process_func_applies_sliding_window=False,
         sampling_rate=None,
         channels=range(NUM_CHANNELS),
         resample=False,
@@ -361,6 +401,7 @@ def test_process_folder(tmpdir):
     feature = audinterface.Feature(
         feature_names,
         process_func=feature_extractor,
+        process_func_applies_sliding_window=False,
         sampling_rate=None,
         channels=range(NUM_CHANNELS),
         resample=False,
@@ -405,6 +446,7 @@ def test_process_func_args():
     audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=process_func,
+        process_func_applies_sliding_window=False,
         process_func_args={
             'arg1': 'foo',
             'arg2': 'bar',
@@ -414,17 +456,20 @@ def test_process_func_args():
         audinterface.Feature(
             feature_names=('o1', 'o2', 'o3'),
             process_func=process_func,
+            process_func_applies_sliding_window=False,
             arg1='foo',
             arg2='bar',
         )
 
 
 @pytest.mark.parametrize(
-    'process_func, num_feat, signal, start, end, expand, expected',
+    'process_func, applies_sliding_window, num_feat, signal, start, end, '
+    'expand, expected',
     [
         # no process function
         (
             None,
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -435,6 +480,7 @@ def test_process_func_args():
         # 1 channel, 1 feature
         (
             lambda s, sr: 1,
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -444,6 +490,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones(1),
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -454,6 +501,7 @@ def test_process_func_args():
         # 1 channel, 1 feature
         (
             lambda s, sr: [1],
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -463,6 +511,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 1)),
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -473,6 +522,7 @@ def test_process_func_args():
         # 1 channel, 3 features
         (
             lambda s, sr: [1, 1, 1],
+            False,
             3,
             SIGNAL_1D,
             None,
@@ -482,6 +532,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones(3),
+            False,
             3,
             SIGNAL_1D,
             None,
@@ -492,6 +543,7 @@ def test_process_func_args():
         # 1 channel, 3 features
         (
             lambda s, sr: [[1, 1, 1]],
+            False,
             3,
             SIGNAL_1D,
             None,
@@ -501,6 +553,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 3)),
+            False,
             3,
             SIGNAL_1D,
             None,
@@ -511,6 +564,7 @@ def test_process_func_args():
         # 2 channels, 1 feature
         (
             lambda s, sr: [[1], [1]],
+            False,
             1,
             SIGNAL_2D,
             None,
@@ -520,6 +574,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((2, 1)),
+            False,
             1,
             SIGNAL_2D,
             None,
@@ -530,6 +585,7 @@ def test_process_func_args():
         # 2 channels, 3 features
         (
             lambda s, sr: [[1, 1, 1], [1, 1, 1]],
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -539,6 +595,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((2, 3)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -549,6 +606,7 @@ def test_process_func_args():
         # 2 channels, 3 features + start, end
         (
             lambda s, sr: np.ones((2, 3)),
+            True,
             3,
             SIGNAL_2D,
             pd.to_timedelta('1s'),
@@ -559,6 +617,7 @@ def test_process_func_args():
         # 2 channels, 3 features, 5 frames
         (
             lambda s, sr: [[[1] * 5] * 3] * 2,
+            True,
             3,
             SIGNAL_2D,
             None,
@@ -568,6 +627,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((2, 3, 5)),
+            True,
             3,
             SIGNAL_2D,
             None,
@@ -578,6 +638,7 @@ def test_process_func_args():
         # 1 channel, 1 feature + mono processing
         (
             lambda s, sr: 1,
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -587,6 +648,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones(1),
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -596,6 +658,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 1)),
+            False,
             1,
             SIGNAL_1D,
             None,
@@ -606,6 +669,7 @@ def test_process_func_args():
         # 2 channels, 1 feature + mono processing
         (
             lambda s, sr: [1],
+            False,
             1,
             SIGNAL_2D,
             None,
@@ -615,6 +679,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones(1),
+            False,
             1,
             SIGNAL_2D,
             None,
@@ -624,6 +689,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 1)),
+            False,
             1,
             SIGNAL_2D,
             None,
@@ -634,6 +700,7 @@ def test_process_func_args():
         # 2 channels, 3 features + mono processing
         (
             lambda s, sr: [1, 1, 1],
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -643,6 +710,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones(3),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -652,6 +720,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 3, 1)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -666,6 +735,7 @@ def test_process_func_args():
                 [1, 1, 1, 1, 1],
                 [1, 1, 1, 1, 1],
             ],
+            True,
             3,
             SIGNAL_2D,
             None,
@@ -675,6 +745,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((3, 5)),
+            True,
             3,
             SIGNAL_2D,
             None,
@@ -684,6 +755,7 @@ def test_process_func_args():
         ),
         (
             lambda s, sr: np.ones((1, 3, 5)),
+            True,
             3,
             SIGNAL_2D,
             None,
@@ -694,6 +766,7 @@ def test_process_func_args():
         # Feature extractor function returns too less dimensions
         pytest.param(
             lambda s, sr: np.ones(1),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -705,6 +778,7 @@ def test_process_func_args():
         # Feature extractor function returns too many dimensions
         pytest.param(
             lambda s, sr: np.ones((1, 1, 1, 1)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -716,6 +790,7 @@ def test_process_func_args():
         # Feature extractor function returns wrong number of channels
         pytest.param(
             lambda s, sr: np.ones((1, 3)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -727,6 +802,7 @@ def test_process_func_args():
         # Feature extractor function returns wrong number of channels
         pytest.param(
             lambda s, sr: np.ones((2 + 1, 3)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -738,6 +814,7 @@ def test_process_func_args():
         # Feature extractor function returns wrong number of features
         pytest.param(
             lambda s, sr: np.ones((2, 3 + 1)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -749,6 +826,7 @@ def test_process_func_args():
         # Feature extractor function returns wrong number of features
         pytest.param(
             lambda s, sr: np.ones((2, 3 + 1, 1)),
+            False,
             3,
             SIGNAL_2D,
             None,
@@ -760,11 +838,13 @@ def test_process_func_args():
     ]
 )
 def test_process_signal(
-        process_func, num_feat, signal, start, end, expand, expected,
+        process_func, applies_sliding_window, num_feat, signal, start, end,
+        expand, expected,
 ):
     feature = audinterface.Feature(
         feature_names=[f'f{i}' for i in range(num_feat)],
         process_func=process_func,
+        process_func_applies_sliding_window=applies_sliding_window,
         channels=range(signal.shape[0]),
         process_func_is_mono=expand,
         win_dur=1,
@@ -794,6 +874,7 @@ def test_process_signal_from_index(index, expected_features):
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
+        process_func_applies_sliding_window=False,
         channels=range(NUM_CHANNELS),
     )
     features = extractor.process_signal_from_index(
@@ -811,6 +892,7 @@ def test_process_index(tmpdir):
     feature = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
+        process_func_applies_sliding_window=False,
         channels=range(NUM_CHANNELS),
     )
 
@@ -966,6 +1048,7 @@ def test_to_numpy():
     extractor = audinterface.Feature(
         feature_names=('o1', 'o2', 'o3'),
         process_func=feature_extractor,
+        process_func_applies_sliding_window=False,
         channels=range(NUM_CHANNELS),
     )
     features = extractor.process_signal(
