@@ -404,11 +404,40 @@ def to_timedelta(
         times: Timestamps,
         sampling_rate: int = None,
 ) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
-    r"""Convert time value to pd.Timedelta.
+    r"""Convert time value to :class:`pandas.Timedelta`.
 
     If time is given as string without unit,
     it is treated as samples
     and requires that ``'sampling_rate'`` is not ``None``.
+
+    Args:
+        durations: duration value(s).
+            If duration value is as a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+        sampling_rate: sampling rate in Hz.
+            Needs to be provided
+            if any duration value is provided in samples
+
+    Returns:
+        duration values as :class:``pandas.Timedelta`` objects
+
+    Raises:
+        ValueError: if a duration value is given in samples,
+            but ``sampling_rate`` is ``None``
+
+    Example:
+        >>> to_timedelta(2)
+        Timedelta('0 days 00:00:02')
+        >>> to_timedelta('2ms')
+        Timedelta('0 days 00:00:00.002000')
+        >>> to_timedelta('200milliseconds')
+        Timedelta('0 days 00:00:00.200000')
+        >>> to_timedelta('2000', 1000)
+        Timedelta('0 days 00:00:02')
 
     """
 
