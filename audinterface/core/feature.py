@@ -78,7 +78,7 @@ class Feature:
         process_func_applies_sliding_window:
             if ``True``
             the processing function receives
-            whole segments and is responsible
+            whole files or segments and is responsible
             for applying a sliding window itself.
             If ``False``,
             the sliding window is applied internally
