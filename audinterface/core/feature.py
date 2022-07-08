@@ -1,4 +1,5 @@
 import errno
+import inspect
 import os
 import typing
 import warnings
@@ -21,18 +22,35 @@ import audinterface.core.utils as utils
 class Feature:
     r"""Feature extraction interface.
 
-    The features are returned as a :class:`pd.DataFrame`.
+    The features are returned as a :class:`pandas.DataFrame`.
     If your input signal is of size ``(num_channels, num_time_steps)``,
-    the returned dataframe will have ``num_channels * num_features``
-    columns.
+    the returned object has ``num_channels * num_features`` columns.
     It will have one row per file or signal.
+
     If features are extracted using a sliding window,
     each window will be stored as one row.
     If ``win_dur`` is specified ``start`` and ``end`` indices
     are referred from the original ``start`` and ``end`` arguments
     and the window positions.
-    Otherwise, the original ``start`` and ``end`` indices
-    are kept.
+    If ``win_dur`` is ``None``,
+    the original ``start`` and ``end`` indices are kept.
+    If
+    ``process_func_applies_sliding_window``
+    is set to ``True``
+    the processing function
+    is responsible to apply the sliding window.
+    Otherwise,
+    the sliding window is applied before
+    the processing function is called.
+
+    If the arguments
+    ``win_dur`` and ``hop_dur``
+    are not specified in
+    ``process_func_args``,
+    but
+    ``process_func``
+    expects them,
+    they are passed on automatically.
 
     Args:
         feature_names: features are stored as columns in a data frame,
@@ -57,6 +75,18 @@ class Feature:
             function
         process_func_is_mono: apply ``process_func`` to every channel
             individually
+        process_func_applies_sliding_window:
+            if ``True``
+            the processing function receives
+            whole files or segments and is responsible
+            for applying a sliding window itself.
+            If ``False``,
+            the sliding window is applied internally
+            and the processing function
+            receives invidual frames instead.
+            Applies only if
+            features are extracted in a framewise manner
+            (see ``win_dur`` and ``hop_dur``)
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal
@@ -144,8 +174,22 @@ class Feature:
                                                            mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
+        >>> interface_with_sliding_window = Feature(
+        ...     ['mean', 'std'],
+        ...     process_func=mean_std,
+        ...     process_func_applies_sliding_window=False,
+        ...     win_dur=1.0,
+        ...     hop_dur=0.25,
+        ... )
+        >>> interface_with_sliding_window.process_index(index, root=db.root)
+                                                                           mean       std
+        file            start                  end
+        wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
+                        0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917
+                        0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
+                        0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
 
-    """
+    """  # noqa: E501
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
@@ -155,6 +199,7 @@ class Feature:
             process_func: typing.Callable[..., typing.Any] = None,
             process_func_args: typing.Dict[str, typing.Any] = None,
             process_func_is_mono: bool = False,
+            process_func_applies_sliding_window: bool = True,
             sampling_rate: int = None,
             resample: bool = False,
             channels: typing.Union[int, typing.Sequence[int]] = 0,
@@ -236,6 +281,20 @@ class Feature:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
+        # add 'win_dur' and 'hop_dur' to process_func_args
+        # if expected by function but not yet set
+        signature = inspect.signature(process_func)
+        if (
+            'win_dur' in signature.parameters
+            and 'win_dur' not in process_func_args
+        ):
+            process_func_args['win_dur'] = win_dur
+        if (
+            'hop_dur' in signature.parameters
+            and 'hop_dur' not in process_func_args
+        ):
+            process_func_args['hop_dur'] = hop_dur
+
         process = Process(
             process_func=process_func,
             process_func_args=process_func_args,
@@ -244,6 +303,8 @@ class Feature:
             resample=resample,
             channels=channels,
             mixdown=mixdown,
+            win_dur=None if process_func_applies_sliding_window else win_dur,
+            hop_dur=None if process_func_applies_sliding_window else hop_dur,
             min_signal_dur=min_signal_dur,
             max_signal_dur=max_signal_dur,
             segment=segment,
@@ -276,6 +337,10 @@ class Feature:
 
         self.process = process
         r"""Processing object."""
+
+        self.process_func_applies_sliding_window = \
+            process_func_applies_sliding_window
+        r"""Controls if processing function applies sliding window."""
 
         self.verbose = verbose
         r"""Show debug messages."""
@@ -563,7 +628,7 @@ class Feature:
 
         if self.process.process_func_is_mono:
             # when mono processing is turned on
-            # the channel dimension has to be 1
+            # the channel dimension has to be 1,
             # so we would usually omit it,
             # but since older versions required
             # a channel dimension we have to
@@ -579,6 +644,11 @@ class Feature:
                 # (channels, 1, features)
                 # -> (channels, features)
                 features = features.squeeze(axis=1)
+
+            if self.win_dur and not self.process_func_applies_sliding_window:
+                # (channels, features)
+                # -> (channels, features, 1)
+                features = features.reshape(self.num_channels, -1, 1)
 
         if features.ndim > 3:
             raise RuntimeError(
@@ -719,11 +789,16 @@ class Feature:
     ) -> np.ndarray:
         r"""Apply processing to signal.
 
-        This function processes the signal **without** transforming the output
-        into a :class:`pd.DataFrame`. Instead it will return the raw processed
-        signal. However, if channel selection, mixdown and/or resampling
-        is enabled, the signal will be first remixed and resampled if the
-        input sampling rate does not fit the expected sampling rate.
+        This function processes the signal
+        **without** transforming the output
+        into a :class:`pandas.DataFrame`.
+        Instead, it will return the raw processed signal.
+        However,
+        if channel selection,
+        mixdown and/or resampling is enabled,
+        the signal will be first remixed
+        and resampled if the input sampling rate
+        does not fit the expected sampling rate.
 
         Args:
             signal: signal values
