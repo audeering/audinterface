@@ -403,7 +403,7 @@ def to_array(value: typing.Any) -> np.ndarray:
 def to_timedelta(
         times: Timestamps,
         sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.Sequence[pd.TimedeltaIndex]]:
+) -> typing.Union[pd.Timedelta, pd.TimedeltaIndex]:
     r"""Convert time value to :class:`pandas.Timedelta`.
 
     If time is given as string without unit,
