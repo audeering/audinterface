@@ -398,7 +398,7 @@ def to_timedelta(
         durations: Timestamps,
         sampling_rate: int = None,
 ) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
-    r"""Convert time value(s) to :class:`pandas.Timedelta`.
+    r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
     If duration is given as string without unit,
     it is treated as samples
