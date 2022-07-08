@@ -915,10 +915,10 @@ def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
         )
         n_time_steps = len(df)
 
-        win_dur = audinterface.core.utils.to_timedelta(win_dur, SAMPLING_RATE)
+        win_dur = audinterface.utils.to_timedelta(win_dur, SAMPLING_RATE)
         if hop_dur is None:
             hop_dur = win_dur / 2
-        hop_dur = audinterface.core.utils.to_timedelta(hop_dur, SAMPLING_RATE)
+        hop_dur = audinterface.utils.to_timedelta(hop_dur, SAMPLING_RATE)
 
         starts = pd.timedelta_range(
             pd.to_timedelta(0),

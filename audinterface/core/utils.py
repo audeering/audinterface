@@ -270,8 +270,8 @@ def signal_index(
 
     index = pd.MultiIndex.from_arrays(
         [
-            to_timedelta(starts),
-            to_timedelta(ends),
+            pd.TimedeltaIndex(to_timedelta(starts)),
+            pd.TimedeltaIndex(to_timedelta(ends)),
         ],
         names=[
             audformat.define.IndexField.START,
@@ -302,17 +302,11 @@ def sliding_window(
         win_dur: window duration,
             if value is as a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options
         hop_dur: hop duration,
             if value is as a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options
 
     Returns:
         view of signal with shape ``(channels, samples, frames)``
@@ -401,16 +395,47 @@ def to_array(value: typing.Any) -> np.ndarray:
 
 
 def to_timedelta(
-        times: Timestamps,
+        durations: Timestamps,
         sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
-    r"""Convert time value to pd.Timedelta.
+) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
+    r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
-    If time is given as string without unit,
+    If duration is given as string without unit,
     it is treated as samples
     and requires that ``'sampling_rate'`` is not ``None``.
 
-    """
+    Args:
+        durations: duration value(s).
+            If value is a float or integer
+            it is treated as seconds.
+            To specify a unit provide as string,
+            e.g. ``'2ms'``.
+            To specify in samples provide as string without unit,
+            e.g. ``'2000'``
+        sampling_rate: sampling rate in Hz.
+            Needs to be provided
+            if any duration value is provided in samples
+
+    Returns:
+        duration value(s) as :class:`pandas.Timedelta` objects
+
+    Raises:
+        ValueError: if a duration value is given in samples,
+            but ``sampling_rate`` is ``None``
+
+    Example:
+        >>> to_timedelta(2)
+        Timedelta('0 days 00:00:02')
+        >>> to_timedelta(2.0)
+        Timedelta('0 days 00:00:02')
+        >>> to_timedelta('2ms')
+        Timedelta('0 days 00:00:00.002000')
+        >>> to_timedelta('200milliseconds')
+        Timedelta('0 days 00:00:00.200000')
+        >>> to_timedelta([1, '2000'], 1000)
+        [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
+
+    """  # noqa: E501
 
     def convert_samples_to_seconds(time):
         if isinstance(time, str):
@@ -428,16 +453,21 @@ def to_timedelta(
         return time
 
     if (
-            not isinstance(times, str)
-            and isinstance(times, collections.abc.Iterable)
+            not isinstance(durations, str)
+            and isinstance(durations, collections.abc.Iterable)
     ):
-        # sequence of time entries
-        times = [convert_samples_to_seconds(t) for t in times]
+        # sequence of duration entries
+        durations = [convert_samples_to_seconds(dur) for dur in durations]
     else:
-        # single time entry
-        times = convert_samples_to_seconds(times)
+        # single duration entry
+        durations = convert_samples_to_seconds(durations)
 
     try:
-        return pd.to_timedelta(times, unit='s')
+        durations = pd.to_timedelta(durations, unit='s')
     except ValueError:  # catches values like '1s'
-        return pd.to_timedelta(times)
+        durations = pd.to_timedelta(durations)
+
+    if isinstance(durations, pd.TimedeltaIndex):
+        durations = list(durations)
+
+    return durations

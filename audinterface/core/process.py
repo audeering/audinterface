@@ -38,40 +38,28 @@ class Process:
         mixdown: apply mono mix-down on selection
         win_dur: window duration,
             if processing should be applied on a sliding window.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options
         hop_dur: hop duration,
             if processing should be applied on a sliding window.
             This defines the shift between two windows.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide a string without unit,
-            e.g. ``'2000'``.
+            See :func:`audinterface.utils.to_timedelta` for further options.
             Defaults to ``win_dur / 2``
         min_signal_dur: minimum signal length
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is shorter,
             it will be zero padded at the end
         max_signal_dur: maximum signal length
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is longer,
             it will be cut at the end
         segment: when a :class:`audinterface.Segment` object is provided,
@@ -283,17 +271,11 @@ class Process:
         Args:
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``
+                If value is a float or integer it is treated as seconds.
+                See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds.
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``
+                If value is a float or integer it is treated as seconds.
+                See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
 
         Returns:
@@ -333,17 +315,13 @@ class Process:
             files: list of file paths
             starts: segment start positions.
                 Time values given as float or integers are treated as seconds.
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``.
+                See :func:`audinterface.utils.to_timedelta`
+                for further options.
                 If a scalar is given, it is applied to all files
             ends: segment end positions.
-                Time values given as float or integers are treated as seconds
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``.
+                Time values given as float or integers are treated as seconds.
+                See :func:`audinterface.utils.to_timedelta`
+                for further options.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
 
@@ -609,17 +587,11 @@ class Process:
             sampling_rate: sampling rate in Hz
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``
+                If value is a float or integer it is treated as seconds.
+                See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                To specify a unit provide as string,
-                e.g. ``'2ms'``.
-                To specify in samples provide as string without unit,
-                e.g. ``'2000'``
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
+                See :func:`audinterface.utils.to_timedelta` for further options
 
         Returns:
             Series with processed signal conform to audformat_

@@ -17,3 +17,8 @@ sliding_window
 --------------
 
 .. autofunction:: sliding_window
+
+to_timedelta
+------------
+
+.. autofunction:: to_timedelta
