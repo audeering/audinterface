@@ -302,17 +302,11 @@ def sliding_window(
         win_dur: window duration,
             if value is as a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options
         hop_dur: hop duration,
             if value is as a float or integer
             it is treated as seconds.
-            To specify a unit provide as string,
-            e.g. ``'2ms'``.
-            To specify in samples provide as string without unit,
-            e.g. ``'2000'``
+            See :func:`audinterface.utils.to_timedelta` for further options
 
     Returns:
         view of signal with shape ``(channels, samples, frames)``
