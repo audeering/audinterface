@@ -270,8 +270,8 @@ def signal_index(
 
     index = pd.MultiIndex.from_arrays(
         [
-            to_timedelta(starts),
-            to_timedelta(ends),
+            pd.TimedeltaIndex(to_timedelta(starts)),
+            pd.TimedeltaIndex(to_timedelta(ends)),
         ],
         names=[
             audformat.define.IndexField.START,
@@ -403,7 +403,7 @@ def to_array(value: typing.Any) -> np.ndarray:
 def to_timedelta(
         durations: Timestamps,
         sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, pd.TimedeltaIndex]:
+) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
     r"""Convert time value to :class:`pandas.Timedelta`.
 
     If time is given as string without unit,
@@ -439,7 +439,7 @@ def to_timedelta(
         >>> to_timedelta('200milliseconds')
         Timedelta('0 days 00:00:00.200000')
         >>> to_timedelta([1, '2000'], 1000)
-        TimedeltaIndex(['0 days 00:00:01', '0 days 00:00:02'], dtype='timedelta64[ns]', freq=None)
+        [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
 
     """  # noqa: E501
 
@@ -469,6 +469,11 @@ def to_timedelta(
         durations = convert_samples_to_seconds(durations)
 
     try:
-        return pd.to_timedelta(durations, unit='s')
+        durations = pd.to_timedelta(durations, unit='s')
     except ValueError:  # catches values like '1s'
-        return pd.to_timedelta(durations)
+        durations = pd.to_timedelta(durations)
+
+    if isinstance(durations, pd.TimedeltaIndex):
+        durations = list(durations)
+
+    return durations
