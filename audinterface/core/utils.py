@@ -401,7 +401,7 @@ def to_array(value: typing.Any) -> np.ndarray:
 
 
 def to_timedelta(
-        times: Timestamps,
+        durations: Timestamps,
         sampling_rate: int = None,
 ) -> typing.Union[pd.Timedelta, pd.TimedeltaIndex]:
     r"""Convert time value to :class:`pandas.Timedelta`.
@@ -459,16 +459,16 @@ def to_timedelta(
         return time
 
     if (
-            not isinstance(times, str)
-            and isinstance(times, collections.abc.Iterable)
+            not isinstance(durations, str)
+            and isinstance(durations, collections.abc.Iterable)
     ):
-        # sequence of time entries
-        times = [convert_samples_to_seconds(t) for t in times]
+        # sequence of duration entries
+        durations = [convert_samples_to_seconds(dur) for dur in durations]
     else:
-        # single time entry
-        times = convert_samples_to_seconds(times)
+        # single duration entry
+        durations = convert_samples_to_seconds(durations)
 
     try:
-        return pd.to_timedelta(times, unit='s')
+        return pd.to_timedelta(durations, unit='s')
     except ValueError:  # catches values like '1s'
-        return pd.to_timedelta(times)
+        return pd.to_timedelta(durations)
