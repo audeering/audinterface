@@ -94,26 +94,26 @@ class Feature:
         channels: channel selection, see :func:`audresample.remix`
         win_dur: window duration,
             if features are extracted with a sliding window.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options
         hop_dur: hop duration,
             if features are extracted with a sliding window.
             This defines the shift between two windows.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options.
             Defaults to ``win_dur / 2``
         min_signal_dur: minimum signal duration
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is shorter,
             it will be zero padded at the end
         max_signal_dur: maximum signal duraton
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is longer,
@@ -349,10 +349,10 @@ class Feature:
         Args:
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
 
@@ -517,10 +517,10 @@ class Feature:
             sampling_rate: sampling rate in Hz
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
 
         Raises:

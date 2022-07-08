@@ -120,14 +120,14 @@ class Segment:
         mixdown: apply mono mix-down on selection
         min_signal_dur: minimum signal length
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is shorter,
             it will be zero padded at the end
         max_signal_dur: maximum signal length
             required by ``process_func``.
-            If value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             See :func:`audinterface.utils.to_timedelta` for further options.
             If provided signal is longer,
@@ -249,10 +249,10 @@ class Segment:
         Args:
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
 
@@ -439,10 +439,10 @@ class Segment:
             sampling_rate: sampling rate in Hz
             file: file path
             start: start processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             end: end processing at this position.
-                If value is as a float or integer it is treated as seconds.
+                If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
 
         Returns:
