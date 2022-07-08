@@ -125,7 +125,6 @@ and assigns names to the dimensions/features.
     interface = audinterface.Feature(
         ['mean', 'std'],
         process_func=features,
-        process_func_applies_sliding_window=False,
     )
 
     df = interface.process_index(index)
@@ -224,7 +223,6 @@ and :class:`audobject.Object`.
             super().__init__(
                 ['mean', 'std'],
                 process_func=self.features,
-                process_func_applies_sliding_window=False,
             )
 
         def features(self, signal, sampling_rate):

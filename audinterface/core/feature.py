@@ -1,4 +1,5 @@
 import errno
+import functools
 import inspect
 import os
 import typing
@@ -17,6 +18,34 @@ from audinterface.core.typing import (
     Timestamps,
 )
 import audinterface.core.utils as utils
+
+
+def deprecated_process_func_applies_sliding_window_default_value(
+) -> typing.Callable:
+    """Deprecate default value of process_func_applies_sliding_window."""
+    def _deprecated(func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            argument = 'process_func_applies_sliding_window'
+            change_in_version = '1.2.0'
+            default_value = True
+            new_default_value = False
+            if (
+                    'win_dur' in kwargs
+                    and kwargs['win_dur'] is not None
+                    and argument not in kwargs
+            ):
+                signature = inspect.signature(func)
+                default_value = signature.parameters[argument].default
+                message = (
+                    f"The default of '{argument}' will change from "
+                    f"'{default_value}' to '{new_default_value}' "
+                    f'with version {change_in_version}.'
+                )
+                warnings.warn(message, category=UserWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return new_func
+    return _deprecated
 
 
 class Feature:
@@ -190,11 +219,7 @@ class Feature:
                         0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
 
     """  # noqa: E501
-    @audeer.deprecated_default_value(
-        argument='process_func_applies_sliding_window',
-        change_in_version='1.2.0',
-        new_default_value=False,
-    )
+    @deprecated_process_func_applies_sliding_window_default_value()
     def __init__(
             self,
             feature_names: typing.Union[str, typing.Sequence[str]],
