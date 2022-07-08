@@ -882,6 +882,7 @@ def test_process_index(tmpdir):
 @pytest.mark.parametrize(
     'win_dur, hop_dur',
     [
+        (0.5, None),
         (0.5, 0.25),
         (0.5, 0.5),
         (0.25, 0.5),
@@ -915,6 +916,8 @@ def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
         n_time_steps = len(df)
 
         win_dur = audinterface.core.utils.to_timedelta(win_dur, SAMPLING_RATE)
+        if hop_dur is None:
+            hop_dur = win_dur / 2
         hop_dur = audinterface.core.utils.to_timedelta(hop_dur, SAMPLING_RATE)
 
         starts = pd.timedelta_range(
