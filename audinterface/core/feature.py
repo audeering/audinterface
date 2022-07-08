@@ -32,8 +32,8 @@ class Feature:
     If ``win_dur`` is specified ``start`` and ``end`` indices
     are referred from the original ``start`` and ``end`` arguments
     and the window positions.
-    Otherwise, the original ``start`` and ``end`` indices
-    are kept.
+    If ``win_dur`` is ``None``,
+    the original ``start`` and ``end`` indices are kept.
     If
     ``process_func_applies_sliding_window``
     is set to ``True``
