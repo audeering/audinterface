@@ -398,15 +398,15 @@ def to_timedelta(
         durations: Timestamps,
         sampling_rate: int = None,
 ) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
-    r"""Convert time value to :class:`pandas.Timedelta`.
+    r"""Convert time value(s) to :class:`pandas.Timedelta`.
 
-    If time is given as string without unit,
+    If duration is given as string without unit,
     it is treated as samples
     and requires that ``'sampling_rate'`` is not ``None``.
 
     Args:
         durations: duration value(s).
-            If duration value is as a float or integer
+            If value is a float or integer
             it is treated as seconds.
             To specify a unit provide as string,
             e.g. ``'2ms'``.
@@ -417,7 +417,7 @@ def to_timedelta(
             if any duration value is provided in samples
 
     Returns:
-        duration values as :class:`pandas.Timedelta` objects
+        duration value(s) as :class:`pandas.Timedelta` objects
 
     Raises:
         ValueError: if a duration value is given in samples,
