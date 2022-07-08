@@ -403,7 +403,7 @@ def to_array(value: typing.Any) -> np.ndarray:
 def to_timedelta(
         times: Timestamps,
         sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.Sequence[pd.Timedelta]]:
+) -> typing.Union[pd.Timedelta, typing.Sequence[pd.TimedeltaIndex]]:
     r"""Convert time value to :class:`pandas.Timedelta`.
 
     If time is given as string without unit,
@@ -423,7 +423,7 @@ def to_timedelta(
             if any duration value is provided in samples
 
     Returns:
-        duration values as :class:``pandas.Timedelta`` objects
+        duration values as :class:`pandas.Timedelta` objects
 
     Raises:
         ValueError: if a duration value is given in samples,
@@ -432,14 +432,16 @@ def to_timedelta(
     Example:
         >>> to_timedelta(2)
         Timedelta('0 days 00:00:02')
+        >>> to_timedelta(2.0)
+        Timedelta('0 days 00:00:02')
         >>> to_timedelta('2ms')
         Timedelta('0 days 00:00:00.002000')
         >>> to_timedelta('200milliseconds')
         Timedelta('0 days 00:00:00.200000')
-        >>> to_timedelta('2000', 1000)
-        Timedelta('0 days 00:00:02')
+        >>> to_timedelta([1, '2000'], 1000)
+        TimedeltaIndex(['0 days 00:00:01', '0 days 00:00:02'], dtype='timedelta64[ns]', freq=None)
 
-    """
+    """  # noqa: E501
 
     def convert_samples_to_seconds(time):
         if isinstance(time, str):
