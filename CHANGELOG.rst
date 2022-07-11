@@ -32,6 +32,9 @@ Version 0.9.0 (2022-07-11)
   ``audinterface.Feature.process_index()``,
   ``audinterface.Process.process_index()``
 * Changed: extend documentation with docstring examples and usage section
+* Deprecated: ``unit`` argument of ``audinterface.Feature``,
+  instead specify unit directly when providing duration arguments,
+  compare ``audinterface.utils.to_timedelta()``
 * Fixed: ``audinterface.ProcessWithContext``
   requires one output for every segment
 
