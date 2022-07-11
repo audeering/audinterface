@@ -32,6 +32,9 @@
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/thebelab.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     
@@ -66,7 +69,7 @@
             
             
               <div class="version">
-                v0.8.1
+                v0.9.0
               </div>
             
           
@@ -93,6 +96,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
@@ -261,6 +265,20 @@
 <span class="sd">        resample: if ``True`` enforces given sampling rate by resampling</span>
 <span class="sd">        channels: channel selection, see :func:`audresample.remix`</span>
 <span class="sd">        mixdown: apply mono mix-down on selection</span>
+<span class="sd">        min_signal_dur: minimum signal length</span>
+<span class="sd">            required by ``process_func``.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options.</span>
+<span class="sd">            If provided signal is shorter,</span>
+<span class="sd">            it will be zero padded at the end</span>
+<span class="sd">        max_signal_dur: maximum signal length</span>
+<span class="sd">            required by ``process_func``.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options.</span>
+<span class="sd">            If provided signal is longer,</span>
+<span class="sd">            it will be cut at the end</span>
 <span class="sd">        keep_nat: if the end of segment is set to ``NaT`` do not replace</span>
 <span class="sd">            with file duration in the result</span>
 <span class="sd">        num_workers: number of parallel jobs or 1 for sequential</span>
@@ -274,7 +292,46 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``resample = True``, but ``sampling_rate = None``</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):</span>
+<span class="sd">        ...     size = signal.shape[1] / sampling_rate</span>
+<span class="sd">        ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit=&#39;s&#39;)</span>
+<span class="sd">        ...     ends = pd.to_timedelta(np.arange(win_size, size, hop_size), unit=&#39;s&#39;)</span>
+<span class="sd">        ...     return pd.MultiIndex.from_tuples(zip(starts, ends), names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; interface = Segment(process_func=segment)</span>
+<span class="sd">        &gt;&gt;&gt; signal = np.array([1., 2., 3.])</span>
+<span class="sd">        &gt;&gt;&gt; interface(signal, sampling_rate=3)</span>
+<span class="sd">        MultiIndex([(       &#39;0 days 00:00:00&#39;, &#39;0 days 00:00:00.200000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.100000&#39;, &#39;0 days 00:00:00.300000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.200000&#39;, &#39;0 days 00:00:00.400000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.300000&#39;, &#39;0 days 00:00:00.500000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.400000&#39;, &#39;0 days 00:00:00.600000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.500000&#39;, &#39;0 days 00:00:00.700000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.600000&#39;, &#39;0 days 00:00:00.800000&#39;),</span>
+<span class="sd">                    (&#39;0 days 00:00:00.700000&#39;, &#39;0 days 00:00:00.900000&#39;)],</span>
+<span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; import audb</span>
+<span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
+<span class="sd">        ...     &#39;emodb&#39;,</span>
+<span class="sd">        ...     version=&#39;1.2.0&#39;,</span>
+<span class="sd">        ...     media=&#39;wav/03a01Fa.wav&#39;,</span>
+<span class="sd">        ...     full_path=False,</span>
+<span class="sd">        ...     verbose=False,</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; interface = Segment(</span>
+<span class="sd">        ...     process_func=segment,</span>
+<span class="sd">        ...     process_func_args={&#39;win_size&#39;: 0.5, &#39;hop_size&#39;: 0.25},</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; interface.process_index(db[&#39;emotion&#39;].index, root=db.root)</span>
+<span class="sd">        MultiIndex([(&#39;wav/03a01Fa.wav&#39;,        &#39;0 days 00:00:00&#39;, ...),</span>
+<span class="sd">                    (&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:00.250000&#39;, ...),</span>
+<span class="sd">                    (&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:00.500000&#39;, ...),</span>
+<span class="sd">                    (&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:00.750000&#39;, ...),</span>
+<span class="sd">                    (&#39;wav/03a01Fa.wav&#39;,        &#39;0 days 00:00:01&#39;, ...),</span>
+<span class="sd">                    (&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:01.250000&#39;, ...)],</span>
+<span class="sd">                   names=[&#39;file&#39;, &#39;start&#39;, &#39;end&#39;])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
@@ -285,6 +342,8 @@
             <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">mixdown</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">min_signal_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">max_signal_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">keep_nat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -301,24 +360,28 @@
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">process_func_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">invert</span> <span class="o">=</span> <span class="n">invert</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert segmentation.&quot;&quot;&quot;</span>
-
         <span class="c1"># avoid cycling imports</span>
         <span class="kn">from</span> <span class="nn">audinterface.core.process</span> <span class="kn">import</span> <span class="n">Process</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
             <span class="n">process_func</span><span class="o">=</span><span class="n">create_process_func</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">invert</span><span class="p">),</span>
             <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
             <span class="n">channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
             <span class="n">mixdown</span><span class="o">=</span><span class="n">mixdown</span><span class="p">,</span>
+            <span class="n">min_signal_dur</span><span class="o">=</span><span class="n">min_signal_dur</span><span class="p">,</span>
+            <span class="n">max_signal_dur</span><span class="o">=</span><span class="n">max_signal_dur</span><span class="p">,</span>
             <span class="n">keep_nat</span><span class="o">=</span><span class="n">keep_nat</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="o">=</span><span class="n">multiprocessing</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">invert</span> <span class="o">=</span> <span class="n">invert</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert segmentation.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Segment.process_file"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -333,9 +396,11 @@
 <span class="sd">        Args:</span>
 <span class="sd">            file: file path</span>
 <span class="sd">            start: start processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            end: end processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            root: root folder to expand relative file path</span>
 
 <span class="sd">        Returns:</span>
@@ -384,9 +449,13 @@
 <span class="sd">            files: list of file paths</span>
 <span class="sd">            starts: segment start positions.</span>
 <span class="sd">                Time values given as float or integers are treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta`</span>
+<span class="sd">                for further options.</span>
 <span class="sd">                If a scalar is given, it is applied to all files</span>
 <span class="sd">            ends: segment end positions.</span>
 <span class="sd">                Time values given as float or integers are treated as seconds</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta`</span>
+<span class="sd">                for further options.</span>
 <span class="sd">                If a scalar is given, it is applied to all files</span>
 <span class="sd">            root: root folder to expand relative file paths</span>
 
@@ -517,9 +586,11 @@
 <span class="sd">            sampling_rate: sampling rate in Hz</span>
 <span class="sd">            file: file path</span>
 <span class="sd">            start: start processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            end: end processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Segmented index conform to audformat_</span>
@@ -671,7 +742,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/02/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -706,7 +777,13 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/thebelab-helper.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
     
 
   

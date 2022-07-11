@@ -1,0 +1,999 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage &mdash; audinterface Documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="_static/thebelab.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="audinterface" href="api.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+    
+  
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          <a href="index.html">
+          
+            <img src="_static/images/audeering.png" class="logo" alt="audEERING"/>
+          
+          
+            <span> audinterface</span>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.9.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#processing-interface">Processing interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-interface">Feature interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-interface-for-external-function">Feature interface for external function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#serializable-feature-interface">Serializable feature interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#segmentation-interface">Segmentation interface</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">audinterface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Usage</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/audeering/audinterface/" class="fa fa-github"> GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+</div>
+</div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+</div>
+</div>
+<div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
+<p>The basic idea of <a class="reference internal" href="api.html#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> is
+to provide easy and standardized interfaces
+to apply a machine learning model,
+or other digital signal processing algorithms
+to audio files.
+The only prerequisite is
+the algorithm provides a callable
+that takes at least the signal
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+and the sampling rate as input.</p>
+<p>The interface can then apply the algorithm
+on a list of files,
+a folder,
+or an index conform to the <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a> database specification.
+Results are always returned containing a <a class="reference external" href="https://audeering.github.io/audformat/data-tables.html#segmented">segmented index</a>.
+In the following we load three files from the <a class="reference external" href="http://emodb.bilderbar.info">emodb</a> database
+and define a list of files,
+a folder,
+and an index.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audb</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">media</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;wav/03a01Fa.wav&#39;</span><span class="p">,</span> <span class="s1">&#39;wav/03a01Nc.wav&#39;</span><span class="p">,</span> <span class="s1">&#39;wav/03a01Wa.wav&#39;</span><span class="p">]</span>
+<span class="n">db</span> <span class="o">=</span> <span class="n">audb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;emodb&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span> <span class="n">media</span><span class="o">=</span><span class="n">media</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s1">&#39;emotion&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+</div>
+</div>
+<div class="section" id="processing-interface">
+<h2>Processing interface<a class="headerlink" href="#processing-interface" title="Permalink to this heading">¶</a></h2>
+<p>Let’s assume we want to calculate the root mean square (RMS)
+value in dB.
+We first define the function
+and create an interface for it using <a class="reference internal" href="api.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Process</span></code></a>.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audinterface</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">signal</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+
+<span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+</div>
+</div>
+<p>The following three commands
+apply the algorithm
+and all return the same result
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.898250</th>
+      <td>-21.690142</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.611250</th>
+      <td>-18.040704</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.877812500</th>
+      <td>-17.896968</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>To calculate RMS with a sliding window,
+we create a new interface
+and set a window and hop duration.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+    <span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">,</span>
+    <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+<span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-20.165248</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-23.472970</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-16.386615</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-19.502597</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-18.885772</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-18.022960</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</div>
+<div class="section" id="feature-interface">
+<h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
+<p>When the result of the processing function has multiple dimensions
+it is recommended to use <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+and assigns names to the dimensions/features.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
+
+<span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">],</span>
+    <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.898250</th>
+      <td>-0.000311</td>
+      <td>0.082317</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.611250</th>
+      <td>-0.000312</td>
+      <td>0.125304</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.877812500</th>
+      <td>-0.000296</td>
+      <td>0.127394</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>To calculate features with a sliding window,
+we create a new interface
+and set a window and hop duration.
+By setting
+<code class="docutils literal notranslate"><span class="pre">process_func_applies_sliding_window=False</span></code>
+the windowing is automatically handeled
+and single frames are passed on to the processing function.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">],</span>
+    <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+    <span class="n">process_func_applies_sliding_window</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+<span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-0.000329</td>
+      <td>0.098115</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-0.000285</td>
+      <td>0.067042</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>0.000039</td>
+      <td>0.151590</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-0.000412</td>
+      <td>0.105893</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-0.000284</td>
+      <td>0.113687</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-0.000318</td>
+      <td>0.125560</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</div>
+<div class="section" id="feature-interface-for-external-function">
+<h2>Feature interface for external function<a class="headerlink" href="#feature-interface-for-external-function" title="Permalink to this heading">¶</a></h2>
+<p>If we interface a function from an external library
+that already applies a sliding window,
+we again specfiy the
+<code class="docutils literal notranslate"><span class="pre">win_dur</span></code> and <code class="docutils literal notranslate"><span class="pre">hop_dur</span></code>
+arguments.
+However,
+by setting
+<code class="docutils literal notranslate"><span class="pre">process_func_applies_sliding_window=True</span></code>
+we still request that the whole signal is passed on.
+Now,
+the processing function is responsible
+for extracting the features in a framewise manner
+and returning the values in the correct shape,
+namely <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_frames)</span></code>,
+whereas the first dimension is optionally.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">librosa</span>
+
+<span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">win_dur</span><span class="p">,</span> <span class="n">hop_dur</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="p">):</span>
+    <span class="n">hop_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hop_dur</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
+    <span class="n">win_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">win_dur</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
+    <span class="n">mfcc</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">mfcc</span><span class="p">(</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">signal</span><span class="p">,</span>
+        <span class="n">sr</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+        <span class="n">n_mfcc</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+        <span class="n">hop_length</span><span class="o">=</span><span class="n">hop_length</span><span class="p">,</span>
+        <span class="n">win_length</span><span class="o">=</span><span class="n">win_length</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">mfcc</span>
+
+<span class="n">n_mfcc</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+    <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;mfcc-</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_mfcc</span><span class="p">)],</span>
+    <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+    <span class="n">process_func_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_mfcc&#39;</span><span class="p">:</span> <span class="n">n_mfcc</span><span class="p">},</span>  <span class="c1"># &#39;win_dur&#39; and &#39;hop_dur&#39; can be omitted</span>
+    <span class="n">process_func_applies_sliding_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">win_dur</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>mfcc-0</th>
+      <th>...</th>
+      <th>mfcc-12</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:00.020000</th>
+      <td>-611.993347</td>
+      <td>...</td>
+      <td>1.151385</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.010000</th>
+      <th>0 days 00:00:00.030000</th>
+      <td>-668.175842</td>
+      <td>...</td>
+      <td>14.068541</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.020000</th>
+      <th>0 days 00:00:00.040000</th>
+      <td>-664.612793</td>
+      <td>...</td>
+      <td>7.949763</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <th>...</th>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days 00:00:01.850000</th>
+      <th>0 days 00:00:01.870000</th>
+      <td>-590.341736</td>
+      <td>...</td>
+      <td>-3.084593</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:01.860000</th>
+      <th>0 days 00:00:01.880000</th>
+      <td>-592.340271</td>
+      <td>...</td>
+      <td>8.390535</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:01.870000</th>
+      <th>0 days 00:00:01.890000</th>
+      <td>-589.111572</td>
+      <td>...</td>
+      <td>4.459586</td>
+    </tr>
+  </tbody>
+</table>
+<p>540 rows × 13 columns</p>
+</div></div></div>
+</div>
+</div>
+<div class="section" id="serializable-feature-interface">
+<h2>Serializable feature interface<a class="headerlink" href="#serializable-feature-interface" title="Permalink to this heading">¶</a></h2>
+<p>To use a feature extractor as an input transform
+of a machine learning model
+it is recommend to provide it in a serializable way
+so it can be <a class="reference external" href="https://audeering.github.io/audonnx/usage.html#export-model">stored as part of the model</a>.
+One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api-smile.html#opensmile.Smile" title="(in opensmile vv2.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
+<p>To create such a feature extractor,
+we create a class that inherits
+from <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
+and <a class="reference external" href="https://audeering.github.io/audobject/api.html#audobject.Object" title="(in audobject vv0.7.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audobject</span>
+
+<span class="k">class</span> <span class="nc">MeanStd</span><span class="p">(</span><span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">,</span> <span class="n">audobject</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">],</span>
+            <span class="n">process_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
+
+<span class="n">fex</span> <span class="o">=</span> <span class="n">MeanStd</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">fex</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.898250</th>
+      <td>-0.000311</td>
+      <td>0.082317</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.611250</th>
+      <td>-0.000312</td>
+      <td>0.125304</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.877812500</th>
+      <td>-0.000296</td>
+      <td>0.127394</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>The advantage of the feature extraction object is
+that we can save it to a YAML file
+and re-instantiate it from there.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fex</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="s1">&#39;mean-std.yaml&#39;</span><span class="p">)</span>
+<span class="n">fex2</span> <span class="o">=</span> <span class="n">audobject</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s1">&#39;mean-std.yaml&#39;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">fex2</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.898250</th>
+      <td>-0.000311</td>
+      <td>0.082317</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.611250</th>
+      <td>-0.000312</td>
+      <td>0.125304</td>
+    </tr>
+    <tr>
+      <th>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Wa.wav</th>
+      <th>0 days</th>
+      <th>0 days 00:00:01.877812500</th>
+      <td>-0.000296</td>
+      <td>0.127394</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</div>
+<div class="section" id="segmentation-interface">
+<h2>Segmentation interface<a class="headerlink" href="#segmentation-interface" title="Permalink to this heading">¶</a></h2>
+<p>When the result of the processing function is an index
+it is recommended to use <a class="reference internal" href="api.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a>,
+which returns a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
+An example for such a processing function
+would be a voice activity detection algorithm.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">auditok</span>
+
+<span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+
+    <span class="c1"># Convert floating point array to 16bit PCM little-endian</span>
+    <span class="n">ints</span> <span class="o">=</span> <span class="p">(</span><span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+    <span class="n">little_endian</span> <span class="o">=</span> <span class="n">ints</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;&lt;u2&#39;</span><span class="p">)</span>
+    <span class="n">signal</span> <span class="o">=</span> <span class="n">little_endian</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+    <span class="n">regions</span> <span class="o">=</span> <span class="n">auditok</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+        <span class="n">signal</span><span class="p">,</span>
+        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+        <span class="n">sample_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">channels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_dur</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">energy_threshold</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">),</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span>
+        <span class="p">],</span>
+        <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span>
+
+<span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Segment</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">segments</span><span class="p">)</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_file</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">idx</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</td>
+      <td>0 days 00:00:00.150000</td>
+      <td>0 days 00:00:00.700000</td>
+    </tr>
+    <tr>
+      <td>/home/runner/audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</td>
+      <td>0 days 00:00:00.900000</td>
+      <td>0 days 00:00:01.600000</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="audinterface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div>
+    <p>
+        
+        
+        
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+        
+    </p>
+  </div>
+
+  <div role="contentinfo">
+    <p>
+        
+      &copy; 2020-2022 audEERING GmbH
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/thebelab-helper.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

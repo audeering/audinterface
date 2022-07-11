@@ -32,6 +32,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="_static/thebelab.css" type="text/css" />
+  <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Contributing" href="contributing.html" />
@@ -67,7 +70,7 @@
             
             
               <div class="version">
-                v0.8.1
+                v0.9.0
               </div>
             
           
@@ -94,6 +97,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
@@ -105,6 +109,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-9-0-2022-07-11">Version 0.9.0 (2022-07-11)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-8-1-2022-02-07">Version 0.8.1 (2022-02-07)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-8-0-2022-01-04">Version 0.8.0 (2022-01-04)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-7-0-2021-07-23">Version 0.7.0 (2021-07-23)</a></li>
@@ -175,12 +180,44 @@
            <div itemprop="articleBody">
             
   <div class="section" id="changelog">
-<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h1>
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a class="reference external" href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<div class="section" id="version-0-9-0-2022-07-11">
+<h2>Version 0.9.0 (2022-07-11)<a class="headerlink" href="#version-0-9-0-2022-07-11" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Added: <code class="docutils literal notranslate"><span class="pre">auinterface.utils.sliding_window()</span></code></p></li>
+<li><p>Added: <code class="docutils literal notranslate"><span class="pre">auinterface.utils.to_timedelta()</span></code></p></li>
+<li><p>Added: argument
+<code class="docutils literal notranslate"><span class="pre">process_func_applies_sliding_window</span></code>
+to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></p></li>
+<li><p>Added: arguments
+<code class="docutils literal notranslate"><span class="pre">win_dur</span></code> and <code class="docutils literal notranslate"><span class="pre">hop_dur</span></code>
+to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process</span></code></p></li>
+<li><p>Added: arguments
+<code class="docutils literal notranslate"><span class="pre">min_signal_dur</span></code> and <code class="docutils literal notranslate"><span class="pre">max_signal_dur</span></code>
+to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></p></li>
+<li><p>Added: argument
+<code class="docutils literal notranslate"><span class="pre">cache_root</span></code>
+to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_index()</span></code></p></li>
+<li><p>Changed: extend documentation with docstring examples and usage section</p></li>
+<li><p>Deprecated: <code class="docutils literal notranslate"><span class="pre">unit</span></code> argument of <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code>,
+instead specify unit directly when providing duration arguments,
+compare <code class="docutils literal notranslate"><span class="pre">audinterface.utils.to_timedelta()</span></code></p></li>
+<li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.ProcessWithContext</span></code>
+requires one output for every segment</p></li>
+</ul>
+</div>
 <div class="section" id="version-0-8-1-2022-02-07">
-<h2>Version 0.8.1 (2022-02-07)<a class="headerlink" href="#version-0-8-1-2022-02-07" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.8.1 (2022-02-07)<a class="headerlink" href="#version-0-8-1-2022-02-07" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code> does support
 specification of single feature as string
@@ -191,7 +228,7 @@ in <code class="docutils literal notranslate"><span class="pre">process_folder()
 </ul>
 </div>
 <div class="section" id="version-0-8-0-2022-01-04">
-<h2>Version 0.8.0 (2022-01-04)<a class="headerlink" href="#version-0-8-0-2022-01-04" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.8.0 (2022-01-04)<a class="headerlink" href="#version-0-8-0-2022-01-04" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: Python 3.9 support</p></li>
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code> argument to process methods</p></li>
@@ -202,7 +239,7 @@ use <code class="docutils literal notranslate"><span class="pre">process_func_ar
 </ul>
 </div>
 <div class="section" id="version-0-7-0-2021-07-23">
-<h2>Version 0.7.0 (2021-07-23)<a class="headerlink" href="#version-0-7-0-2021-07-23" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.7.0 (2021-07-23)<a class="headerlink" href="#version-0-7-0-2021-07-23" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: <code class="docutils literal notranslate"><span class="pre">Feature.process_func()</span></code> supports more shapes, namely
 <code class="docutils literal notranslate"><span class="pre">(features)</span></code>
@@ -215,13 +252,13 @@ use <code class="docutils literal notranslate"><span class="pre">process_func_ar
 </ul>
 </div>
 <div class="section" id="version-0-6-8-2021-07-06">
-<h2>Version 0.6.8 (2021-07-06)<a class="headerlink" href="#version-0-6-8-2021-07-06" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.8 (2021-07-06)<a class="headerlink" href="#version-0-6-8-2021-07-06" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: CHANGELOG</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-7-2021-07-06">
-<h2>Version 0.6.7 (2021-07-06)<a class="headerlink" href="#version-0-6-7-2021-07-06" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.7 (2021-07-06)<a class="headerlink" href="#version-0-6-7-2021-07-06" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">utils.signal_index()</span></code> to create a segmented index without file level</p></li>
 <li><p>Changed: use keyword argument with <code class="docutils literal notranslate"><span class="pre">pandas.MultiIndex.set_levels()</span></code></p></li>
@@ -230,44 +267,44 @@ use <code class="docutils literal notranslate"><span class="pre">process_func_ar
 </ul>
 </div>
 <div class="section" id="version-0-6-6-2021-06-18">
-<h2>Version 0.6.6 (2021-06-18)<a class="headerlink" href="#version-0-6-6-2021-06-18" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.6 (2021-06-18)<a class="headerlink" href="#version-0-6-6-2021-06-18" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: tests on Windows and macOC</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-5-2021-06-08">
-<h2>Version 0.6.5 (2021-06-08)<a class="headerlink" href="#version-0-6-5-2021-06-08" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.5 (2021-06-08)<a class="headerlink" href="#version-0-6-5-2021-06-08" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">root</span></code> argument to all functions processing file input</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-4-2021-06-07">
-<h2>Version 0.6.4 (2021-06-07)<a class="headerlink" href="#version-0-6-4-2021-06-07" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.4 (2021-06-07)<a class="headerlink" href="#version-0-6-4-2021-06-07" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: avoid using ‘sec’ as unit in <code class="docutils literal notranslate"><span class="pre">pd.to_timedelta()</span></code> for backward compatibility</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-3-2021-05-03">
-<h2>Version 0.6.3 (2021-05-03)<a class="headerlink" href="#version-0-6-3-2021-05-03" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.3 (2021-05-03)<a class="headerlink" href="#version-0-6-3-2021-05-03" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: empty API section in documentation</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-2-2021-04-28">
-<h2>Version 0.6.2 (2021-04-28)<a class="headerlink" href="#version-0-6-2-2021-04-28" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.2 (2021-04-28)<a class="headerlink" href="#version-0-6-2-2021-04-28" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: open source release on Github</p></li>
 <li><p>Changed: switch to MIT license</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-1-2021-04-16">
-<h2>Version 0.6.1 (2021-04-16)<a class="headerlink" href="#version-0-6-1-2021-04-16" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.1 (2021-04-16)<a class="headerlink" href="#version-0-6-1-2021-04-16" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">Process</span></code>, <code class="docutils literal notranslate"><span class="pre">Feature</span></code>: do not apply segmentation twice when <code class="docutils literal notranslate"><span class="pre">segment</span></code> object is given</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-6-0-2021-04-15">
-<h2>Version 0.6.0 (2021-04-15)<a class="headerlink" href="#version-0-6-0-2021-04-15" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.6.0 (2021-04-15)<a class="headerlink" href="#version-0-6-0-2021-04-15" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">invert</span></code> argument to <code class="docutils literal notranslate"><span class="pre">Segment</span></code></p></li>
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">Segment.process_index()</span></code> and <code class="docutils literal notranslate"><span class="pre">Segment.process_signal_from_index()</span></code></p></li>
@@ -276,14 +313,14 @@ use <code class="docutils literal notranslate"><span class="pre">process_func_ar
 </ul>
 </div>
 <div class="section" id="version-0-5-5-2021-02-17">
-<h2>Version 0.5.5 (2021-02-17)<a class="headerlink" href="#version-0-5-5-2021-02-17" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.5 (2021-02-17)<a class="headerlink" href="#version-0-5-5-2021-02-17" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: PyPI publishing pipeline</p></li>
 <li><p>Changed: use new tokenizer in CI pipeline</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-5-4-2021-02-17">
-<h2>Version 0.5.4 (2021-02-17)<a class="headerlink" href="#version-0-5-4-2021-02-17" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.4 (2021-02-17)<a class="headerlink" href="#version-0-5-4-2021-02-17" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: support for providing <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> time values
 in the same format as done in <code class="docutils literal notranslate"><span class="pre">audformat</span></code>,
@@ -293,7 +330,7 @@ e.g. as integer, floats, or <code class="docutils literal notranslate"><span cla
 </ul>
 </div>
 <div class="section" id="version-0-5-3-2021-01-07">
-<h2>Version 0.5.3 (2021-01-07)<a class="headerlink" href="#version-0-5-3-2021-01-07" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.3 (2021-01-07)<a class="headerlink" href="#version-0-5-3-2021-01-07" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: rename
 <code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_unified_format_index</span></code>,
@@ -306,21 +343,21 @@ to
 </ul>
 </div>
 <div class="section" id="version-0-5-2-2020-12-10">
-<h2>Version 0.5.2 (2020-12-10)<a class="headerlink" href="#version-0-5-2-2020-12-10" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.2 (2020-12-10)<a class="headerlink" href="#version-0-5-2-2020-12-10" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code> allow
 <code class="docutils literal notranslate"><span class="pre">win_dur=None</span></code> with <code class="docutils literal notranslate"><span class="pre">unit='samples'</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-5-1-2020-12-04">
-<h2>Version 0.5.1 (2020-12-04)<a class="headerlink" href="#version-0-5-1-2020-12-04" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.1 (2020-12-04)<a class="headerlink" href="#version-0-5-1-2020-12-04" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: store <code class="docutils literal notranslate"><span class="pre">Process.channels</span></code> always as a list</p></li>
 <li><p>Changed: keep <code class="docutils literal notranslate"><span class="pre">Feature.win_dur</span></code> and <code class="docutils literal notranslate"><span class="pre">Feature.hop_dur</span></code> in original format</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-5-0-2020-12-03">
-<h2>Version 0.5.0 (2020-12-03)<a class="headerlink" href="#version-0-5-0-2020-12-03" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.5.0 (2020-12-03)<a class="headerlink" href="#version-0-5-0-2020-12-03" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: arguments <code class="docutils literal notranslate"><span class="pre">channels</span></code> and <code class="docutils literal notranslate"><span class="pre">mixdown</span></code> to
 <code class="docutils literal notranslate"><span class="pre">audinterface.Process</span></code>,
@@ -331,14 +368,14 @@ to
 </ul>
 </div>
 <div class="section" id="version-0-4-3-2020-11-24">
-<h2>Version 0.4.3 (2020-11-24)<a class="headerlink" href="#version-0-4-3-2020-11-24" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.4.3 (2020-11-24)<a class="headerlink" href="#version-0-4-3-2020-11-24" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.Feature.__call__</span></code>
 always returns <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-4-2-2020-11-23">
-<h2>Version 0.4.2 (2020-11-23)<a class="headerlink" href="#version-0-4-2-2020-11-23" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.4.2 (2020-11-23)<a class="headerlink" href="#version-0-4-2-2020-11-23" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: <code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_unified_format_index</span></code> and
 <code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_unified_format_index</span></code>
@@ -346,7 +383,7 @@ support filewise index</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-4-1-2020-11-20">
-<h2>Version 0.4.1 (2020-11-20)<a class="headerlink" href="#version-0-4-1-2020-11-20" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.4.1 (2020-11-20)<a class="headerlink" href="#version-0-4-1-2020-11-20" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">process_func_is_mono</span></code> argument to
 <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code>,
@@ -355,7 +392,7 @@ support filewise index</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-4-0-2020-10-21">
-<h2>Version 0.4.0 (2020-10-21)<a class="headerlink" href="#version-0-4-0-2020-10-21" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.4.0 (2020-10-21)<a class="headerlink" href="#version-0-4-0-2020-10-21" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: make
 <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code>,
@@ -368,60 +405,60 @@ in <code class="docutils literal notranslate"><span class="pre">audinterface.Fea
 </ul>
 </div>
 <div class="section" id="version-0-3-2-2020-09-21">
-<h2>Version 0.3.2 (2020-09-21)<a class="headerlink" href="#version-0-3-2-2020-09-21" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.3.2 (2020-09-21)<a class="headerlink" href="#version-0-3-2-2020-09-21" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: switch to <code class="docutils literal notranslate"><span class="pre">audeer.run_tasks</span></code></p></li>
 <li><p>Changed: cut signal before resampling is applied</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-3-1-2020-09-18">
-<h2>Version 0.3.1 (2020-09-18)<a class="headerlink" href="#version-0-3-1-2020-09-18" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.3.1 (2020-09-18)<a class="headerlink" href="#version-0-3-1-2020-09-18" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code> raises an due to missing sampling rate
 now only if <code class="docutils literal notranslate"><span class="pre">win_dur</span></code> is given</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-3-0-2020-08-07">
-<h2>Version 0.3.0 (2020-08-07)<a class="headerlink" href="#version-0-3-0-2020-08-07" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.3.0 (2020-08-07)<a class="headerlink" href="#version-0-3-0-2020-08-07" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: switch to <code class="docutils literal notranslate"><span class="pre">audsp</span></code> &gt;=0.9.2, which fixes a critical resampling
 issue and introduces a new keyword arg name</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-2-4-2020-06-12">
-<h2>Version 0.2.4 (2020-06-12)<a class="headerlink" href="#version-0-2-4-2020-06-12" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.4 (2020-06-12)<a class="headerlink" href="#version-0-2-4-2020-06-12" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: description and keywords of package in <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-2-3-2020-06-11">
-<h2>Version 0.2.3 (2020-06-11)<a class="headerlink" href="#version-0-2-3-2020-06-11" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.3 (2020-06-11)<a class="headerlink" href="#version-0-2-3-2020-06-11" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: syntax error in CHANGELOG</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-2-2-2020-06-11">
-<h2>Version 0.2.2 (2020-06-11)<a class="headerlink" href="#version-0-2-2-2020-06-11" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.2 (2020-06-11)<a class="headerlink" href="#version-0-2-2-2020-06-11" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_file</span></code> was changing end times
 when process a segmented index</p></li>
 </ul>
 </div>
 <div class="section" id="version-0-2-1-2020-06-10">
-<h2>Version 0.2.1 (2020-06-10)<a class="headerlink" href="#version-0-2-1-2020-06-10" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.1 (2020-06-10)<a class="headerlink" href="#version-0-2-1-2020-06-10" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Changed: <code class="docutils literal notranslate"><span class="pre">utils.check_index</span></code> ignores <code class="docutils literal notranslate"><span class="pre">datetime</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-2-0-2020-06-10">
-<h2>Version 0.2.0 (2020-06-10)<a class="headerlink" href="#version-0-2-0-2020-06-10" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.2.0 (2020-06-10)<a class="headerlink" href="#version-0-2-0-2020-06-10" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: <code class="docutils literal notranslate"><span class="pre">segment</span></code> argument to <code class="docutils literal notranslate"><span class="pre">audinterface.Process</span></code> and <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></p></li>
 <li><p>Removed: <code class="docutils literal notranslate"><span class="pre">name</span></code> argument from <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-1-0-2020-06-05">
-<h2>Version 0.1.0 (2020-06-05)<a class="headerlink" href="#version-0-1-0-2020-06-05" title="Permalink to this headline">¶</a></h2>
+<h2>Version 0.1.0 (2020-06-05)<a class="headerlink" href="#version-0-1-0-2020-06-05" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Added: initial release</p></li>
 </ul>
@@ -449,7 +486,7 @@ when process a segmented index</p></li>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/02/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -484,7 +521,13 @@ when process a segmented index</p></li>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/thebelab-helper.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
     
 
   

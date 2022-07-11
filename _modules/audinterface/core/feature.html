@@ -32,6 +32,9 @@
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/thebelab.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     
@@ -66,7 +69,7 @@
             
             
               <div class="version">
-                v0.8.1
+                v0.9.0
               </div>
             
           
@@ -93,6 +96,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
@@ -142,6 +146,8 @@
             
   <h1>Source code for audinterface.core.feature</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -161,21 +167,66 @@
 <span class="kn">import</span> <span class="nn">audinterface.core.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 
 
+<span class="k">def</span> <span class="nf">deprecated_process_func_applies_sliding_window_default_value</span><span class="p">(</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Deprecate default value of process_func_applies_sliding_window.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_deprecated</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">argument</span> <span class="o">=</span> <span class="s1">&#39;process_func_applies_sliding_window&#39;</span>
+            <span class="n">change_in_version</span> <span class="o">=</span> <span class="s1">&#39;1.2.0&#39;</span>
+            <span class="n">default_value</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">new_default_value</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="s1">&#39;win_dur&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+                    <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;win_dur&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="n">argument</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="p">):</span>
+                <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+                <span class="n">default_value</span> <span class="o">=</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">argument</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The default of &#39;</span><span class="si">{</span><span class="n">argument</span><span class="si">}</span><span class="s2">&#39; will change from &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">new_default_value</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                    <span class="sa">f</span><span class="s1">&#39;with version </span><span class="si">{</span><span class="n">change_in_version</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_func</span>
+    <span class="k">return</span> <span class="n">_deprecated</span>
+
+
 <div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../../api.html#audinterface.Feature">[docs]</a><span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature extraction interface.</span>
 
-<span class="sd">    The features are returned as a :class:`pd.DataFrame`.</span>
+<span class="sd">    The features are returned as a :class:`pandas.DataFrame`.</span>
 <span class="sd">    If your input signal is of size ``(num_channels, num_time_steps)``,</span>
-<span class="sd">    the returned dataframe will have ``num_channels * num_features``</span>
-<span class="sd">    columns.</span>
+<span class="sd">    the returned object has ``num_channels * num_features`` columns.</span>
 <span class="sd">    It will have one row per file or signal.</span>
+
 <span class="sd">    If features are extracted using a sliding window,</span>
 <span class="sd">    each window will be stored as one row.</span>
 <span class="sd">    If ``win_dur`` is specified ``start`` and ``end`` indices</span>
 <span class="sd">    are referred from the original ``start`` and ``end`` arguments</span>
 <span class="sd">    and the window positions.</span>
-<span class="sd">    Otherwise, the original ``start`` and ``end`` indices</span>
-<span class="sd">    are kept.</span>
+<span class="sd">    If ``win_dur`` is ``None``,</span>
+<span class="sd">    the original ``start`` and ``end`` indices are kept.</span>
+<span class="sd">    If</span>
+<span class="sd">    ``process_func_applies_sliding_window``</span>
+<span class="sd">    is set to ``True``</span>
+<span class="sd">    the processing function</span>
+<span class="sd">    is responsible to apply the sliding window.</span>
+<span class="sd">    Otherwise,</span>
+<span class="sd">    the sliding window is applied before</span>
+<span class="sd">    the processing function is called.</span>
+
+<span class="sd">    If the arguments</span>
+<span class="sd">    ``win_dur`` and ``hop_dur``</span>
+<span class="sd">    are not specified in</span>
+<span class="sd">    ``process_func_args``,</span>
+<span class="sd">    but</span>
+<span class="sd">    ``process_func``</span>
+<span class="sd">    expects them,</span>
+<span class="sd">    they are passed on automatically.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        feature_names: features are stored as columns in a data frame,</span>
@@ -200,20 +251,49 @@
 <span class="sd">            function</span>
 <span class="sd">        process_func_is_mono: apply ``process_func`` to every channel</span>
 <span class="sd">            individually</span>
+<span class="sd">        process_func_applies_sliding_window:</span>
+<span class="sd">            if ``True``</span>
+<span class="sd">            the processing function receives</span>
+<span class="sd">            whole files or segments and is responsible</span>
+<span class="sd">            for applying a sliding window itself.</span>
+<span class="sd">            If ``False``,</span>
+<span class="sd">            the sliding window is applied internally</span>
+<span class="sd">            and the processing function</span>
+<span class="sd">            receives invidual frames instead.</span>
+<span class="sd">            Applies only if</span>
+<span class="sd">            features are extracted in a framewise manner</span>
+<span class="sd">            (see ``win_dur`` and ``hop_dur``)</span>
 <span class="sd">        sampling_rate: sampling rate in Hz.</span>
 <span class="sd">            If ``None`` it will call ``process_func`` with the actual</span>
 <span class="sd">            sampling rate of the signal</span>
-<span class="sd">        win_dur: window size in ``unit``,</span>
-<span class="sd">            if features are extracted with a sliding window</span>
-<span class="sd">        hop_dur: hop size in ``unit``,</span>
-<span class="sd">            if features are extracted with a sliding window.</span>
-<span class="sd">            This defines the shift between two windows.</span>
-<span class="sd">            Defaults to ``win_dur / 2``.</span>
-<span class="sd">        unit: unit of ``win_dur`` and ``hop_dur``.</span>
-<span class="sd">            Can be ``&#39;samples&#39;``,</span>
-<span class="sd">            or any unit supported by :func:`pandas.to_timedelta`</span>
 <span class="sd">        resample: if ``True`` enforces given sampling rate by resampling</span>
 <span class="sd">        channels: channel selection, see :func:`audresample.remix`</span>
+<span class="sd">        win_dur: window duration,</span>
+<span class="sd">            if features are extracted with a sliding window.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options</span>
+<span class="sd">        hop_dur: hop duration,</span>
+<span class="sd">            if features are extracted with a sliding window.</span>
+<span class="sd">            This defines the shift between two windows.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options.</span>
+<span class="sd">            Defaults to ``win_dur / 2``</span>
+<span class="sd">        min_signal_dur: minimum signal duration</span>
+<span class="sd">            required by ``process_func``.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options.</span>
+<span class="sd">            If provided signal is shorter,</span>
+<span class="sd">            it will be zero padded at the end</span>
+<span class="sd">        max_signal_dur: maximum signal duraton</span>
+<span class="sd">            required by ``process_func``.</span>
+<span class="sd">            If value is a float or integer</span>
+<span class="sd">            it is treated as seconds.</span>
+<span class="sd">            See :func:`audinterface.utils.to_timedelta` for further options.</span>
+<span class="sd">            If provided signal is longer,</span>
+<span class="sd">            it will be cut at the end</span>
 <span class="sd">        mixdown: apply mono mix-down on selection</span>
 <span class="sd">        segment: when a :class:`audinterface.Segment` object is provided,</span>
 <span class="sd">            it will be used to find a segmentation of the input signal.</span>
@@ -229,11 +309,52 @@
 <span class="sd">        verbose: show debug messages</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        ValueError: if ``unit == &#39;samples&#39;``, ``sampling_rate is None``</span>
-<span class="sd">            and ``win_dur is not None``</span>
+<span class="sd">        ValueError: if ``win_dur`` or ``hop_dur`` are given in samples</span>
+<span class="sd">            and ``sampling_rate is None``</span>
 <span class="sd">        ValueError: if ``hop_dur`` is specified, but not ``win_dur``</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; def mean_std(signal, sampling_rate):</span>
+<span class="sd">        ...     return [signal.mean(), signal.std()]</span>
+<span class="sd">        &gt;&gt;&gt; interface = Feature([&#39;mean&#39;, &#39;std&#39;], process_func=mean_std)</span>
+<span class="sd">        &gt;&gt;&gt; signal = np.array([1., 2., 3.])</span>
+<span class="sd">        &gt;&gt;&gt; interface(signal, sampling_rate=3)</span>
+<span class="sd">        array([[[2.        ],</span>
+<span class="sd">                [0.81649658]]])</span>
+<span class="sd">        &gt;&gt;&gt; interface.process_signal(signal, sampling_rate=3)</span>
+<span class="sd">                                mean       std</span>
+<span class="sd">        start  end</span>
+<span class="sd">        0 days 0 days 00:00:01   2.0  0.816497</span>
+<span class="sd">        &gt;&gt;&gt; import audb</span>
+<span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
+<span class="sd">        ...     &#39;emodb&#39;,</span>
+<span class="sd">        ...     version=&#39;1.2.0&#39;,</span>
+<span class="sd">        ...     media=&#39;wav/03a01Fa.wav&#39;,</span>
+<span class="sd">        ...     full_path=False,</span>
+<span class="sd">        ...     verbose=False,</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; index = db[&#39;emotion&#39;].index</span>
+<span class="sd">        &gt;&gt;&gt; interface.process_index(index, root=db.root)</span>
+<span class="sd">                                                           mean       std</span>
+<span class="sd">        file            start  end</span>
+<span class="sd">        wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317</span>
+<span class="sd">        &gt;&gt;&gt; interface_with_sliding_window = Feature(</span>
+<span class="sd">        ...     [&#39;mean&#39;, &#39;std&#39;],</span>
+<span class="sd">        ...     process_func=mean_std,</span>
+<span class="sd">        ...     process_func_applies_sliding_window=False,</span>
+<span class="sd">        ...     win_dur=1.0,</span>
+<span class="sd">        ...     hop_dur=0.25,</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; interface_with_sliding_window.process_index(index, root=db.root)</span>
+<span class="sd">                                                                           mean       std</span>
+<span class="sd">        file            start                  end</span>
+<span class="sd">        wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115</span>
+<span class="sd">                        0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917</span>
+<span class="sd">                        0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042</span>
+<span class="sd">                        0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="nd">@deprecated_process_func_applies_sliding_window_default_value</span><span class="p">()</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">feature_names</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
@@ -243,13 +364,15 @@
             <span class="n">process_func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">process_func_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">process_func_is_mono</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">process_func_applies_sliding_window</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">win_dur</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">hop_dur</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;seconds&#39;</span><span class="p">,</span>
             <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
             <span class="n">mixdown</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">win_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">hop_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">min_signal_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">max_signal_dur</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">segment</span><span class="p">:</span> <span class="n">Segment</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">keep_nat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -257,7 +380,54 @@
             <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="c1"># ------</span>
+        <span class="c1"># Handle deprecated &#39;unit&#39; keyword argument</span>
+        <span class="k">def</span> <span class="nf">add_unit</span><span class="p">(</span><span class="n">dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;samples&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">dur</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dur</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="s1">&#39;unit&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;&#39;unit&#39; argument is deprecated &quot;</span>
+                <span class="s2">&quot;and will be removed with version &#39;1.2.0&#39;.&quot;</span>
+                <span class="s2">&quot;The unit can now directly specified &quot;</span>
+                <span class="s2">&quot;within the &#39;win_dur&#39; and &#39;hop_dur&#39; arguments.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="n">message</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">win_dur</span> <span class="o">=</span> <span class="n">add_unit</span><span class="p">(</span><span class="n">win_dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">add_unit</span><span class="p">(</span><span class="n">hop_dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="c1"># ------</span>
+
+        <span class="k">if</span> <span class="n">mixdown</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">num_channels</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">num_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+
         <span class="n">feature_names</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_channels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
+                <span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+
+        <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">num_channels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)),</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -273,25 +443,24 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;You have to specify &#39;win_dur&#39; if &#39;hop_dur&#39; is given.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;samples&#39;</span> <span class="ow">and</span> <span class="n">sampling_rate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;You have specified &#39;samples&#39; as unit, &quot;</span>
-                <span class="s2">&quot;but haven&#39;t provided a sampling rate.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">win_dur</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
-        <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">num_channels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)),</span>
-                    <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="c1"># add &#39;win_dur&#39; and &#39;hop_dur&#39; to process_func_args</span>
+        <span class="c1"># if expected by function but not yet set</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">process_func</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s1">&#39;win_dur&#39;</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="ow">and</span> <span class="s1">&#39;win_dur&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">process_func_args</span>
+        <span class="p">):</span>
+            <span class="n">process_func_args</span><span class="p">[</span><span class="s1">&#39;win_dur&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">win_dur</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s1">&#39;hop_dur&#39;</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="ow">and</span> <span class="s1">&#39;hop_dur&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">process_func_args</span>
+        <span class="p">):</span>
+            <span class="n">process_func_args</span><span class="p">[</span><span class="s1">&#39;hop_dur&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hop_dur</span>
 
-        <span class="k">if</span> <span class="n">mixdown</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">num_channels</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">num_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
             <span class="n">process_func</span><span class="o">=</span><span class="n">process_func</span><span class="p">,</span>
             <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
             <span class="n">process_func_is_mono</span><span class="o">=</span><span class="n">process_func_is_mono</span><span class="p">,</span>
@@ -299,43 +468,50 @@
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
             <span class="n">channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
             <span class="n">mixdown</span><span class="o">=</span><span class="n">mixdown</span><span class="p">,</span>
+            <span class="n">win_dur</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">process_func_applies_sliding_window</span> <span class="k">else</span> <span class="n">win_dur</span><span class="p">,</span>
+            <span class="n">hop_dur</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">process_func_applies_sliding_window</span> <span class="k">else</span> <span class="n">hop_dur</span><span class="p">,</span>
+            <span class="n">min_signal_dur</span><span class="o">=</span><span class="n">min_signal_dur</span><span class="p">,</span>
+            <span class="n">max_signal_dur</span><span class="o">=</span><span class="n">max_signal_dur</span><span class="p">,</span>
             <span class="n">segment</span><span class="o">=</span><span class="n">segment</span><span class="p">,</span>
             <span class="n">keep_nat</span><span class="o">=</span><span class="n">keep_nat</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="o">=</span><span class="n">multiprocessing</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name of the feature set.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Dictionary of parameters describing the feature set.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span> <span class="o">=</span> <span class="n">num_channels</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Expected number of channels&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of features.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature names.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="n">column_names</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature column names.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">num_channels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">]</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="o">=</span> <span class="n">win_dur</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Window duration.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature names.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span> <span class="o">=</span> <span class="n">hop_dur</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hop duration.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span> <span class="o">=</span> <span class="n">win_dur</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;samples&#39;</span> <span class="k">else</span> <span class="n">win_dur</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Unit of ``win_dur`` and ``hop dur``&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name of the feature set.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span> <span class="o">=</span> <span class="n">num_channels</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Expected number of channels&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of features.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Dictionary of parameters describing the feature set.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_func_applies_sliding_window</span> <span class="o">=</span> \
+            <span class="n">process_func_applies_sliding_window</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Controls if processing function applies sliding window.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Show debug messages.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="o">=</span> <span class="n">win_dur</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Window duration.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Feature.process_file"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -350,9 +526,11 @@
 <span class="sd">        Args:</span>
 <span class="sd">            file: file path</span>
 <span class="sd">            start: start processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            end: end processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            root: root folder to expand relative file path</span>
 
 <span class="sd">        Raises:</span>
@@ -384,9 +562,13 @@
 <span class="sd">            files: list of file paths</span>
 <span class="sd">            starts: segment start positions.</span>
 <span class="sd">                Time values given as float or integers are treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta`</span>
+<span class="sd">                for further options.</span>
 <span class="sd">                If a scalar is given, it is applied to all files</span>
 <span class="sd">            ends: segment end positions.</span>
-<span class="sd">                Time values given as float or integers are treated as seconds</span>
+<span class="sd">                Time values given as float or integers are treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta`</span>
+<span class="sd">                for further options.</span>
 <span class="sd">                If a scalar is given, it is applied to all files</span>
 <span class="sd">            root: root folder to expand relative file paths</span>
 
@@ -444,12 +626,22 @@
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cache_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from an index conform to audformat_.</span>
+
+<span class="sd">        If ``cache_root`` is not ``None``,</span>
+<span class="sd">        a hash value is created from the index</span>
+<span class="sd">        using :func:`audformat.utils.hash` and</span>
+<span class="sd">        the result is stored as</span>
+<span class="sd">        ``&lt;cache_root&gt;/&lt;hash&gt;.pkl``.</span>
+<span class="sd">        When called again with the same index,</span>
+<span class="sd">        features will be read from the cached file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: index with segment information</span>
 <span class="sd">            root: root folder to expand relative file paths</span>
+<span class="sd">            cache_root: cache folder (see description)</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
@@ -461,8 +653,26 @@
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></div>
+        <span class="n">cache_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">cache_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cache_root</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cache_root</span><span class="p">)</span>
+            <span class="nb">hash</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">cache_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cache_root</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">hash</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cache_path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_path</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_pickle</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span>
+                <span class="n">index</span><span class="p">,</span>
+                <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">cache_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">cache_path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="Feature.process_signal"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -484,9 +694,11 @@
 <span class="sd">            sampling_rate: sampling rate in Hz</span>
 <span class="sd">            file: file path</span>
 <span class="sd">            start: start processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 <span class="sd">            end: end processing at this position.</span>
-<span class="sd">                If value is as a float or integer it is treated as seconds</span>
+<span class="sd">                If value is a float or integer it is treated as seconds.</span>
+<span class="sd">                See :func:`audinterface.utils.to_timedelta` for further options</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: if sampling rates do not match</span>
@@ -565,7 +777,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_func_is_mono</span><span class="p">:</span>
             <span class="c1"># when mono processing is turned on</span>
-            <span class="c1"># the channel dimension has to be 1</span>
+            <span class="c1"># the channel dimension has to be 1,</span>
             <span class="c1"># so we would usually omit it,</span>
             <span class="c1"># but since older versions required</span>
             <span class="c1"># a channel dimension we have to</span>
@@ -581,6 +793,11 @@
                 <span class="c1"># (channels, 1, features)</span>
                 <span class="c1"># -&gt; (channels, features)</span>
                 <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_func_applies_sliding_window</span><span class="p">:</span>
+                <span class="c1"># (channels, features)</span>
+                <span class="c1"># -&gt; (channels, features, 1)</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -674,20 +891,11 @@
         <span class="c1"># [n_features, n_frames]</span>
         <span class="c1"># [n_features]</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="s1">&#39;samples&#39;</span><span class="p">:</span>
-                <span class="n">win_dur</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;seconds&#39;</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;seconds&#39;</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">win_dur</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-                <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">win_dur</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">hop_dur</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">win_dur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span>
+        <span class="n">hop_dur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span>
+        <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">win_dur</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">win_dur</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+            <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">hop_dur</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
 
         <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reshape_3d</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
         <span class="n">n_channels</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_frames</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
@@ -730,11 +938,16 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
 
-<span class="sd">        This function processes the signal **without** transforming the output</span>
-<span class="sd">        into a :class:`pd.DataFrame`. Instead it will return the raw processed</span>
-<span class="sd">        signal. However, if channel selection, mixdown and/or resampling</span>
-<span class="sd">        is enabled, the signal will be first remixed and resampled if the</span>
-<span class="sd">        input sampling rate does not fit the expected sampling rate.</span>
+<span class="sd">        This function processes the signal</span>
+<span class="sd">        **without** transforming the output</span>
+<span class="sd">        into a :class:`pandas.DataFrame`.</span>
+<span class="sd">        Instead, it will return the raw processed signal.</span>
+<span class="sd">        However,</span>
+<span class="sd">        if channel selection,</span>
+<span class="sd">        mixdown and/or resampling is enabled,</span>
+<span class="sd">        the signal will be first remixed</span>
+<span class="sd">        and resampled if the input sampling rate</span>
+<span class="sd">        does not fit the expected sampling rate.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            signal: signal values</span>
@@ -771,7 +984,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/02/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -806,7 +1019,13 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/thebelab-helper.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
     
 
   
