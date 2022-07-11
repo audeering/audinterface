@@ -7,6 +7,38 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.9.0 (2022-07-11)
+--------------------------
+
+* Added: ``auinterface.utils.sliding_window()``
+* Added: ``auinterface.utils.to_timedelta()``
+* Added: argument
+  ``process_func_applies_sliding_window``
+  to
+  ``audinterface.Feature``
+* Added: arguments
+  ``win_dur`` and ``hop_dur``
+  to
+  ``audinterface.Process``
+* Added: arguments
+  ``min_signal_dur`` and ``max_signal_dur``
+  to
+  ``audinterface.Feature``,
+  ``audinterface.Process``,
+  ``audinterface.Segment``
+* Added: argument
+  ``cache_root``
+  to
+  ``audinterface.Feature.process_index()``,
+  ``audinterface.Process.process_index()``
+* Changed: extend documentation with docstring examples and usage section
+* Deprecated: ``unit`` argument of ``audinterface.Feature``,
+  instead specify unit directly when providing duration arguments,
+  compare ``audinterface.utils.to_timedelta()``
+* Fixed: ``audinterface.ProcessWithContext``
+  requires one output for every segment
+
+
 Version 0.8.1 (2022-02-07)
 --------------------------
 
