@@ -1111,9 +1111,10 @@ def test_process_with_idx(tmpdir):
     duration = 3
     sampling_rate = 1
     signal = np.zeros((2, duration), np.float32)
-    num_files = 5
+    num_files = 10
     win_dur = 1
     num_frames = duration // win_dur
+    num_workers = 3
 
     # create files
     root = tmpdir
@@ -1131,7 +1132,10 @@ def test_process_with_idx(tmpdir):
     def process_func(signal, sampling_rate, idx):
         return idx
 
-    process = audinterface.Process(process_func=process_func)
+    process = audinterface.Process(
+        process_func=process_func,
+        num_workers=num_workers,
+    )
 
     # process signal
     y = process.process_signal(signal, sampling_rate)
@@ -1181,8 +1185,9 @@ def test_process_with_idx(tmpdir):
         process_func=process_func,
         win_dur=win_dur,
         hop_dur=win_dur,
+        num_workers=num_workers,
     )
-    y = process.process_files(files, root=root)    
+    y = process.process_files(files, root=root)
     values = np.repeat(range(num_files), num_frames)
     expected = pd.Series(values, index, dtype='int64')
     pd.testing.assert_series_equal(y, expected)
@@ -1193,6 +1198,7 @@ def test_process_with_idx(tmpdir):
     process = audinterface.Process(
         process_func=process_func,
         process_func_is_mono=True,
+        num_workers=num_workers,
     )
     y = process.process_index(index, root=root)
     expected = pd.Series(
@@ -1206,6 +1212,7 @@ def test_process_with_idx(tmpdir):
     process = audinterface.Process(
         process_func=process_func,
         process_func_args={'idx': 99},
+        num_workers=num_workers,
     )
     y = process.process_index(index, root=root)
     expected = pd.Series(99, index)
