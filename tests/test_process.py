@@ -1106,6 +1106,103 @@ def test_process_signal_min_max(
     pd.testing.assert_series_equal(result, expected)
 
 
+def test_process_with_idx(tmpdir):
+
+    duration = 3
+    sampling_rate = 1
+    signal = np.zeros((2, duration), np.float32)
+    num_files = 5
+    win_dur = 1
+    num_frames = duration // win_dur
+
+    # create files
+    root = tmpdir
+    files = [f'f{idx}.wav' for idx in range(num_files)]
+    index = audformat.segmented_index(
+        np.repeat(files, num_frames),
+        np.tile(range(num_frames), num_files),
+        np.tile(range(1, num_frames + 1), num_files),
+    )
+    for file in files:
+        path = os.path.join(root, file)
+        audiofile.write(path, signal, sampling_rate, bit_depth=32)
+
+    # create interface
+    def process_func(signal, sampling_rate, idx):
+        return idx
+
+    process = audinterface.Process(process_func=process_func)
+
+    # process signal
+    y = process.process_signal(signal, sampling_rate)
+    expected = pd.Series(
+        0,
+        audinterface.utils.signal_index(0, duration),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process signal from index
+    y = process.process_signal_from_index(
+        signal,
+        sampling_rate,
+        expected.index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process file
+    y = process.process_file(files[0], root=root)
+    expected = pd.Series(
+        0,
+        audformat.segmented_index(files[0], 0, duration),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process files
+    y = process.process_files(files, root=root)
+    expected = pd.Series(
+        range(num_files),
+        audformat.segmented_index(
+            files,
+            [0] * num_files,
+            [duration] * num_files,
+        ),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index
+    y = process.process_index(index, root=root)
+    expected = pd.Series(range(len(index)), index)
+    pd.testing.assert_series_equal(y, expected)
+
+    # sliding window
+    # frames belonging to the same files have same idx
+
+    process = audinterface.Process(
+        process_func=process_func,
+        win_dur=win_dur,
+        hop_dur=win_dur,
+    )
+    y = process.process_files(files, root=root)
+    num_windows = duration // win_dur
+    values = np.repeat(range(num_files), num_windows)
+    expected = pd.Series(values, index)
+    pd.testing.assert_series_equal(y, expected)
+
+    # mono processing function
+    # returns series with (0, 0), (1, 1), ...
+
+    process = audinterface.Process(
+        process_func=process_func,
+        process_func_is_mono=True,
+    )
+    y = process.process_index(index, root=root)
+    expected = pd.Series(
+        [(idx, idx) for idx in range(len(index))],
+        index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+
 @pytest.mark.parametrize(
     'process_func, signal, sampling_rate',
     [
