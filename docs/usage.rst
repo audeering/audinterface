@@ -3,7 +3,6 @@
     :hide-code:
     :hide-output:
 
-    import os
     import pandas as pd
 
 
