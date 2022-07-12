@@ -7,6 +7,7 @@
 
 
     def dataframe_to_html(df):
+        # Replace beginning of data path with ...
         if len(df.index) > 0:
             old_path = r'.+/audb'
             new_path = r'.../audb'
