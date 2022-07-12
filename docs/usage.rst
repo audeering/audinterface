@@ -6,20 +6,38 @@
     import pandas as pd
 
 
-    def series_to_html(self):
-        df = self.to_frame()
+    def dataframe_to_html(df):
+        # Replace beginning of data path with ...
+        if len(df.index) > 0:
+            old_path = r'.+/audb'
+            new_path = r'.../audb'
+            # Assuming segmented index
+            df.index = df.index.set_levels(
+                df.index.levels[0].str.replace(
+                    old_path,
+                    new_path,
+                    regex=True,
+                ),
+                level=0,
+            )
+            
+        return df.to_html(max_rows=6, max_cols=3)
+
+            
+    def series_to_html(y):
+        df = y.to_frame()
         df.columns = ['']
-        return df._repr_html_()
+        return dataframe_to_html(df)
 
 
-    def index_to_html(self):
-        return self.to_frame(index=False).to_html(index=False)
+    def index_to_html(index):
+        df = pd.DataFrame(index=index)
+        return dataframe_to_html(df)
 
 
     setattr(pd.Series, '_repr_html_', series_to_html)
     setattr(pd.Index, '_repr_html_', index_to_html)
-    pd.set_option('display.max_rows', 6)
-    pd.set_option('display.max_columns', 3)
+    setattr(pd.DataFrame, '_repr_html_', dataframe_to_html)
 
 .. Specify version for storing and loading objects to YAML
 .. jupyter-execute::
