@@ -1182,10 +1182,9 @@ def test_process_with_idx(tmpdir):
         win_dur=win_dur,
         hop_dur=win_dur,
     )
-    y = process.process_files(files, root=root)
-    num_windows = duration // win_dur
-    values = np.repeat(range(num_files), num_windows)
-    expected = pd.Series(values, index)
+    y = process.process_files(files, root=root)    
+    values = np.repeat(range(num_files), num_frames)
+    expected = pd.Series(values, index, dtype='int64')
     pd.testing.assert_series_equal(y, expected)
 
     # mono processing function
