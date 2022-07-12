@@ -105,7 +105,13 @@ class Segment:
         process_func: segmentation function,
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
-            and any number of additional keyword arguments.
+            and any number of additional keyword arguments
+            (see ``process_func_args``).
+            If the function has an argument
+            ``idx``,
+            but such an argument is not specified in
+            ``process_func_args``,
+            it is replaced with a running index.
             Must return a :class:`pandas.MultiIndex` with two levels
             named `start` and `end` that hold start and end
             positions as :class:`pandas.Timedelta` objects

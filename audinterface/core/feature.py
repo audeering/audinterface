@@ -94,12 +94,18 @@ class Feature:
         process_func: feature extraction function,
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
-            and any number of additional keyword arguments.
+            and any number of additional keyword arguments
+            (see ``process_func_args``).
+            If the function has an argument
+            ``idx``,
+            but such an argument is not specified in
+            ``process_func_args``,
+            it is replaced with a running index.
             The function must return features in the shape of
             ``(num_features)``,
             ``(num_channels, num_features)``,
             ``(num_features, num_frames)``,
-            or ``(num_channels, num_features, num_frames)``
+            or ``(num_channels, num_features, num_frames)``                           
         process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: apply ``process_func`` to every channel

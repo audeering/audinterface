@@ -26,6 +26,12 @@ class Process:
             which expects the two positional arguments ``signal``
             and ``sampling_rate``
             and any number of additional keyword arguments
+            (see ``process_func_args``).
+            If the function has an argument
+            ``idx``,
+            but such an argument is not specified in
+            ``process_func_args``,
+            it is replaced with a running index
         process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: if set to ``True`` and the input signal
