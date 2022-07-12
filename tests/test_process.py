@@ -1201,6 +1201,16 @@ def test_process_with_idx(tmpdir):
         index,
     )
     pd.testing.assert_series_equal(y, expected)
+    
+    # explicitely pass idx
+    
+    process = audinterface.Process(
+        process_func=process_func,
+        process_func_args={'idx': 99},
+    )    
+    y = process.process_index(index, root=root)
+    expected = pd.Series(99, index)
+    pd.testing.assert_series_equal(y, expected)
 
 
 @pytest.mark.parametrize(
