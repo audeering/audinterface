@@ -1360,7 +1360,6 @@ def test_process_with_special_args(tmpdir):
 
     # sliding window
     # frames belonging to the same files have same idx
-
     process = audinterface.Process(
         process_func=process_func,
         win_dur=win_dur,
@@ -1373,10 +1372,7 @@ def test_process_with_special_args(tmpdir):
         file = files[idx]
         for _ in range(num_frames):
             values.append((idx, file, root))
-    expected = pd.Series(
-        values,
-        index,
-    )
+    expected = pd.Series(values, index)
     pd.testing.assert_series_equal(y, expected)
 
     # mono processing function
@@ -1384,7 +1380,6 @@ def test_process_with_special_args(tmpdir):
     # [((0, files[0], root), (0, files[0], root)),
     #  ((1, files[1], root), (1, files[1], root)),
     #  ... ]
-
     process = audinterface.Process(
         process_func=process_func,
         process_func_is_mono=True,

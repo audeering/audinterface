@@ -96,7 +96,7 @@ class Feature:
             and ``sampling_rate``
             and any number of additional keyword arguments
             (see ``process_func_args``).
-            There are a few special arguments:
+            There are the following special arguments:
             ``'idx'``, ``'file'``, ``'root'``.
             If expected by the function,
             but not specified in
@@ -104,7 +104,7 @@ class Feature:
             they will be replaced with:
             a running index,
             the currently processed file,
-            the root folder
+            the root folder.
             The function must return features in the shape of
             ``(num_features)``,
             ``(num_channels, num_features)``,

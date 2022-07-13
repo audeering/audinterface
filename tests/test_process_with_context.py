@@ -1,4 +1,3 @@
-
 import os
 
 import numpy as np
@@ -7,7 +6,7 @@ import pytest
 
 import audformat
 import audinterface
-import audiofile as af
+import audiofile
 
 
 def signal_max(signal, sampling_rate):
@@ -64,7 +63,7 @@ def test_process_index(tmpdir):
     root = str(tmpdir.mkdir('wav'))
     file = 'file.wav'
     path = os.path.join(root, file)
-    af.write(path, signal, sampling_rate)
+    audiofile.write(path, signal, sampling_rate)
 
     # absolute paths
     index = audformat.segmented_index(
@@ -94,7 +93,7 @@ def test_process_index(tmpdir):
 
     # multiple channels
     signal = np.concatenate([signal] * 3)
-    af.write(path, signal, sampling_rate)
+    audiofile.write(path, signal, sampling_rate)
     result = process.process_index(index, root=root)
     for (file, start, end), value in result.items():
         x, sampling_rate = audinterface.utils.read_audio(
@@ -283,6 +282,70 @@ def test_process_signal_from_index(
             result,
             pd.concat(expected, names=['start', 'end']),
         )
+
+
+def test_process_with_special_args(tmpdir):
+
+    duration = 3
+    sampling_rate = 1
+    signal = np.zeros((2, duration), np.float32)
+    num_files = 10
+    win_dur = 1
+    num_frames = duration // win_dur
+
+    # create files
+    root = tmpdir
+    files = [f'f{idx}.wav' for idx in range(num_files)]
+    for file in files:
+        path = os.path.join(root, file)
+        audiofile.write(path, signal, sampling_rate, bit_depth=32)
+
+    # create interface
+    def process_func(signal, sampling_rate, starts, ends, idx, file, root):
+        return [(idx, file, root)] * len(starts)
+
+    process = audinterface.ProcessWithContext(process_func=process_func)
+
+    # process signal from index
+    index = audinterface.utils.signal_index(
+        range(num_frames),
+        range(1, num_frames + 1),
+    )
+    y = process.process_signal_from_index(
+        signal,
+        sampling_rate,
+        index,
+    )
+    expected = pd.Series(
+        [(0, None, None)] * len(index),
+        index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index
+    index = audformat.segmented_index(
+        np.repeat(files, num_frames),
+        np.tile(range(num_frames), num_files),
+        np.tile(range(1, num_frames + 1), num_files),
+    )
+    y = process.process_index(index, root=root)
+    values = []
+    for idx in range(num_files):
+        file = files[idx]
+        for _ in range(num_frames):
+            values.append((idx, file, root))
+    expected = pd.Series(values, index)
+    pd.testing.assert_series_equal(y, expected)
+
+    # explicitely pass special arguments
+
+    process = audinterface.ProcessWithContext(
+        process_func=process_func,
+        process_func_args={'idx': 99, 'file': 'my/file', 'root': None},
+    )
+    y = process.process_index(index, root=root)
+    expected = pd.Series([(99, 'my/file', None)] * len(index), index)
+    pd.testing.assert_series_equal(y, expected)
 
 
 @pytest.mark.parametrize(

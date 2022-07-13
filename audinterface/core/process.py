@@ -27,7 +27,7 @@ class Process:
             and ``sampling_rate``
             and any number of additional keyword arguments
             (see ``process_func_args``).
-            There are a few special arguments:
+            There are the following special arguments:
             ``'idx'``, ``'file'``, ``'root'``.
             If expected by the function,
             but not specified in
@@ -35,7 +35,8 @@ class Process:
             they will be replaced with:
             a running index,
             the currently processed file,
-            the root folder
+            the root folder.
+            There is no restriction on the return type of the function
         process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: if set to ``True`` and the input signal
@@ -776,8 +777,6 @@ class Process:
             idx: int = 0,
             root: str = None,
             file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
 
