@@ -1350,7 +1350,14 @@ def test_process_with_special_args(tmpdir):
     )
     pd.testing.assert_series_equal(y, expected)
 
-    # process index
+    # process index with a filewise index
+    y = process.process_index(
+        audformat.filewise_index(files),
+        root=root,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index with a segmented index
     y = process.process_index(index, root=root)
     expected = pd.Series(
         [(idx, file, root) for idx, (file, _, _) in enumerate(index)],
