@@ -107,11 +107,15 @@ class Segment:
             and ``sampling_rate``
             and any number of additional keyword arguments
             (see ``process_func_args``).
-            If the function has an argument
-            ``idx``,
-            but such an argument is not specified in
+            There are a few special arguments:
+            ``'idx'``, ``'file'``, ``'root'``.
+            If expected by the function,
+            but not specified in
             ``process_func_args``,
-            it is replaced with a running index.
+            they will be replaced with:
+            a running index,
+            the currently processed file,
+            the root folder
             Must return a :class:`pandas.MultiIndex` with two levels
             named `start` and `end` that hold start and end
             positions as :class:`pandas.Timedelta` objects

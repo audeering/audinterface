@@ -27,11 +27,15 @@ class Process:
             and ``sampling_rate``
             and any number of additional keyword arguments
             (see ``process_func_args``).
-            If the function has an argument
-            ``idx``,
-            but such an argument is not specified in
+            There are a few special arguments:
+            ``'idx'``, ``'file'``, ``'root'``.
+            If expected by the function,
+            but not specified in
             ``process_func_args``,
-            it is replaced with a running index
+            they will be replaced with:
+            a running index,
+            the currently processed file,
+            the root folder
         process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: if set to ``True`` and the input signal
@@ -172,16 +176,20 @@ class Process:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
-        # add 'idx' to process_func_args
-        # if expected by function but not set
+        # figure out if special arguments
+        # to pass to the processing function
         signature = inspect.signature(process_func)
-        if (
-                'idx' in signature.parameters
-                and 'idx' not in process_func_args
-        ):
-            self._process_func_with_idx = True
-        else:
-            self._process_func_with_idx = False
+        self._process_func_special_args = {
+            'idx': False,
+            'root': False,
+            'file': False,
+        }
+        for key in self._process_func_special_args:
+            if (
+                    key in signature.parameters
+                    and key not in process_func_args
+            ):
+                self._process_func_special_args[key] = True
 
         self.channels = channels
         r"""Channel selection."""
@@ -235,10 +243,10 @@ class Process:
             self,
             file: str,
             *,
+            idx: int = 0,
+            root: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            root: str = None,
-            idx: int = 0,
     ) -> pd.Series:
 
         start = utils.to_timedelta(start, self.sampling_rate)
@@ -253,8 +261,9 @@ class Process:
         y = self._process_signal(
             signal,
             sampling_rate,
-            file=file,
             idx=idx,
+            root=root,
+            file=file,
         )
 
         if self.win_dur is not None:
@@ -320,7 +329,12 @@ class Process:
             )
             return self._process_index_wo_segment(index, root)
         else:
-            return self._process_file(file, start=start, end=end, root=root)
+            return self._process_file(
+                file,
+                root=root,
+                start=start,
+                end=end,
+            )
 
     def process_files(
             self,
@@ -368,16 +382,14 @@ class Process:
             (
                 (file, ),
                 {
+                    'idx': idx,
+                    'root': root,
                     'start': start,
                     'end': end,
-                    'root': root,
                 },
-            ) for file, start, end in zip(files, starts, ends)
+            ) for idx, (file, start, end)
+            in enumerate(zip(files, starts, ends))
         ]
-
-        if self._process_func_with_idx:
-            for idx, param in enumerate(params):
-                param[1]['idx'] = idx
 
         verbose = self.verbose
         self.verbose = False  # avoid nested progress bar
@@ -442,17 +454,14 @@ class Process:
             (
                 (file, ),
                 {
+                    'idx': idx,
+                    'root': root,
                     'start': start,
                     'end': end,
-                    'root': root,
                 },
             )
-            for file, start, end in index
+            for idx, (file, start, end) in enumerate(index)
         ]
-
-        if self._process_func_with_idx:
-            for idx, param in enumerate(params):
-                param[1]['idx'] = idx
 
         y = audeer.run_tasks(
             self._process_file,
@@ -524,10 +533,11 @@ class Process:
             signal: np.ndarray,
             sampling_rate: int,
             *,
+            idx: int = 0,
+            root: str = None,
             file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-            idx: int = 0,
     ) -> pd.Series:
 
         signal = np.atleast_2d(signal)
@@ -571,7 +581,13 @@ class Process:
                 signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
 
         # Process signal
-        y = self._call(signal, sampling_rate, idx=idx)
+        y = self._call(
+            signal,
+            sampling_rate,
+            idx=idx,
+            root=root,
+            file=file,
+        )
 
         # Create index
         if self.win_dur is not None:
@@ -674,21 +690,26 @@ class Process:
             params = [
                 (
                     (signal, sampling_rate),
-                    {'start': start, 'end': end},
-                ) for start, end in index
+                    {
+                        'idx': idx,
+                        'start': start,
+                        'end': end,
+                    },
+                ) for idx, (start, end) in enumerate(index)
             ]
         else:
             index = audformat.utils.to_segmented_index(index)
             params = [
                 (
                     (signal, sampling_rate),
-                    {'file': file, 'start': start, 'end': end},
-                ) for file, start, end in index
+                    {
+                        'idx': idx,
+                        'file': file,
+                        'start': start,
+                        'end': end,
+                    },
+                ) for idx, (file, start, end) in enumerate(index)
             ]
-
-        if self._process_func_with_idx:
-            for idx, param in enumerate(params):
-                param[1]['idx'] = idx
 
         y = audeer.run_tasks(
             self._process_signal,
@@ -753,8 +774,12 @@ class Process:
             sampling_rate: int,
             *,
             idx: int = 0,
+            root: str = None,
+            file: str = None,
+            start: pd.Timedelta = None,
+            end: pd.Timedelta = None,
     ) -> typing.Any:
-        r"""Call processing function, possibly pass idx."""
+        r"""Call processing function, possibly pass special args."""
 
         signal, sampling_rate = utils.preprocess_signal(
             signal,
@@ -765,39 +790,32 @@ class Process:
             self.mixdown,
         )
 
+        special_args = {}
+        for key, value in [
+            ('idx', idx),
+            ('root', root),
+            ('file', file),
+        ]:
+            if self._process_func_special_args[key]:
+                special_args[key] = value
+
         def _helper(x):
             if self.process_func_is_mono:
-                if self._process_func_with_idx:
-                    return [
-                        self.process_func(
-                            np.atleast_2d(channel),
-                            sampling_rate,
-                            idx=idx,
-                            **self.process_func_args,
-                        ) for channel in x
-                    ]
-                else:
-                    return [
-                        self.process_func(
-                            np.atleast_2d(channel),
-                            sampling_rate,
-                            **self.process_func_args,
-                        ) for channel in x
-                    ]
+                return [
+                    self.process_func(
+                        np.atleast_2d(channel),
+                        sampling_rate,
+                        **special_args,
+                        **self.process_func_args,
+                    ) for channel in x
+                ]
             else:
-                if self._process_func_with_idx:
-                    return self.process_func(
-                        x,
-                        sampling_rate,
-                        idx=idx,
-                        **self.process_func_args,
-                    )
-                else:
-                    return self.process_func(
-                        x,
-                        sampling_rate,
-                        **self.process_func_args,
-                    )
+                return self.process_func(
+                    x,
+                    sampling_rate,
+                    **special_args,
+                    **self.process_func_args,
+                )
 
         if self.win_dur is not None:
             frames = utils.sliding_window(
