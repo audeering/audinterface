@@ -1,4 +1,5 @@
 import collections
+import inspect
 import typing
 import warnings
 
@@ -21,16 +22,26 @@ class ProcessWithContext:
     signal values or other segments.
 
     Args:
-        process_func: processing function, which expects four positional
-            arguments:
+        process_func: processing function,
+            which expects four positional arguments:
 
             * ``signal``
             * ``sampling_rate``
             * ``starts`` sequence with start indices
             * ``ends`` sequence with end indices
 
-            and any number of additional keyword arguments.
-            Must return a sequence of results for every segment
+            and any number of additional keyword arguments
+            (see ``process_func_args``).
+            There are the following special arguments:
+            ``'idx'``, ``'file'``, ``'root'``.
+            If expected by the function,
+            but not specified in
+            ``process_func_args``,
+            they will be replaced with:
+            a running index,
+            the currently processed file,
+            the root folder.
+            The function must return a sequence of results for every segment
         process_func_args: (keyword) arguments passed on to the processing
             function
         sampling_rate: sampling rate in Hz.
@@ -118,6 +129,21 @@ class ProcessWithContext:
                 'sampling_rate has to be provided for resample = True.'
             )
 
+        # figure out if special arguments
+        # to pass to the processing function
+        signature = inspect.signature(process_func)
+        self._process_func_special_args = {
+            'idx': False,
+            'root': False,
+            'file': False,
+        }
+        for key in self._process_func_special_args:
+            if (
+                    key in signature.parameters
+                    and key not in process_func_args
+            ):
+                self._process_func_special_args[key] = True
+
         self.channels = channels
         r"""Channel selection."""
 
@@ -183,13 +209,60 @@ class ProcessWithContext:
                 select = index[mask].droplevel(0)
                 signal, sampling_rate = utils.read_audio(file, root=root)
                 ys[idx] = pd.Series(
-                    self.process_signal_from_index(
-                        signal, sampling_rate, select,
+                    self._process_signal_from_index(
+                        signal,
+                        sampling_rate,
+                        select,
+                        idx=idx,
+                        root=root,
+                        file=file,
                     ).values,
                     index=index[mask],
                 )
 
         return pd.concat(ys)
+
+    def _process_signal_from_index(
+            self,
+            signal: np.ndarray,
+            sampling_rate: int,
+            index: pd.Index,
+            *,
+            idx: int = 0,
+            root: str = None,
+            file: str = None,
+    ) -> pd.Series:
+
+        utils.assert_index(index)
+
+        if len(index) == 0:
+            y = pd.Series([], index=index, dtype=object)
+        else:
+            starts_i, ends_i = utils.segments_to_indices(
+                signal,
+                sampling_rate,
+                index,
+            )
+            y = self._call(
+                signal,
+                sampling_rate,
+                starts_i,
+                ends_i,
+                idx=idx,
+                root=root,
+                file=file,
+            )
+            if (
+                    not isinstance(y, collections.abc.Iterable)
+                    or len(y) != len(index)
+            ):
+                raise RuntimeError(
+                    'process_func has to return a sequence of results, '
+                    f'matching the length {len(index)} of the index. '
+                )
+            y = pd.Series(y, index=index)
+
+        return y
 
     def process_signal_from_index(
             self,
@@ -220,26 +293,51 @@ class ProcessWithContext:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        utils.assert_index(index)
+        return self._process_signal_from_index(
+            signal,
+            sampling_rate,
+            index,
+        )
 
-        if len(index) == 0:
-            y = pd.Series([], index=index, dtype=object)
-        else:
-            starts_i, ends_i = utils.segments_to_indices(
-                signal, sampling_rate, index,
-            )
-            y = self(signal, sampling_rate, starts_i, ends_i)
-            if (
-                    not isinstance(y, collections.abc.Iterable)
-                    or len(y) != len(index)
-            ):
-                raise RuntimeError(
-                    'process_func has to return a sequence of results, '
-                    f'matching the length {len(index)} of the index. '
-                )
-            y = pd.Series(y, index=index)
+    def _call(
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        starts: typing.Sequence[int],
+        ends: typing.Sequence[int],
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+    ) -> typing.Any:
+        r"""Call processing function, possibly pass special args."""
 
-        return y
+        signal, sampling_rate = utils.preprocess_signal(
+            signal,
+            sampling_rate,
+            self.sampling_rate,
+            self.resample,
+            self.channels,
+            self.mixdown,
+        )
+
+        special_args = {}
+        for key, value in [
+            ('idx', idx),
+            ('root', root),
+            ('file', file),
+        ]:
+            if self._process_func_special_args[key]:
+                special_args[key] = value
+
+        return self.process_func(
+            signal,
+            sampling_rate,
+            starts,
+            ends,
+            **special_args,
+            **self.process_func_args,
+        )
 
     def __call__(
         self,
@@ -268,18 +366,4 @@ class ProcessWithContext:
             RuntimeError: if channel selection is invalid
 
         """
-        signal, sampling_rate = utils.preprocess_signal(
-            signal,
-            sampling_rate,
-            self.sampling_rate,
-            self.resample,
-            self.channels,
-            self.mixdown,
-        )
-        return self.process_func(
-            signal,
-            sampling_rate,
-            starts,
-            ends,
-            **self.process_func_args,
-        )
+        return self._call(signal, sampling_rate, starts, ends)

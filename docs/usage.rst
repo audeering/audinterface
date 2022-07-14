@@ -20,10 +20,10 @@
                 ),
                 level=0,
             )
-            
+
         return df.to_html(max_rows=6, max_cols=3)
 
-            
+
     def series_to_html(y):
         df = y.to_frame()
         df.columns = ['']
@@ -75,8 +75,17 @@ and an index.
     import audb
     import os
 
-    media = ['wav/03a01Fa.wav', 'wav/03a01Nc.wav', 'wav/03a01Wa.wav']
-    db = audb.load('emodb', version='1.2.0', media=media, verbose=False)
+    media = [
+        'wav/03a01Fa.wav',
+        'wav/03a01Nc.wav',
+        'wav/16b10Wb.wav',
+    ]
+    db = audb.load(
+        'emodb',
+        version='1.2.0',
+        media=media,
+        verbose=False,
+    )
 
     files = list(db.files)
     folder = os.path.dirname(files[0])
@@ -305,6 +314,72 @@ would be a voice activity detection algorithm.
     interface = audinterface.Segment(process_func=segments)
     idx = interface.process_file(files[0])
     idx
+
+
+Special processing function arguments
+-------------------------------------
+
+There are some special arguments
+to the processing function,
+which will be automatically set
+if they are not specified in
+``process_func_args``:
+
+========  =============
+argument  value
+========  =============
+idx       running index
+file      file path
+root      root folder
+========  =============
+
+The following processing function
+returns the values of
+``'idx'`` and ``'file'``.
+
+.. jupyter-execute::
+
+    def special_args(signal, sampling_rate, idx, file):
+        return idx, os.path.basename(file)
+
+    interface = audinterface.Process(process_func=special_args)
+    y = interface.process_files(files)
+    y
+
+For instance,
+we can pass a list with gender labels
+to the processing function
+and use the running index
+to select the appropriate f0 range.
+
+.. jupyter-execute::
+
+    gender = db['files']['speaker'].get(map='gender')  # gender per file
+    f0_range = {
+        'female': [160, 300],  # [fmin, fmax]
+        'male': [60, 180],
+    }
+
+    def f0(signal, sampling_rate, idx, gender, f0_range):
+        # extract mean f0 using a gender adapted range
+        y = librosa.yin(
+            signal,
+            fmin=f0_range[gender[idx]][0],
+            fmax=f0_range[gender[idx]][1],
+            sr=sampling_rate,
+        ).mean()
+        return y, gender[idx]
+
+    interface = audinterface.Feature(
+        ['f0', 'gender'],
+        process_func=f0,
+        process_func_args={
+            'gender': gender,
+            'f0_range': f0_range,
+        },
+    )
+    df = interface.process_index(gender.index)
+    df
 
 
 .. _audformat: https://audeering.github.io/audformat/

@@ -323,7 +323,7 @@ def test_process_file(
     root = str(tmpdir.mkdir('wav'))
     file = 'file.wav'
     path = os.path.join(root, file)
-    af.write(path, signal, sampling_rate)
+    af.write(path, signal, sampling_rate, bit_depth=32)
 
     # test absolute path
     y = process.process_file(
@@ -1280,6 +1280,135 @@ def test_process_with_sliding_window(
 
     # process index
     y = process.process_index(expected.index, root=root)
+    pd.testing.assert_series_equal(y, expected)
+
+
+def test_process_with_special_args(tmpdir):
+
+    duration = 3
+    sampling_rate = 1
+    signal = np.zeros((2, duration), np.float32)
+    num_files = 10
+    win_dur = 1
+    num_frames = duration // win_dur
+    num_workers = 3
+
+    # create files
+    root = tmpdir
+    files = [f'f{idx}.wav' for idx in range(num_files)]
+    index = audformat.segmented_index(
+        np.repeat(files, num_frames),
+        np.tile(range(num_frames), num_files),
+        np.tile(range(1, num_frames + 1), num_files),
+    )
+    for file in files:
+        path = os.path.join(root, file)
+        audiofile.write(path, signal, sampling_rate, bit_depth=32)
+
+    # create interface
+    def process_func(signal, sampling_rate, idx, file, root):
+        return (idx, file, root)
+
+    process = audinterface.Process(
+        process_func=process_func,
+        num_workers=num_workers,
+    )
+
+    # process signal
+    y = process.process_signal(signal, sampling_rate)
+    expected = pd.Series(
+        [(0, None, None)],
+        audinterface.utils.signal_index(0, duration),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process signal from index
+    y = process.process_signal_from_index(
+        signal,
+        sampling_rate,
+        expected.index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process file
+    y = process.process_file(files[0], root=root)
+    expected = pd.Series(
+        [(0, files[0], root)],
+        audformat.segmented_index(files[0], 0, duration),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process files
+    y = process.process_files(files, root=root)
+    expected = pd.Series(
+        [(idx, files[idx], root) for idx in range(num_files)],
+        audformat.segmented_index(
+            files,
+            [0] * num_files,
+            [duration] * num_files,
+        ),
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index with a filewise index
+    y = process.process_index(
+        audformat.filewise_index(files),
+        root=root,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # process index with a segmented index
+    y = process.process_index(index, root=root)
+    expected = pd.Series(
+        [(idx, file, root) for idx, (file, _, _) in enumerate(index)],
+        index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # sliding window
+    # frames belonging to the same files have same idx
+    process = audinterface.Process(
+        process_func=process_func,
+        win_dur=win_dur,
+        hop_dur=win_dur,
+        num_workers=num_workers,
+    )
+    y = process.process_files(files, root=root)
+    values = []
+    for idx in range(num_files):
+        file = files[idx]
+        for _ in range(num_frames):
+            values.append((idx, file, root))
+    expected = pd.Series(values, index)
+    pd.testing.assert_series_equal(y, expected)
+
+    # mono processing function
+    # returns
+    # [((0, files[0], root), (0, files[0], root)),
+    #  ((1, files[1], root), (1, files[1], root)),
+    #  ... ]
+    process = audinterface.Process(
+        process_func=process_func,
+        process_func_is_mono=True,
+        num_workers=num_workers,
+    )
+    y = process.process_index(index, root=root)
+    expected = pd.Series(
+        [((idx, file, root), (idx, file, root))
+         for idx, (file, _, _) in enumerate(index)],
+        index,
+    )
+    pd.testing.assert_series_equal(y, expected)
+
+    # explicitely pass special arguments
+
+    process = audinterface.Process(
+        process_func=process_func,
+        process_func_args={'idx': 99, 'file': 'my/file', 'root': None},
+        num_workers=num_workers,
+    )
+    y = process.process_index(index, root=root)
+    expected = pd.Series([(99, 'my/file', None)] * len(index), index)
     pd.testing.assert_series_equal(y, expected)
 
 

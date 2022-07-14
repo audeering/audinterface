@@ -366,7 +366,7 @@ def sliding_window(
             f'Hz the hop duration must be at least '
             f'{1.0/sampling_rate}s, '
             f'but got '
-            f'{win_dur.total_seconds()}s.'
+            f'{hop_dur.total_seconds()}s.'
         )
 
     if signal.shape[1] < win_length:  # signal too short
