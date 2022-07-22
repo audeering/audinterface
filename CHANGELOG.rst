@@ -7,6 +7,16 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.9.1 (2022-07-22)
+--------------------------
+
+* Changed: support special arguments
+  ``idx``,
+  ``file``,
+  ``root``
+  in processing function
+
+
 Version 0.9.0 (2022-07-11)
 --------------------------
 
