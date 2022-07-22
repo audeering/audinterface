@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.9.0
+                v0.9.1
               </div>
             
           
@@ -146,6 +146,7 @@
             
   <h1>Source code for audinterface.core.process</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -172,6 +173,17 @@
 <span class="sd">            which expects the two positional arguments ``signal``</span>
 <span class="sd">            and ``sampling_rate``</span>
 <span class="sd">            and any number of additional keyword arguments</span>
+<span class="sd">            (see ``process_func_args``).</span>
+<span class="sd">            There are the following special arguments:</span>
+<span class="sd">            ``&#39;idx&#39;``, ``&#39;file&#39;``, ``&#39;root&#39;``.</span>
+<span class="sd">            If expected by the function,</span>
+<span class="sd">            but not specified in</span>
+<span class="sd">            ``process_func_args``,</span>
+<span class="sd">            they will be replaced with:</span>
+<span class="sd">            a running index,</span>
+<span class="sd">            the currently processed file,</span>
+<span class="sd">            the root folder.</span>
+<span class="sd">            There is no restriction on the return type of the function</span>
 <span class="sd">        process_func_args: (keyword) arguments passed on to the processing</span>
 <span class="sd">            function</span>
 <span class="sd">        process_func_is_mono: if set to ``True`` and the input signal</span>
@@ -312,6 +324,21 @@
         <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">win_dur</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
+        <span class="c1"># figure out if special arguments</span>
+        <span class="c1"># to pass to the processing function</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">process_func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_func_special_args</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;idx&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_func_special_args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">key</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+                    <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">process_func_args</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_func_special_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Channel selection.&quot;&quot;&quot;</span>
 
@@ -364,10 +391,14 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
+            <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
 
         <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">read_audio</span><span class="p">(</span>
             <span class="n">file</span><span class="p">,</span>
@@ -378,6 +409,8 @@
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_signal</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+            <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
             <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -444,9 +477,12 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_index_wo_segment</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_file</span><span class="p">(</span>
+                <span class="n">file</span><span class="p">,</span>
+                <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Process.process_files"><a class="viewcode-back" href="../../../api.html#audinterface.Process.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -494,16 +530,19 @@
             <span class="p">(</span>
                 <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="p">),</span>
                 <span class="p">{</span>
+                    <span class="s1">&#39;idx&#39;</span><span class="p">:</span> <span class="n">idx</span><span class="p">,</span>
+                    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="n">root</span><span class="p">,</span>
                     <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
                     <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
-                    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="n">root</span><span class="p">,</span>
                 <span class="p">},</span>
-            <span class="p">)</span> <span class="k">for</span> <span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">))</span>
         <span class="p">]</span>
+
         <span class="n">verbose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># avoid nested progress bar</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">process_file</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_file</span><span class="p">,</span>
             <span class="n">params</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">multiprocessing</span><span class="p">,</span>
@@ -563,13 +602,15 @@
             <span class="p">(</span>
                 <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="p">),</span>
                 <span class="p">{</span>
+                    <span class="s1">&#39;idx&#39;</span><span class="p">:</span> <span class="n">idx</span><span class="p">,</span>
+                    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="n">root</span><span class="p">,</span>
                     <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
                     <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
-                    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="n">root</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">index</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="p">]</span>
+
         <span class="n">y</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_file</span><span class="p">,</span>
             <span class="n">params</span><span class="p">,</span>
@@ -640,6 +681,8 @@
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
+            <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -686,7 +729,13 @@
                 <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_pad</span><span class="p">)),</span> <span class="s1">&#39;constant&#39;</span><span class="p">)</span>
 
         <span class="c1"># Process signal</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span>
+            <span class="n">signal</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span>
+            <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Create index</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -789,16 +838,25 @@
             <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">(</span>
                     <span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">),</span>
-                    <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">},</span>
-                <span class="p">)</span> <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">index</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;idx&#39;</span><span class="p">:</span> <span class="n">idx</span><span class="p">,</span>
+                        <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
+                        <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_segmented_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">(</span>
                     <span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">),</span>
-                    <span class="p">{</span><span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">file</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">},</span>
-                <span class="p">)</span> <span class="k">for</span> <span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">index</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;idx&#39;</span><span class="p">:</span> <span class="n">idx</span><span class="p">,</span>
+                        <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">file</span><span class="p">,</span>
+                        <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
+                        <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="p">]</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">run_tasks</span><span class="p">(</span>
@@ -858,6 +916,67 @@
             <span class="n">index</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+    <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">,</span>
+            <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Call processing function, possibly pass special args.&quot;&quot;&quot;</span>
+
+        <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">preprocess_signal</span><span class="p">(</span>
+            <span class="n">signal</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resample</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mixdown</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">special_args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;idx&#39;</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="n">root</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span>
+        <span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_func_special_args</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">special_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">def</span> <span class="nf">_helper</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_func_is_mono</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">process_func</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">channel</span><span class="p">),</span>
+                        <span class="n">sampling_rate</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">special_args</span><span class="p">,</span>
+                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">x</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_func</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="n">sampling_rate</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">special_args</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frames</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sliding_window</span><span class="p">(</span>
+                <span class="n">signal</span><span class="p">,</span>
+                <span class="n">sampling_rate</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">num_frames</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">_helper</span><span class="p">(</span><span class="n">frames</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_frames</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">_helper</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">y</span>
+
 <div class="viewcode-block" id="Process.__call__"><a class="viewcode-back" href="../../../api.html#audinterface.Process.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -883,44 +1002,7 @@
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">preprocess_signal</span><span class="p">(</span>
-            <span class="n">signal</span><span class="p">,</span>
-            <span class="n">sampling_rate</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">resample</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mixdown</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">def</span> <span class="nf">_helper</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_func_is_mono</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">process_func</span><span class="p">(</span>
-                        <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">channel</span><span class="p">),</span>
-                        <span class="n">sampling_rate</span><span class="p">,</span>
-                        <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span><span class="p">,</span>
-                    <span class="p">)</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">x</span>
-                <span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_func</span><span class="p">(</span>
-                    <span class="n">x</span><span class="p">,</span>
-                    <span class="n">sampling_rate</span><span class="p">,</span>
-                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span><span class="p">,</span>
-                <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">sliding_window</span><span class="p">(</span>
-                <span class="n">signal</span><span class="p">,</span>
-                <span class="n">sampling_rate</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">num_frames</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">_helper</span><span class="p">(</span><span class="n">frames</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">idx</span><span class="p">])</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_frames</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">_helper</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">y</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
@@ -936,7 +1018,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/22 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

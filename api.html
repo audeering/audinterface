@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                v0.9.0
+                v0.9.1
               </div>
             
           
@@ -223,7 +223,17 @@ the same feature set</p></li>
 <li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – feature extraction function,
 which expects the two positional arguments <code class="docutils literal notranslate"><span class="pre">signal</span></code>
 and <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code>
-and any number of additional keyword arguments.
+and any number of additional keyword arguments
+(see <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>).
+There are the following special arguments:
+<code class="docutils literal notranslate"><span class="pre">'idx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'file'</span></code>, <code class="docutils literal notranslate"><span class="pre">'root'</span></code>.
+If expected by the function,
+but not specified in
+<code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>,
+they will be replaced with:
+a running index,
+the currently processed file,
+the root folder.
 The function must return features in the shape of
 <code class="docutils literal notranslate"><span class="pre">(num_features)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features)</span></code>,
@@ -680,7 +690,18 @@ shape, i.e. <code class="docutils literal notranslate"><span class="pre">(channe
 <li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – processing function,
 which expects the two positional arguments <code class="docutils literal notranslate"><span class="pre">signal</span></code>
 and <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code>
-and any number of additional keyword arguments</p></li>
+and any number of additional keyword arguments
+(see <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>).
+There are the following special arguments:
+<code class="docutils literal notranslate"><span class="pre">'idx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'file'</span></code>, <code class="docutils literal notranslate"><span class="pre">'root'</span></code>.
+If expected by the function,
+but not specified in
+<code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>,
+they will be replaced with:
+a running index,
+the currently processed file,
+the root folder.
+There is no restriction on the return type of the function</p></li>
 <li><p><strong>process_func_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – (keyword) arguments passed on to the processing
 function</p></li>
 <li><p><strong>process_func_is_mono</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if set to <code class="docutils literal notranslate"><span class="pre">True</span></code> and the input signal
@@ -1123,16 +1144,26 @@ signal values or other segments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]]) – <p>processing function, which expects four positional
-arguments:</p>
+<li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]]) – <p>processing function,
+which expects four positional arguments:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">signal</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">starts</span></code> sequence with start indices</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ends</span></code> sequence with end indices</p></li>
 </ul>
-<p>and any number of additional keyword arguments.
-Must return a sequence of results for every segment</p>
+<p>and any number of additional keyword arguments
+(see <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>).
+There are the following special arguments:
+<code class="docutils literal notranslate"><span class="pre">'idx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'file'</span></code>, <code class="docutils literal notranslate"><span class="pre">'root'</span></code>.
+If expected by the function,
+but not specified in
+<code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>,
+they will be replaced with:
+a running index,
+the currently processed file,
+the root folder.
+The function must return a sequence of results for every segment</p>
 </p></li>
 <li><p><strong>process_func_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – (keyword) arguments passed on to the processing
 function</p></li>
@@ -1335,7 +1366,17 @@ e.g. a voice activity model that detects speech regions.</p>
 <li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiIndex</span></code></a>]]) – segmentation function,
 which expects the two positional arguments <code class="docutils literal notranslate"><span class="pre">signal</span></code>
 and <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code>
-and any number of additional keyword arguments.
+and any number of additional keyword arguments
+(see <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>).
+There are the following special arguments:
+<code class="docutils literal notranslate"><span class="pre">'idx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'file'</span></code>, <code class="docutils literal notranslate"><span class="pre">'root'</span></code>.
+If expected by the function,
+but not specified in
+<code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>,
+they will be replaced with:
+a running index,
+the currently processed file,
+the root folder.
 Must return a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.MultiIndex</span></code></a> with two levels
 named <cite>start</cite> and <cite>end</cite> that hold start and end
 positions as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a> objects</p></li>
@@ -1684,7 +1725,7 @@ See also <a class="reference internal" href="api-utils.html#audinterface.utils.s
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/22 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

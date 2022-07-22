@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.9.0
+                v0.9.1
               </div>
             
           
@@ -241,7 +241,17 @@
 <span class="sd">        process_func: feature extraction function,</span>
 <span class="sd">            which expects the two positional arguments ``signal``</span>
 <span class="sd">            and ``sampling_rate``</span>
-<span class="sd">            and any number of additional keyword arguments.</span>
+<span class="sd">            and any number of additional keyword arguments</span>
+<span class="sd">            (see ``process_func_args``).</span>
+<span class="sd">            There are the following special arguments:</span>
+<span class="sd">            ``&#39;idx&#39;``, ``&#39;file&#39;``, ``&#39;root&#39;``.</span>
+<span class="sd">            If expected by the function,</span>
+<span class="sd">            but not specified in</span>
+<span class="sd">            ``process_func_args``,</span>
+<span class="sd">            they will be replaced with:</span>
+<span class="sd">            a running index,</span>
+<span class="sd">            the currently processed file,</span>
+<span class="sd">            the root folder.</span>
 <span class="sd">            The function must return features in the shape of</span>
 <span class="sd">            ``(num_features)``,</span>
 <span class="sd">            ``(num_channels, num_features)``,</span>
@@ -984,7 +994,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/11 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/22 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
