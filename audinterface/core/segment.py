@@ -284,18 +284,10 @@ class Segment:
             end=end,
             root=root,
         ).values[0]
-        return pd.MultiIndex(
-            levels=[
-                [file],
-                index.levels[0] + start,
-                index.levels[1] + start,
-            ],
-            codes=[
-                [0] * len(index),
-                index.codes[0],
-                index.codes[1],
-            ],
-            names=['file', 'start', 'end'],
+        return audformat.segmented_index(
+            files=[file] * len(index),
+            starts=index.levels[0] + start,
+            ends=index.levels[1] + start,
         )
 
     def process_files(
@@ -338,21 +330,15 @@ class Segment:
             ends=ends,
             root=root,
         )
+        if len(series) == 0:
+            return audformat.filewise_index()
         objs = []
         for idx, ((file, start, _), index) in enumerate(series.items()):
             objs.append(
-                pd.MultiIndex(
-                    levels=[
-                        [file],
-                        index.levels[0] + start,
-                        index.levels[1] + start,
-                    ],
-                    codes=[
-                        [0] * len(index),
-                        index.codes[0],
-                        index.codes[1],
-                    ],
-                    names=['file', 'start', 'end'],
+                audformat.segmented_index(
+                    files=[file] * len(index),
+                    starts=index.levels[0] + start,
+                    ends=index.levels[1] + start,
                 )
             )
         return audformat.utils.union(objs)
@@ -482,18 +468,10 @@ class Segment:
                 level=[0, 1],
             )
         if file is not None:
-            index = pd.MultiIndex(
-                levels=[
-                    [file],
-                    index.levels[0],
-                    index.levels[1],
-                ],
-                codes=[
-                    [0] * len(index),
-                    index.codes[0],
-                    index.codes[1],
-                ],
-                names=['file', 'start', 'end'],
+            index = audformat.segmented_index(
+                files=[file] * len(index),
+                starts=index.levels[0],
+                ends=index.levels[1],
             )
         return index
 
@@ -554,10 +532,7 @@ class Segment:
             progress_bar=self.process.verbose,
             task_description=f'Process {len(index)} segments',
         )
-
-        index = y[0]
-        for obj in y[1:]:
-            index = index.union(obj)
+        index = audformat.utils.union(y)
 
         return index
 
