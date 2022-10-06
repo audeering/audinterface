@@ -288,7 +288,7 @@ def sliding_window(
         sampling_rate: int,
         win_dur: Timestamp,
         hop_dur: Timestamp,
-):
+) -> np.ndarray:
     r"""Reshape signal by applying a sliding window.
 
     Windows that do not match the specified duration
