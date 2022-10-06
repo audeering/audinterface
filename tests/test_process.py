@@ -8,6 +8,7 @@ import pytest
 
 import audinterface
 import audformat
+import audobject
 
 
 def signal_duration(signal, sampling_rate):
@@ -16,6 +17,12 @@ def signal_duration(signal, sampling_rate):
 
 def signal_max(signal, sampling_rate):
     return np.max(signal)
+
+
+class SignalObject(audobject.Object):
+
+    def __call__(self, signal, sampling_rate):
+        return np.max(signal)
 
 
 SEGMENT = audinterface.Segment(
@@ -968,6 +975,12 @@ def test_process_signal(
         ),
         (
             signal_max,
+            np.random.random(5 * 44100),
+            44100,
+            audinterface.utils.signal_index(),
+        ),
+        (
+            SignalObject(),
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(),
