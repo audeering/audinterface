@@ -532,16 +532,7 @@ class Segment:
             progress_bar=self.process.verbose,
             task_description=f'Process {len(index)} segments',
         )
-
-        if len(index.levels) == 2:
-            # Index without 'file' level
-            index = y[0]
-            for obj in y[1:]:
-                index = index.union(obj)
-        else:
-            # For segmented index use audformat.utils.union()
-            # to ensure the correct dtypes are preserved
-            index = audformat.utils.union(y)
+        index = audformat.utils.union(y)
 
         return index
 
