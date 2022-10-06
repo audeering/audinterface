@@ -1,3 +1,4 @@
+audobject >=0.7.5
 # To avoid https://github.com/tholo/pytest-flake8/issues/87
 flake8 <5.0.0
 pytest
