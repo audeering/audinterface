@@ -124,8 +124,8 @@ def read_audio(
         root: root folder
 
     Returns:
-        signal: array with signal values in shape ``(channels, samples)``
-        sampling_rate: sampling rate in Hz
+        * array with signal values in shape ``(channels, samples)``
+        * sampling rate in Hz
 
     Example:
         >>> import audb
