@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                v0.9.1
+                v0.9.2
               </div>
             
           
@@ -233,7 +233,7 @@ and create an interface for it using <a class="reference internal" href="api.htm
 <p>The following three commands
 apply the algorithm
 and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
@@ -328,7 +328,7 @@ and set a window and hop duration.</p>
       <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
-      <td>-16.386615</td>
+      <td>-16.386614</td>
     </tr>
     <tr>
       <th>...</th>
@@ -360,7 +360,7 @@ and set a window and hop duration.</p>
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -582,23 +582,23 @@ whereas the first dimension is optionally.</p>
       <th rowspan="3" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:00.020000</th>
-      <td>-611.993347</td>
+      <td>-611.993286</td>
       <td>...</td>
-      <td>1.151385</td>
+      <td>1.151391</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.010000</th>
       <th>0 days 00:00:00.030000</th>
       <td>-668.175842</td>
       <td>...</td>
-      <td>14.068541</td>
+      <td>14.068544</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.020000</th>
       <th>0 days 00:00:00.040000</th>
       <td>-664.612793</td>
       <td>...</td>
-      <td>7.949763</td>
+      <td>7.949759</td>
     </tr>
     <tr>
       <th>...</th>
@@ -614,21 +614,21 @@ whereas the first dimension is optionally.</p>
       <th>0 days 00:00:02.520000</th>
       <td>-644.156494</td>
       <td>...</td>
-      <td>7.411008</td>
+      <td>7.411007</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.510000</th>
       <th>0 days 00:00:02.530000</th>
       <td>-618.545898</td>
       <td>...</td>
-      <td>17.645348</td>
+      <td>17.645357</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.520000</th>
       <th>0 days 00:00:02.540000</th>
       <td>-666.805237</td>
       <td>...</td>
-      <td>3.711084</td>
+      <td>3.711080</td>
     </tr>
   </tbody>
 </table></div></div>
@@ -1023,7 +1023,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/07/22 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -1060,11 +1060,12 @@ to select the appropriate f0 range.</p>
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/thebelab-helper.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.1/dist/embed-amd.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     
 
   
