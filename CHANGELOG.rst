@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.9.2 (2022-10-07)
+--------------------------
+
+* Changed: require ``audformat>=0.15.3``
+* Fixed: segmented indices are returned
+  with ``file`` level
+  as dtype ``string``
+  as introduced with ``audformat`` 0.15.0
+* Removed: support for Python 3.7
+
+
 Version 0.9.1 (2022-07-22)
 --------------------------
 
