@@ -280,10 +280,11 @@ class Feature:
             column_names = []
             for channel in range(num_channels):
                 column_names.extend(
-                    [f'{name}-{channel}' for name in feature_names]
+                    [(channel, feature_name) for feature_name in feature_names]
                 )
+            column_names = pd.MultiIndex.from_tuples(column_names)
         else:
-            column_names = feature_names
+            column_names = pd.Index(feature_names)
 
         if process_func is None:
             def process_func(signal, _):
