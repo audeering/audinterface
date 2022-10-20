@@ -278,7 +278,7 @@ class Feature:
         feature_names = audeer.to_list(feature_names)
         if num_channels > 1:
             column_names = []
-            for channel in range(num_channels):
+            for channel in channels:
                 column_names.extend(
                     [(channel, feature_name) for feature_name in feature_names]
                 )

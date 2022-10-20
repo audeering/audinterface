@@ -8,7 +8,7 @@
 
     def dataframe_to_html(df):
         # Replace beginning of data path with ...
-        if len(df.index) > 0:
+        if len(df.index) > 0 and df.index.names[0] == 'file':
             old_path = r'.+/audb'
             new_path = r'.../audb'
             # Assuming segmented index
@@ -21,7 +21,7 @@
                 level=0,
             )
 
-        return df.to_html(max_rows=6, max_cols=3)
+        return df.to_html(max_rows=6, max_cols=4)
 
 
     def series_to_html(y):
@@ -174,8 +174,84 @@ and single frames are passed on to the processing function.
         win_dur=1.0,
         hop_dur=0.5,
     )
-    y = interface.process_files(files)
-    y
+    df = interface.process_files(files)
+    df
+
+
+Feature interface for multi-channel input
+-----------------------------------------
+
+By default,
+an interface will process
+the first channel of an audio signal.
+We can prove this
+by running the previous interface
+on the following multi-channel signal.
+
+.. jupyter-execute::
+
+    import audiofile
+
+    signal, sampling_rate = audiofile.read(
+        files[0],
+        always_2d=True,
+    )
+    signal_multi_channel = np.concatenate(
+        [
+            signal,
+            signal * 0,
+            signal - 0.5,
+            signal + 0.5,
+        ],
+    )
+    signal_multi_channel.shape
+
+.. jupyter-execute::
+
+    df = interface.process_signal(
+        signal,
+        sampling_rate,
+    )
+    df
+
+To process the second and fourth channel,
+we create a new interface
+and set
+``channels=[1, 3]``.
+To reuse our processing function,
+we additionally set
+``process_func_is_mono=True``.
+This will apply the function
+on each channel and combine the results.
+Otherwise,
+the processing function must
+return an array with the correct
+number of channels (here 2).
+
+.. jupyter-execute::
+
+    interface_multi_channel = audinterface.Feature(
+        ['mean', 'std'],
+        process_func=features,
+        process_func_is_mono=True,
+        process_func_applies_sliding_window=False,
+        win_dur=1.0,
+        hop_dur=0.5,
+        channels=[1, 3],
+    )
+
+    df = interface_multi_channel.process_signal(
+        signal_multi_channel,
+        sampling_rate,
+    )
+    df
+
+We can access the features of a specific
+channel by its index.
+
+.. jupyter-execute::
+
+    df[3]
 
 
 Feature interface for external function
