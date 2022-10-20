@@ -438,8 +438,6 @@ def test_process_func_args():
         )
 
 
-
-
 def test_process_index(tmpdir):
 
     cache_root = os.path.join(tmpdir, 'cache')
@@ -910,7 +908,7 @@ def test_process_signal(
         for channel in channels:
             np.testing.assert_array_equal(
                 df[channel].values,
-                expected[:, channel*num_feat:(channel+1)*num_feat],
+                expected[:, channel * num_feat:(channel + 1) * num_feat],
             )
             assert df[channel].columns.to_list() == feature_names
 
