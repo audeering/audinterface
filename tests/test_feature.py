@@ -438,9 +438,77 @@ def test_process_func_args():
         )
 
 
+
+
+def test_process_index(tmpdir):
+
+    cache_root = os.path.join(tmpdir, 'cache')
+
+    feature = audinterface.Feature(
+        feature_names=('o1', 'o2', 'o3'),
+        process_func=feature_extractor,
+        channels=range(NUM_CHANNELS),
+    )
+
+    # empty
+
+    index = audformat.segmented_index()
+    df = feature.process_index(index)
+    assert df.empty
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # non-empty
+
+    # create file
+    root = str(tmpdir.mkdir('wav'))
+    files = ['file-1.wav', 'file-2.wav']
+    paths = [os.path.join(root, file) for file in files]
+    for path in paths:
+        af.write(path, SIGNAL_2D, SAMPLING_RATE)
+    df_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
+
+    # absolute paths
+    index = audformat.segmented_index(paths, [0, 1], [2, 3])
+    df = feature.process_index(index)
+    assert df.index.get_level_values('file')[0] == paths[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+    df = feature.process_index(index)
+
+    # relative paths
+    index = audformat.segmented_index(files, [0, 1], [2, 3])
+    df = feature.process_index(index, root=root)
+    assert df.index.get_level_values('file')[0] == files[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # cache result
+    df = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    os.remove(paths[1])
+
+    # fails because second file does not exist
+    with pytest.raises(RuntimeError):
+        feature.process_index(
+            index,
+            root=root,
+        )
+
+    # loading from cache still works
+    df_cached = feature.process_index(
+        index,
+        root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_frame_equal(df, df_cached)
+
+
 @pytest.mark.parametrize(
     'process_func, applies_sliding_window, num_feat, signal, start, end, '
-    'expand, expected',
+    'is_mono, expected',
     [
         # no process function
         (
@@ -815,23 +883,36 @@ def test_process_func_args():
 )
 def test_process_signal(
         process_func, applies_sliding_window, num_feat, signal, start, end,
-        expand, expected,
+        is_mono, expected,
 ):
+    channels = range(signal.shape[0])
+    feature_names = [f'f{i}' for i in range(num_feat)]
+
     feature = audinterface.Feature(
-        feature_names=[f'f{i}' for i in range(num_feat)],
+        feature_names=feature_names,
         process_func=process_func,
         process_func_applies_sliding_window=applies_sliding_window,
-        channels=range(signal.shape[0]),
-        process_func_is_mono=expand,
+        channels=channels,
+        process_func_is_mono=is_mono,
         win_dur=1,
     )
-    y = feature.process_signal(
+
+    df = feature.process_signal(
         signal,
         SAMPLING_RATE,
         start=start,
         end=end,
     )
-    np.testing.assert_array_equal(y.values, expected)
+    np.testing.assert_array_equal(df.values, expected)
+
+    # test individual channels
+    if len(channels) > 1:
+        for channel in channels:
+            np.testing.assert_array_equal(
+                df[channel].values,
+                expected[:, channel*num_feat:(channel+1)*num_feat],
+            )
+            assert df[channel].columns.to_list() == feature_names
 
 
 @pytest.mark.parametrize(
@@ -858,72 +939,6 @@ def test_process_signal_from_index(index, expected_features):
         index,
     )
     np.testing.assert_array_equal(features.values, expected_features)
-
-
-def test_process_index(tmpdir):
-
-    cache_root = os.path.join(tmpdir, 'cache')
-
-    feature = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
-        process_func=feature_extractor,
-        channels=range(NUM_CHANNELS),
-    )
-
-    # empty
-
-    index = audformat.segmented_index()
-    df = feature.process_index(index)
-    assert df.empty
-    assert df.columns.tolist() == feature.column_names
-
-    # non-empty
-
-    # create file
-    root = str(tmpdir.mkdir('wav'))
-    files = ['file-1.wav', 'file-2.wav']
-    paths = [os.path.join(root, file) for file in files]
-    for path in paths:
-        af.write(path, SIGNAL_2D, SAMPLING_RATE)
-    df_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
-
-    # absolute paths
-    index = audformat.segmented_index(paths, [0, 1], [2, 3])
-    df = feature.process_index(index)
-    assert df.index.get_level_values('file')[0] == paths[0]
-    np.testing.assert_array_equal(df.values, df_expected)
-    assert df.columns.tolist() == feature.column_names
-    df = feature.process_index(index)
-
-    # relative paths
-    index = audformat.segmented_index(files, [0, 1], [2, 3])
-    df = feature.process_index(index, root=root)
-    assert df.index.get_level_values('file')[0] == files[0]
-    np.testing.assert_array_equal(df.values, df_expected)
-    assert df.columns.tolist() == feature.column_names
-
-    # cache result
-    df = feature.process_index(
-        index,
-        root=root,
-        cache_root=cache_root,
-    )
-    os.remove(paths[1])
-
-    # fails because second file does not exist
-    with pytest.raises(RuntimeError):
-        feature.process_index(
-            index,
-            root=root,
-        )
-
-    # loading from cache still works
-    df_cached = feature.process_index(
-        index,
-        root=root,
-        cache_root=cache_root,
-    )
-    pd.testing.assert_frame_equal(df, df_cached)
 
 
 @pytest.mark.parametrize(
