@@ -83,9 +83,11 @@ class Feature:
 
     Args:
         feature_names: features are stored as columns in a data frame,
-            ``feature_names`` defines the names of the columns.
-            If ``num_channels`` > 1,
-            the channel number will be appended to the column names.
+            where ``feature_names`` defines the names of the columns.
+            If ``len(channels)`` > 1,
+            the data frame has a multi-column index with
+            with channel ID as first level
+            and ``feature_names`` as second level
         name: name of the feature set, e.g. ``'stft'``
         params: parameters that describe the feature set,
             e.g. ``{'win_size': 512, 'hop_size': 256, 'num_fft': 512}``.
@@ -215,6 +217,31 @@ class Feature:
                         0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917
                         0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
                         0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
+        >>> import audiofile
+        >>> signal, sampling_rate = audiofile.read(
+        ...     audeer.path(db.root, db.files[0]),
+        ...     always_2d=True,
+        ... )
+        >>> signal_multi_channel = np.concatenate(
+        ...     [
+        ...         signal - 0.5,
+        ...         signal + 0.5,
+        ...     ],
+        ... )
+        >>> interface_multi_channel = Feature(
+        ...     ['mean', 'std'],
+        ...     process_func=mean_std,
+        ...     process_func_is_mono=True,
+        ...     channels=[0, 1],
+        ... )
+        >>> interface_multi_channel.process_signal(
+        ...     signal_multi_channel,
+        ...     sampling_rate,
+        ... )
+                                              0                   1
+                                           mean       std      mean       std
+        start  end
+        0 days 0 days 00:00:01.898250 -0.500311  0.082317  0.499689  0.082317
 
     """  # noqa: E501
     @deprecated_process_func_applies_sliding_window_default_value()
@@ -278,12 +305,13 @@ class Feature:
         feature_names = audeer.to_list(feature_names)
         if num_channels > 1:
             column_names = []
-            for channel in range(num_channels):
+            for channel in channels:
                 column_names.extend(
-                    [f'{name}-{channel}' for name in feature_names]
+                    [(channel, feature_name) for feature_name in feature_names]
                 )
+            column_names = pd.MultiIndex.from_tuples(column_names)
         else:
-            column_names = feature_names
+            column_names = pd.Index(feature_names)
 
         if process_func is None:
             def process_func(signal, _):
