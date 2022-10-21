@@ -9,8 +9,8 @@
     def dataframe_to_html(df):
         # Replace beginning of data path with ...
         if len(df.index) > 0 and df.index.names[0] == 'file':
-            old_path = r'.+/audb'
-            new_path = r'.../audb'
+            old_path = r'.+/audb/emodb/1.2.0/d3b62a9b/wav/'
+            new_path = r'.../'
             # Assuming segmented index
             df.index = df.index.set_levels(
                 df.index.levels[0].str.replace(
