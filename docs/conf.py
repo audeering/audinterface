@@ -57,6 +57,9 @@ autosectionlabel_maxdepth = 2
 copybutton_prompt_text = r'>>> |\.\.\. |$ '
 copybutton_prompt_is_regexp = True
 
+# Disable auto-generation of TOC entries in the API
+# https://github.com/sphinx-doc/sphinx/issues/6316
+toc_object_entries = False
 
 # HTML --------------------------------------------------------------------
 html_theme = 'sphinx_audeering_theme'
