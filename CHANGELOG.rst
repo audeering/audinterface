@@ -7,6 +7,15 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 0.10.0 (2022-10-24)
+---------------------------
+
+* Changed: ``audinterface.Feature``
+  uses multi-level column format
+  and names columns after channel ID
+  when result has more than one channel
+
+
 Version 0.9.2 (2022-10-07)
 --------------------------
 
