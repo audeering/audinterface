@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                v0.9.2
+                v0.10.0
               </div>
             
           
@@ -101,6 +101,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#processing-interface">Processing interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#feature-interface">Feature interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-interface-for-multi-channel-input">Feature interface for multi-channel input</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#feature-interface-for-external-function">Feature interface for external function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#serializable-feature-interface">Serializable feature interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-interface">Segmentation interface</a></li>
@@ -233,7 +234,7 @@ and create an interface for it using <a class="reference internal" href="api.htm
 <p>The following three commands
 apply the algorithm
 and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
@@ -261,19 +262,19 @@ as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/s
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>-21.690142</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>-18.040704</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>-20.394533</td>
@@ -314,7 +315,7 @@ and set a window and hop duration.</p>
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
       <td>-20.165248</td>
@@ -325,10 +326,10 @@ and set a window and hop duration.</p>
       <td>-23.472970</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
-      <td>-16.386614</td>
+      <td>-16.386615</td>
     </tr>
     <tr>
       <th>...</th>
@@ -337,7 +338,7 @@ and set a window and hop duration.</p>
       <td>...</td>
     </tr>
     <tr>
-      <th rowspan="3" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
       <th>0 days 00:00:00.500000</th>
       <th>0 days 00:00:01.500000</th>
       <td>-20.233054</td>
@@ -360,7 +361,7 @@ and set a window and hop duration.</p>
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -397,21 +398,21 @@ and assigns names to the dimensions/features.</p>
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>-0.000311</td>
       <td>0.082317</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>-0.000312</td>
       <td>0.125304</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>-0.000464</td>
@@ -436,8 +437,8 @@ and single frames are passed on to the processing function.</p>
     <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-<span class="n">y</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+<span class="n">df</span>
 </pre></div>
 </div>
 </div>
@@ -461,7 +462,7 @@ and single frames are passed on to the processing function.</p>
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
       <td>-0.000329</td>
@@ -474,7 +475,7 @@ and single frames are passed on to the processing function.</p>
       <td>0.067042</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
       <td>0.000039</td>
@@ -488,7 +489,7 @@ and single frames are passed on to the processing function.</p>
       <td>...</td>
     </tr>
     <tr>
-      <th rowspan="3" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
       <th>0 days 00:00:00.500000</th>
       <th>0 days 00:00:01.500000</th>
       <td>-0.000461</td>
@@ -505,6 +506,202 @@ and single frames are passed on to the processing function.</p>
       <th>0 days 00:00:02.500000</th>
       <td>-0.000447</td>
       <td>0.095459</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+</div>
+<div class="section" id="feature-interface-for-multi-channel-input">
+<h2>Feature interface for multi-channel input<a class="headerlink" href="#feature-interface-for-multi-channel-input" title="Permalink to this heading">¶</a></h2>
+<p>By default,
+an interface will process
+the first channel of an audio signal.
+We can prove this
+by running the previous interface
+on the following multi-channel signal.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audiofile</span>
+
+<span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">audiofile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+    <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">always_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">signal_multi_channel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">signal</span><span class="p">,</span>
+        <span class="n">signal</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">signal</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">signal</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="n">signal_multi_channel</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>(4, 30372)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
+    <span class="n">signal</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>-0.000329</td>
+      <td>0.098115</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>-0.000285</td>
+      <td>0.067042</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+<p>To process the second and fourth channel,
+we create a new interface
+and set
+<code class="docutils literal notranslate"><span class="pre">channels=[1,</span> <span class="pre">3]</span></code>.
+To reuse our processing function,
+we additionally set
+<code class="docutils literal notranslate"><span class="pre">process_func_is_mono=True</span></code>.
+This will apply the function
+on each channel and combine the results.
+Otherwise,
+the processing function must
+return an array with the correct
+number of channels (here 2).</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface_multi_channel</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">],</span>
+    <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+    <span class="n">process_func_is_mono</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">process_func_applies_sliding_window</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">interface_multi_channel</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
+    <span class="n">signal_multi_channel</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th colspan="2" halign="left">1</th>
+      <th colspan="2" halign="left">3</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.499671</td>
+      <td>0.098115</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.499715</td>
+      <td>0.067042</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+<p>We can access the features of a specific
+channel by its index.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+    </tr>
+    <tr>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0 days 00:00:00</th>
+      <th>0 days 00:00:01</th>
+      <td>0.499671</td>
+      <td>0.098115</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.500000</th>
+      <th>0 days 00:00:01.500000</th>
+      <td>0.499715</td>
+      <td>0.067042</td>
     </tr>
   </tbody>
 </table></div></div>
@@ -565,7 +762,9 @@ whereas the first dimension is optionally.</p>
       <th></th>
       <th></th>
       <th>mfcc-0</th>
+      <th>mfcc-1</th>
       <th>...</th>
+      <th>mfcc-11</th>
       <th>mfcc-12</th>
     </tr>
     <tr>
@@ -575,30 +774,38 @@ whereas the first dimension is optionally.</p>
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th rowspan="3" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th rowspan="3" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:00.020000</th>
-      <td>-611.993286</td>
+      <td>-611.993347</td>
+      <td>47.627602</td>
       <td>...</td>
-      <td>1.151391</td>
+      <td>10.659678</td>
+      <td>1.151385</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.010000</th>
       <th>0 days 00:00:00.030000</th>
       <td>-668.175842</td>
+      <td>35.650555</td>
       <td>...</td>
-      <td>14.068544</td>
+      <td>13.644268</td>
+      <td>14.068541</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.020000</th>
       <th>0 days 00:00:00.040000</th>
       <td>-664.612793</td>
+      <td>43.068928</td>
       <td>...</td>
-      <td>7.949759</td>
+      <td>5.081636</td>
+      <td>7.949763</td>
     </tr>
     <tr>
       <th>...</th>
@@ -607,28 +814,36 @@ whereas the first dimension is optionally.</p>
       <td>...</td>
       <td>...</td>
       <td>...</td>
+      <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
-      <th rowspan="3" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
       <th>0 days 00:00:02.500000</th>
       <th>0 days 00:00:02.520000</th>
       <td>-644.156494</td>
+      <td>34.024544</td>
       <td>...</td>
-      <td>7.411007</td>
+      <td>2.472634</td>
+      <td>7.411008</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.510000</th>
       <th>0 days 00:00:02.530000</th>
       <td>-618.545898</td>
+      <td>44.741570</td>
       <td>...</td>
-      <td>17.645357</td>
+      <td>12.690895</td>
+      <td>17.645348</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.520000</th>
       <th>0 days 00:00:02.540000</th>
       <td>-666.805237</td>
+      <td>19.845562</td>
       <td>...</td>
-      <td>3.711080</td>
+      <td>4.124322</td>
+      <td>3.711084</td>
     </tr>
   </tbody>
 </table></div></div>
@@ -686,21 +901,21 @@ and <a class="reference external" href="https://audeering.github.io/audobject/ap
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>-0.000311</td>
       <td>0.082317</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>-0.000312</td>
       <td>0.125304</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>-0.000464</td>
@@ -741,21 +956,21 @@ and re-instantiate it from there.</p>
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>-0.000311</td>
       <td>0.082317</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>-0.000312</td>
       <td>0.125304</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>-0.000464</td>
@@ -825,7 +1040,7 @@ would be a voice activity detection algorithm.</p>
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2" valign="top">.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00.150000</th>
       <th>0 days 00:00:00.700000</th>
     </tr>
@@ -898,19 +1113,19 @@ returns the values of
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>(0, 03a01Fa.wav)</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>(1, 03a01Nc.wav)</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>(2, 16b10Wb.wav)</td>
@@ -974,21 +1189,21 @@ to select the appropriate f0 range.</p>
   </thead>
   <tbody>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Fa.wav</th>
+      <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
       <td>128.8100011952554</td>
       <td>male</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/03a01Nc.wav</th>
+      <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
       <td>111.6334972484757</td>
       <td>male</td>
     </tr>
     <tr>
-      <th>.../audb/emodb/1.2.0/d3b62a9b/wav/16b10Wb.wav</th>
+      <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
       <td>229.09341831755435</td>
@@ -1023,7 +1238,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

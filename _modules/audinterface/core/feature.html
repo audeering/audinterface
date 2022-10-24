@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.9.2
+                v0.10.0
               </div>
             
           
@@ -230,9 +230,11 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        feature_names: features are stored as columns in a data frame,</span>
-<span class="sd">            ``feature_names`` defines the names of the columns.</span>
-<span class="sd">            If ``num_channels`` &gt; 1,</span>
-<span class="sd">            the channel number will be appended to the column names.</span>
+<span class="sd">            where ``feature_names`` defines the names of the columns.</span>
+<span class="sd">            If ``len(channels)`` &gt; 1,</span>
+<span class="sd">            the data frame has a multi-column index with</span>
+<span class="sd">            with channel ID as first level</span>
+<span class="sd">            and ``feature_names`` as second level</span>
 <span class="sd">        name: name of the feature set, e.g. ``&#39;stft&#39;``</span>
 <span class="sd">        params: parameters that describe the feature set,</span>
 <span class="sd">            e.g. ``{&#39;win_size&#39;: 512, &#39;hop_size&#39;: 256, &#39;num_fft&#39;: 512}``.</span>
@@ -362,6 +364,31 @@
 <span class="sd">                        0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917</span>
 <span class="sd">                        0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042</span>
 <span class="sd">                        0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677</span>
+<span class="sd">        &gt;&gt;&gt; import audiofile</span>
+<span class="sd">        &gt;&gt;&gt; signal, sampling_rate = audiofile.read(</span>
+<span class="sd">        ...     audeer.path(db.root, db.files[0]),</span>
+<span class="sd">        ...     always_2d=True,</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; signal_multi_channel = np.concatenate(</span>
+<span class="sd">        ...     [</span>
+<span class="sd">        ...         signal - 0.5,</span>
+<span class="sd">        ...         signal + 0.5,</span>
+<span class="sd">        ...     ],</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; interface_multi_channel = Feature(</span>
+<span class="sd">        ...     [&#39;mean&#39;, &#39;std&#39;],</span>
+<span class="sd">        ...     process_func=mean_std,</span>
+<span class="sd">        ...     process_func_is_mono=True,</span>
+<span class="sd">        ...     channels=[0, 1],</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; interface_multi_channel.process_signal(</span>
+<span class="sd">        ...     signal_multi_channel,</span>
+<span class="sd">        ...     sampling_rate,</span>
+<span class="sd">        ... )</span>
+<span class="sd">                                              0                   1</span>
+<span class="sd">                                           mean       std      mean       std</span>
+<span class="sd">        start  end</span>
+<span class="sd">        0 days 0 days 00:00:01.898250 -0.500311  0.082317  0.499689  0.082317</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
     <span class="nd">@deprecated_process_func_applies_sliding_window_default_value</span><span class="p">()</span>
@@ -425,12 +452,13 @@
         <span class="n">feature_names</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_channels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">column_names</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
                 <span class="n">column_names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                    <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">channel</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">]</span>
+                    <span class="p">[(</span><span class="n">channel</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">]</span>
                 <span class="p">)</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">column_names</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">column_names</span> <span class="o">=</span> <span class="n">feature_names</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
@@ -994,7 +1022,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/07 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
