@@ -209,7 +209,7 @@ on the following multi-channel signal.
 .. jupyter-execute::
 
     df = interface.process_signal(
-        signal,
+        signal_multi_channel,
         sampling_rate,
     )
     df
