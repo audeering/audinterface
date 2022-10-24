@@ -328,16 +328,6 @@ class Feature:
                     dtype=object,
                 )
 
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
-
         if win_dur is None and hop_dur is not None:
             raise ValueError(
                 "You have to specify 'win_dur' if 'hop_dur' is given."
@@ -347,6 +337,7 @@ class Feature:
 
         # add 'win_dur' and 'hop_dur' to process_func_args
         # if expected by function but not yet set
+        process_func_args = process_func_args or {}
         signature = inspect.signature(process_func)
         if (
             'win_dur' in signature.parameters

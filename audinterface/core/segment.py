@@ -212,18 +212,7 @@ class Segment:
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
-            **kwargs,
     ):
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
-
         # avoid cycling imports
         from audinterface.core.process import Process
         process = Process(
