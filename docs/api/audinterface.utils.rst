@@ -3,8 +3,6 @@ audinterface.utils
 
 .. automodule:: audinterface.utils
 
-.. rubric:: Functions
-
 .. autosummary::
     :toctree:
     :nosignatures:
