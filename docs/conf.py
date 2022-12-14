@@ -56,6 +56,7 @@ linkcheck_ignore = [
 autodoc_mock_imports = [
     'tqdm',
 ]
+autodoc_inherit_docstrings = True
 # Reference with :ref:`data-header:Database`
 autosectionlabel_prefix_document = True
 autosectionlabel_maxdepth = 2
