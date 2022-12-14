@@ -20,12 +20,19 @@ title = f'{project} Documentation'
 master_doc = 'index'
 extensions = []
 source_suffix = '.rst'
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+exclude_patterns = [
+    'build',
+    'tests',
+    'Thumbs.db',
+    '.DS_Store',
+]
+templates_path = ['_templates']
 pygments_style = None
 extensions = [
     'jupyter_sphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',  # support for Google-style docstrings
+    'sphinx.ext.autosummary',
     'sphinx_autodoc_typehints',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
