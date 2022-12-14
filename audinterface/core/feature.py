@@ -519,7 +519,7 @@ class Feature:
             root: str = None,
             cache_root: str = None,
     ) -> pd.DataFrame:
-        r"""Extract features from an index conform to audformat_.
+        r"""Extract features from an index conform to audformat.
 
         If ``cache_root`` is not ``None``,
         a hash value is created from the index
