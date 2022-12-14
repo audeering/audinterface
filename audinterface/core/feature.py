@@ -178,7 +178,8 @@ class Feature:
             and ``sampling_rate is None``
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
-    Example:
+    Examples:
+
         >>> def mean_std(signal, sampling_rate):
         ...     return [signal.mean(), signal.std()]
         >>> interface = Feature(['mean', 'std'], process_func=mean_std)
@@ -190,6 +191,11 @@ class Feature:
                                 mean       std
         start  end
         0 days 0 days 00:00:01   2.0  0.816497
+
+        Apply interface on an index of a dataframe
+        as provided a database
+        stored in audformat_.
+
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',
@@ -203,20 +209,28 @@ class Feature:
                                                            mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
-        >>> interface_with_sliding_window = Feature(
+
+        Apply interface with a sliding window.
+
+        >>> interface = Feature(
         ...     ['mean', 'std'],
         ...     process_func=mean_std,
         ...     process_func_applies_sliding_window=False,
         ...     win_dur=1.0,
         ...     hop_dur=0.25,
         ... )
-        >>> interface_with_sliding_window.process_index(index, root=db.root)
+        >>> interface.process_index(index, root=db.root)
                                                                            mean       std
         file            start                  end
         wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
                         0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917
                         0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
                         0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
+
+        Apply the same process function
+        on all channels
+        of a multi-channel signal.
+
         >>> import audiofile
         >>> signal, sampling_rate = audiofile.read(
         ...     audeer.path(db.root, db.files[0]),
@@ -228,13 +242,13 @@ class Feature:
         ...         signal + 0.5,
         ...     ],
         ... )
-        >>> interface_multi_channel = Feature(
+        >>> interface = Feature(
         ...     ['mean', 'std'],
         ...     process_func=mean_std,
         ...     process_func_is_mono=True,
         ...     channels=[0, 1],
         ... )
-        >>> interface_multi_channel.process_signal(
+        >>> interface.process_signal(
         ...     signal_multi_channel,
         ...     sampling_rate,
         ... )
@@ -242,6 +256,8 @@ class Feature:
                                            mean       std      mean       std
         start  end
         0 days 0 days 00:00:01.898250 -0.500311  0.082317  0.499689  0.082317
+
+    .. _audformat: https://audeering.github.io/audformat/data-format.html
 
     """  # noqa: E501
     @deprecated_process_func_applies_sliding_window_default_value()

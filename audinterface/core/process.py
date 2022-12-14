@@ -91,7 +91,8 @@ class Process:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
-    Example:
+    Examples:
+
         >>> def mean(signal, sampling_rate):
         ...     return signal.mean()
         >>> interface = Process(process_func=mean)
@@ -102,6 +103,11 @@ class Process:
         start   end
         0 days  0 days 00:00:01   2.0
         dtype: float64
+
+        Apply interface on an index of a dataframe
+        as provided a database
+        stored in audformat_.
+
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',
@@ -115,6 +121,9 @@ class Process:
         file             start   end
         wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
         dtype: float32
+
+        Apply interface with a sliding window.
+
         >>> interface = Process(
         ...     process_func=mean,
         ...     win_dur=1.0,
@@ -125,6 +134,8 @@ class Process:
         wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -0.000329
                          0 days 00:00:00.500000  0 days 00:00:01.500000   -0.000285
         dtype: float32
+
+    .. _audformat: https://audeering.github.io/audformat/data-format.html
 
     """  # noqa: E501
     def __init__(

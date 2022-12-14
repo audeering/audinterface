@@ -127,7 +127,7 @@ def read_audio(
         * array with signal values in shape ``(channels, samples)``
         * sampling rate in Hz
 
-    Example:
+    Examples:
         >>> import audb
         >>> media = audb.load_media(
         ...     'emodb',
@@ -221,17 +221,21 @@ def signal_index(
     Raises:
         ValueError: if ``start`` and ``ends`` differ in size
 
-    Example:
+    Examples:
+
         >>> signal_index(0, 1.1)
         MultiIndex([('0 days', '0 days 00:00:01.100000')],
                    names=['start', 'end'])
+
         >>> signal_index('0ms', '1ms')
         MultiIndex([('0 days', '0 days 00:00:00.001000')],
                    names=['start', 'end'])
+
         >>> signal_index([None, 1], [1, None])
         MultiIndex([(              NaT, '0 days 00:00:01'),
                     ('0 days 00:00:01',              NaT)],
                    names=['start', 'end'])
+
         >>> signal_index(
         ...     starts=[0, 1],
         ...     ends=pd.to_timedelta([1000, 2000], unit='ms'),
@@ -239,10 +243,12 @@ def signal_index(
         MultiIndex([('0 days 00:00:00', '0 days 00:00:01'),
                     ('0 days 00:00:01', '0 days 00:00:02')],
                    names=['start', 'end'])
+
         >>> signal_index([0, 1])
         MultiIndex([('0 days 00:00:00', NaT),
                     ('0 days 00:00:01', NaT)],
                    names=['start', 'end'])
+
         >>> signal_index(ends=[1, 2])
         MultiIndex([('0 days', '0 days 00:00:01'),
                     ('0 days', '0 days 00:00:02')],
@@ -316,6 +322,7 @@ def sliding_window(
             is smaller than ``1/sampling_rate``
 
     Examples:
+
         >>> signal = np.array(
         ...     [
         ...         [0, 1, 2, 3, 4, 5],
@@ -331,13 +338,22 @@ def sliding_window(
         ...     win_dur=3,
         ...     hop_dur=2,
         ... )
-        >>> frames[..., 0]  # first frame
+
+        First frame.
+
+        >>> frames[..., 0]
         array([[ 0,  1,  2],
                [ 0, 10, 20]])
-        >>> frames[..., -1]  # last frame
+
+        Last frame.
+
+        >>> frames[..., -1]
         array([[ 2,  3,  4],
                [20, 30, 40]])
-        >>> frames.mean(axis=1)  # mean per frame
+
+        Mean per frame.
+
+        >>> frames.mean(axis=1)
         array([[ 1.,  3.],
                [10., 30.]])
 
@@ -423,15 +439,20 @@ def to_timedelta(
         ValueError: if a duration value is given in samples,
             but ``sampling_rate`` is ``None``
 
-    Example:
+    Examples:
+
         >>> to_timedelta(2)
         Timedelta('0 days 00:00:02')
+
         >>> to_timedelta(2.0)
         Timedelta('0 days 00:00:02')
+
         >>> to_timedelta('2ms')
         Timedelta('0 days 00:00:00.002000')
+
         >>> to_timedelta('200milliseconds')
         Timedelta('0 days 00:00:00.200000')
+
         >>> to_timedelta([1, '2000'], 1000)
         [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
 
