@@ -665,7 +665,7 @@ class Feature:
             frame: pd.DataFrame,
     ) -> np.ndarray:
         r"""Return feature values as a numpy array.
-        
+
         The returned :class:`numpy.ndarray`
         has the original shape,
         i.e. ``(channels, features, time)``.
