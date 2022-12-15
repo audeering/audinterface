@@ -57,6 +57,9 @@ autodoc_mock_imports = [
     'tqdm',
 ]
 autodoc_inherit_docstrings = True
+
+autosummary_generate = True
+
 # Reference with :ref:`data-header:Database`
 autosectionlabel_prefix_document = True
 autosectionlabel_maxdepth = 2
