@@ -10,7 +10,7 @@
 
     .. autosummary::
         :nosignatures:
-    {% for item in (all_methods)|sort(attribute=0) %}
+    {% for item in (all_methods)|sort %}
         {%- if not item.startswith('_') or item in ['__call__'] %}
         {{ name }}.{{ item }}
         {% endif %}
@@ -20,7 +20,7 @@
 
     .. autosummary::
         :nosignatures:
-    {% for item in (attributes)|sort(attribute=0) %}
+    {% for item in (attributes)|sort %}
         {%- if not item.startswith('_') %}
         {{ name }}.{{ item }}
         {% endif %}
@@ -28,7 +28,7 @@
 
     .. toctree::
         :hidden:
-    {% for item in (all_methods + attributes)|sort(attribute=0) %}
+    {% for item in (all_methods + attributes)|sort %}
         {%- if not item.startswith('_') or item in ['__call__'] %}
         audinterface.{{ name }}.{{ item }}
         {% endif %}
