@@ -7,5 +7,4 @@ dist/
 venv/
 .coverage
 coverage.xml
-docs/api/audinterface.*.*.rst
-docs/api/audinterface.[A-Z]*.rst
+docs/api/
