@@ -5,33 +5,14 @@
 .. autoclass:: {{ objname }}
 
     {% block methods %}
-
-    .. rubric:: {{ _('Methods') }}
-
-    .. autosummary::
-        :nosignatures:
-    {% for item in (all_methods)|sort %}
+    {%- for item in (all_methods + attributes)|sort %}
         {%- if not item.startswith('_') or item in ['__call__'] %}
-        {{ name }}.{{ item }}
+{{ item | escape | underline(line='-') }}
+            {%- if item in all_methods %}
+.. automethod:: {{ name }}.{{ item }}
+            {%- elif item in attributes %}
+.. autoattribute:: {{ name }}.{{ item }}
+            {%- endif %}
         {% endif %}
     {%- endfor %}
-
-    .. rubric:: {{ _('Attributes') }}
-
-    .. autosummary::
-        :nosignatures:
-    {% for item in (attributes)|sort %}
-        {%- if not item.startswith('_') %}
-        {{ name }}.{{ item }}
-        {% endif %}
-    {%- endfor %}
-
-    .. toctree::
-        :hidden:
-    {% for item in (all_methods + attributes)|sort %}
-        {%- if not item.startswith('_') or item in ['__call__'] %}
-        audinterface.{{ name }}.{{ item }}
-        {% endif %}
-    {%- endfor %}
-
     {% endblock %}
