@@ -179,7 +179,6 @@ class Feature:
         ValueError: if ``hop_dur`` is specified, but not ``win_dur``
 
     Examples:
-
         >>> def mean_std(signal, sampling_rate):
         ...     return [signal.mean(), signal.std()]
         >>> interface = Feature(['mean', 'std'], process_func=mean_std)
@@ -191,11 +190,7 @@ class Feature:
                                 mean       std
         start  end
         0 days 0 days 00:00:01   2.0  0.816497
-
-        Apply interface on an index of a dataframe
-        as provided a database
-        stored in audformat_.
-
+        >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',
@@ -209,9 +204,7 @@ class Feature:
                                                            mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
-
-        Apply interface with a sliding window.
-
+        >>> # Apply interface with a sliding window
         >>> interface = Feature(
         ...     ['mean', 'std'],
         ...     process_func=mean_std,
@@ -226,11 +219,8 @@ class Feature:
                         0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917
                         0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
                         0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677
-
-        Apply the same process function
-        on all channels
-        of a multi-channel signal.
-
+        >>> # Apply the same process function on all channels
+        >>> # of a multi-channel signal
         >>> import audiofile
         >>> signal, sampling_rate = audiofile.read(
         ...     audeer.path(db.root, db.files[0]),
@@ -256,8 +246,6 @@ class Feature:
                                            mean       std      mean       std
         start  end
         0 days 0 days 00:00:01.898250 -0.500311  0.082317  0.499689  0.082317
-
-    .. _audformat: https://audeering.github.io/audformat/data-format.html
 
     """  # noqa: E501
     @deprecated_process_func_applies_sliding_window_default_value()
