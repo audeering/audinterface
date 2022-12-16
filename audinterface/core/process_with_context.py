@@ -55,7 +55,7 @@ class ProcessWithContext:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    Example:
+    Examples:
         >>> def running_mean(signal, sampling_rate, starts, ends):
         ...     means_per_segment = [
         ...         signal[:, start:end].mean()
@@ -70,6 +70,7 @@ class ProcessWithContext:
         >>> ends = [sampling_rate, 2 * sampling_rate]
         >>> interface(signal, sampling_rate, starts, ends)
         array([2., 1.])
+        >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',

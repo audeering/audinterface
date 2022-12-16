@@ -127,7 +127,7 @@ def read_audio(
         * array with signal values in shape ``(channels, samples)``
         * sampling rate in Hz
 
-    Example:
+    Examples:
         >>> import audb
         >>> media = audb.load_media(
         ...     'emodb',
@@ -221,7 +221,7 @@ def signal_index(
     Raises:
         ValueError: if ``start`` and ``ends`` differ in size
 
-    Example:
+    Examples:
         >>> signal_index(0, 1.1)
         MultiIndex([('0 days', '0 days 00:00:01.100000')],
                    names=['start', 'end'])
@@ -331,13 +331,16 @@ def sliding_window(
         ...     win_dur=3,
         ...     hop_dur=2,
         ... )
-        >>> frames[..., 0]  # first frame
+        >>> # First frame
+        >>> frames[..., 0]
         array([[ 0,  1,  2],
                [ 0, 10, 20]])
-        >>> frames[..., -1]  # last frame
+        >>> # Last frame
+        >>> frames[..., -1]
         array([[ 2,  3,  4],
                [20, 30, 40]])
-        >>> frames.mean(axis=1)  # mean per frame
+        >>> # Mean per frame
+        >>> frames.mean(axis=1)
         array([[ 1.,  3.],
                [10., 30.]])
 
@@ -423,7 +426,7 @@ def to_timedelta(
         ValueError: if a duration value is given in samples,
             but ``sampling_rate`` is ``None``
 
-    Example:
+    Examples:
         >>> to_timedelta(2)
         Timedelta('0 days 00:00:02')
         >>> to_timedelta(2.0)

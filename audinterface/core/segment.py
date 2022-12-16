@@ -155,7 +155,7 @@ class Segment:
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
-    Example:
+    Examples:
         >>> def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):
         ...     size = signal.shape[1] / sampling_rate
         ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit='s')
@@ -173,6 +173,7 @@ class Segment:
                     ('0 days 00:00:00.600000', '0 days 00:00:00.800000'),
                     ('0 days 00:00:00.700000', '0 days 00:00:00.900000')],
                    names=['start', 'end'])
+        >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',
