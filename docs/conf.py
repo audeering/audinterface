@@ -3,8 +3,6 @@ import shutil
 import subprocess
 from datetime import date
 
-import sphinx.ext.autosummary.generate
-
 import audeer
 
 
@@ -31,7 +29,6 @@ exclude_patterns = [
     'tests',
     'Thumbs.db',
     '.DS_Store',
-    '_templates-stub-files',
     'api-src',
 ]
 templates_path = ['_templates']
@@ -90,8 +87,7 @@ html_context = {
 }
 html_title = title
 
-# Generate autosummary stub files -----------------------------------------
-# Copy API (sub-)module RST files to the decired docs/api/ folder
+# Copy API (sub-)module RST files to docs/api/ folder ---------------------
 audeer.mkdir('api')
 api_src_files = audeer.list_file_names('api-src')
 api_dst_files = [
