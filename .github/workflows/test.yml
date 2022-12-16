@@ -50,10 +50,6 @@ jobs:
 
     - name: Test building documentation
       run: |
-        # Generate stub files for each class method/attribute
-        sphinx-autogen -o docs/api/ -t docs/_templates-stub-files/ docs/api/*.rst
-        # Build documentation without stub file generation
-        # to use custom toctree entries
         python -m sphinx docs/ docs/_build/ -b html -W
         # Disbale link check until new release is done
         # python -m sphinx docs/ build/sphinx/html -b linkcheck
