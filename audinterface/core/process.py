@@ -484,7 +484,7 @@ class Process:
             root: str = None,
             cache_root: str = None,
     ) -> pd.Series:
-        r"""Process from an index conform to audformat.
+        r"""Process from an index conform to audformat_.
 
         If ``cache_root`` is not ``None``,
         a hash value is created from the index

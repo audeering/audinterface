@@ -172,7 +172,7 @@ class ProcessWithContext:
             *,
             root: str = None,
     ) -> pd.Series:
-        r"""Process from a segmented index conform to audformat.
+        r"""Process from a segmented index conform to audformat_.
 
         Args:
             index: index with segment information
