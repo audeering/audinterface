@@ -156,7 +156,6 @@ class Segment:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
 
     Examples:
-
         >>> def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):
         ...     size = signal.shape[1] / sampling_rate
         ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit='s')
