@@ -533,6 +533,8 @@ class Feature:
         When called again with the same index,
         features will be read from the cached file.
 
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
         Args:
             index: index with segment information
             root: root folder to expand relative file paths
@@ -544,8 +546,6 @@ class Feature:
             RuntimeError: if multiple frames are returned,
                 but ``win_dur`` is not set
             ValueError: if index is not conform to audformat_
-
-        .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
         cache_path = None
