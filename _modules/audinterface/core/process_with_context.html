@@ -58,7 +58,7 @@
 
           <a href="../../../index.html">
           
-            <img src="../../../_static/images/audeering.png" class="logo" alt="audEERING"/>
+            <img src="../../../_static/images/audeering.svg" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.10.0
+                v0.10.1
               </div>
             
           
@@ -100,8 +100,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api.html">audinterface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -131,14 +131,40 @@
         
         <div class="rst-content">
         
-          <div role="navigation" aria-label="Page navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
       <li>audinterface.core.process_with_context</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -159,8 +185,8 @@
 <span class="kn">from</span> <span class="nn">audinterface.core</span> <span class="kn">import</span> <span class="n">utils</span>
 
 
-<div class="viewcode-block" id="ProcessWithContext"><a class="viewcode-back" href="../../../api.html#audinterface.ProcessWithContext">[docs]</a><span class="k">class</span> <span class="nc">ProcessWithContext</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alternate processing interface that provides signal context.</span>
+<div class="viewcode-block" id="ProcessWithContext"><a class="viewcode-back" href="../../../api/audinterface.ProcessWithContext.html#audinterface.ProcessWithContext">[docs]</a><span class="k">class</span> <span class="nc">ProcessWithContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Alternate processing interface that provides signal context.</span>
 
 <span class="sd">    In contrast to :class:`Process` this interface does not look at segments</span>
 <span class="sd">    in isolation, but passes the complete signal together with a list of</span>
@@ -202,7 +228,7 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``resample = True``, but ``sampling_rate = None``</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; def running_mean(signal, sampling_rate, starts, ends):</span>
 <span class="sd">        ...     means_per_segment = [</span>
 <span class="sd">        ...         signal[:, start:end].mean()</span>
@@ -217,6 +243,7 @@
 <span class="sd">        &gt;&gt;&gt; ends = [sampling_rate, 2 * sampling_rate]</span>
 <span class="sd">        &gt;&gt;&gt; interface(signal, sampling_rate, starts, ends)</span>
 <span class="sd">        array([2., 1.])</span>
+<span class="sd">        &gt;&gt;&gt; # Apply interface on an audformat conform index of a dataframe</span>
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
@@ -292,33 +319,33 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_process_func_special_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Channel selection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Channel selection.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">mixdown</span> <span class="o">=</span> <span class="n">mixdown</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mono mixdown.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mono mixdown.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process_func</span> <span class="o">=</span> <span class="n">process_func</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Process function.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Process function.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Additional keyword arguments to processing function.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Additional keyword arguments to processing function.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">resample</span> <span class="o">=</span> <span class="n">resample</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Resample signal.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Resample signal.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sampling rate in Hz.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sampling rate in Hz.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Show debug messages.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Show debug messages.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ProcessWithContext.process_index"><a class="viewcode-back" href="../../../api.html#audinterface.ProcessWithContext.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
+<div class="viewcode-block" id="ProcessWithContext.process_index"><a class="viewcode-back" href="../../../api/audinterface.ProcessWithContext.html#audinterface.ProcessWithContext.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Process from a segmented index conform to audformat_.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Process from a segmented index conform to audformat_.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: index with segment information</span>
@@ -411,13 +438,13 @@
 
         <span class="k">return</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="ProcessWithContext.process_signal_from_index"><a class="viewcode-back" href="../../../api.html#audinterface.ProcessWithContext.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
+<div class="viewcode-block" id="ProcessWithContext.process_signal_from_index"><a class="viewcode-back" href="../../../api/audinterface.ProcessWithContext.html#audinterface.ProcessWithContext.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Split a signal into segments and process each segment.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Split a signal into segments and process each segment.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            signal: signal values</span>
@@ -457,7 +484,7 @@
         <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Call processing function, possibly pass special args.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Call processing function, possibly pass special args.&quot;&quot;&quot;</span>
 
         <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">preprocess_signal</span><span class="p">(</span>
             <span class="n">signal</span><span class="p">,</span>
@@ -486,14 +513,14 @@
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">process_func_args</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="ProcessWithContext.__call__"><a class="viewcode-back" href="../../../api.html#audinterface.ProcessWithContext.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+<div class="viewcode-block" id="ProcessWithContext.__call__"><a class="viewcode-back" href="../../../api/audinterface.ProcessWithContext.html#audinterface.ProcessWithContext.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">starts</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
         <span class="n">ends</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
 
 <span class="sd">        This function processes the signal **without** transforming the output</span>
 <span class="sd">        into a :class:`pd.Series`. Instead it will return the raw processed</span>
@@ -529,7 +556,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -537,7 +564,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2022 audEERING GmbH
+      &copy; 2020-2023 audEERING GmbH
     </p>
   </div> 
 
@@ -562,9 +589,6 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/thebelab-helper.js"></script>

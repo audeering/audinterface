@@ -58,7 +58,7 @@
 
           <a href="../../../index.html">
           
-            <img src="../../../_static/images/audeering.png" class="logo" alt="audEERING"/>
+            <img src="../../../_static/images/audeering.svg" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.10.0
+                v0.10.1
               </div>
             
           
@@ -100,8 +100,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api.html">audinterface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -131,14 +131,40 @@
         
         <div class="rst-content">
         
-          <div role="navigation" aria-label="Page navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
       <li>audinterface.core.utils</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -164,7 +190,7 @@
 
 
 <span class="k">def</span> <span class="nf">assert_index</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if index is conform to audformat.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if index is conform to audformat.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
 
@@ -210,7 +236,7 @@
 
 
 <span class="k">def</span> <span class="nf">is_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if value is scalar&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if value is scalar&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">))</span>
 
@@ -230,7 +256,7 @@
         <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
         <span class="n">mixdown</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pre-process signal.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pre-process signal.&quot;&quot;&quot;</span>
 
     <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
 
@@ -255,14 +281,14 @@
     <span class="k">return</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span>
 
 
-<div class="viewcode-block" id="read_audio"><a class="viewcode-back" href="../../../api-utils.html#audinterface.utils.read_audio">[docs]</a><span class="k">def</span> <span class="nf">read_audio</span><span class="p">(</span>
+<div class="viewcode-block" id="read_audio"><a class="viewcode-back" href="../../../api/audinterface.utils.read_audio.html#audinterface.utils.read_audio">[docs]</a><span class="k">def</span> <span class="nf">read_audio</span><span class="p">(</span>
         <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Reads (segment of an) audio file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads (segment of an) audio file.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        file: path to audio file</span>
@@ -274,7 +300,7 @@
 <span class="sd">        * array with signal values in shape ``(channels, samples)``</span>
 <span class="sd">        * sampling rate in Hz</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; media = audb.load_media(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
@@ -340,11 +366,11 @@
     <span class="k">return</span> <span class="n">starts_i</span><span class="p">,</span> <span class="n">ends_i</span>
 
 
-<div class="viewcode-block" id="signal_index"><a class="viewcode-back" href="../../../api-utils.html#audinterface.utils.signal_index">[docs]</a><span class="k">def</span> <span class="nf">signal_index</span><span class="p">(</span>
+<div class="viewcode-block" id="signal_index"><a class="viewcode-back" href="../../../api/audinterface.utils.signal_index.html#audinterface.utils.signal_index">[docs]</a><span class="k">def</span> <span class="nf">signal_index</span><span class="p">(</span>
         <span class="n">starts</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create signal index.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create signal index.</span>
 
 <span class="sd">    Returns a segmented index like</span>
 <span class="sd">    :func:`audformat.segmented_index`,</span>
@@ -368,7 +394,7 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``start`` and ``ends`` differ in size</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; signal_index(0, 1.1)</span>
 <span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01.100000&#39;)],</span>
 <span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
@@ -430,13 +456,13 @@
     <span class="k">return</span> <span class="n">index</span></div>
 
 
-<div class="viewcode-block" id="sliding_window"><a class="viewcode-back" href="../../../api-utils.html#audinterface.utils.sliding_window">[docs]</a><span class="k">def</span> <span class="nf">sliding_window</span><span class="p">(</span>
+<div class="viewcode-block" id="sliding_window"><a class="viewcode-back" href="../../../api/audinterface.utils.sliding_window.html#audinterface.utils.sliding_window">[docs]</a><span class="k">def</span> <span class="nf">sliding_window</span><span class="p">(</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">win_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
         <span class="n">hop_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reshape signal by applying a sliding window.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reshape signal by applying a sliding window.</span>
 
 <span class="sd">    Windows that do not match the specified duration</span>
 <span class="sd">    at the end of the signals will be dropped.</span>
@@ -478,13 +504,16 @@
 <span class="sd">        ...     win_dur=3,</span>
 <span class="sd">        ...     hop_dur=2,</span>
 <span class="sd">        ... )</span>
-<span class="sd">        &gt;&gt;&gt; frames[..., 0]  # first frame</span>
+<span class="sd">        &gt;&gt;&gt; # First frame</span>
+<span class="sd">        &gt;&gt;&gt; frames[..., 0]</span>
 <span class="sd">        array([[ 0,  1,  2],</span>
 <span class="sd">               [ 0, 10, 20]])</span>
-<span class="sd">        &gt;&gt;&gt; frames[..., -1]  # last frame</span>
+<span class="sd">        &gt;&gt;&gt; # Last frame</span>
+<span class="sd">        &gt;&gt;&gt; frames[..., -1]</span>
 <span class="sd">        array([[ 2,  3,  4],</span>
 <span class="sd">               [20, 30, 40]])</span>
-<span class="sd">        &gt;&gt;&gt; frames.mean(axis=1)  # mean per frame</span>
+<span class="sd">        &gt;&gt;&gt; # Mean per frame</span>
+<span class="sd">        &gt;&gt;&gt; frames.mean(axis=1)</span>
 <span class="sd">        array([[ 1.,  3.],</span>
 <span class="sd">               [10., 30.]])</span>
 
@@ -532,7 +561,7 @@
 
 
 <span class="k">def</span> <span class="nf">to_array</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert value to numpy array.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert value to numpy array.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">)):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -541,11 +570,11 @@
     <span class="k">return</span> <span class="n">value</span>
 
 
-<div class="viewcode-block" id="to_timedelta"><a class="viewcode-back" href="../../../api-utils.html#audinterface.utils.to_timedelta">[docs]</a><span class="k">def</span> <span class="nf">to_timedelta</span><span class="p">(</span>
+<div class="viewcode-block" id="to_timedelta"><a class="viewcode-back" href="../../../api/audinterface.utils.to_timedelta.html#audinterface.utils.to_timedelta">[docs]</a><span class="k">def</span> <span class="nf">to_timedelta</span><span class="p">(</span>
         <span class="n">durations</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert duration value(s) to :class:`pandas.Timedelta`.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert duration value(s) to :class:`pandas.Timedelta`.</span>
 
 <span class="sd">    If duration is given as string without unit,</span>
 <span class="sd">    it is treated as samples</span>
@@ -570,7 +599,7 @@
 <span class="sd">        ValueError: if a duration value is given in samples,</span>
 <span class="sd">            but ``sampling_rate`` is ``None``</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; to_timedelta(2)</span>
 <span class="sd">        Timedelta(&#39;0 days 00:00:02&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; to_timedelta(2.0)</span>
@@ -633,7 +662,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -641,7 +670,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2022 audEERING GmbH
+      &copy; 2020-2023 audEERING GmbH
     </p>
   </div> 
 
@@ -666,9 +695,6 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/thebelab-helper.js"></script>

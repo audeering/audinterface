@@ -1,0 +1,6 @@
+﻿to\_timedelta\(\)
+=================
+
+.. currentmodule:: audinterface.utils
+
+.. autofunction:: audinterface.utils.to_timedelta

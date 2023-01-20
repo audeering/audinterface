@@ -58,7 +58,7 @@
 
           <a href="../../../index.html">
           
-            <img src="../../../_static/images/audeering.png" class="logo" alt="audEERING"/>
+            <img src="../../../_static/images/audeering.svg" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.10.0
+                v0.10.1
               </div>
             
           
@@ -100,8 +100,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api.html">audinterface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -131,14 +131,40 @@
         
         <div class="rst-content">
         
-          <div role="navigation" aria-label="Page navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
       <li>audinterface.core.segment</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -167,7 +193,7 @@
         <span class="n">process_func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]],</span>
         <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create processing function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create processing function.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -190,7 +216,7 @@
         <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">,</span>
         <span class="n">dur</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert index.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert index.</span>
 
 <span class="sd">    Assumes that index is sorted by &#39;start&#39; level.</span>
 
@@ -214,7 +240,7 @@
 <span class="k">def</span> <span class="nf">merge_index</span><span class="p">(</span>
         <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Merge overlapping segments.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Merge overlapping segments.</span>
 
 <span class="sd">    Assumes that index is sorted by &#39;start&#39; level.</span>
 
@@ -242,8 +268,8 @@
     <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Segment"><a class="viewcode-back" href="../../../api.html#audinterface.Segment">[docs]</a><span class="k">class</span> <span class="nc">Segment</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segmentation interface.</span>
+<div class="viewcode-block" id="Segment"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment">[docs]</a><span class="k">class</span> <span class="nc">Segment</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segmentation interface.</span>
 
 <span class="sd">    Interface for models that apply a segmentation to the input signal,</span>
 <span class="sd">    e.g. a voice activity model that detects speech regions.</span>
@@ -302,7 +328,7 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if ``resample = True``, but ``sampling_rate = None``</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):</span>
 <span class="sd">        ...     size = signal.shape[1] / sampling_rate</span>
 <span class="sd">        ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit=&#39;s&#39;)</span>
@@ -320,6 +346,7 @@
 <span class="sd">                    (&#39;0 days 00:00:00.600000&#39;, &#39;0 days 00:00:00.800000&#39;),</span>
 <span class="sd">                    (&#39;0 days 00:00:00.700000&#39;, &#39;0 days 00:00:00.900000&#39;)],</span>
 <span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
+<span class="sd">        &gt;&gt;&gt; # Apply interface on an audformat conform index of a dataframe</span>
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
@@ -388,12 +415,12 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">invert</span> <span class="o">=</span> <span class="n">invert</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert segmentation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Invert segmentation.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Segment.process_file"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_file"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
@@ -401,7 +428,7 @@
             <span class="n">end</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment the content of an audio file.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment the content of an audio file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: file path</span>
@@ -437,7 +464,7 @@
             <span class="n">ends</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Segment.process_files"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_files"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">files</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
             <span class="o">*</span><span class="p">,</span>
@@ -445,7 +472,7 @@
             <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment a list of files.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment a list of files.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            files: list of file paths</span>
@@ -490,13 +517,13 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Segment.process_folder"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_folder">[docs]</a>    <span class="k">def</span> <span class="nf">process_folder</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_folder"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_folder">[docs]</a>    <span class="k">def</span> <span class="nf">process_folder</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">filetype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;wav&#39;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment files in a folder.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment files in a folder.</span>
 
 <span class="sd">        .. note:: At the moment does not scan in sub-folders!</span>
 
@@ -527,13 +554,13 @@
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Segment.process_index"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_index"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment files or segments from an index.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment files or segments from an index.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: index conform to audformat_</span>
@@ -562,7 +589,7 @@
             <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Segment.process_signal"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_signal"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -571,7 +598,7 @@
             <span class="n">start</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">end</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment audio signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment audio signal.</span>
 
 <span class="sd">        .. note:: If a ``file`` is given, the index of the returned frame</span>
 <span class="sd">            has levels ``file``, ``start`` and ``end``. Otherwise,</span>
@@ -622,13 +649,13 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">index</span></div>
 
-<div class="viewcode-block" id="Segment.process_signal_from_index"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.process_signal_from_index"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment parts of a signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment parts of a signal.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            signal: signal values</span>
@@ -683,12 +710,12 @@
 
         <span class="k">return</span> <span class="n">index</span></div>
 
-<div class="viewcode-block" id="Segment.__call__"><a class="viewcode-back" href="../../../api.html#audinterface.Segment.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+<div class="viewcode-block" id="Segment.__call__"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
 
 <span class="sd">        This function processes the signal **without** transforming the output</span>
 <span class="sd">        into a :class:`pd.MultiIndex`. Instead it will return the raw processed</span>
@@ -727,7 +754,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -735,7 +762,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2022 audEERING GmbH
+      &copy; 2020-2023 audEERING GmbH
     </p>
   </div> 
 
@@ -760,9 +787,6 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/thebelab-helper.js"></script>

@@ -1,0 +1,6 @@
+﻿signal\_index\(\)
+=================
+
+.. currentmodule:: audinterface.utils
+
+.. autofunction:: audinterface.utils.signal_index

@@ -1,0 +1,48 @@
+﻿ProcessWithContext
+==================
+
+.. currentmodule:: audinterface
+
+.. autoclass:: ProcessWithContext
+
+
+\_\_call\_\_\(\)
+----------------
+.. automethod:: ProcessWithContext.__call__
+    
+channels
+--------
+.. autoattribute:: ProcessWithContext.channels
+    
+mixdown
+-------
+.. autoattribute:: ProcessWithContext.mixdown
+    
+process\_func
+-------------
+.. autoattribute:: ProcessWithContext.process_func
+    
+process\_func\_args
+-------------------
+.. autoattribute:: ProcessWithContext.process_func_args
+    
+process\_index\(\)
+------------------
+.. automethod:: ProcessWithContext.process_index
+    
+process\_signal\_from\_index\(\)
+--------------------------------
+.. automethod:: ProcessWithContext.process_signal_from_index
+    
+resample
+--------
+.. autoattribute:: ProcessWithContext.resample
+    
+sampling\_rate
+--------------
+.. autoattribute:: ProcessWithContext.sampling_rate
+    
+verbose
+-------
+.. autoattribute:: ProcessWithContext.verbose
+    

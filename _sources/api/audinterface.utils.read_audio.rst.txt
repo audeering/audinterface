@@ -1,0 +1,6 @@
+﻿read\_audio\(\)
+===============
+
+.. currentmodule:: audinterface.utils
+
+.. autofunction:: audinterface.utils.read_audio

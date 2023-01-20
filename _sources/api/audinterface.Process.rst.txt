@@ -1,0 +1,100 @@
+﻿Process
+=======
+
+.. currentmodule:: audinterface
+
+.. autoclass:: Process
+
+
+\_\_call\_\_\(\)
+----------------
+.. automethod:: Process.__call__
+    
+channels
+--------
+.. autoattribute:: Process.channels
+    
+hop\_dur
+--------
+.. autoattribute:: Process.hop_dur
+    
+keep\_nat
+---------
+.. autoattribute:: Process.keep_nat
+    
+max\_signal\_dur
+----------------
+.. autoattribute:: Process.max_signal_dur
+    
+min\_signal\_dur
+----------------
+.. autoattribute:: Process.min_signal_dur
+    
+mixdown
+-------
+.. autoattribute:: Process.mixdown
+    
+multiprocessing
+---------------
+.. autoattribute:: Process.multiprocessing
+    
+num\_workers
+------------
+.. autoattribute:: Process.num_workers
+    
+process\_file\(\)
+-----------------
+.. automethod:: Process.process_file
+    
+process\_files\(\)
+------------------
+.. automethod:: Process.process_files
+    
+process\_folder\(\)
+-------------------
+.. automethod:: Process.process_folder
+    
+process\_func
+-------------
+.. autoattribute:: Process.process_func
+    
+process\_func\_args
+-------------------
+.. autoattribute:: Process.process_func_args
+    
+process\_func\_is\_mono
+-----------------------
+.. autoattribute:: Process.process_func_is_mono
+    
+process\_index\(\)
+------------------
+.. automethod:: Process.process_index
+    
+process\_signal\(\)
+-------------------
+.. automethod:: Process.process_signal
+    
+process\_signal\_from\_index\(\)
+--------------------------------
+.. automethod:: Process.process_signal_from_index
+    
+resample
+--------
+.. autoattribute:: Process.resample
+    
+sampling\_rate
+--------------
+.. autoattribute:: Process.sampling_rate
+    
+segment
+-------
+.. autoattribute:: Process.segment
+    
+verbose
+-------
+.. autoattribute:: Process.verbose
+    
+win\_dur
+--------
+.. autoattribute:: Process.win_dur
+    

@@ -1,0 +1,84 @@
+﻿Feature
+=======
+
+.. currentmodule:: audinterface
+
+.. autoclass:: Feature
+
+
+\_\_call\_\_\(\)
+----------------
+.. automethod:: Feature.__call__
+    
+column\_names
+-------------
+.. autoattribute:: Feature.column_names
+    
+feature\_names
+--------------
+.. autoattribute:: Feature.feature_names
+    
+hop\_dur
+--------
+.. autoattribute:: Feature.hop_dur
+    
+name
+----
+.. autoattribute:: Feature.name
+    
+num\_channels
+-------------
+.. autoattribute:: Feature.num_channels
+    
+num\_features
+-------------
+.. autoattribute:: Feature.num_features
+    
+params
+------
+.. autoattribute:: Feature.params
+    
+process
+-------
+.. autoattribute:: Feature.process
+    
+process\_file\(\)
+-----------------
+.. automethod:: Feature.process_file
+    
+process\_files\(\)
+------------------
+.. automethod:: Feature.process_files
+    
+process\_folder\(\)
+-------------------
+.. automethod:: Feature.process_folder
+    
+process\_func\_applies\_sliding\_window
+---------------------------------------
+.. autoattribute:: Feature.process_func_applies_sliding_window
+    
+process\_index\(\)
+------------------
+.. automethod:: Feature.process_index
+    
+process\_signal\(\)
+-------------------
+.. automethod:: Feature.process_signal
+    
+process\_signal\_from\_index\(\)
+--------------------------------
+.. automethod:: Feature.process_signal_from_index
+    
+to\_numpy\(\)
+-------------
+.. automethod:: Feature.to_numpy
+    
+verbose
+-------
+.. autoattribute:: Feature.verbose
+    
+win\_dur
+--------
+.. autoattribute:: Feature.win_dur
+    

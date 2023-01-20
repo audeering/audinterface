@@ -1,0 +1,6 @@
+﻿sliding\_window\(\)
+===================
+
+.. currentmodule:: audinterface.utils
+
+.. autofunction:: audinterface.utils.sliding_window

@@ -1,0 +1,530 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProcessWithContext &mdash; audinterface Documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/audeering.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/jupyter-sphinx.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/thebelab.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Segment" href="audinterface.Segment.html" />
+    <link rel="prev" title="Process" href="audinterface.Process.html" />
+    
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          <a href="../index.html">
+          
+            <img src="../_static/images/audeering.svg" class="logo" alt="audEERING"/>
+          
+          
+            <span> audinterface</span>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.10.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="audinterface.html">audinterface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="audinterface.Feature.html">Feature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="audinterface.Process.html">Process</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ProcessWithContext</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#call">__call__()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channels">channels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mixdown">mixdown</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process-func">process_func</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process-func-args">process_func_args</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process-index">process_index()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process-signal-from-index">process_signal_from_index()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#resample">resample</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sampling-rate">sampling_rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verbose">verbose</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="audinterface.Segment.html">Segment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="audinterface.utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">audinterface</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="audinterface.html">audinterface</a> &raquo;</li>
+        
+      <li>ProcessWithContext</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/audeering/audinterface/blob/v0.10.1/docs/api/audinterface.ProcessWithContext.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="processwithcontext">
+<h1>ProcessWithContext<a class="headerlink" href="#processwithcontext" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">audinterface.</span></span><span class="sig-name descname"><span class="pre">ProcessWithContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process_func_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixdown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/process_with_context.html#ProcessWithContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.ProcessWithContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alternate processing interface that provides signal context.</p>
+<p>In contrast to <a class="reference internal" href="audinterface.Process.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></a> this interface does not look at segments
+in isolation, but passes the complete signal together with a list of
+segments to the processing function. By doing so, it becomes possible to
+process segments in context, e.g. by taking into account surrounding
+signal values or other segments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>process_func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]]) – <p>processing function,
+which expects four positional arguments:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">signal</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">starts</span></code> sequence with start indices</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ends</span></code> sequence with end indices</p></li>
+</ul>
+<p>and any number of additional keyword arguments
+(see <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>).
+There are the following special arguments:
+<code class="docutils literal notranslate"><span class="pre">'idx'</span></code>, <code class="docutils literal notranslate"><span class="pre">'file'</span></code>, <code class="docutils literal notranslate"><span class="pre">'root'</span></code>.
+If expected by the function,
+but not specified in
+<code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>,
+they will be replaced with:
+a running index,
+the currently processed file,
+the root folder.
+The function must return a sequence of results for every segment</p>
+</p></li>
+<li><p><strong>process_func_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – (keyword) arguments passed on to the processing
+function</p></li>
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – sampling rate in Hz.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> it will call <code class="docutils literal notranslate"><span class="pre">process_func</span></code> with the actual
+sampling rate of the signal</p></li>
+<li><p><strong>resample</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code> enforces given sampling rate by resampling</p></li>
+<li><p><strong>channels</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – channel selection, see <a class="reference external" href="https://audeering.github.io/audresample/api/audresample.remix.html#audresample.remix" title="(in audresample vv1.1.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">audresample.remix()</span></code></a></p></li>
+<li><p><strong>mixdown</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – apply mono mix-down on selection</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – show debug messages</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">resample</span> <span class="pre">=</span> <span class="pre">True</span></code>, but <code class="docutils literal notranslate"><span class="pre">sampling_rate</span> <span class="pre">=</span> <span class="pre">None</span></code></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">running_mean</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">means_per_segment</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">signal</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span>    <span class="n">cumsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">means_per_segment</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="p">(</span><span class="n">cumsum</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">-</span> <span class="n">cumsum</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span> <span class="o">=</span> <span class="n">ProcessWithContext</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">running_mean</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sampling_rate</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ends</span> <span class="o">=</span> <span class="p">[</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+<span class="go">array([2., 1.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Apply interface on an audformat conform index of a dataframe</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">audb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">audb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;emodb&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">media</span><span class="o">=</span><span class="s1">&#39;wav/03a01Fa.wav&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">full_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">files</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ends</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">file             start                   end</span>
+<span class="go">wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:00.500000   -0.000261</span>
+<span class="go">                 0 days 00:00:00.100000  0 days 00:00:00.600000   -0.000199</span>
+<span class="go">                 0 days 00:00:00.200000  0 days 00:00:00.700000   -0.000111</span>
+<span class="go">dtype: float32</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<section id="call">
+<h2>__call__()<a class="headerlink" href="#call" title="Permalink to this heading">¶</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.__call__">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ends</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/process_with_context.html#ProcessWithContext.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.ProcessWithContext.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply processing to signal.</p>
+<p>This function processes the signal <strong>without</strong> transforming the output
+into a <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.Series</span></code>. Instead it will return the raw processed
+signal. However, if channel selection, mixdown and/or resampling
+is enabled, the signal will be first remixed and resampled if the
+input sampling rate does not fit the expected sampling rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – signal values</p></li>
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – sampling rate in Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed signal</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if sampling rates do not match</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if channel selection is invalid</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="channels">
+<h2>channels<a class="headerlink" href="#channels" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.channels">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Channel selection.</p>
+</dd></dl>
+
+</section>
+<section id="mixdown">
+<h2>mixdown<a class="headerlink" href="#mixdown" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.mixdown">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">mixdown</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.mixdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mono mixdown.</p>
+</dd></dl>
+
+</section>
+<section id="process-func">
+<h2>process_func<a class="headerlink" href="#process-func" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.process_func">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">process_func</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.process_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process function.</p>
+</dd></dl>
+
+</section>
+<section id="process-func-args">
+<h2>process_func_args<a class="headerlink" href="#process-func-args" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.process_func_args">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">process_func_args</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.process_func_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Additional keyword arguments to processing function.</p>
+</dd></dl>
+
+</section>
+<section id="process-index">
+<h2>process_index()<a class="headerlink" href="#process-index" title="Permalink to this heading">¶</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.process_index">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">process_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/process_with_context.html#ProcessWithContext.process_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.ProcessWithContext.process_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process from a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/data-format.html">audformat</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>) – index with segment information</p></li>
+<li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – root folder to expand relative file paths</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Series with processed segments conform to <a class="reference external" href="https://audeering.github.io/audformat/data-format.html">audformat</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if sampling rates do not match</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if channel selection is invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if sequence returned by <code class="docutils literal notranslate"><span class="pre">process_func</span></code>
+    does not match length of <code class="docutils literal notranslate"><span class="pre">index</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="process-signal-from-index">
+<h2>process_signal_from_index()<a class="headerlink" href="#process-signal-from-index" title="Permalink to this heading">¶</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.process_signal_from_index">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">process_signal_from_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/process_with_context.html#ProcessWithContext.process_signal_from_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.ProcessWithContext.process_signal_from_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a signal into segments and process each segment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – signal values</p></li>
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – sampling rate in Hz</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a>) – a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html#pandas.MultiIndex" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.MultiIndex</span></code></a> with two levels
+named <cite>start</cite> and <cite>end</cite> that hold start and end
+positions as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a> objects.
+See also <a class="reference internal" href="audinterface.utils.signal_index.html#audinterface.utils.signal_index" title="audinterface.utils.signal_index"><code class="xref py py-func docutils literal notranslate"><span class="pre">audinterface.utils.signal_index()</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Series with processed segments conform to <a class="reference external" href="https://audeering.github.io/audformat/data-format.html">audformat</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if sampling rates do not match</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if channel selection is invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.11)"><strong>RuntimeError</strong></a> – if sequence returned by <code class="docutils literal notranslate"><span class="pre">process_func</span></code>
+    does not match length of <code class="docutils literal notranslate"><span class="pre">index</span></code></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if index contains duplicates</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="resample">
+<h2>resample<a class="headerlink" href="#resample" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.resample">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">resample</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resample signal.</p>
+</dd></dl>
+
+</section>
+<section id="sampling-rate">
+<h2>sampling_rate<a class="headerlink" href="#sampling-rate" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.sampling_rate">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">sampling_rate</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.sampling_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sampling rate in Hz.</p>
+</dd></dl>
+
+</section>
+<section id="verbose">
+<h2>verbose<a class="headerlink" href="#verbose" title="Permalink to this heading">¶</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="audinterface.ProcessWithContext.verbose">
+<span class="sig-prename descclassname"><span class="pre">ProcessWithContext.</span></span><span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#audinterface.ProcessWithContext.verbose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show debug messages.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="audinterface.Segment.html" class="btn btn-neutral float-right" title="Segment" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="audinterface.Process.html" class="btn btn-neutral float-left" title="Process" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div>
+    <p>
+        
+        
+        
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+        
+    </p>
+  </div>
+
+  <div role="contentinfo">
+    <p>
+        
+      &copy; 2020-2023 audEERING GmbH
+    </p>
+  </div> 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/thebelab-helper.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

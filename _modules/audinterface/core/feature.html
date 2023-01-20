@@ -58,7 +58,7 @@
 
           <a href="../../../index.html">
           
-            <img src="../../../_static/images/audeering.png" class="logo" alt="audEERING"/>
+            <img src="../../../_static/images/audeering.svg" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                v0.10.0
+                v0.10.1
               </div>
             
           
@@ -100,8 +100,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../api.html">audinterface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/audinterface.utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../genindex.html">Index</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -131,14 +131,40 @@
         
         <div class="rst-content">
         
-          <div role="navigation" aria-label="Page navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
       <li>audinterface.core.feature</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -169,7 +195,7 @@
 
 <span class="k">def</span> <span class="nf">deprecated_process_func_applies_sliding_window_default_value</span><span class="p">(</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Deprecate default value of process_func_applies_sliding_window.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecate default value of process_func_applies_sliding_window.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_deprecated</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -195,8 +221,8 @@
     <span class="k">return</span> <span class="n">_deprecated</span>
 
 
-<div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../../api.html#audinterface.Feature">[docs]</a><span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature extraction interface.</span>
+<div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature">[docs]</a><span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature extraction interface.</span>
 
 <span class="sd">    The features are returned as a :class:`pandas.DataFrame`.</span>
 <span class="sd">    If your input signal is of size ``(num_channels, num_time_steps)``,</span>
@@ -325,7 +351,7 @@
 <span class="sd">            and ``sampling_rate is None``</span>
 <span class="sd">        ValueError: if ``hop_dur`` is specified, but not ``win_dur``</span>
 
-<span class="sd">    Example:</span>
+<span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; def mean_std(signal, sampling_rate):</span>
 <span class="sd">        ...     return [signal.mean(), signal.std()]</span>
 <span class="sd">        &gt;&gt;&gt; interface = Feature([&#39;mean&#39;, &#39;std&#39;], process_func=mean_std)</span>
@@ -337,6 +363,7 @@
 <span class="sd">                                mean       std</span>
 <span class="sd">        start  end</span>
 <span class="sd">        0 days 0 days 00:00:01   2.0  0.816497</span>
+<span class="sd">        &gt;&gt;&gt; # Apply interface on an audformat conform index of a dataframe</span>
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
@@ -350,20 +377,23 @@
 <span class="sd">                                                           mean       std</span>
 <span class="sd">        file            start  end</span>
 <span class="sd">        wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317</span>
-<span class="sd">        &gt;&gt;&gt; interface_with_sliding_window = Feature(</span>
+<span class="sd">        &gt;&gt;&gt; # Apply interface with a sliding window</span>
+<span class="sd">        &gt;&gt;&gt; interface = Feature(</span>
 <span class="sd">        ...     [&#39;mean&#39;, &#39;std&#39;],</span>
 <span class="sd">        ...     process_func=mean_std,</span>
 <span class="sd">        ...     process_func_applies_sliding_window=False,</span>
 <span class="sd">        ...     win_dur=1.0,</span>
 <span class="sd">        ...     hop_dur=0.25,</span>
 <span class="sd">        ... )</span>
-<span class="sd">        &gt;&gt;&gt; interface_with_sliding_window.process_index(index, root=db.root)</span>
+<span class="sd">        &gt;&gt;&gt; interface.process_index(index, root=db.root)</span>
 <span class="sd">                                                                           mean       std</span>
 <span class="sd">        file            start                  end</span>
 <span class="sd">        wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115</span>
 <span class="sd">                        0 days 00:00:00.250000 0 days 00:00:01.250000 -0.000405  0.087917</span>
 <span class="sd">                        0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042</span>
 <span class="sd">                        0 days 00:00:00.750000 0 days 00:00:01.750000 -0.000187  0.063677</span>
+<span class="sd">        &gt;&gt;&gt; # Apply the same process function on all channels</span>
+<span class="sd">        &gt;&gt;&gt; # of a multi-channel signal</span>
 <span class="sd">        &gt;&gt;&gt; import audiofile</span>
 <span class="sd">        &gt;&gt;&gt; signal, sampling_rate = audiofile.read(</span>
 <span class="sd">        ...     audeer.path(db.root, db.files[0]),</span>
@@ -375,13 +405,13 @@
 <span class="sd">        ...         signal + 0.5,</span>
 <span class="sd">        ...     ],</span>
 <span class="sd">        ... )</span>
-<span class="sd">        &gt;&gt;&gt; interface_multi_channel = Feature(</span>
+<span class="sd">        &gt;&gt;&gt; interface = Feature(</span>
 <span class="sd">        ...     [&#39;mean&#39;, &#39;std&#39;],</span>
 <span class="sd">        ...     process_func=mean_std,</span>
 <span class="sd">        ...     process_func_is_mono=True,</span>
 <span class="sd">        ...     channels=[0, 1],</span>
 <span class="sd">        ... )</span>
-<span class="sd">        &gt;&gt;&gt; interface_multi_channel.process_signal(</span>
+<span class="sd">        &gt;&gt;&gt; interface.process_signal(</span>
 <span class="sd">        ...     signal_multi_channel,</span>
 <span class="sd">        ...     sampling_rate,</span>
 <span class="sd">        ... )</span>
@@ -518,40 +548,40 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span> <span class="o">=</span> <span class="n">column_names</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature column names.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature column names.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="n">feature_names</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature names.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Feature names.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hop_dur</span> <span class="o">=</span> <span class="n">hop_dur</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hop duration.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hop duration.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name of the feature set.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name of the feature set.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span> <span class="o">=</span> <span class="n">num_channels</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Expected number of channels&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Expected number of channels&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of features.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of features.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Dictionary of parameters describing the feature set.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Dictionary of parameters describing the feature set.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing object.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">process_func_applies_sliding_window</span> <span class="o">=</span> \
             <span class="n">process_func_applies_sliding_window</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Controls if processing function applies sliding window.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Controls if processing function applies sliding window.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Show debug messages.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Show debug messages.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">win_dur</span> <span class="o">=</span> <span class="n">win_dur</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Window duration.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Window duration.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Feature.process_file"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_file"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_file">[docs]</a>    <span class="k">def</span> <span class="nf">process_file</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
@@ -559,7 +589,7 @@
             <span class="n">end</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from an audio file.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from an audio file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: file path</span>
@@ -586,7 +616,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Feature.process_files"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_files"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_files">[docs]</a>    <span class="k">def</span> <span class="nf">process_files</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">files</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
             <span class="o">*</span><span class="p">,</span>
@@ -594,7 +624,7 @@
             <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features for a list of files.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features for a list of files.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            files: list of file paths</span>
@@ -625,13 +655,13 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Feature.process_folder"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_folder">[docs]</a>    <span class="k">def</span> <span class="nf">process_folder</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_folder"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_folder">[docs]</a>    <span class="k">def</span> <span class="nf">process_folder</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">filetype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;wav&#39;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from files in a folder.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from files in a folder.</span>
 
 <span class="sd">        .. note:: At the moment does not scan in sub-folders!</span>
 
@@ -659,14 +689,14 @@
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Feature.process_index"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_index"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">cache_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from an index conform to audformat_.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from an index conform to audformat_.</span>
 
 <span class="sd">        If ``cache_root`` is not ``None``,</span>
 <span class="sd">        a hash value is created from the index</span>
@@ -675,6 +705,8 @@
 <span class="sd">        ``&lt;cache_root&gt;/&lt;hash&gt;.pkl``.</span>
 <span class="sd">        When called again with the same index,</span>
 <span class="sd">        features will be read from the cached file.</span>
+
+<span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: index with segment information</span>
@@ -687,8 +719,6 @@
 <span class="sd">            RuntimeError: if multiple frames are returned,</span>
 <span class="sd">                but ``win_dur`` is not set</span>
 <span class="sd">            ValueError: if index is not conform to audformat_</span>
-
-<span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cache_path</span> <span class="o">=</span> <span class="kc">None</span>
@@ -712,7 +742,7 @@
 
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="Feature.process_signal"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_signal"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -721,7 +751,7 @@
             <span class="n">start</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">end</span><span class="p">:</span> <span class="n">Timestamp</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features for an audio signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features for an audio signal.</span>
 
 <span class="sd">        .. note:: If a ``file`` is given, the index of the returned frame</span>
 <span class="sd">            has levels ``file``, ``start`` and ``end``. Otherwise,</span>
@@ -760,13 +790,13 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Feature.process_signal_from_index"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.process_signal_from_index"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_signal_from_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal_from_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
             <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Split a signal into segments and extract features for each segment.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Split a signal into segments and extract features for each segment.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            signal: signal values</span>
@@ -791,12 +821,15 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_series_to_frame</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Feature.to_numpy"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.to_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.to_numpy"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.to_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">frame</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return feature values as a :class:`numpy.ndarray` in original</span>
-<span class="sd">        shape, i.e. ``(channels, features, time)``.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return feature values as a numpy array.</span>
+
+<span class="sd">        The returned :class:`numpy.ndarray`</span>
+<span class="sd">        has the original shape,</span>
+<span class="sd">        i.e. ``(channels, features, time)``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: feature frame</span>
@@ -808,7 +841,7 @@
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">features</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reshape to [n_channels, n_features, n_frames].&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reshape to [n_channels, n_features, n_frames].&quot;&quot;&quot;</span>
 
         <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
         <span class="n">features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
@@ -863,7 +896,7 @@
                     <span class="sa">f</span><span class="s1">&#39;Cannot determine feature shape from &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, &#39;</span><span class="p">,</span>
                     <span class="sa">f</span><span class="s1">&#39;when expected shape is &#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1">).&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1">).&#39;</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">n_channels</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -969,12 +1002,12 @@
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Feature.__call__"><a class="viewcode-back" href="../../../api.html#audinterface.Feature.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+<div class="viewcode-block" id="Feature.__call__"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
 
 <span class="sd">        This function processes the signal</span>
 <span class="sd">        **without** transforming the output</span>
@@ -1022,7 +1055,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -1030,7 +1063,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2022 audEERING GmbH
+      &copy; 2020-2023 audEERING GmbH
     </p>
   </div> 
 
@@ -1055,9 +1088,6 @@
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
         <script src="../../../_static/thebelab-helper.js"></script>

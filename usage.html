@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Usage &mdash; audinterface Documentation</title>
@@ -37,7 +38,7 @@
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="audinterface" href="api.html" />
+    <link rel="next" title="audinterface" href="api/audinterface.html" />
     <link rel="prev" title="Installation" href="installation.html" />
     
   
@@ -60,7 +61,7 @@
 
           <a href="index.html">
           
-            <img src="_static/images/audeering.png" class="logo" alt="audEERING"/>
+            <img src="_static/images/audeering.svg" class="logo" alt="audEERING"/>
           
           
             <span> audinterface</span>
@@ -71,7 +72,7 @@
             
             
               <div class="version">
-                v0.10.0
+                v0.10.1
               </div>
             
           
@@ -111,8 +112,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api.html">audinterface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api-utils.html">audinterface.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/audinterface.html">audinterface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/audinterface.utils.html">audinterface.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
@@ -142,14 +143,44 @@
         
         <div class="rst-content">
         
-          <div role="navigation" aria-label="Page navigation">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
       <li>Usage</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/audeering/audinterface/" class="fa fa-github"> GitHub</a>
+        
+            
+            
+              <a href="https://github.com/audeering/audinterface/blob/v0.10.1/docs/usage.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -163,9 +194,9 @@
 <div class="cell_output docutils container">
 </div>
 </div>
-<div class="section" id="usage">
+<section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
-<p>The basic idea of <a class="reference internal" href="api.html#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> is
+<p>The basic idea of <a class="reference internal" href="api/audinterface.html#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> is
 to provide easy and standardized interfaces
 to apply a machine learning model,
 or other digital signal processing algorithms
@@ -173,7 +204,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
 and the sampling rate as input.</p>
 <p>The interface can then apply the algorithm
 on a list of files,
@@ -210,12 +241,12 @@ and an index.</p>
 <div class="cell_output docutils container">
 </div>
 </div>
-<div class="section" id="processing-interface">
+<section id="processing-interface">
 <h2>Processing interface<a class="headerlink" href="#processing-interface" title="Permalink to this heading">¶</a></h2>
 <p>Let’s assume we want to calculate the root mean square (RMS)
 value in dB.
 We first define the function
-and create an interface for it using <a class="reference internal" href="api.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Process</span></code></a>.</p>
+and create an interface for it using <a class="reference internal" href="api/audinterface.Process.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Process</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audinterface</span>
@@ -234,7 +265,7 @@ and create an interface for it using <a class="reference internal" href="api.htm
 <p>The following three commands
 apply the algorithm
 and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
@@ -356,12 +387,12 @@ and set a window and hop duration.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="feature-interface">
+</section>
+<section id="feature-interface">
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
-it is recommended to use <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -510,8 +541,8 @@ and single frames are passed on to the processing function.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="feature-interface-for-multi-channel-input">
+</section>
+<section id="feature-interface-for-multi-channel-input">
 <h2>Feature interface for multi-channel input<a class="headerlink" href="#feature-interface-for-multi-channel-input" title="Permalink to this heading">¶</a></h2>
 <p>By default,
 an interface will process
@@ -548,7 +579,7 @@ on the following multi-channel signal.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
-    <span class="n">signal</span><span class="p">,</span>
+    <span class="n">signal_multi_channel</span><span class="p">,</span>
     <span class="n">sampling_rate</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">df</span>
@@ -706,8 +737,8 @@ channel by its index.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="feature-interface-for-external-function">
+</section>
+<section id="feature-interface-for-external-function">
 <h2>Feature interface for external function<a class="headerlink" href="#feature-interface-for-external-function" title="Permalink to this heading">¶</a></h2>
 <p>If we interface a function from an external library
 that already applies a sliding window,
@@ -848,18 +879,18 @@ whereas the first dimension is optionally.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="serializable-feature-interface">
+</section>
+<section id="serializable-feature-interface">
 <h2>Serializable feature interface<a class="headerlink" href="#serializable-feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>To use a feature extractor as an input transform
 of a machine learning model
 it is recommend to provide it in a serializable way
 so it can be <a class="reference external" href="https://audeering.github.io/audonnx/usage.html#export-model">stored as part of the model</a>.
-One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api-smile.html#opensmile.Smile" title="(in opensmile vv2.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
+One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api/opensmile.Smile.html#opensmile.Smile" title="(in opensmile vv2.4.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
 <p>To create such a feature extractor,
 we create a class that inherits
-from <a class="reference internal" href="api.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
-and <a class="reference external" href="https://audeering.github.io/audobject/api.html#audobject.Object" title="(in audobject vv0.7.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
+from <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
+and <a class="reference external" href="https://audeering.github.io/audobject/api/audobject.Object.html#audobject.Object" title="(in audobject vv0.7.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audobject</span>
@@ -979,11 +1010,11 @@ and re-instantiate it from there.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="segmentation-interface">
+</section>
+<section id="segmentation-interface">
 <h2>Segmentation interface<a class="headerlink" href="#segmentation-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function is an index
-it is recommended to use <a class="reference internal" href="api.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a>,
+it is recommended to use <a class="reference internal" href="api/audinterface.Segment.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a>,
 which returns a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
 An example for such a processing function
 would be a voice activity detection algorithm.</p>
@@ -1051,8 +1082,8 @@ would be a voice activity detection algorithm.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-<div class="section" id="special-processing-function-arguments">
+</section>
+<section id="special-processing-function-arguments">
 <h2>Special processing function arguments<a class="headerlink" href="#special-processing-function-arguments" title="Permalink to this heading">¶</a></h2>
 <p>There are some special arguments
 to the processing function,
@@ -1060,10 +1091,6 @@ which will be automatically set
 if they are not specified in
 <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 38%" />
-<col style="width: 62%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>argument</p></th>
 <th class="head"><p>value</p></th>
@@ -1212,8 +1239,8 @@ to select the appropriate f0 range.</p>
   </tbody>
 </table></div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
@@ -1223,7 +1250,7 @@ to select the appropriate f0 range.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.html" class="btn btn-neutral float-right" title="audinterface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api/audinterface.html" class="btn btn-neutral float-right" title="audinterface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -1238,7 +1265,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2022/10/24 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -1246,7 +1273,7 @@ to select the appropriate f0 range.</p>
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2022 audEERING GmbH
+      &copy; 2020-2023 audEERING GmbH
     </p>
   </div> 
 
@@ -1271,9 +1298,6 @@ to select the appropriate f0 range.</p>
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/thebelab-helper.js"></script>

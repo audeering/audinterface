@@ -1,0 +1,44 @@
+﻿Segment
+=======
+
+.. currentmodule:: audinterface
+
+.. autoclass:: Segment
+
+
+\_\_call\_\_\(\)
+----------------
+.. automethod:: Segment.__call__
+    
+invert
+------
+.. autoattribute:: Segment.invert
+    
+process
+-------
+.. autoattribute:: Segment.process
+    
+process\_file\(\)
+-----------------
+.. automethod:: Segment.process_file
+    
+process\_files\(\)
+------------------
+.. automethod:: Segment.process_files
+    
+process\_folder\(\)
+-------------------
+.. automethod:: Segment.process_folder
+    
+process\_index\(\)
+------------------
+.. automethod:: Segment.process_index
+    
+process\_signal\(\)
+-------------------
+.. automethod:: Segment.process_signal
+    
+process\_signal\_from\_index\(\)
+--------------------------------
+.. automethod:: Segment.process_signal_from_index
+    

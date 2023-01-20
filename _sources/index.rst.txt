@@ -17,8 +17,8 @@
     :caption: API Documentation
     :hidden:
 
-    api
-    api-utils
+    api/audinterface
+    api/audinterface.utils
     genindex
 
 .. toctree::
