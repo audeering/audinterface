@@ -602,6 +602,13 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
         )
         np.testing.assert_equal(signal, value)
 
+    # filewise index with absolute paths and preserved index
+    index = audformat.filewise_index(path)
+    y = process.process_index(index, preserve_index=True)
+    for path, value in y.items():
+        signal, sampling_rate = audinterface.utils.read_audio(path)
+        np.testing.assert_equal(signal, value)
+
     # segmented index with relative paths
     index = audformat.segmented_index(
         [file] * 3,
@@ -621,6 +628,15 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
     for (file, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(signal, value)
+
+    # filewise index with relative paths and preserved index
+    index = audformat.filewise_index(path)
+    y = process.process_index(index, preserve_index=True, root=root)
+    for file, value in y.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            file, root=root
         )
         np.testing.assert_equal(signal, value)
 

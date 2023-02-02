@@ -204,6 +204,10 @@ class Feature:
                                                            mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01.898250 -0.000311  0.082317
+        >>> interface.process_index(index, root=db.root, preserve_index=True)
+                        mean       std
+        file
+        wav/03a01Fa.wav -0.000311  0.082317
         >>> # Apply interface with a sliding window
         >>> interface = Feature(
         ...     ['mean', 'std'],
@@ -520,6 +524,7 @@ class Feature:
             self,
             index: pd.Index,
             *,
+            preserve_index: bool = False,
             root: str = None,
             cache_root: str = None,
     ) -> pd.DataFrame:
@@ -537,6 +542,12 @@ class Feature:
 
         Args:
             index: index with segment information
+            preserve_index: if ``True``
+                and :attr:`audinterface.Feature.process.segment` is ``None``
+                the returned index
+                will be of same type
+                as the original one,
+                otherwise always a segmented index is returned
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
 
@@ -549,6 +560,7 @@ class Feature:
 
         """
         cache_path = None
+        index_type = audformat.index_type(index)
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
@@ -566,6 +578,15 @@ class Feature:
 
             if cache_path is not None:
                 df.to_pickle(cache_path, protocol=4)
+
+        if self.process.segment is None and preserve_index:
+            # Convert segmented index to filewise index
+            # if original index was filewise
+            if index_type == audformat.define.IndexType.FILEWISE:
+                files = df.index.get_level_values(
+                    audformat.define.IndexField.FILE
+                )
+                df.index = audformat.filewise_index(files)
 
         return df
 

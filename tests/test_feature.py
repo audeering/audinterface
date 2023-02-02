@@ -465,18 +465,45 @@ def test_process_index(tmpdir):
         af.write(path, SIGNAL_2D, SAMPLING_RATE)
     df_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
 
-    # absolute paths
+    # absolute paths segmented index
     index = audformat.segmented_index(paths, [0, 1], [2, 3])
     df = feature.process_index(index)
     assert df.index.get_level_values('file')[0] == paths[0]
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
-    df = feature.process_index(index)
 
-    # relative paths
+    # absolute paths filewise index
+    index = audformat.filewise_index(paths)
+    df = feature.process_index(index)
+    assert df.index.get_level_values('file')[0] == paths[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # absolute paths filewise index with preserved index
+    index = audformat.filewise_index(paths)
+    df = feature.process_index(index, preserve_index=True)
+    assert df.index[0] == paths[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # relative paths segmented index
     index = audformat.segmented_index(files, [0, 1], [2, 3])
     df = feature.process_index(index, root=root)
     assert df.index.get_level_values('file')[0] == files[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # relative paths filewise index
+    index = audformat.filewise_index(files)
+    df = feature.process_index(index, root=root)
+    assert df.index.get_level_values('file')[0] == files[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # relative paths filewise index with preserved index
+    index = audformat.filewise_index(files)
+    df = feature.process_index(index, root=root, preserve_index=True)
+    assert df.index[0] == files[0]
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 

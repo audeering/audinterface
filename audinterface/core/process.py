@@ -116,6 +116,10 @@ class Process:
         file             start   end
         wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
         dtype: float32
+        >>> interface.process_index(index, root=db.root, preserve_index=True)
+        file
+        wav/03a01Fa.wav  -0.000311
+        dtype: float32
         >>> # Apply interface with a sliding window
         >>> interface = Process(
         ...     process_func=mean,
@@ -481,6 +485,7 @@ class Process:
             self,
             index: pd.Index,
             *,
+            preserve_index: bool = False,
             root: str = None,
             cache_root: str = None,
     ) -> pd.Series:
@@ -496,6 +501,12 @@ class Process:
 
         Args:
             index: index with segment information
+            preserve_index: if ``True``
+                and :attr:`audinterface.Process.segment` is ``None``
+                the returned index
+                will be of same type
+                as the original one,
+                otherwise always a segmented index is returned
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
 
@@ -510,6 +521,7 @@ class Process:
 
         """
         cache_path = None
+        index_type = audformat.index_type(index)
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
@@ -528,6 +540,15 @@ class Process:
 
             if cache_path is not None:
                 y.to_pickle(cache_path, protocol=4)
+
+        if self.segment is None and preserve_index:
+            # Convert segmented index to filewise index
+            # if original index was filewise
+            if index_type == audformat.define.IndexType.FILEWISE:
+                files = y.index.get_level_values(
+                    audformat.define.IndexField.FILE
+                )
+                y.index = audformat.filewise_index(files)
 
         return y
 
