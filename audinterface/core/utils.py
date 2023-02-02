@@ -441,9 +441,17 @@ def to_timedelta(
 
     """  # noqa: E501
     def duration_in_seconds(duration, sampling_rate):
-        # Force non-string values to represent seconds
         if not isinstance(duration, str):
+            # force non-string values to represent seconds
             sampling_rate = None
+        elif all(d.isdigit() for d in duration):
+            # force string without unit to represent samples
+            if sampling_rate is None:
+                raise ValueError(
+                    "You have to provide 'sampling_rate' "
+                    "when specifying the duration in samples "
+                    f"as you did with '{duration}'."
+                )
         # Don't try to convert NaT/None values
         if not pd.isnull(duration):
             duration = audmath.duration_in_seconds(duration, sampling_rate)
@@ -451,9 +459,8 @@ def to_timedelta(
 
     if (
             not isinstance(durations, str)
-            or not isinstance(durations, collections.abc.Iterable)
+            and isinstance(durations, collections.abc.Iterable)
     ):
-        print(f'{durations=}')
         # sequence of duration entries
         durations = [
             duration_in_seconds(duration, sampling_rate)
