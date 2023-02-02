@@ -7,6 +7,7 @@ import pandas as pd
 
 import audeer
 import audformat
+import audmath
 import audresample
 import audiofile as af
 
@@ -439,36 +440,30 @@ def to_timedelta(
         [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
 
     """  # noqa: E501
-
-    def convert_samples_to_seconds(time):
-        if isinstance(time, str):
-            # ensure we have a str and not numpy.str_
-            time = str(time)
-            # string without unit represents samples
-            if all(t.isdigit() for t in time):
-                if sampling_rate is None:
-                    raise ValueError(
-                        "You have to provide 'sampling_rate' "
-                        "when specifying the duration in samples "
-                        f"as you did with '{time}'."
-                    )
-                time = int(time) / sampling_rate
-        return time
+    def duration_in_seconds(duration, sampling_rate):
+        # Force non-string values to represent seconds
+        if not isinstance(duration, str):
+            sampling_rate = None
+        # Don't try to convert NaT/None values
+        if not pd.isnull(duration):
+            duration = audmath.duration_in_seconds(duration, sampling_rate)
+        return duration
 
     if (
             not isinstance(durations, str)
-            and isinstance(durations, collections.abc.Iterable)
+            or not isinstance(durations, collections.abc.Iterable)
     ):
+        print(f'{durations=}')
         # sequence of duration entries
-        durations = [convert_samples_to_seconds(dur) for dur in durations]
+        durations = [
+            duration_in_seconds(duration, sampling_rate)
+            for duration in durations
+        ]
     else:
         # single duration entry
-        durations = convert_samples_to_seconds(durations)
+        durations = duration_in_seconds(durations, sampling_rate)
 
-    try:
-        durations = pd.to_timedelta(durations, unit='s')
-    except ValueError:  # catches values like '1s'
-        durations = pd.to_timedelta(durations)
+    durations = pd.to_timedelta(durations, unit='s')
 
     if isinstance(durations, pd.TimedeltaIndex):
         durations = list(durations)
