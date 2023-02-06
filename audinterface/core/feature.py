@@ -560,7 +560,6 @@ class Feature:
 
         """
         cache_path = None
-        index_type = audformat.index_type(index)
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
@@ -582,11 +581,7 @@ class Feature:
         if self.process.segment is None and preserve_index:
             # Convert segmented index to filewise index
             # if original index was filewise
-            if index_type == audformat.define.IndexType.FILEWISE:
-                files = df.index.get_level_values(
-                    audformat.define.IndexField.FILE
-                )
-                df.index = audformat.filewise_index(files)
+            df.index = index
 
         return df
 

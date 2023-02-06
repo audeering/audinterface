@@ -521,7 +521,6 @@ class Process:
 
         """
         cache_path = None
-        index_type = audformat.index_type(index)
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
@@ -531,12 +530,15 @@ class Process:
         if cache_path and os.path.exists(cache_path):
             y = pd.read_pickle(cache_path)
         else:
-            index = audformat.utils.to_segmented_index(index)
+            segmented_index = audformat.utils.to_segmented_index(index)
 
             if self.segment is not None:
-                index = self.segment.process_index(index, root=root)
+                segmented_index = self.segment.process_index(
+                    segmented_index,
+                    root=root,
+                )
 
-            y = self._process_index_wo_segment(index, root)
+            y = self._process_index_wo_segment(segmented_index, root)
 
             if cache_path is not None:
                 y.to_pickle(cache_path, protocol=4)
@@ -544,11 +546,7 @@ class Process:
         if self.segment is None and preserve_index:
             # Convert segmented index to filewise index
             # if original index was filewise
-            if index_type == audformat.define.IndexType.FILEWISE:
-                files = y.index.get_level_values(
-                    audformat.define.IndexField.FILE
-                )
-                y.index = audformat.filewise_index(files)
+            y.index = index
 
         return y
 
