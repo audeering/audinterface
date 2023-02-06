@@ -651,7 +651,6 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
             )
             np.testing.assert_equal(signal, value)
 
-
     # cache result
     y = process.process_index(
         index,
