@@ -450,9 +450,12 @@ def to_timedelta(
                 raise ValueError(
                     "You have to provide 'sampling_rate' "
                     "when specifying the duration in samples "
-                    f"as you did with '{duration}'."
+                    f"as you did with '{duration}'. "
+                    "NOTE: this will no longer raise an error "
+                    "in version 1.0.0, "
+                    f"but interpret '{duration}' in seconds."
                 )
-        # Don't try to convert NaT/None values
+        # Don't try to convert NaT values
         if not pd.isnull(duration):
             duration = audmath.duration_in_seconds(duration, sampling_rate)
         return duration

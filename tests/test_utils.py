@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -365,3 +367,39 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
         hop_dur,
     )
     np.testing.assert_equal(frames, expected)
+
+
+@pytest.mark.parametrize(
+    'durations, sampling_rate, error_msg, error',
+    [
+        (
+            '200',
+            None,
+            (
+                "You have to provide 'sampling_rate' "
+                "when specifying the duration in samples "
+                "as you did with ''200''. "
+                "NOTE: this will no longer raise an error "
+                "in version 1.0.0, "
+                "but interpret ''200'' in seconds."
+            ),
+            ValueError,
+        ),
+        (
+            [200, '200'],
+            None,
+            (
+                "You have to provide 'sampling_rate' "
+                "when specifying the duration in samples "
+                "as you did with ''200''. "
+                "NOTE: this will no longer raise an error "
+                "in version 1.0.0, "
+                "but interpret ''200'' in seconds."
+            ),
+            ValueError,
+        ),
+    ]
+)
+def test_to_timedelta_errors(durations, sampling_rate, error_msg, error):
+    with pytest.raises(error, match=re.escape(error_msg)):
+        audinterface.utils.to_timedelta(durations, sampling_rate)
