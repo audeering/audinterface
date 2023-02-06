@@ -470,6 +470,8 @@ def test_process_index(tmpdir, preserve_index):
     index = audformat.segmented_index(paths, [0, 1], [None, 3])
     df = feature.process_index(index, preserve_index=preserve_index)
     assert df.index.get_level_values('file')[0] == paths[0]
+    if preserve_index:
+        pd.testing.assert_index_equal(df.index, index)
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
@@ -477,6 +479,8 @@ def test_process_index(tmpdir, preserve_index):
     index = audformat.segmented_index(files, [0, 1], [None, 3])
     df = feature.process_index(index, preserve_index=preserve_index, root=root)
     assert df.index.get_level_values('file')[0] == files[0]
+    if preserve_index:
+        pd.testing.assert_index_equal(df.index, index)
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
@@ -485,6 +489,7 @@ def test_process_index(tmpdir, preserve_index):
     df = feature.process_index(index, preserve_index=preserve_index)
     if preserve_index:
         assert df.index[0] == paths[0]
+        pd.testing.assert_index_equal(df.index, index)
     else:
         assert df.index.get_level_values('file')[0] == paths[0]
     np.testing.assert_array_equal(df.values, df_expected)
@@ -495,6 +500,7 @@ def test_process_index(tmpdir, preserve_index):
     df = feature.process_index(index, preserve_index=preserve_index, root=root)
     if preserve_index:
         assert df.index[0] == files[0]
+        pd.testing.assert_index_equal(df.index, index)
     else:
         assert df.index.get_level_values('file')[0] == files[0]
     np.testing.assert_array_equal(df.values, df_expected)

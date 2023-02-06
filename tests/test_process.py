@@ -591,6 +591,8 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         index,
         preserve_index=preserve_index,
     )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
     for (path, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             path, start=start, end=end
@@ -608,6 +610,8 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         preserve_index=preserve_index,
         root=root,
     )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
     for (file, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end, root=root
@@ -621,6 +625,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         preserve_index=preserve_index,
     )
     if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
         for path, value in y.items():
             signal, sampling_rate = audinterface.utils.read_audio(path)
             np.testing.assert_equal(signal, value)
@@ -639,6 +644,7 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         root=root,
     )
     if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
         for file, value in y.items():
             signal, sampling_rate = audinterface.utils.read_audio(
                 file, root=root,
