@@ -6,7 +6,6 @@ audinterface
 
 Generic interfaces for signal processing.
 
-
 **audinterface** provides user interfaces
 to apply any machine learning model
 or digital signal processing algorithm
