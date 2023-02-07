@@ -132,7 +132,7 @@ def read_audio(
         >>> media = audb.load_media(
         ...     'emodb',
         ...     'wav/03a01Fa.wav',
-        ...     version='1.2.0',
+        ...     version='1.3.0',
         ...     verbose=False,
         ... )
         >>> signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit='s'))
