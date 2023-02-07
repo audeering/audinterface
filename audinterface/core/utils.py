@@ -408,6 +408,17 @@ def to_timedelta(
     it is treated as samples
     and requires that ``'sampling_rate'`` is not ``None``.
 
+    .. warning::
+
+        From version 1.0.0 not providing ``sampling_rate``
+        no longer raises an error
+        when duration is provided
+        as a string value without unit,
+        but the string value will be interpreted as seconds;
+        if ``sampling_rate`` is provided
+        integer and float duration values
+        will be interpreted as seconds.
+
     Args:
         durations: duration value(s).
             If value is a float or integer
