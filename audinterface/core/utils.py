@@ -1,6 +1,7 @@
 import collections
 import os
 import typing
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -458,21 +459,29 @@ def to_timedelta(
         and replace it by calling directly audmath.duration_in_seconds().
 
         """
-        if not isinstance(duration, str):
+        if (
+                sampling_rate is not None
+                and isinstance(duration, (np.floating, float))
+        ):
             # force non-string values to represent seconds
             sampling_rate = None
-        elif all(d.isdigit() for d in duration):
-            # force string without unit to represent samples
-            if sampling_rate is None:
-                raise ValueError(
-                    "You have to provide 'sampling_rate' "
-                    "when specifying the duration in samples "
-                    f"as you did with '{duration}'. "
-                    "NOTE: this will no longer raise an error "
-                    "in version 1.0.0, "
-                    f"but interpret '{duration}' in seconds."
-                )
         return audmath.duration_in_seconds(duration, sampling_rate)
+
+    if sampling_rate is not None:
+        is_numeric = any(
+            [
+                isinstance(duration, (np.floating, float))
+                for duration in audeer.to_list(durations)
+            ]
+        )
+        if is_numeric:
+            message = (
+                "Providing duration as float or integer "
+                "will be interpreted as samples "
+                "from version 1.0.0 "
+                "when 'sampling_rate' is provided as well."
+            )
+            warnings.warn(message, category=UserWarning, stacklevel=2)
 
     if (
             not isinstance(durations, str)

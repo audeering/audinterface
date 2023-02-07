@@ -370,36 +370,19 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
 
 
 @pytest.mark.parametrize(
-    'durations, sampling_rate, error_msg, error',
+    'durations',
     [
-        (
-            '200',
-            None,
-            (
-                "You have to provide 'sampling_rate' "
-                "when specifying the duration in samples "
-                "as you did with '200'. "
-                "NOTE: this will no longer raise an error "
-                "in version 1.0.0, "
-                "but interpret '200' in seconds."
-            ),
-            ValueError,
-        ),
-        (
-            [200, '200'],
-            None,
-            (
-                "You have to provide 'sampling_rate' "
-                "when specifying the duration in samples "
-                "as you did with '200'. "
-                "NOTE: this will no longer raise an error "
-                "in version 1.0.0, "
-                "but interpret '200' in seconds."
-            ),
-            ValueError,
-        ),
+        1,
+        [2.0, '200'],
     ]
 )
-def test_to_timedelta_errors(durations, sampling_rate, error_msg, error):
-    with pytest.raises(error, match=re.escape(error_msg)):
+def test_to_timedelta_warnings(durations):
+    sampling_rate = 8000
+    message = (
+        "Providing duration as float or integer "
+        "will be interpreted as samples "
+        "from version 1.0.0 "
+        "when 'sampling_rate' is provided as well."
+    )
+    with pytest.warns(UserWarning, match=re.escape(message)):
         audinterface.utils.to_timedelta(durations, sampling_rate)
