@@ -452,6 +452,12 @@ def to_timedelta(
 
     """  # noqa: E501
     def duration_in_seconds(duration, sampling_rate):
+        """Helper function to convert to seconds.
+
+        We will remove this helper function in version 1.0.0 of audinterface
+        and replace it by calling directly audmath.duration_in_seconds().
+
+        """
         if not isinstance(duration, str):
             # force non-string values to represent seconds
             sampling_rate = None
@@ -466,8 +472,7 @@ def to_timedelta(
                     "in version 1.0.0, "
                     f"but interpret '{duration}' in seconds."
                 )
-        duration = audmath.duration_in_seconds(duration, sampling_rate)
-        return duration
+        return audmath.duration_in_seconds(duration, sampling_rate)
 
     if (
             not isinstance(durations, str)
