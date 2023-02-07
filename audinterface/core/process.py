@@ -256,8 +256,10 @@ class Process:
             end: pd.Timedelta = None,
     ) -> pd.Series:
 
-        start = utils.to_timedelta(start, self.sampling_rate)
-        end = utils.to_timedelta(end, self.sampling_rate)
+        if start is not None:
+            start = utils.to_timedelta(start, self.sampling_rate)
+        if end is not None:
+            end = utils.to_timedelta(end, self.sampling_rate)
 
         signal, sampling_rate = utils.read_audio(
             file,
@@ -687,8 +689,10 @@ class Process:
                 index,
             )
         else:
-            start = utils.to_timedelta(start, sampling_rate)
-            end = utils.to_timedelta(end, sampling_rate)
+            if start is not None:
+                start = utils.to_timedelta(start, sampling_rate)
+            if end is not None:
+                end = utils.to_timedelta(end, sampling_rate)
             return self._process_signal(
                 signal,
                 sampling_rate,

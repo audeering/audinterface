@@ -455,9 +455,7 @@ def to_timedelta(
                     "in version 1.0.0, "
                     f"but interpret '{duration}' in seconds."
                 )
-        # Don't try to convert NaT values
-        if not pd.isnull(duration):
-            duration = audmath.duration_in_seconds(duration, sampling_rate)
+        duration = audmath.duration_in_seconds(duration, sampling_rate)
         return duration
 
     if (
