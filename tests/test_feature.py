@@ -438,7 +438,8 @@ def test_process_func_args():
         )
 
 
-def test_process_index(tmpdir):
+@pytest.mark.parametrize('preserve_index', [False, True])
+def test_process_index(tmpdir, preserve_index):
 
     cache_root = os.path.join(tmpdir, 'cache')
 
@@ -451,7 +452,7 @@ def test_process_index(tmpdir):
     # empty
 
     index = audformat.segmented_index()
-    df = feature.process_index(index)
+    df = feature.process_index(index, preserve_index=preserve_index)
     assert df.empty
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
@@ -465,24 +466,50 @@ def test_process_index(tmpdir):
         af.write(path, SIGNAL_2D, SAMPLING_RATE)
     df_expected = np.ones((2, NUM_CHANNELS * NUM_FEATURES))
 
-    # absolute paths
-    index = audformat.segmented_index(paths, [0, 1], [2, 3])
-    df = feature.process_index(index)
+    # absolute paths segmented index
+    index = audformat.segmented_index(paths, [0, 1], [None, 3])
+    df = feature.process_index(index, preserve_index=preserve_index)
     assert df.index.get_level_values('file')[0] == paths[0]
+    if preserve_index:
+        pd.testing.assert_index_equal(df.index, index)
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
-    df = feature.process_index(index)
 
-    # relative paths
-    index = audformat.segmented_index(files, [0, 1], [2, 3])
-    df = feature.process_index(index, root=root)
+    # relative paths segmented index
+    index = audformat.segmented_index(files, [0, 1], [None, 3])
+    df = feature.process_index(index, preserve_index=preserve_index, root=root)
     assert df.index.get_level_values('file')[0] == files[0]
+    if preserve_index:
+        pd.testing.assert_index_equal(df.index, index)
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # absolute paths filewise index
+    index = audformat.filewise_index(paths)
+    df = feature.process_index(index, preserve_index=preserve_index)
+    if preserve_index:
+        assert df.index[0] == paths[0]
+        pd.testing.assert_index_equal(df.index, index)
+    else:
+        assert df.index.get_level_values('file')[0] == paths[0]
+    np.testing.assert_array_equal(df.values, df_expected)
+    pd.testing.assert_index_equal(df.columns, feature.column_names)
+
+    # relative paths filewise index
+    index = audformat.filewise_index(files)
+    df = feature.process_index(index, preserve_index=preserve_index, root=root)
+    if preserve_index:
+        assert df.index[0] == files[0]
+        pd.testing.assert_index_equal(df.index, index)
+    else:
+        assert df.index.get_level_values('file')[0] == files[0]
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
     # cache result
     df = feature.process_index(
         index,
+        preserve_index=preserve_index,
         root=root,
         cache_root=cache_root,
     )
@@ -492,12 +519,14 @@ def test_process_index(tmpdir):
     with pytest.raises(RuntimeError):
         feature.process_index(
             index,
+            preserve_index=preserve_index,
             root=root,
         )
 
     # loading from cache still works
     df_cached = feature.process_index(
         index,
+        preserve_index=preserve_index,
         root=root,
         cache_root=cache_root,
     )

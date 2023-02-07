@@ -546,6 +546,7 @@ def test_process_func_args():
         )
 
 
+@pytest.mark.parametrize('preserve_index', [False, True])
 @pytest.mark.parametrize(
     'num_workers, multiprocessing',
     [
@@ -554,7 +555,7 @@ def test_process_func_args():
         (None, False, ),
     ]
 )
-def test_process_index(tmpdir, num_workers, multiprocessing):
+def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
 
     cache_root = os.path.join(tmpdir, 'cache')
 
@@ -577,25 +578,21 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
 
     # empty index
     index = audformat.segmented_index()
-    y = process.process_index(index)
+    y = process.process_index(index, preserve_index=preserve_index)
     assert y.empty
 
     # segmented index with absolute paths
     index = audformat.segmented_index(
-        [path] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
+        [path] * 4,
+        starts=[0, 0, 1, 2],
+        ends=[None, 1, 2, 3],
     )
-    y = process.process_index(index)
-    for (path, start, end), value in y.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
-            path, start=start, end=end
-        )
-        np.testing.assert_equal(signal, value)
-
-    # filewise index with absolute paths
-    index = audformat.filewise_index(path)
-    y = process.process_index(index)
+    y = process.process_index(
+        index,
+        preserve_index=preserve_index,
+    )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
     for (path, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             path, start=start, end=end
@@ -604,29 +601,66 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
 
     # segmented index with relative paths
     index = audformat.segmented_index(
-        [file] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
+        [file] * 4,
+        starts=[0, 0, 1, 2],
+        ends=[None, 1, 2, 3],
     )
-    y = process.process_index(index, root=root)
+    y = process.process_index(
+        index,
+        preserve_index=preserve_index,
+        root=root,
+    )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
     for (file, start, end), value in y.items():
         signal, sampling_rate = audinterface.utils.read_audio(
             file, start=start, end=end, root=root
         )
         np.testing.assert_equal(signal, value)
 
-    # filewise index with relative paths
+    # filewise index with absolute paths
     index = audformat.filewise_index(path)
-    y = process.process_index(index, root=root)
-    for (file, start, end), value in y.items():
-        signal, sampling_rate = audinterface.utils.read_audio(
-            file, start=start, end=end, root=root
-        )
-        np.testing.assert_equal(signal, value)
+    y = process.process_index(
+        index,
+        preserve_index=preserve_index,
+    )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
+        for path, value in y.items():
+            signal, sampling_rate = audinterface.utils.read_audio(path)
+            np.testing.assert_equal(signal, value)
+    else:
+        for (path, start, end), value in y.items():
+            signal, sampling_rate = audinterface.utils.read_audio(
+                path, start=start, end=end
+            )
+            np.testing.assert_equal(signal, value)
+
+    # filewise index with relative paths
+    index = audformat.filewise_index(file)
+    y = process.process_index(
+        index,
+        preserve_index=preserve_index,
+        root=root,
+    )
+    if preserve_index:
+        pd.testing.assert_index_equal(y.index, index)
+        for file, value in y.items():
+            signal, sampling_rate = audinterface.utils.read_audio(
+                file, root=root,
+            )
+            np.testing.assert_equal(signal, value)
+    else:
+        for (file, start, end), value in y.items():
+            signal, sampling_rate = audinterface.utils.read_audio(
+                file, start=start, end=end, root=root,
+            )
+            np.testing.assert_equal(signal, value)
 
     # cache result
     y = process.process_index(
         index,
+        preserve_index=preserve_index,
         root=root,
         cache_root=cache_root,
     )
@@ -636,12 +670,14 @@ def test_process_index(tmpdir, num_workers, multiprocessing):
     with pytest.raises(RuntimeError):
         process.process_index(
             index,
+            preserve_index=preserve_index,
             root=root,
         )
 
     # loading from cache still works
     y_cached = process.process_index(
         index,
+        preserve_index=preserve_index,
         root=root,
         cache_root=cache_root,
     )
