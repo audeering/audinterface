@@ -106,7 +106,7 @@ class Process:
         >>> import audb
         >>> db = audb.load(
         ...     'emodb',
-        ...     version='1.2.0',
+        ...     version='1.3.0',
         ...     media='wav/03a01Fa.wav',
         ...     full_path=False,
         ...     verbose=False,

@@ -9,7 +9,7 @@
     def dataframe_to_html(df):
         # Replace beginning of data path with ...
         if len(df.index) > 0 and df.index.names[0] == 'file':
-            old_path = r'.+/audb/emodb/1.2.0/d3b62a9b/wav/'
+            old_path = r'.+/audb/emodb/1.3.0/d3b62a9b/wav/'
             new_path = r'.../'
             # Assuming segmented index
             df.index = df.index.set_levels(
@@ -82,7 +82,7 @@ and an index.
     ]
     db = audb.load(
         'emodb',
-        version='1.2.0',
+        version='1.3.0',
         media=media,
         verbose=False,
     )
