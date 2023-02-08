@@ -2,7 +2,6 @@ import collections
 import inspect
 import itertools
 import typing
-import warnings
 
 import numpy as np
 import pandas as pd
