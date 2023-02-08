@@ -69,13 +69,6 @@ def is_scalar(value: typing.Any) -> bool:
            (isinstance(value, str) or not hasattr(value, '__len__'))
 
 
-kwargs_deprecation_warning = (
-    "The use of **kwargs is deprecated "
-    "and will be removed with version 1.0.0. "
-    "Use 'process_func_args' instead."
-)
-
-
 def preprocess_signal(
         signal: np.ndarray,
         sampling_rate: int,
