@@ -407,7 +407,7 @@ def to_timedelta(
     The single duration values
     support all formats
     mentioned in :func:`audmath.duration_in_seconds`,
-    like ``'2 ms'``, or ``pd.to_timedelta(2, 's')``.
+    like ``'2 ms'``, or ``pandas.to_timedelta(2, 's')``.
     The exception is
     that float and integer values
     are always interpreted as seconds
