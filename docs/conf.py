@@ -45,13 +45,14 @@ extensions = [
     'sphinx_copybutton',  # for "copy to clipboard" buttons
 ]
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
     'audformat': ('https://audeering.github.io/audformat/', None),
+    'audmath': ('https://audeering.github.io/audmath/', None),
     'audobject': ('https://audeering.github.io/audobject/', None),
     'audresample': ('https://audeering.github.io/audresample/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'opensmile': ('https://audeering.github.io/opensmile-python/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'python': ('https://docs.python.org/3/', None),
 }
 # Disable Gitlab as we need to sign in
 linkcheck_ignore = [

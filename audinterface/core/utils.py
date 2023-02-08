@@ -7,6 +7,7 @@ import pandas as pd
 
 import audeer
 import audformat
+import audmath
 import audresample
 import audiofile as af
 
@@ -403,9 +404,15 @@ def to_timedelta(
 ) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
-    If duration is given as string without unit,
-    it is treated as samples
-    and requires that ``'sampling_rate'`` is not ``None``.
+    The single duration values
+    support all formats
+    mentioned in :func:`audmath.duration_in_seconds`,
+    like ``'2 ms'``, or ``pandas.to_timedelta(2, 's')``.
+    The exception is
+    that float and integer values
+    are always interpreted as seconds
+    and strings without unit
+    always as samples.
 
     Args:
         durations: duration value(s).
@@ -425,6 +432,9 @@ def to_timedelta(
     Raises:
         ValueError: if a duration value is given in samples,
             but ``sampling_rate`` is ``None``
+        ValueError: if a duration is a string
+            that does not match a valid '<value><unit>' pattern
+            or the provided unit is not supported
 
     Examples:
         >>> to_timedelta(2)
@@ -439,36 +449,35 @@ def to_timedelta(
         [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
 
     """  # noqa: E501
-
-    def convert_samples_to_seconds(time):
-        if isinstance(time, str):
-            # ensure we have a str and not numpy.str_
-            time = str(time)
-            # string without unit represents samples
-            if all(t.isdigit() for t in time):
-                if sampling_rate is None:
-                    raise ValueError(
-                        "You have to provide 'sampling_rate' "
-                        "when specifying the duration in samples "
-                        f"as you did with '{time}'."
-                    )
-                time = int(time) / sampling_rate
-        return time
+    def duration_in_seconds(duration, sampling_rate):
+        """Helper function to convert to seconds."""
+        if not isinstance(duration, str):
+            # force non-string values to represent seconds
+            sampling_rate = None
+        elif all(d.isdigit() for d in duration):
+            # force string without unit to represent samples
+            if sampling_rate is None:
+                raise ValueError(
+                    "You have to provide 'sampling_rate' "
+                    "when specifying the duration in samples "
+                    f"as you did with '{duration}'. "
+                )
+        return audmath.duration_in_seconds(duration, sampling_rate)
 
     if (
             not isinstance(durations, str)
             and isinstance(durations, collections.abc.Iterable)
     ):
         # sequence of duration entries
-        durations = [convert_samples_to_seconds(dur) for dur in durations]
+        durations = [
+            duration_in_seconds(duration, sampling_rate)
+            for duration in durations
+        ]
     else:
         # single duration entry
-        durations = convert_samples_to_seconds(durations)
+        durations = duration_in_seconds(durations, sampling_rate)
 
-    try:
-        durations = pd.to_timedelta(durations, unit='s')
-    except ValueError:  # catches values like '1s'
-        durations = pd.to_timedelta(durations)
+    durations = pd.to_timedelta(durations, unit='s')
 
     if isinstance(durations, pd.TimedeltaIndex):
         durations = list(durations)
