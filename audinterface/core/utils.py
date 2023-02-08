@@ -432,6 +432,9 @@ def to_timedelta(
     Raises:
         ValueError: if a duration value is given in samples,
             but ``sampling_rate`` is ``None``
+        ValueError: if ``duration`` is a string
+            that does not match a valid '<value><unit>' pattern
+            or the provided unit is not supported
 
     Examples:
         >>> to_timedelta(2)

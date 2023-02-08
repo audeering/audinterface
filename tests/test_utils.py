@@ -392,6 +392,24 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
             ),
             ValueError,
         ),
+        (
+            '200 a b',
+            None,
+            (
+                "Your given duration '200 a b' "
+                "is not conform to the <value><unit> pattern."
+            ),
+            ValueError,
+        ),
+        (
+            [200, '200 a b'],
+            None,
+            (
+                "Your given duration '200 a b' "
+                "is not conform to the <value><unit> pattern."
+            ),
+            ValueError,
+        ),
     ]
 )
 def test_to_timedelta_errors(durations, sampling_rate, error_msg, error):
