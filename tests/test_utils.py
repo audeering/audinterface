@@ -379,9 +379,6 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
                 "You have to provide 'sampling_rate' "
                 "when specifying the duration in samples "
                 "as you did with '200'. "
-                "NOTE: this will no longer raise an error "
-                "in version 1.0.0, "
-                "but interpret '200' in seconds."
             ),
             ValueError,
         ),
@@ -392,9 +389,6 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
                 "You have to provide 'sampling_rate' "
                 "when specifying the duration in samples "
                 "as you did with '200'. "
-                "NOTE: this will no longer raise an error "
-                "in version 1.0.0, "
-                "but interpret '200' in seconds."
             ),
             ValueError,
         ),

@@ -404,20 +404,15 @@ def to_timedelta(
 ) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
-    If duration is given as string without unit,
-    it is treated as samples
-    and requires that ``'sampling_rate'`` is not ``None``.
-
-    .. warning::
-
-        From version 1.0.0 not providing ``sampling_rate``
-        no longer raises an error
-        when duration is provided
-        as a string value without unit,
-        but the string value will be interpreted as seconds;
-        if ``sampling_rate`` is provided
-        integer and float duration values
-        will be interpreted as seconds.
+    The single duration values
+    support all formats
+    mentioned in :func:`audmath.duration_in_seconds`,
+    like ``'2 ms'``, or ``pd.to_timedelta(2, 's')``.
+    The exception is
+    that float and integer values
+    are always interpreted as seconds
+    and strings without unit
+    always as samples.
 
     Args:
         durations: duration value(s).
@@ -452,12 +447,7 @@ def to_timedelta(
 
     """  # noqa: E501
     def duration_in_seconds(duration, sampling_rate):
-        """Helper function to convert to seconds.
-
-        We will remove this helper function in version 1.0.0 of audinterface
-        and replace it by calling directly audmath.duration_in_seconds().
-
-        """
+        """Helper function to convert to seconds."""
         if not isinstance(duration, str):
             # force non-string values to represent seconds
             sampling_rate = None
@@ -468,9 +458,6 @@ def to_timedelta(
                     "You have to provide 'sampling_rate' "
                     "when specifying the duration in samples "
                     f"as you did with '{duration}'. "
-                    "NOTE: this will no longer raise an error "
-                    "in version 1.0.0, "
-                    f"but interpret '{duration}' in seconds."
                 )
         return audmath.duration_in_seconds(duration, sampling_rate)
 
