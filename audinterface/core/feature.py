@@ -767,36 +767,97 @@ class Feature:
 
     def _series_to_frame(
             self,
-            series: pd.Series,
+            y: pd.Series,
     ) -> pd.DataFrame:
 
-        if series.empty:
+        if y.empty:
             return pd.DataFrame(
                 columns=self.column_names,
                 dtype=object,
             )
 
-        frames = [None] * len(series)
-        if len(series.index.levels) == 3:
-            for idx, ((file, start, end), values) in enumerate(series.items()):
-                frames[idx] = self._values_to_frame(
-                    values, file=file, start=start, end=end,
-                )
+        num = len(y)
+
+        if (
+                self.win_dur is not None and
+                self.process_func_applies_sliding_window
+        ):
+
+            win_dur = utils.to_timedelta(
+                self.win_dur,
+                self.process.sampling_rate,
+            )
+            hop_dur = utils.to_timedelta(
+                self.hop_dur,
+                self.process.sampling_rate,
+            )
+
+            starts = []
+            ends = []
+            data = []
+
+            if len(y.index.levels) == 3:
+
+                files = []
+
+                for idx, ((file, start, end), values) in enumerate(y.items()):
+
+                    frames = self._values_to_frame(values)
+                    data.append(frames)
+
+                    times = pd.timedelta_range(
+                        start,
+                        freq=hop_dur,
+                        periods=frames.shape[0],
+                    )
+
+                    starts.extend(times.to_list())
+                    ends.extend((times + win_dur).to_list())
+                    files.extend([file] * len(times))
+
+                index = audformat.segmented_index(files, starts, ends)
+
+            else:
+
+                for idx, ((start, end), values) in enumerate(y.items()):
+                    frames = self._values_to_frame(values)
+                    data.append(frames)
+
+                    times = pd.timedelta_range(
+                        start,
+                        freq=hop_dur,
+                        periods=frames.shape[0],
+                    )
+
+                    starts.extend(times.to_list())
+                    ends.extend((times + win_dur).to_list())
+
+                index = utils.signal_index(starts, ends)
+
+            data = np.concatenate(data)
+
         else:
-            for idx, ((start, end), values) in enumerate(series.items()):
-                frames[idx] = self._values_to_frame(
-                    values, start=start, end=end,
-                )
-        return pd.concat(frames, axis='index')
+
+            index = y.index
+            dtype = self._values_to_frame(y[0]).dtype
+            shape = (num, len(self.column_names))
+            data = np.empty(shape, dtype)
+
+            for idx, values in enumerate(y):
+                data[idx, :] = self._values_to_frame(values)
+
+        df = pd.DataFrame(
+            data,
+            index=index,
+            columns=self.column_names,
+        )
+
+        return df
 
     def _values_to_frame(
             self,
             features: np.ndarray,
-            start: pd.Timedelta,
-            end: pd.Timedelta,
-            *,
-            file: str = None,
-    ) -> pd.DataFrame:
+    ) -> np.ndarray:
 
         # Convert features to a pd.DataFrame
         # Assumed formats are:
@@ -804,12 +865,6 @@ class Feature:
         # [n_channels, n_features]
         # [n_features, n_frames]
         # [n_features]
-
-        win_dur = self.win_dur
-        hop_dur = self.hop_dur
-        if win_dur is not None:
-            win_dur = utils.to_timedelta(win_dur, self.process.sampling_rate)
-            hop_dur = utils.to_timedelta(hop_dur, self.process.sampling_rate)
 
         features = self._reshape_3d(features)
         n_channels, n_features, n_frames = features.shape
@@ -819,31 +874,14 @@ class Feature:
         new_shape = (n_channels * n_features, n_frames)
         features = features.reshape(new_shape).T
 
-        if n_frames > 1 and win_dur is None:
+        if n_frames > 1 and self.win_dur is None:
             raise RuntimeError(
                 f"Got "
                 f"{n_frames} "
                 f"frames, but 'win_dur' is not set."
             )
 
-        if win_dur is not None:
-            starts = pd.timedelta_range(
-                start,
-                freq=hop_dur,
-                periods=n_frames,
-            )
-            ends = starts + win_dur
-        else:
-            starts = [start]
-            ends = [end]
-
-        if file is None:
-            index = utils.signal_index(starts, ends)
-        else:
-            files = [file] * len(starts)
-            index = audformat.segmented_index(files, starts, ends)
-
-        return pd.DataFrame(features, index, columns=self.column_names)
+        return features
 
     def __call__(
             self,
