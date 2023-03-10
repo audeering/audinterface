@@ -1,5 +1,6 @@
 import os
 
+import audiofile
 import numpy as np
 import pandas as pd
 import pytest
@@ -969,6 +970,13 @@ def test_process_signal_from_index(index, expected_features):
 
 
 @pytest.mark.parametrize(
+    'signal, num_channels, sampling_rate',
+    [
+        (SIGNAL_1D, 1, SAMPLING_RATE),
+        (SIGNAL_2D, 2, SAMPLING_RATE),
+    ]
+)
+@pytest.mark.parametrize(
     'process_func, is_mono, applies_sliding_window, feature_names',
     [
         (mean, False, False, 'mean'),
@@ -991,7 +999,9 @@ def test_process_signal_from_index(index, expected_features):
         (f'{SAMPLING_RATE // 2}', f'{SAMPLING_RATE // 4}'),
     ],
 )
-def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
+def test_signal_sliding_window(tmpdir, signal, num_channels,
+                               sampling_rate, process_func, is_mono,
+                               applies_sliding_window,
                                feature_names, win_dur, hop_dur):
 
     interface = audinterface.Feature(
@@ -999,39 +1009,55 @@ def test_signal_sliding_window(process_func, is_mono, applies_sliding_window,
         process_func=process_func,
         process_func_is_mono=is_mono,
         process_func_applies_sliding_window=applies_sliding_window,
-        channels=range(NUM_CHANNELS),
+        channels=range(num_channels),
         win_dur=win_dur,
         hop_dur=hop_dur,
-        sampling_rate=SAMPLING_RATE,
+        sampling_rate=sampling_rate,
     )
 
-    for signal in [SIGNAL_1D, SIGNAL_2D]:
+    # signal
 
-        df = interface.process_signal(
-            SIGNAL_2D,
-            SAMPLING_RATE,
-        )
-        n_time_steps = len(df)
+    df = interface.process_signal(
+        signal,
+        sampling_rate,
+    )
+    n_time_steps = len(df)
 
-        win_dur = audinterface.utils.to_timedelta(win_dur, SAMPLING_RATE)
-        if hop_dur is None:
-            hop_dur = win_dur / 2
-        hop_dur = audinterface.utils.to_timedelta(hop_dur, SAMPLING_RATE)
+    win_dur = audinterface.utils.to_timedelta(win_dur, sampling_rate)
+    if hop_dur is None:
+        hop_dur = win_dur / 2
+    hop_dur = audinterface.utils.to_timedelta(hop_dur, sampling_rate)
 
-        starts = pd.timedelta_range(
-            pd.to_timedelta(0),
-            freq=hop_dur,
-            periods=n_time_steps,
-        )
-        ends = starts + win_dur
+    starts = pd.timedelta_range(
+        pd.to_timedelta(0),
+        freq=hop_dur,
+        periods=n_time_steps,
+    )
+    ends = starts + win_dur
 
-        index = audinterface.utils.signal_index(starts, ends)
-        expected = pd.DataFrame(
-            np.ones((n_time_steps, len(interface.column_names))),
-            index=index,
-            columns=interface.column_names,
-        )
-        pd.testing.assert_frame_equal(df, expected)
+    index = audinterface.utils.signal_index(starts, ends)
+    expected = pd.DataFrame(
+        np.ones((n_time_steps, len(interface.column_names))),
+        index=index,
+        columns=interface.column_names,
+    )
+    pd.testing.assert_frame_equal(df, expected)
+
+    # file
+
+    file = audeer.path(tmpdir, 'tmp.wav')
+    audiofile.write(file, signal, sampling_rate, bit_depth=32)
+
+    df = interface.process_file(file)
+
+    index = audformat.segmented_index([file] * len(starts), starts, ends)
+    expected = pd.DataFrame(
+        np.ones((n_time_steps, len(interface.column_names))),
+        index=index,
+        columns=interface.column_names,
+        dtype=np.float32,
+    )
+    pd.testing.assert_frame_equal(df, expected)
 
 
 def test_signal_sliding_window_error():
