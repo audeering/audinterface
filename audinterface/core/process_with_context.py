@@ -1,5 +1,6 @@
 import collections
 import inspect
+import itertools
 import typing
 import warnings
 
@@ -190,13 +191,15 @@ class ProcessWithContext:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
+        utils.assert_index(index)
+
         index = audformat.utils.to_segmented_index(index)
 
-        if index.empty:
-            return pd.Series(index=index, dtype=object)
+        if len(index) == 0:
+            return pd.Series([], index=index, dtype=object)
 
         files = index.levels[0]
-        ys = [None] * len(files)
+        ys = []
 
         with audeer.progress_bar(
                 files,
@@ -204,24 +207,30 @@ class ProcessWithContext:
                 disable=not self.verbose,
         ) as pbar:
             for idx, file in enumerate(pbar):
-                desc = audeer.format_display_message(file, pbar=True)
-                pbar.set_description(desc, refresh=True)
+
+                if self.verbose:  # pragma: no cover
+                    desc = audeer.format_display_message(file, pbar=True)
+                    pbar.set_description(desc, refresh=True)
+
                 mask = index.isin([file], 0)
                 select = index[mask].droplevel(0)
+
                 signal, sampling_rate = utils.read_audio(file, root=root)
-                ys[idx] = pd.Series(
-                    self._process_signal_from_index(
-                        signal,
-                        sampling_rate,
-                        select,
-                        idx=idx,
-                        root=root,
-                        file=file,
-                    ).values,
-                    index=index[mask],
+                y = self._process_signal_from_index(
+                    signal,
+                    sampling_rate,
+                    select,
+                    idx=idx,
+                    root=root,
+                    file=file,
                 )
 
-        return pd.concat(ys)
+                ys.append(y)
+
+        y = list(itertools.chain.from_iterable([x for x in ys]))
+        y = pd.Series(y, index)
+
+        return y
 
     def _process_signal_from_index(
             self,
@@ -232,36 +241,30 @@ class ProcessWithContext:
             idx: int = 0,
             root: str = None,
             file: str = None,
-    ) -> pd.Series:
+    ) -> typing.Any:
 
-        utils.assert_index(index)
-
-        if len(index) == 0:
-            y = pd.Series([], index=index, dtype=object)
-        else:
-            starts_i, ends_i = utils.segments_to_indices(
-                signal,
-                sampling_rate,
-                index,
+        starts_i, ends_i = utils.segments_to_indices(
+            signal,
+            sampling_rate,
+            index,
+        )
+        y = self._call(
+            signal,
+            sampling_rate,
+            starts_i,
+            ends_i,
+            idx=idx,
+            root=root,
+            file=file,
+        )
+        if (
+                not isinstance(y, collections.abc.Iterable)
+                or len(y) != len(index)
+        ):
+            raise RuntimeError(
+                'process_func has to return a sequence of results, '
+                f'matching the length {len(index)} of the index. '
             )
-            y = self._call(
-                signal,
-                sampling_rate,
-                starts_i,
-                ends_i,
-                idx=idx,
-                root=root,
-                file=file,
-            )
-            if (
-                    not isinstance(y, collections.abc.Iterable)
-                    or len(y) != len(index)
-            ):
-                raise RuntimeError(
-                    'process_func has to return a sequence of results, '
-                    f'matching the length {len(index)} of the index. '
-                )
-            y = pd.Series(y, index=index)
 
         return y
 
@@ -294,11 +297,19 @@ class ProcessWithContext:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        return self._process_signal_from_index(
+        utils.assert_index(index)
+
+        if len(index) == 0:
+            return pd.Series([], index=index, dtype=object)
+
+        y = self._process_signal_from_index(
             signal,
             sampling_rate,
             index,
         )
+        y = pd.Series(y, index)
+
+        return y
 
     def _call(
         self,
@@ -350,7 +361,7 @@ class ProcessWithContext:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.Series`. Instead it will return the raw processed
+        into a :class:`pd.Series`. Instead, it will return the raw processed
         signal. However, if channel selection, mixdown and/or resampling
         is enabled, the signal will be first remixed and resampled if the
         input sampling rate does not fit the expected sampling rate.
