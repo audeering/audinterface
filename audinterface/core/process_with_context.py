@@ -2,7 +2,6 @@ import collections
 import inspect
 import itertools
 import typing
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -105,7 +104,6 @@ class ProcessWithContext:
             channels: typing.Union[int, typing.Sequence[int]] = None,
             mixdown: bool = False,
             verbose: bool = False,
-            **kwargs,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
@@ -116,16 +114,6 @@ class ProcessWithContext:
                     signal[:, start:end] for start, end in zip(starts, ends)
                 ]
 
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
-
         if resample and sampling_rate is None:
             raise ValueError(
                 'sampling_rate has to be provided for resample = True.'
@@ -134,6 +122,7 @@ class ProcessWithContext:
         # figure out if special arguments
         # to pass to the processing function
         signature = inspect.signature(process_func)
+        process_func_args = process_func_args or {}
         self._process_func_special_args = {
             'idx': False,
             'root': False,

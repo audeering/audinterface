@@ -325,12 +325,6 @@ def test_process_func_args():
             'arg2': 'bar',
         }
     )
-    with pytest.warns(UserWarning):
-        audinterface.Segment(
-            process_func=segment_func,
-            arg1='foo',
-            arg2='bar',
-        )
 
 
 @pytest.mark.parametrize(

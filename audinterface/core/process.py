@@ -3,7 +3,6 @@ import inspect
 import itertools
 import os
 import typing
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -153,7 +152,6 @@ class Process:
             num_workers: typing.Optional[int] = 1,
             multiprocessing: bool = False,
             verbose: bool = False,
-            **kwargs,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
@@ -161,16 +159,6 @@ class Process:
         if process_func is None:
             def process_func(signal, _):
                 return signal
-
-        process_func_args = process_func_args or {}
-        if kwargs:
-            warnings.warn(
-                utils.kwargs_deprecation_warning,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            for key, value in kwargs.items():
-                process_func_args[key] = value
 
         if resample and sampling_rate is None:
             raise ValueError(
@@ -187,6 +175,7 @@ class Process:
         # figure out if special arguments
         # to pass to the processing function
         signature = inspect.signature(process_func)
+        process_func_args = process_func_args or {}
         self._process_func_special_args = {
             'idx': False,
             'root': False,

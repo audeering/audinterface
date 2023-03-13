@@ -31,13 +31,6 @@ def test_process_func_args():
             'arg2': 'bar',
         }
     )
-    with pytest.warns(UserWarning):
-        audinterface.ProcessWithContext(
-            feature_names=('o1', 'o2', 'o3'),
-            process_func=process_func,
-            arg1='foo',
-            arg2='bar',
-        )
 
 
 def test_process_index(tmpdir):
