@@ -1,5 +1,6 @@
 import errno
 import inspect
+import itertools
 import os
 import typing
 import warnings
@@ -254,7 +255,12 @@ class Process:
             root: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-    ) -> pd.Series:
+    ) -> typing.Tuple[
+        typing.List[typing.Any],
+        typing.List[str],
+        typing.List[pd.Timedelta],
+        typing.List[pd.Timedelta],
+    ]:
 
         if start is not None:
             start = utils.to_timedelta(start, self.sampling_rate)
@@ -267,7 +273,8 @@ class Process:
             end=end,
             root=root,
         )
-        y = self._process_signal(
+
+        y, files, starts, ends = self._process_signal(
             signal,
             sampling_rate,
             idx=idx,
@@ -276,28 +283,17 @@ class Process:
         )
 
         if self.win_dur is not None:
-
             if start is not None:
-                starts = y.index.levels[1] + start
-                ends = y.index.levels[2] + start
-                y.index = y.index.set_levels(
-                    [starts, ends],
-                    level=[1, 2],
-                )
-
+                starts = starts + start
+                ends = ends + start
         else:
+            if start is not None and not pd.isna(start):
+                starts[0] += start
+                ends[0] += start
+            if self.keep_nat and (end is None or pd.isna(end)):
+                ends[0] = pd.NaT
 
-            if start is None or pd.isna(start):
-                start = y.index.levels[1][0]
-            if end is None or (pd.isna(end) and not self.keep_nat):
-                end = y.index.levels[2][0] + start
-
-            y.index = y.index.set_levels(
-                [[start], [end]],
-                level=[1, 2],
-            )
-
-        return y
+        return y, files, starts, ends
 
     def process_file(
             self,
@@ -338,12 +334,20 @@ class Process:
             )
             return self._process_index_wo_segment(index, root)
         else:
-            return self._process_file(
+
+            y, files, starts, ends = self._process_file(
                 file,
                 root=root,
                 start=start,
                 end=end,
             )
+
+            index = audformat.segmented_index(files, starts, ends)
+
+            if len(y) == 0:
+                return pd.Series([], index, dtype=object)
+            else:
+                return pd.Series(y, index)
 
     def process_files(
             self,
@@ -402,7 +406,7 @@ class Process:
 
         verbose = self.verbose
         self.verbose = False  # avoid nested progress bar
-        y = audeer.run_tasks(
+        xs = audeer.run_tasks(
             self._process_file,
             params,
             num_workers=self.num_workers,
@@ -411,7 +415,16 @@ class Process:
             task_description=f'Process {len(files)} files',
         )
         self.verbose = verbose
-        return pd.concat(y)
+
+        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+        files = list(itertools.chain.from_iterable([x[1] for x in xs]))
+        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+        index = audformat.segmented_index(files, starts, ends)
+        y = pd.Series(y, index)
+
+        return y
 
     def process_folder(
             self,
@@ -472,7 +485,7 @@ class Process:
             for idx, (file, start, end) in enumerate(index)
         ]
 
-        y = audeer.run_tasks(
+        xs = audeer.run_tasks(
             self._process_file,
             params,
             num_workers=self.num_workers,
@@ -481,7 +494,15 @@ class Process:
             task_description=f'Process {len(index)} segments',
         )
 
-        return pd.concat(y)
+        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+        files = list(itertools.chain.from_iterable([x[1] for x in xs]))
+        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+        index = audformat.segmented_index(files, starts, ends)
+        y = pd.Series(y, index)
+
+        return y
 
     def process_index(
             self,
@@ -562,7 +583,12 @@ class Process:
             file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
-    ) -> pd.Series:
+    ) -> typing.Tuple[
+        typing.List[typing.Any],
+        typing.List[str],
+        typing.List[pd.Timedelta],
+        typing.List[pd.Timedelta],
+    ]:
 
         signal = np.atleast_2d(signal)
 
@@ -628,16 +654,7 @@ class Process:
             ends = [end]
             y = [y]
 
-        if file is not None:
-            files = [file] * len(starts)
-            index = audformat.segmented_index(files, starts, ends)
-        else:
-            index = utils.signal_index(starts, ends)
-
-        if len(y) == 0:
-            return pd.Series([], index, dtype=object)
-        else:
-            return pd.Series(y, index)
+        return y, [file] * len(starts), starts, ends
 
     def process_signal(
             self,
@@ -647,7 +664,7 @@ class Process:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
-    ) -> typing.Any:
+    ) -> pd.Series:
         r"""Process audio signal and return result.
 
         .. note:: If a ``file`` is given, the index of the returned frame
@@ -693,13 +710,24 @@ class Process:
                 start = utils.to_timedelta(start, sampling_rate)
             if end is not None:
                 end = utils.to_timedelta(end, sampling_rate)
-            return self._process_signal(
+
+            y, files, starts, ends = self._process_signal(
                 signal,
                 sampling_rate,
                 file=file,
                 start=start,
                 end=end,
             )
+
+            if file is not None:
+                index = audformat.segmented_index(files, starts, ends)
+            else:
+                index = utils.signal_index(starts, ends)
+
+            if len(y) == 0:
+                return pd.Series([], index, dtype=object)
+            else:
+                return pd.Series(y, index)
 
     def _process_signal_from_index_wo_segment(
             self,
@@ -712,7 +740,12 @@ class Process:
         if index.empty:
             return pd.Series(None, index=index, dtype=object)
 
-        if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
+        skip_file_level = (
+                isinstance(index, pd.MultiIndex) and
+                len(index.levels) == 2
+        )
+
+        if skip_file_level:
             params = [
                 (
                     (signal, sampling_rate),
@@ -737,7 +770,7 @@ class Process:
                 ) for idx, (file, start, end) in enumerate(index)
             ]
 
-        y = audeer.run_tasks(
+        xs = audeer.run_tasks(
             self._process_signal,
             params,
             num_workers=self.num_workers,
@@ -746,7 +779,19 @@ class Process:
             task_description=f'Process {len(index)} segments',
         )
 
-        return pd.concat(y)
+        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+        if skip_file_level:
+            index = utils.signal_index(starts, ends)
+        else:
+            files = list(itertools.chain.from_iterable([x[1] for x in xs]))
+            index = audformat.segmented_index(files, starts, ends)
+
+        y = pd.Series(y, index)
+
+        return y
 
     def process_signal_from_index(
             self,
@@ -863,7 +908,7 @@ class Process:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.Series`. Instead it will return the raw processed
+        into a :class:`pd.Series`. Instead, it will return the raw processed
         signal. However, if channel selection, mixdown and/or resampling
         is enabled, the signal will be first remixed and resampled if the
         input sampling rate does not fit the expected sampling rate.
