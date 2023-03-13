@@ -325,19 +325,19 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series = self.process.process_files(
+        y = self.process.process_files(
             files,
             starts=starts,
             ends=ends,
             root=root,
         )
-        if len(series) == 0:
+        if len(y) == 0:
             return audformat.filewise_index()
 
         files = []
         starts = []
         ends = []
-        for idx, ((file, start, _), index) in enumerate(series.items()):
+        for idx, ((file, start, _), index) in enumerate(y.items()):
             files.extend([file] * len(index))
             starts.extend(index.levels[0] + start)
             ends.extend(index.levels[1] + start)
