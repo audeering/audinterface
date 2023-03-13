@@ -337,7 +337,7 @@ class Segment:
         files = []
         starts = []
         ends = []
-        for idx, ((file, start, _), index) in enumerate(y.items()):
+        for (file, start, _), index in y.items():
             files.extend([file] * len(index))
             starts.extend(index.levels[0] + start)
             ends.extend(index.levels[1] + start)
@@ -510,6 +510,7 @@ class Segment:
             return index
 
         if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
+            has_file_level = False
             params = [
                 (
                     (signal, sampling_rate),
@@ -517,6 +518,7 @@ class Segment:
                 ) for start, end in index
             ]
         else:
+            has_file_level = True
             index = audformat.utils.to_segmented_index(index)
             params = [
                 (
@@ -533,7 +535,21 @@ class Segment:
             progress_bar=self.process.verbose,
             task_description=f'Process {len(index)} segments',
         )
-        index = audformat.utils.union(y)
+
+        files = []
+        starts = []
+        ends = []
+
+        for idx in y:
+            if has_file_level:
+                files.extend(idx.get_level_values('file'))
+            starts.extend(idx.get_level_values('start'))
+            ends.extend(idx.get_level_values('end'))
+
+        if has_file_level:
+            index = audformat.segmented_index(files, starts, ends)
+        else:
+            index = utils.signal_index(starts, ends)
 
         return index
 
