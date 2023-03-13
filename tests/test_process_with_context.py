@@ -133,6 +133,10 @@ def test_process_index(tmpdir):
         )
         np.testing.assert_equal(np.atleast_2d(x[channel]), value)
 
+    # bad index
+    with pytest.raises(ValueError):
+        process.process_index(pd.Index([]), root=root)
+
 
 @pytest.mark.parametrize(
     'process_func,process_func_with_context,signal,sampling_rate,index',
