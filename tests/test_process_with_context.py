@@ -242,6 +242,14 @@ def test_process_index(tmpdir):
             ),
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
+        pytest.param(  # not a valid index
+            lambda signal, sampling_rate: [0, 1],
+            lambda signal, sampling_rate, starts, ends: [0, 1],
+            np.random.random(5 * 44100),
+            44100,
+            pd.Index([]),
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
     ],
 )
 def test_process_signal_from_index(
