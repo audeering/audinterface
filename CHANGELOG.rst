@@ -11,21 +11,21 @@ Version 1.0.0 (2023/03/13)
 --------------------------
 
 * Added: ``preserve_index`` argument to
-  ``Process.process_index()``
-  and ``Feature.process_index()``
+  ``audinterface.Process.process_index()``
+  and ``audinterface.Feature.process_index()``
 * Added: support for Python 3.10
-* Changed: speedup of ``process_index()``
-  and related methods
-  for ``audinterface.Feature``,
+* Changed: speedup of processing methods
+  dealing with multiple files/segments in
+  ``audinterface.Feature``,
   ``audinterface.Process``,
   ``audinterface.ProcessWithContext``,
   and ``audinterface.Segment``
-* Removed: deprecated ``kwargs``
+* Removed: deprecated ``kwargs`` argument
   from ``audinterface.Feature``,
   ``audinterface.Process``,
   ``audinterface.ProcessWithContext``,
   and ``audinterface.Segment``;
-  use ``process_func_args`` instead
+  use the ``process_func_args`` argument instead
 
 
 Version 0.10.2 (2023/01/20)
