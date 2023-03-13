@@ -325,24 +325,24 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series = self.process.process_files(
+        y = self.process.process_files(
             files,
             starts=starts,
             ends=ends,
             root=root,
         )
-        if len(series) == 0:
+        if len(y) == 0:
             return audformat.filewise_index()
-        objs = []
-        for idx, ((file, start, _), index) in enumerate(series.items()):
-            objs.append(
-                audformat.segmented_index(
-                    files=[file] * len(index),
-                    starts=index.levels[0] + start,
-                    ends=index.levels[1] + start,
-                )
-            )
-        return audformat.utils.union(objs)
+
+        files = []
+        starts = []
+        ends = []
+        for (file, start, _), index in y.items():
+            files.extend([file] * len(index))
+            starts.extend(index.levels[0] + start)
+            ends.extend(index.levels[1] + start)
+
+        return audformat.segmented_index(files, starts, ends)
 
     def process_folder(
             self,
@@ -510,6 +510,7 @@ class Segment:
             return index
 
         if isinstance(index, pd.MultiIndex) and len(index.levels) == 2:
+            has_file_level = False
             params = [
                 (
                     (signal, sampling_rate),
@@ -517,6 +518,7 @@ class Segment:
                 ) for start, end in index
             ]
         else:
+            has_file_level = True
             index = audformat.utils.to_segmented_index(index)
             params = [
                 (
@@ -533,7 +535,21 @@ class Segment:
             progress_bar=self.process.verbose,
             task_description=f'Process {len(index)} segments',
         )
-        index = audformat.utils.union(y)
+
+        files = []
+        starts = []
+        ends = []
+
+        for idx in y:
+            if has_file_level:
+                files.extend(idx.get_level_values('file'))
+            starts.extend(idx.get_level_values('start'))
+            ends.extend(idx.get_level_values('end'))
+
+        if has_file_level:
+            index = audformat.segmented_index(files, starts, ends)
+        else:
+            index = utils.signal_index(starts, ends)
 
         return index
 
@@ -545,10 +561,11 @@ class Segment:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.MultiIndex`. Instead it will return the raw processed
-        signal. However, if channel selection, mixdown and/or resampling
-        is enabled, the signal will be first remixed and resampled if the
-        input sampling rate does not fit the expected sampling rate.
+        into a :class:`pd.MultiIndex`. Instead, it will return the raw
+        processed signal. However, if channel selection, mixdown
+        and/or resampling is enabled, the signal will be first remixed and
+        resampled if the input sampling rate does not fit the expected
+        sampling rate.
 
         Args:
             signal: signal values
