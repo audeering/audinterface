@@ -133,6 +133,10 @@ def test_process_index(tmpdir):
         )
         np.testing.assert_equal(np.atleast_2d(x[channel]), value)
 
+    # bad index
+    with pytest.raises(ValueError):
+        process.process_index(pd.Index([]), root=root)
+
 
 @pytest.mark.parametrize(
     'process_func,process_func_with_context,signal,sampling_rate,index',
@@ -241,6 +245,14 @@ def test_process_index(tmpdir):
                 pd.timedelta_range('1s', '4s', 3),
             ),
             marks=pytest.mark.xfail(raises=RuntimeError),
+        ),
+        pytest.param(  # not a valid index
+            lambda signal, sampling_rate: [0, 1],
+            lambda signal, sampling_rate, starts, ends: [0, 1],
+            np.random.random(5 * 44100),
+            44100,
+            pd.Index([]),
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
     ],
 )
