@@ -14,7 +14,7 @@ Version 1.0.0 (2023/03/14)
   ``audinterface.Process.process_index()``
   and ``audinterface.Feature.process_index()``
 * Added: support for Python 3.10
-* Changed: speedup of processing methods
+* Changed: speed up processing methods
   dealing with multiple files/segments in
   ``audinterface.Feature``,
   ``audinterface.Process``,
