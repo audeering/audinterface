@@ -7,6 +7,27 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.0 (2023/03/14)
+--------------------------
+
+* Added: ``preserve_index`` argument to
+  ``audinterface.Process.process_index()``
+  and ``audinterface.Feature.process_index()``
+* Added: support for Python 3.10
+* Changed: speed up processing methods
+  dealing with multiple files/segments in
+  ``audinterface.Feature``,
+  ``audinterface.Process``,
+  ``audinterface.ProcessWithContext``,
+  and ``audinterface.Segment``
+* Removed: deprecated ``kwargs`` argument
+  from ``audinterface.Feature``,
+  ``audinterface.Process``,
+  ``audinterface.ProcessWithContext``,
+  and ``audinterface.Segment``;
+  use the ``process_func_args`` argument instead
+
+
 Version 0.10.2 (2023/01/20)
 ---------------------------
 
