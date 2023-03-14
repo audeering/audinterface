@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.10.2
+                v1.0.0
               </div>
             
           
@@ -150,6 +150,7 @@
 
 <span class="kn">import</span> <span class="nn">audeer</span>
 <span class="kn">import</span> <span class="nn">audformat</span>
+<span class="kn">import</span> <span class="nn">audmath</span>
 <span class="kn">import</span> <span class="nn">audresample</span>
 <span class="kn">import</span> <span class="nn">audiofile</span> <span class="k">as</span> <span class="nn">af</span>
 
@@ -211,13 +212,6 @@
            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">))</span>
 
 
-<span class="n">kwargs_deprecation_warning</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;The use of **kwargs is deprecated &quot;</span>
-    <span class="s2">&quot;and will be removed with version 1.0.0. &quot;</span>
-    <span class="s2">&quot;Use &#39;process_func_args&#39; instead.&quot;</span>
-<span class="p">)</span>
-
-
 <span class="k">def</span> <span class="nf">preprocess_signal</span><span class="p">(</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -275,7 +269,7 @@
 <span class="sd">        &gt;&gt;&gt; media = audb.load_media(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
 <span class="sd">        ...     &#39;wav/03a01Fa.wav&#39;,</span>
-<span class="sd">        ...     version=&#39;1.2.0&#39;,</span>
+<span class="sd">        ...     version=&#39;1.3.0&#39;,</span>
 <span class="sd">        ...     verbose=False,</span>
 <span class="sd">        ... )</span>
 <span class="sd">        &gt;&gt;&gt; signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit=&#39;s&#39;))</span>
@@ -546,9 +540,15 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert duration value(s) to :class:`pandas.Timedelta`.</span>
 
-<span class="sd">    If duration is given as string without unit,</span>
-<span class="sd">    it is treated as samples</span>
-<span class="sd">    and requires that ``&#39;sampling_rate&#39;`` is not ``None``.</span>
+<span class="sd">    The single duration values</span>
+<span class="sd">    support all formats</span>
+<span class="sd">    mentioned in :func:`audmath.duration_in_seconds`,</span>
+<span class="sd">    like ``&#39;2 ms&#39;``, or ``pandas.to_timedelta(2, &#39;s&#39;)``.</span>
+<span class="sd">    The exception is</span>
+<span class="sd">    that float and integer values</span>
+<span class="sd">    are always interpreted as seconds</span>
+<span class="sd">    and strings without unit</span>
+<span class="sd">    always as samples.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        durations: duration value(s).</span>
@@ -568,6 +568,9 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: if a duration value is given in samples,</span>
 <span class="sd">            but ``sampling_rate`` is ``None``</span>
+<span class="sd">        ValueError: if a duration is a string</span>
+<span class="sd">            that does not match a valid &#39;&lt;value&gt;&lt;unit&gt;&#39; pattern</span>
+<span class="sd">            or the provided unit is not supported</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; to_timedelta(2)</span>
@@ -582,36 +585,35 @@
 <span class="sd">        [Timedelta(&#39;0 days 00:00:01&#39;), Timedelta(&#39;0 days 00:00:02&#39;)]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
-
-    <span class="k">def</span> <span class="nf">convert_samples_to_seconds</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># ensure we have a str and not numpy.str_</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
-            <span class="c1"># string without unit represents samples</span>
-            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">time</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">sampling_rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;You have to provide &#39;sampling_rate&#39; &quot;</span>
-                        <span class="s2">&quot;when specifying the duration in samples &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;as you did with &#39;</span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">/</span> <span class="n">sampling_rate</span>
-        <span class="k">return</span> <span class="n">time</span>
+    <span class="k">def</span> <span class="nf">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function to convert to seconds.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># force non-string values to represent seconds</span>
+            <span class="n">sampling_rate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">duration</span><span class="p">):</span>
+            <span class="c1"># force string without unit to represent samples</span>
+            <span class="k">if</span> <span class="n">sampling_rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;You have to provide &#39;sampling_rate&#39; &quot;</span>
+                    <span class="s2">&quot;when specifying the duration in samples &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;as you did with &#39;</span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">audmath</span><span class="o">.</span><span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
             <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="c1"># sequence of duration entries</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_samples_to_seconds</span><span class="p">(</span><span class="n">dur</span><span class="p">)</span> <span class="k">for</span> <span class="n">dur</span> <span class="ow">in</span> <span class="n">durations</span><span class="p">]</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">durations</span>
+        <span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># single duration entry</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="n">convert_samples_to_seconds</span><span class="p">(</span><span class="n">durations</span><span class="p">)</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>  <span class="c1"># catches values like &#39;1s&#39;</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">)</span>
+    <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">):</span>
         <span class="n">durations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">durations</span><span class="p">)</span>
@@ -632,7 +634,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/03/14 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v0.10.2
+                v1.0.0
               </div>
             
           
@@ -155,9 +155,15 @@
 <dt class="sig sig-object py" id="audinterface.utils.to_timedelta">
 <span class="sig-prename descclassname"><span class="pre">audinterface.utils.</span></span><span class="sig-name descname"><span class="pre">to_timedelta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">durations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/utils.html#to_timedelta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.utils.to_timedelta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert duration value(s) to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>.</p>
-<p>If duration is given as string without unit,
-it is treated as samples
-and requires that <code class="docutils literal notranslate"><span class="pre">'sampling_rate'</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>The single duration values
+support all formats
+mentioned in <a class="reference external" href="https://audeering.github.io/audmath/api/audmath.duration_in_seconds.html#audmath.duration_in_seconds" title="(in audmath vv1.2.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">audmath.duration_in_seconds()</span></code></a>,
+like <code class="docutils literal notranslate"><span class="pre">'2</span> <span class="pre">ms'</span></code>, or <code class="docutils literal notranslate"><span class="pre">pandas.to_timedelta(2,</span> <span class="pre">'s')</span></code>.
+The exception is
+that float and integer values
+are always interpreted as seconds
+and strings without unit
+always as samples.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -180,8 +186,13 @@ if any duration value is provided in samples</p></li>
 <dd class="field-odd"><p>duration value(s) as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v1.5.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a> objects</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if a duration value is given in samples,
-    but <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if a duration value is given in samples,
+    but <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if a duration is a string
+    that does not match a valid ‘&lt;value&gt;&lt;unit&gt;’ pattern
+    or the provided unit is not supported</p></li>
+</ul>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -224,7 +235,7 @@ if any duration value is provided in samples</p></li>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/03/14 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

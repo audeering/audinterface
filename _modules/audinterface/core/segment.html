@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.10.2
+                v1.0.0
               </div>
             
           
@@ -144,7 +144,6 @@
 <span></span><span class="kn">import</span> <span class="nn">errno</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -320,7 +319,7 @@
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; db = audb.load(</span>
 <span class="sd">        ...     &#39;emodb&#39;,</span>
-<span class="sd">        ...     version=&#39;1.2.0&#39;,</span>
+<span class="sd">        ...     version=&#39;1.3.0&#39;,</span>
 <span class="sd">        ...     media=&#39;wav/03a01Fa.wav&#39;,</span>
 <span class="sd">        ...     full_path=False,</span>
 <span class="sd">        ...     verbose=False,</span>
@@ -355,18 +354,7 @@
             <span class="n">num_workers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">multiprocessing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">utils</span><span class="o">.</span><span class="n">kwargs_deprecation_warning</span><span class="p">,</span>
-                <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">process_func_args</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-
         <span class="c1"># avoid cycling imports</span>
         <span class="kn">from</span> <span class="nn">audinterface.core.process</span> <span class="kn">import</span> <span class="n">Process</span>
         <span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
@@ -468,24 +456,24 @@
 <span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span>
             <span class="n">files</span><span class="p">,</span>
             <span class="n">starts</span><span class="o">=</span><span class="n">starts</span><span class="p">,</span>
             <span class="n">ends</span><span class="o">=</span><span class="n">ends</span><span class="p">,</span>
             <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">audformat</span><span class="o">.</span><span class="n">filewise_index</span><span class="p">()</span>
-        <span class="n">objs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">((</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="n">index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-            <span class="n">objs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span>
-                    <span class="n">files</span><span class="o">=</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
-                    <span class="n">starts</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span>
-                    <span class="n">ends</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span></div>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+            <span class="n">starts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+            <span class="n">ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Segment.process_folder"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_folder">[docs]</a>    <span class="k">def</span> <span class="nf">process_folder</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -653,6 +641,7 @@
             <span class="k">return</span> <span class="n">index</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">has_file_level</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">(</span>
                     <span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">),</span>
@@ -660,6 +649,7 @@
                 <span class="p">)</span> <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">index</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">has_file_level</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_segmented_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="p">(</span>
@@ -676,7 +666,21 @@
             <span class="n">progress_bar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
             <span class="n">task_description</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Process </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s1"> segments&#39;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">has_file_level</span><span class="p">:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">))</span>
+            <span class="n">starts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">))</span>
+            <span class="n">ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">has_file_level</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">index</span></div>
 
@@ -688,10 +692,11 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Apply processing to signal.</span>
 
 <span class="sd">        This function processes the signal **without** transforming the output</span>
-<span class="sd">        into a :class:`pd.MultiIndex`. Instead it will return the raw processed</span>
-<span class="sd">        signal. However, if channel selection, mixdown and/or resampling</span>
-<span class="sd">        is enabled, the signal will be first remixed and resampled if the</span>
-<span class="sd">        input sampling rate does not fit the expected sampling rate.</span>
+<span class="sd">        into a :class:`pd.MultiIndex`. Instead, it will return the raw</span>
+<span class="sd">        processed signal. However, if channel selection, mixdown</span>
+<span class="sd">        and/or resampling is enabled, the signal will be first remixed and</span>
+<span class="sd">        resampled if the input sampling rate does not fit the expected</span>
+<span class="sd">        sampling rate.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            signal: signal values</span>
@@ -724,7 +729,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/01/20 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/03/14 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
