@@ -1,6 +1,7 @@
 audb
 audeer
 auditok
+ipykernel
 jupyter-sphinx
 librosa
 sphinx
