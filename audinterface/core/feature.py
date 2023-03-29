@@ -767,8 +767,6 @@ class Feature:
                 dtype=object,
             )
 
-        num = len(y)
-
         if (
                 self.win_dur is not None and
                 self.process_func_applies_sliding_window
@@ -825,17 +823,12 @@ class Feature:
 
                 index = utils.signal_index(starts, ends)
 
-            data = np.concatenate(data)
-
         else:
 
             index = y.index
-            dtype = self._values_to_frame(y[0]).dtype
-            shape = (num, len(self.column_names))
-            data = np.empty(shape, dtype)
+            data = [self._values_to_frame(values) for values in y]
 
-            for idx, values in enumerate(y):
-                data[idx, :] = self._values_to_frame(values)
+        data = np.concatenate(data)
 
         df = pd.DataFrame(
             data,
