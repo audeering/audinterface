@@ -7,6 +7,14 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.1 (2023/03/29)
+--------------------------
+
+* Fixed: do not truncate strings
+  in values returned by process methods of
+  ``audinterface.Feature``
+
+
 Version 1.0.0 (2023/03/14)
 --------------------------
 
