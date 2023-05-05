@@ -470,11 +470,15 @@ def to_timedelta(
         # single duration entry
         if not isinstance(durations, pd.Timedelta):
             durations = duration_in_seconds(durations, sampling_rate)
+            durations = pd.to_timedelta(durations, unit='s')
             # Limit precision to 6 digits
-            # by converting to milliseconds and rounding
-            # to avoid rounding error in index
+            # to mimick previous behavior of pandas
             # compare https://github.com/audeering/audinterface/issues/113
-            durations = round(float(durations) * 10 ** 3, 3)
-            durations = pd.to_timedelta(durations, unit='ms')
+            precision = 6
+            durations_str = str(durations)
+            num_digits = len(durations_str.split('.')[-1])
+            if num_digits > precision:
+                durations_str = durations_str[:precision - num_digits]
+                durations = pd.Timedelta(durations_str)
 
     return durations
