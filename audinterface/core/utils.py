@@ -463,16 +463,18 @@ def to_timedelta(
     ):
         # sequence of duration entries
         durations = [
-            duration_in_seconds(duration, sampling_rate)
+            to_timedelta(duration, sampling_rate)
             for duration in durations
         ]
     else:
         # single duration entry
-        durations = duration_in_seconds(durations, sampling_rate)
-
-    durations = pd.to_timedelta(durations, unit='s')
-
-    if isinstance(durations, pd.TimedeltaIndex):
-        durations = list(durations)
+        if not isinstance(durations, pd.Timedelta):
+            durations = duration_in_seconds(durations, sampling_rate)
+            # Limit precision to 6 digits
+            # by converting to milliseconds and rounding
+            # to avoid rounding error in index
+            # compare https://github.com/audeering/audinterface/issues/113
+            durations = round(float(durations) * 10 ** 3, 3)
+            durations = pd.to_timedelta(durations, unit='ms')
 
     return durations

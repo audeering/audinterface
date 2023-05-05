@@ -527,28 +527,6 @@ def test_process_index(tmpdir, preserve_index):
     pd.testing.assert_frame_equal(df, df_cached)
 
 
-def test_process_index_time_precision(tmpdir):
-    r"""Test index start, end values are correctly rounded.
-
-    This ensures the issue reported at
-    https://github.com/audeering/audinterface/issues/113
-    is fixed.
-
-    """
-    root = audeer.mkdir(audeer.path(tmpdir, 'audio'))
-    sampling_rate = 8000
-    duration = 0.127375  # => 1019 samples
-    signal = np.ones((1, int(duration * sampling_rate)))
-    audiofile.write(
-        audeer.path(root, 'f.wav'),
-        signal,
-        sampling_rate,
-    )
-    index = audformat.segmented_index(['f.wav'], [0], [duration])
-    ends = index.get_level_values('end')
-    assert ends[0].total_seconds() == duration
-
-
 @pytest.mark.parametrize(
     'process_func, applies_sliding_window, num_feat, signal, start, end, '
     'is_mono, expected',

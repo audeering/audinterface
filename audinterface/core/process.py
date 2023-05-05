@@ -253,8 +253,14 @@ class Process:
 
         if start is not None:
             start = utils.to_timedelta(start, self.sampling_rate)
+            file_start = start - start
+        else:
+            file_start = None
         if end is not None:
             end = utils.to_timedelta(end, self.sampling_rate)
+            file_end = end - start
+        else:
+            file_end = None
 
         signal, sampling_rate = utils.read_audio(
             file,
@@ -269,6 +275,8 @@ class Process:
             idx=idx,
             root=root,
             file=file,
+            start=file_start,
+            end=file_end,
         )
 
         if self.win_dur is not None:
@@ -585,7 +593,7 @@ class Process:
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
         if end is None or (pd.isna(end) and not self.keep_nat):
-            end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
+            end = utils.to_timedelta(str(signal.shape[-1]), sampling_rate)
         start_i, end_i = utils.segment_to_indices(
             signal, sampling_rate, start, end,
         )
