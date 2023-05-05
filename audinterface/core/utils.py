@@ -476,9 +476,11 @@ def to_timedelta(
             # compare https://github.com/audeering/audinterface/issues/113
             precision = 6
             durations_str = str(durations)
-            num_digits = len(durations_str.split('.')[-1])
-            if num_digits > precision:
-                durations_str = durations_str[:precision - num_digits]
-                durations = pd.Timedelta(durations_str)
+            durations_str_parts = durations_str.split('.')
+            if len(durations_str_parts) > 1:  # check if we have digits at all
+                num_digits = len(durations_str_parts[-1])
+                if num_digits > precision:
+                    durations_str = durations_str[:precision - num_digits]
+                    durations = pd.Timedelta(durations_str)
 
     return durations
