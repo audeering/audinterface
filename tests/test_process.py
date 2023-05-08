@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import audeer
 import audinterface
 import audformat
 import audobject
@@ -561,7 +562,8 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         verbose=False,
     )
     sampling_rate = 8000
-    signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
+    duration = 3.5225
+    signal = np.random.uniform(-1.0, 1.0, (1, int(duration * sampling_rate)))
 
     # create file
     root = str(tmpdir.mkdir('wav'))
@@ -623,6 +625,13 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
             signal, sampling_rate = audinterface.utils.read_audio(path)
             np.testing.assert_equal(signal, value)
     else:
+        durations = [audiofile.duration(file) for file in index]
+        expected_index = audformat.segmented_index(
+            files=list(index),
+            starts=[0] * len(index),
+            ends=durations,
+        )
+        pd.testing.assert_index_equal(y.index, expected_index)
         for (path, start, end), value in y.items():
             signal, sampling_rate = audinterface.utils.read_audio(
                 path, start=start, end=end
@@ -675,6 +684,34 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         cache_root=cache_root,
     )
     pd.testing.assert_series_equal(y, y_cached)
+
+
+def test_process_index_filewise_end_times(tmpdir):
+
+    # Ensure the resulting segmented index
+    # returned by audinterface.process_index()
+    # and by audformat.Table.get()
+    # have identical end times
+    # if NaT is forbidden,
+    # see https://github.com/audeering/audinterface/issues/113
+
+    db_root = audeer.mkdir(audeer.path(tmpdir, 'tmp'))
+    sampling_rate = 8000
+    duration = 2.5225
+    signal = np.ones((1, int(duration * sampling_rate)))
+    audiofile.write(audeer.path(db_root, 'f.wav'), signal, sampling_rate)
+    db = audformat.Database('db')
+    index = audformat.filewise_index(['f.wav'])
+    db['table'] = audformat.Table(index)
+    db['table']['column'] = audformat.Column()
+    db['table']['column'].set(['label'])
+    db.save(db_root)
+
+    df = db['table'].get(as_segmented=True, allow_nat=False)
+    expected_index = df.index
+    interface = audinterface.Process(process_func=lambda x, fs: x.max())
+    df = interface.process_index(db['table'].index, root=db_root)
+    pd.testing.assert_index_equal(df.index, expected_index)
 
 
 @pytest.mark.parametrize(
