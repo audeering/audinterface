@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.2 (2023/05/08)
+--------------------------
+
+* Added: support for Python 3.11
+* Changed: require ``audformat>=1.0.1``
+* Fixed: ``*.process_index()``
+  keeps precision of ``end`` values
+  when a segmented index
+  is returned
+
+
 Version 1.0.1 (2023/03/29)
 --------------------------
 
