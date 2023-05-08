@@ -10,6 +10,7 @@ and this project adheres to `Semantic Versioning`_.
 Version 1.0.2 (2023/05/08)
 --------------------------
 
+* Added: support for Python 3.11
 * Changed: require ``audformat>=1.0.1``
 * Fixed: ensure that the index
   returned by
