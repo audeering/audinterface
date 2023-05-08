@@ -7,6 +7,19 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.2 (2023/05/08)
+--------------------------
+
+* Changed: require ``audformat>=1.0.1``
+* Fixed: ensure that the index
+  returned by
+  ``audformat.Table.get(as_segmented=True, allow_nan=False)``
+  and by all occurrences of ``process_index()``
+  in ``audinterface``
+  are identical
+  when the underlying table has a filewise index
+
+
 Version 1.0.1 (2023/03/29)
 --------------------------
 
