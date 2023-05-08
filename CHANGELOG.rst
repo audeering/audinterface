@@ -12,13 +12,10 @@ Version 1.0.2 (2023/05/08)
 
 * Added: support for Python 3.11
 * Changed: require ``audformat>=1.0.1``
-* Fixed: ensure that the index
-  returned by
-  ``audformat.Table.get(as_segmented=True, allow_nan=False)``
-  and by all occurrences of ``process_index()``
-  in ``audinterface``
-  are identical
-  when the underlying table has a filewise index
+* Fixed: ``*.process_index()``
+  keeps precision of ``end`` values
+  when a segmented index
+  is returned
 
 
 Version 1.0.1 (2023/03/29)
