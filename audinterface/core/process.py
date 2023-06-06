@@ -509,7 +509,7 @@ class Process:
         the result is stored as
         ``<cache_root>/<hash>.pkl``.
         When called again with the same index,
-        features will be read from the cached file.
+        results will be read from the cached file.
 
         Args:
             index: index with segment information
