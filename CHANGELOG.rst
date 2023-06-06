@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.3 (2023/06/06)
+--------------------------
+
+* Added: ``cache_root`` argument
+  to ``audinterface.Segment.process_index()``
+
+
 Version 1.0.2 (2023/05/08)
 --------------------------
 
