@@ -374,12 +374,22 @@ class Segment:
             index: pd.Index,
             *,
             root: str = None,
+            cache_root: str = None,
     ) -> pd.Index:
         r"""Segment files or segments from an index.
+
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        results will be read from the cached file.
 
         Args:
             index: index conform to audformat_
             root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
 
         Returns:
             Segmented index conform to audformat_
@@ -397,12 +407,22 @@ class Segment:
         if index.empty:
             return index
 
-        return self.process_files(
-            index.get_level_values('file'),
-            starts=index.get_level_values('start'),
-            ends=index.get_level_values('end'),
+        y = self.process.process_index(
+            index,
+            preserve_index=False,
             root=root,
+            cache_root=cache_root,
         )
+
+        files = []
+        starts = []
+        ends = []
+        for (file, start, _), index in y.items():
+            files.extend([file] * len(index))
+            starts.extend(index.levels[0] + start)
+            ends.extend(index.levels[1] + start)
+
+        return audformat.segmented_index(files, starts, ends)
 
     def process_signal(
             self,

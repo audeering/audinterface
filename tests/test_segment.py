@@ -215,6 +215,25 @@ def test_index(tmpdir, num_workers, multiprocessing):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
+    # empty index returned by process func
+
+    def process_func(x, sr):
+        return audinterface.utils.signal_index()
+
+    segment = audinterface.Segment(
+        process_func=process_func,
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
+        verbose=False,
+    )
+
+    index = pd.Index([path], name='file')
+    expected = audformat.segmented_index()
+    result = segment.process_index(index)
+    pd.testing.assert_index_equal(result, expected)
+
 
 @pytest.mark.parametrize(
     'signal, sampling_rate, segment_func, result',
