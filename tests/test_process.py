@@ -306,7 +306,8 @@ def signal_modification(signal, sampling_rate, subtract=False):
             False,
             1.0,
         ),
-        # Add failing test for certain `start`, `end` values
+        # Test for certain `start`, `end` values
+        # that were failing before
         # https://github.com/audeering/audinterface/issues/123
         (
             identity,
@@ -325,7 +326,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             True,
             None,
             False,
-            np.ones((1, 6720)),
+            np.ones((1, 6720), 'float32'),
         ),
     ],
 )
@@ -365,8 +366,13 @@ def test_process_file(
         start=start,
         end=end,
     )
+    if isinstance(y.values, np.ndarray):
+        values = y.values[0]
+    else:
+        values = y.values
+
     np.testing.assert_almost_equal(
-        y.values, expected_output, decimal=4,
+        values, expected_output, decimal=4,
     )
 
     # test relative path
@@ -376,8 +382,13 @@ def test_process_file(
         end=end,
         root=root,
     )
+    if isinstance(y.values, np.ndarray):
+        values = y.values[0]
+    else:
+        values = y.values
+
     np.testing.assert_almost_equal(
-        y.values, expected_output, decimal=4,
+        values, expected_output, decimal=4,
     )
 
 
