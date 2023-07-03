@@ -13,6 +13,10 @@ import audobject
 import audinterface
 
 
+def identity(signal, sampling_rate):
+    return signal
+
+
 def signal_duration(signal, sampling_rate):
     return signal.shape[1] / sampling_rate
 
@@ -301,6 +305,27 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             False,
             1.0,
+        ),
+        # Add failing test for certain `start`, `end` values
+        # https://github.com/audeering/audinterface/issues/123
+        (
+            identity,
+            None,
+            np.concatenate(
+                [
+                    np.zeros((1, 18240)),
+                    np.ones((1, 6720)),
+                    np.zeros((1, 23040)),
+                ],
+                axis=1,
+            ),
+            16000,
+            pd.Timedelta('0 days 00:00:01.140000'),
+            pd.Timedelta('0 days 00:00:01.560000'),
+            True,
+            None,
+            False,
+            np.ones((1, 6720)),
         ),
     ],
 )
