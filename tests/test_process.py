@@ -366,13 +366,9 @@ def test_process_file(
         start=start,
         end=end,
     )
-    if isinstance(y.values, np.ndarray):
-        values = y.values[0]
-    else:
-        values = y.values
 
     np.testing.assert_almost_equal(
-        values, expected_output, decimal=4,
+        y.values[0], expected_output, decimal=4,
     )
 
     # test relative path
@@ -382,13 +378,9 @@ def test_process_file(
         end=end,
         root=root,
     )
-    if isinstance(y.values, np.ndarray):
-        values = y.values[0]
-    else:
-        values = y.values
 
     np.testing.assert_almost_equal(
-        values, expected_output, decimal=4,
+        y.values[0], expected_output, decimal=4,
     )
 
 
