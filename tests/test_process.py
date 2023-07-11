@@ -1479,7 +1479,7 @@ def test_process_with_special_args(tmpdir):
     )
     pd.testing.assert_series_equal(y, expected)
 
-    # explicitely pass special arguments
+    # explicitly pass special arguments
 
     process = audinterface.Process(
         process_func=process_func,

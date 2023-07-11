@@ -124,7 +124,7 @@ class Feature:
             If ``False``,
             the sliding window is applied internally
             and the processing function
-            receives invidual frames instead.
+            receives individual frames instead.
             Applies only if
             features are extracted in a framewise manner
             (see ``win_dur`` and ``hop_dur``)
