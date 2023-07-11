@@ -57,6 +57,6 @@ jobs:
     - name: Test building documentation
       run: |
         python -m sphinx docs/ docs/_build/ -b html -W
-        # Disbale link check until new release is done
+        # Disable link check until new release is done
         # python -m sphinx docs/ build/sphinx/html -b linkcheck
       if: matrix.os == 'ubuntu-latest'

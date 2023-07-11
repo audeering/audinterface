@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 import audformat
+
 import audinterface
 
 

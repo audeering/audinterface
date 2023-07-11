@@ -7,19 +7,16 @@ import pandas as pd
 
 import audeer
 import audformat
+import audiofile as af
 import audmath
 import audresample
-import audiofile as af
 
-from audinterface.core.typing import (
-    Timestamp,
-    Timestamps,
-)
+from audinterface.core.typing import Timestamp
+from audinterface.core.typing import Timestamps
 
 
 def assert_index(obj: pd.Index):
     r"""Check if index is conform to audformat."""
-
     if isinstance(obj, pd.MultiIndex) and len(obj.levels) == 2:
 
         if obj.has_duplicates:
@@ -64,7 +61,7 @@ def assert_index(obj: pd.Index):
 
 
 def is_scalar(value: typing.Any) -> bool:
-    r"""Check if value is scalar"""
+    r"""Check if value is scalar."""
     return (value is not None) and \
            (isinstance(value, str) or not hasattr(value, '__len__'))
 
@@ -78,7 +75,6 @@ def preprocess_signal(
         mixdown: bool,
 ) -> (np.ndarray, int):
     r"""Pre-process signal."""
-
     signal = np.atleast_2d(signal)
 
     if channels is not None or mixdown:

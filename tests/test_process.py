@@ -1,15 +1,16 @@
 import os
 
-import audiofile
-import audiofile as af
 import numpy as np
 import pandas as pd
 import pytest
 
 import audeer
-import audinterface
 import audformat
+import audiofile
+import audiofile as af
 import audobject
+
+import audinterface
 
 
 def signal_duration(signal, sampling_rate):
@@ -1479,7 +1480,7 @@ def test_process_with_special_args(tmpdir):
     )
     pd.testing.assert_series_equal(y, expected)
 
-    # explicitely pass special arguments
+    # explicitly pass special arguments
 
     process = audinterface.Process(
         process_func=process_func,

@@ -5,8 +5,9 @@ import pandas as pd
 import pytest
 
 import audformat
-import audinterface
 import audiofile
+
+import audinterface
 
 
 def signal_max(signal, sampling_rate):
@@ -342,7 +343,7 @@ def test_process_with_special_args(tmpdir):
     expected = pd.Series(values, index)
     pd.testing.assert_series_equal(y, expected)
 
-    # explicitely pass special arguments
+    # explicitly pass special arguments
 
     process = audinterface.ProcessWithContext(
         process_func=process_func,

@@ -312,7 +312,6 @@ class ProcessWithContext:
         file: str = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
-
         signal, sampling_rate = utils.preprocess_signal(
             signal,
             sampling_rate,
@@ -358,6 +357,8 @@ class ProcessWithContext:
         Args:
             signal: signal values
             sampling_rate: sampling rate in Hz
+            starts: sequence with start values
+            ends: sequence with end values
 
         Returns:
             Processed signal

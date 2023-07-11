@@ -13,10 +13,8 @@ import audformat
 
 from audinterface.core.process import Process
 from audinterface.core.segment import Segment
-from audinterface.core.typing import (
-    Timestamp,
-    Timestamps,
-)
+from audinterface.core.typing import Timestamp
+from audinterface.core.typing import Timestamps
 import audinterface.core.utils as utils
 
 
@@ -124,7 +122,7 @@ class Feature:
             If ``False``,
             the sliding window is applied internally
             and the processing function
-            receives invidual frames instead.
+            receives individual frames instead.
             Applies only if
             features are extracted in a framewise manner
             (see ``win_dur`` and ``hop_dur``)
@@ -676,7 +674,6 @@ class Feature:
             features: typing.Union[np.ndarray, pd.Series]
     ):
         r"""Reshape to [n_channels, n_features, n_frames]."""
-
         features = np.array(features)
         features = np.atleast_1d(features)
 
