@@ -9,10 +9,8 @@ import audeer
 import audformat
 
 from audinterface.core import utils
-from audinterface.core.typing import (
-    Timestamp,
-    Timestamps,
-)
+from audinterface.core.typing import Timestamp
+from audinterface.core.typing import Timestamps
 
 
 def create_process_func(
@@ -20,7 +18,6 @@ def create_process_func(
         invert: bool,
 ) -> typing.Callable[..., pd.MultiIndex]:
     r"""Create processing function."""
-
     if process_func is None:
         def process_func(signal, sr, **kwargs):
             return utils.signal_index()

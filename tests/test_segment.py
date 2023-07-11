@@ -5,8 +5,9 @@ import pandas as pd
 import pytest
 
 import audformat
-import audinterface
 import audiofile as af
+
+import audinterface
 
 
 SAMPLING_RATE = 8000

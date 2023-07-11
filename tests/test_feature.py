@@ -1,14 +1,15 @@
 import os
 
-import audiofile
 import numpy as np
 import pandas as pd
 import pytest
 
 import audeer
 import audformat
-import audinterface
+import audiofile
 import audiofile as af
+
+import audinterface
 
 
 SAMPLING_RATE = 8000

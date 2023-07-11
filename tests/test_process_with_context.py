@@ -5,8 +5,9 @@ import pandas as pd
 import pytest
 
 import audformat
-import audinterface
 import audiofile
+
+import audinterface
 
 
 def signal_max(signal, sampling_rate):

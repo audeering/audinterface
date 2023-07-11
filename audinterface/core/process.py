@@ -12,10 +12,8 @@ import audformat
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
-from audinterface.core.typing import (
-    Timestamp,
-    Timestamps,
-)
+from audinterface.core.typing import Timestamp
+from audinterface.core.typing import Timestamps
 
 
 class Process:
@@ -725,7 +723,6 @@ class Process:
             index: pd.Index,
     ) -> pd.Series:
         r"""Like process_signal_from_index, but does not apply segmentation."""
-
         if index.empty:
             return pd.Series(None, index=index, dtype=object)
 
@@ -838,7 +835,6 @@ class Process:
             file: str = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
-
         signal, sampling_rate = utils.preprocess_signal(
             signal,
             sampling_rate,
