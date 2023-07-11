@@ -1,23 +1,21 @@
 from datetime import date
 import os
 import shutil
-import subprocess
+
+import toml
 
 import audeer
 
 
+config = toml.load(audeer.path('..', 'pyproject.toml'))
+
+
 # Project -----------------------------------------------------------------
-project = 'audinterface'
+project = config['project']['name']
 copyright = f'2020-{date.today().year} audEERING GmbH'
-author = 'Johannes Wagner, Hagen Wierstorf, Andreas Triantafyllopoulos'
-# The x.y.z version read from tags
-try:
-    version = subprocess.check_output(['git', 'describe', '--tags',
-                                       '--always'])
-    version = version.decode().strip()
-except Exception:
-    version = '<unknown>'
-title = f'{project} Documentation'
+author = ', '.join(author['name'] for author in config['project']['authors'])
+version = audeer.git_repo_version()
+title = 'Documentation'
 
 
 # General -----------------------------------------------------------------
