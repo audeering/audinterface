@@ -6,9 +6,9 @@ import pytest
 
 import audeer
 import audformat
+import audiofile
 
 import audinterface
-import audiofile
 
 
 def to_array(value):
