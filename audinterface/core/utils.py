@@ -133,23 +133,21 @@ def read_audio(
     if root is not None and not os.path.isabs(file):
         file = os.path.join(root, file)
 
-    sampling_rate = af.sampling_rate(file)
-
     if start is None or pd.isna(start):
         offset = 0
     else:
-        offset = to_samples(start, sampling_rate)
+        offset = start.total_seconds()
 
     if end is None or pd.isna(end):
         duration = None
     else:
-        duration = to_samples(end, sampling_rate) - offset
+        duration = end.total_seconds() - offset
 
     signal, sampling_rate = af.read(
         audeer.safe_path(file),
         always_2d=True,
-        offset=str(offset),  # str() to enforce samples as unit
-        duration=str(duration),
+        offset=offset,
+        duration=duration,
     )
 
     return signal, sampling_rate
@@ -164,9 +162,9 @@ def segment_to_indices(
     if pd.isna(end):
         end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
     max_i = signal.shape[-1]
-    start_i = to_samples(start, sampling_rate)
+    start_i = audmath.samples(start.total_seconds(), sampling_rate)
     start_i = min(start_i, max_i)
-    end_i = to_samples(end, sampling_rate)
+    end_i = audmath.samples(end.total_seconds(), sampling_rate)
     end_i = min(end_i, max_i)
     return start_i, end_i
 
@@ -387,23 +385,6 @@ def to_array(value: typing.Any) -> np.ndarray:
         elif is_scalar(value):
             value = np.array([value])
     return value
-
-
-def to_samples(
-        duration: pd.Timedelta,
-        sampling_rate: int,
-) -> int:
-    r"""Convert duration to samples.
-
-    Args:
-        duration: duration in seconds
-        sampling_rate: sampling rate in Hz
-
-    Returns:
-        duration in samples
-
-    """
-    return int(round(duration.total_seconds() * sampling_rate))
 
 
 def to_timedelta(
