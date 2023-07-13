@@ -162,9 +162,9 @@ def segment_to_indices(
     if pd.isna(end):
         end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
     max_i = signal.shape[-1]
-    start_i = int(round(start.total_seconds() * sampling_rate))
+    start_i = audmath.samples(start.total_seconds(), sampling_rate)
     start_i = min(start_i, max_i)
-    end_i = int(round(end.total_seconds() * sampling_rate))
+    end_i = audmath.samples(end.total_seconds(), sampling_rate)
     end_i = min(end_i, max_i)
     return start_i, end_i
 

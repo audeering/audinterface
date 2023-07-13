@@ -13,6 +13,10 @@ import audobject
 import audinterface
 
 
+def identity(signal, sampling_rate):
+    return signal
+
+
 def signal_duration(signal, sampling_rate):
     return signal.shape[1] / sampling_rate
 
@@ -302,6 +306,28 @@ def signal_modification(signal, sampling_rate, subtract=False):
             False,
             1.0,
         ),
+        # Test for certain `start`, `end` values
+        # that were failing before
+        # https://github.com/audeering/audinterface/issues/123
+        (
+            identity,
+            None,
+            np.concatenate(
+                [
+                    np.zeros((1, 18240)),
+                    np.ones((1, 6720)),
+                    np.zeros((1, 23040)),
+                ],
+                axis=1,
+            ),
+            16000,
+            pd.Timedelta('0 days 00:00:01.140000'),
+            pd.Timedelta('0 days 00:00:01.560000'),
+            True,
+            None,
+            False,
+            np.ones((1, 6720), 'float32'),
+        ),
     ],
 )
 def test_process_file(
@@ -340,8 +366,9 @@ def test_process_file(
         start=start,
         end=end,
     )
+
     np.testing.assert_almost_equal(
-        y.values, expected_output, decimal=4,
+        y.values[0], expected_output, decimal=4,
     )
 
     # test relative path
@@ -351,8 +378,9 @@ def test_process_file(
         end=end,
         root=root,
     )
+
     np.testing.assert_almost_equal(
-        y.values, expected_output, decimal=4,
+        y.values[0], expected_output, decimal=4,
     )
 
 

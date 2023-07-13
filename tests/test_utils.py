@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import audeer
 import audformat
+import audiofile
 
 import audinterface
 
@@ -130,6 +132,45 @@ def test_create_segmented_index(starts, ends):
             assert index.get_level_values(
                 audformat.define.IndexField.END
             ).tolist() == [pd.NaT] * len(starts)
+
+
+def test_read_audio(tmpdir):
+
+    # Ensures that we apply the same rounding
+    # when reading with `audinterface.utils.read_audio()`
+    # with `start` and `end`
+    # or when using `start` and `end` with `process_signal()`.
+
+    # Use critical `start` and `end` values
+    # as reported in
+    # https://github.com/audeering/audinterface/issues/123
+    start = pd.Timedelta('0 days 00:00:01.140000')
+    end = pd.Timedelta('0 days 00:00:01.560000')
+
+    sampling_rate = 16000
+    signal = np.zeros((1, 3 * sampling_rate))
+
+    # Use `audinterface.core.utils.segment_to_indices()` as ground truth
+    start_i, end_i = audinterface.core.utils.segment_to_indices(
+        signal,
+        sampling_rate,
+        start,
+        end,
+    )
+    signal[:, start_i:end_i] = 0.9
+
+    audio_file = audeer.path(tmpdir, 'signal.wav')
+    audiofile.write(audio_file, signal, sampling_rate)
+
+    signal, _ = audinterface.utils.read_audio(
+        audio_file,
+        start=start,
+        end=end,
+    )
+    expected_signal, _ = audiofile.read(audio_file, always_2d=True)
+    expected_signal = expected_signal[:, start_i:end_i]
+
+    np.testing.assert_array_equal(signal, expected_signal)
 
 
 @pytest.mark.parametrize(
