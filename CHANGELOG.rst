@@ -7,6 +7,24 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.0.4 (2023/07/13)
+--------------------------
+
+* Changed: require ``audmath>=1.3.0``
+* Changed: require ``audiofile>=1.3.0``
+* Changed: always evenly round
+  ``start`` and ``end``
+  to samples
+  in ``audinterface.utils.read_signal()``
+* Fixed: process functions
+  that work on segments
+  are now always processing the identical signal
+  independent if they get the signal as input,
+  like ``audinterface.Process.process_signal()``,
+  or a file,
+  like ``audinterface.Process.process_file()``
+
+
 Version 1.0.3 (2023/06/06)
 --------------------------
 
