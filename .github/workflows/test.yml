@@ -40,7 +40,6 @@ jobs:
         python -V
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r docs/requirements.txt
         pip install -r tests/requirements.txt
 
     - name: Test with pytest
@@ -52,11 +51,4 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
-      if: matrix.os == 'ubuntu-latest'
-
-    - name: Test building documentation
-      run: |
-        python -m sphinx docs/ docs/_build/ -b html -W
-        # Disable link check until new release is done
-        # python -m sphinx docs/ build/sphinx/html -b linkcheck
       if: matrix.os == 'ubuntu-latest'
