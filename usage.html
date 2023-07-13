@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Usage &mdash; audinterface Documentation</title>
+  <title>Usage &mdash; Documentation</title>
   
 
   
@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v1.0.3
+                v1.0.4
               </div>
             
           
@@ -169,7 +169,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
 and the sampling rate as input.</p>
 <p>The interface can then apply the algorithm
 on a list of files,
@@ -230,7 +230,7 @@ and create an interface for it using <a class="reference internal" href="api/aud
 <p>The following three commands
 apply the algorithm
 and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
@@ -325,7 +325,7 @@ and set a window and hop duration.</p>
       <th>.../03a01Nc.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
-      <td>-16.386615</td>
+      <td>-16.386614</td>
     </tr>
     <tr>
       <th>...</th>
@@ -357,7 +357,7 @@ and set a window and hop duration.</p>
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -422,7 +422,7 @@ we create a new interface
 and set a window and hop duration.
 By setting
 <code class="docutils literal notranslate"><span class="pre">process_func_applies_sliding_window=False</span></code>
-the windowing is automatically handeled
+the windowing is automatically handled
 and single frames are passed on to the processing function.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -779,29 +779,29 @@ whereas the first dimension is optionally.</p>
       <th rowspan="3" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:00.020000</th>
-      <td>-611.993347</td>
-      <td>47.627602</td>
+      <td>-611.993286</td>
+      <td>47.627609</td>
       <td>...</td>
       <td>10.659678</td>
-      <td>1.151385</td>
+      <td>1.151391</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.010000</th>
       <th>0 days 00:00:00.030000</th>
       <td>-668.175842</td>
-      <td>35.650555</td>
+      <td>35.650566</td>
       <td>...</td>
-      <td>13.644268</td>
-      <td>14.068541</td>
+      <td>13.644274</td>
+      <td>14.068544</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.020000</th>
       <th>0 days 00:00:00.040000</th>
       <td>-664.612793</td>
-      <td>43.068928</td>
+      <td>43.068939</td>
       <td>...</td>
-      <td>5.081636</td>
-      <td>7.949763</td>
+      <td>5.081634</td>
+      <td>7.949759</td>
     </tr>
     <tr>
       <th>...</th>
@@ -818,28 +818,28 @@ whereas the first dimension is optionally.</p>
       <th>0 days 00:00:02.500000</th>
       <th>0 days 00:00:02.520000</th>
       <td>-644.156494</td>
-      <td>34.024544</td>
+      <td>34.024551</td>
       <td>...</td>
-      <td>2.472634</td>
-      <td>7.411008</td>
+      <td>2.472640</td>
+      <td>7.411007</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.510000</th>
       <th>0 days 00:00:02.530000</th>
       <td>-618.545898</td>
-      <td>44.741570</td>
+      <td>44.741573</td>
       <td>...</td>
-      <td>12.690895</td>
-      <td>17.645348</td>
+      <td>12.690891</td>
+      <td>17.645357</td>
     </tr>
     <tr>
       <th>0 days 00:00:02.520000</th>
       <th>0 days 00:00:02.540000</th>
       <td>-666.805237</td>
-      <td>19.845562</td>
+      <td>19.845566</td>
       <td>...</td>
-      <td>4.124322</td>
-      <td>3.711084</td>
+      <td>4.124321</td>
+      <td>3.711080</td>
     </tr>
   </tbody>
 </table></div></div>
@@ -1234,7 +1234,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/06/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

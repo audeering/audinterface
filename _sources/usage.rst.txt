@@ -162,7 +162,7 @@ we create a new interface
 and set a window and hop duration.
 By setting
 ``process_func_applies_sliding_window=False``
-the windowing is automatically handeled
+the windowing is automatically handled
 and single frames are passed on to the processing function.
 
 .. jupyter-execute::

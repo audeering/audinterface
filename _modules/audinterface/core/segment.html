@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>audinterface.core.segment &mdash; audinterface Documentation</title>
+  <title>audinterface.core.segment &mdash; Documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.0.3
+                v1.0.4
               </div>
             
           
@@ -152,10 +152,8 @@
 <span class="kn">import</span> <span class="nn">audformat</span>
 
 <span class="kn">from</span> <span class="nn">audinterface.core</span> <span class="kn">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">audinterface.core.typing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Timestamp</span><span class="p">,</span>
-    <span class="n">Timestamps</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">audinterface.core.typing</span> <span class="kn">import</span> <span class="n">Timestamp</span>
+<span class="kn">from</span> <span class="nn">audinterface.core.typing</span> <span class="kn">import</span> <span class="n">Timestamps</span>
 
 
 <span class="k">def</span> <span class="nf">create_process_func</span><span class="p">(</span>
@@ -163,7 +161,6 @@
         <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create processing function.&quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">()</span>
@@ -749,7 +746,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/06/06 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
