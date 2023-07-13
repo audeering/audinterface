@@ -14,7 +14,7 @@ to audio files or databases_.
 Have a look at the installation_ and usage_ instructions.
 
 .. _databases: https://audeering.github.io/audformat/
-.. _installation: https://audeering.github.io/audinterface/install.html
+.. _installation: https://audeering.github.io/audinterface/installation.html
 .. _usage: https://audeering.github.io/audinterface/usage.html
 
 
