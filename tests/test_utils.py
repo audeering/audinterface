@@ -174,6 +174,52 @@ def test_read_audio(tmpdir):
 
 
 @pytest.mark.parametrize(
+    'starts, ends, expected',
+    [
+        (
+            [1, 2],
+            [3, 4],
+            pd.MultiIndex.from_arrays(
+                [
+                    pd.TimedeltaIndex(
+                        [
+                            pd.Timedelta('0 days 00:00:01.0'),
+                            pd.Timedelta('0 days 00:00:02.0'),
+                        ]
+                    ),
+                    pd.TimedeltaIndex(
+                        [
+                            pd.Timedelta('0 days 00:00:03.0'),
+                            pd.Timedelta('0 days 00:00:04.0'),
+                        ]
+                    ),
+                ],
+                names=['start', 'end'],
+            ),
+        ),
+        (
+            [pd.Timedelta('0 days 00:00:35.511437999')],
+            [36],
+            pd.MultiIndex.from_arrays(
+                [
+                    pd.TimedeltaIndex(
+                        [pd.Timedelta('0 days 00:00:35.511437999')]
+                    ),
+                    pd.TimedeltaIndex(
+                        [pd.Timedelta('0 days 00:00:36.000000000')]
+                    ),
+                ],
+                names=['start', 'end'],
+            ),
+        ),
+    ]
+)
+def test_signal_index(starts, ends, expected):
+    index = audinterface.utils.signal_index(starts, ends)
+    pd.testing.assert_index_equal(index, expected)
+
+
+@pytest.mark.parametrize(
     'signal, sampling_rate, win_dur, hop_dur, expected',
     [
         # empty
@@ -409,6 +455,23 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
         hop_dur,
     )
     np.testing.assert_equal(frames, expected)
+
+
+@pytest.mark.parametrize(
+    'duration, expected',
+    [
+        (
+            10,
+            pd.to_timedelta(10, unit='s'),
+        ),
+        (  # See https://github.com/audeering/audinterface/issues/134
+            pd.Timedelta('0 days 00:00:35.511437999'),
+            pd.Timedelta('0 days 00:00:35.511437999'),
+        ),
+    ]
+)
+def test_to_timedelta(duration, expected):
+    assert audinterface.utils.to_timedelta(duration) == expected
 
 
 @pytest.mark.parametrize(
