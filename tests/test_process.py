@@ -1528,10 +1528,10 @@ def test_process_with_special_args(tmpdir):
         ),
         audinterface.Segment(
             process_func=lambda x, sr:
-                audinterface.utils.signal_index(
-                    pd.to_timedelta(0),
-                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                )
+            audinterface.utils.signal_index(
+                pd.to_timedelta(0),
+                pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
+            )
         ),
         audinterface.Segment(
             process_func=lambda x, sr:
@@ -1542,17 +1542,26 @@ def test_process_with_special_args(tmpdir):
         ),
         audinterface.Segment(
             process_func=lambda x, sr:
-                audinterface.utils.signal_index(
-                    [
-                        pd.to_timedelta(0),
-                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                    ],
-                    [
-                        pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-                        pd.to_timedelta(x.shape[1] / sr),
-                    ],
-                )
-        )
+            audinterface.utils.signal_index(
+                [
+                    pd.to_timedelta(0),
+                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
+                ],
+                [
+                    pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
+                    pd.to_timedelta(x.shape[1] / sr),
+                ],
+            )
+        ),
+        audinterface.Segment(
+            process_func=lambda x, sr:
+            audinterface.utils.signal_index([0, 2], [1, 3])
+        ),
+        # https://github.com/audeering/audinterface/issues/135
+        audinterface.Segment(
+            process_func=lambda x, sr:
+            audinterface.utils.signal_index([0, 1], [3, 2])
+        ),
     ]
 )
 def test_process_with_segment(tmpdir, segment):
@@ -1576,6 +1585,21 @@ def test_process_with_segment(tmpdir, segment):
         sampling_rate,
         file=file,
     )
+    print(f'{index.get_level_values("start")=}')
+    print(f'{index.get_level_values("end")=}')
+
+    i1 = process.process_index(index, root=root)
+    print(f'{i1.index.get_level_values("start")=}')
+    print(f'{i1.index.get_level_values("end")=}')
+
+    i2 = process_with_segment.process_signal(
+        signal,
+        sampling_rate,
+        file=file,
+    )
+    print(f'{i2.index.get_level_values("start")=}')
+    print(f'{i2.index.get_level_values("end")=}')
+
     pd.testing.assert_series_equal(
         process.process_index(index, root=root),
         process_with_segment.process_signal(
