@@ -418,7 +418,6 @@ class Segment:
             files.extend([file] * len(index))
             starts.extend(index.levels[0] + start)
             ends.extend(index.levels[1] + start)
-
         return audformat.segmented_index(files, starts, ends)
 
     def process_signal(
@@ -476,9 +475,10 @@ class Segment:
         if file is not None:
             index = audformat.segmented_index(
                 files=[file] * len(index),
-                starts=index.levels[0],
-                ends=index.levels[1],
+                starts=index.get_level_values('start'),
+                ends=index.get_level_values('end'),
             )
+
         return index
 
     def process_signal_from_index(
