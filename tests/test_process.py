@@ -1612,6 +1612,15 @@ def test_process_with_segment(tmpdir, starts, ends):
         )
     )
 
+    # process files
+    index = segment.process_files([file], root=root)
+    pd.testing.assert_index_equal(index, expected)
+
+    # pd.testing.assert_series_equal(
+    #     process.process_index(index, root=root, preserve_index=True),
+    #     process_with_segment.process_files([file], root=root)
+    # )
+
 
 def test_read_audio(tmpdir):
     sampling_rate = 8000
