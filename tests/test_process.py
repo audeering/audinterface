@@ -1598,6 +1598,20 @@ def test_process_with_segment(tmpdir, starts, ends):
         )
     )
 
+    # process signal from index
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audinterface.utils.signal_index(0, 3),
+    )
+    pd.testing.assert_index_equal(index, expected_signal_index)
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audformat.segmented_index(file, 0, 3),
+    )
+    pd.testing.assert_index_equal(index, expected)
+
     # process file
     index = segment.process_file(file, root=root)
     pd.testing.assert_index_equal(index, expected)
