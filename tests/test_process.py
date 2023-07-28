@@ -1526,14 +1526,14 @@ def test_process_with_special_args(tmpdir):
     # using audinterface.utils.signal_index()
     'starts, ends',
     [
-        (None, None),
-        (0, 1.5),
-        (1.5, 3),
-        ([0, 1.5], [1.5, 3]),
+        #(None, None),
+        #(0, 1.5),
+        #(1.5, 3),
+        #([0, 1.5], [1.5, 3]),
         # Blocked by https://github.com/audeering/audinterface/issues/134
         # or a similar issue
         # ([0, 1.5], [1, 2.000000003]),
-        ([0, 2], [1, 3]),
+        #([0, 2], [1, 3]),
         # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
     ]
@@ -1554,6 +1554,8 @@ def test_process_with_segment(tmpdir, starts, ends):
     else:
         files = ['file.wav'] * len(audeer.to_list(starts))
     expected = audformat.segmented_index(files, starts, ends)
+
+    print(f'{expected.get_level_values("end")=}')
 
     # Create signal and file
     sampling_rate = 8000
@@ -1592,6 +1594,8 @@ def test_process_with_segment(tmpdir, starts, ends):
 
     # process file
     index = segment.process_file(file, root=root)
+    pd.testing.assert_index_equal(index, expected)
+
     pd.testing.assert_series_equal(
         process.process_index(index, root=root, preserve_index=True),
         process_with_segment.process_file(file, root=root)

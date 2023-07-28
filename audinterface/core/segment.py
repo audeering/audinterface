@@ -272,8 +272,8 @@ class Segment:
         ).values[0]
         return audformat.segmented_index(
             files=[file] * len(index),
-            starts=index.levels[0] + start,
-            ends=index.levels[1] + start,
+            starts=index.get_level_values('start') + start,
+            ends=index.get_level_values('end') + start,
         )
 
     def process_files(
