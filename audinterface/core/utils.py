@@ -459,16 +459,18 @@ def to_timedelta(
     ):
         # sequence of duration entries
         durations = [
-            duration_in_seconds(duration, sampling_rate)
+            to_timedelta(duration, sampling_rate)
             for duration in durations
         ]
     else:
         # single duration entry
+
+        # avoid converting Timedelta values to ensure precision
+        # https://github.com/audeering/audinterface/pull/137
+        if isinstance(durations, pd.Timedelta):
+            return durations
+
         durations = duration_in_seconds(durations, sampling_rate)
-
-    durations = pd.to_timedelta(durations, unit='s')
-
-    if isinstance(durations, pd.TimedeltaIndex):
-        durations = list(durations)
+        durations = pd.to_timedelta(durations, unit='s')
 
     return durations
