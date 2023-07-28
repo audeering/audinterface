@@ -270,6 +270,16 @@ class Process:
             file=file,
         )
 
+        def precision_offset(duration, sampling_rate):
+            # Ensure we get the same precision
+            # by storing what is lost due to rounding
+            # when reading the file
+            duration_at_sample = utils.to_timedelta(
+                audmath.samples(duration.total_seconds(), sampling_rate)
+                / sampling_rate
+            )
+            return duration - duration_at_sample
+
         if self.win_dur is not None:
             if start is not None:
                 starts = starts + start
@@ -277,19 +287,11 @@ class Process:
         else:
             if start is not None and not pd.isna(start):
                 starts[0] += start
-                ends[0] += start
+                ends[0] += start - precision_offset(start, sampling_rate)
             if self.keep_nat and (end is None or pd.isna(end)):
                 ends[0] = pd.NaT
-            # Ensure we get the same precision for the end values
-            # by storing what is lost due to rounding
-            # when reading the file
             if end is not None and not pd.isna(end):
-                end_at_sample = utils.to_timedelta(
-                    audmath.samples(end.total_seconds(), sampling_rate)
-                    / sampling_rate
-                )
-                end_precision_difference = end - end_at_sample
-                ends[-1] += end_precision_difference
+                ends[-1] += precision_offset(end, sampling_rate)
 
         return y, files, starts, ends
 
