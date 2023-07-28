@@ -177,20 +177,31 @@ def test_read_audio(tmpdir):
     'starts, ends, expected',
     [
         (
+            1,
+            2,
+            pd.MultiIndex.from_arrays(
+                [
+                    pd.TimedeltaIndex([pd.Timedelta('0 days 00:00:01')]),
+                    pd.TimedeltaIndex([pd.Timedelta('0 days 00:00:02')]),
+                ],
+                names=['start', 'end'],
+            ),
+        ),
+        (
             [1, 2],
             [3, 4],
             pd.MultiIndex.from_arrays(
                 [
                     pd.TimedeltaIndex(
                         [
-                            pd.Timedelta('0 days 00:00:01.0'),
-                            pd.Timedelta('0 days 00:00:02.0'),
+                            pd.Timedelta('0 days 00:00:01'),
+                            pd.Timedelta('0 days 00:00:02'),
                         ]
                     ),
                     pd.TimedeltaIndex(
                         [
-                            pd.Timedelta('0 days 00:00:03.0'),
-                            pd.Timedelta('0 days 00:00:04.0'),
+                            pd.Timedelta('0 days 00:00:03'),
+                            pd.Timedelta('0 days 00:00:04'),
                         ]
                     ),
                 ],
@@ -206,7 +217,7 @@ def test_read_audio(tmpdir):
                         [pd.Timedelta('0 days 00:00:35.511437999')]
                     ),
                     pd.TimedeltaIndex(
-                        [pd.Timedelta('0 days 00:00:36.000000000')]
+                        [pd.Timedelta('0 days 00:00:36')]
                     ),
                 ],
                 names=['start', 'end'],
@@ -464,9 +475,30 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
             10,
             pd.to_timedelta(10, unit='s'),
         ),
-        (  # See https://github.com/audeering/audinterface/issues/134
+        (
+            [1],
+            [pd.Timedelta('0 days 00:00:01')],
+        ),
+        (
+            [1, 2],
+            [pd.Timedelta('0 days 00:00:01'), pd.Timedelta('0 days 00:00:02')],
+        ),
+        (
+            [1, pd.Timedelta('0 days 00:00:02')],
+            [pd.Timedelta('0 days 00:00:01'), pd.Timedelta('0 days 00:00:02')],
+        ),
+        # Example with high precision
+        # https://github.com/audeering/audinterface/issues/134
+        (
             pd.Timedelta('0 days 00:00:35.511437999'),
             pd.Timedelta('0 days 00:00:35.511437999'),
+        ),
+        (
+            [1e-09, 1],
+            [
+                pd.Timedelta('0 days 00:00:00.000000001'),
+                pd.Timedelta('0 days 00:00:01'),
+            ],
         ),
     ]
 )
