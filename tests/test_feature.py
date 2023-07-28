@@ -8,7 +8,6 @@ import audeer
 import audformat
 import audiofile
 import audiofile as af
-import audmath
 
 import audinterface
 
@@ -987,6 +986,7 @@ def test_process_signal_from_index(feature, signal, sampling_rate, index,
     np.testing.assert_array_equal(df.values, expected)
 
 
+@pytest.mark.parametrize('audio', [(3, 8000)], indirect=True)  # s, Hz
 @pytest.mark.parametrize(
     # `starts` and `ends`
     # are used to create a segment object
@@ -997,16 +997,22 @@ def test_process_signal_from_index(feature, signal, sampling_rate, index,
         (0, 1.5),
         (1.5, 3),
         ([0, 1.5], [1.5, 3]),
-        # Blocked by https://github.com/audeering/audinterface/issues/134
-        # or a similar issue
-        # ([0, 1.5], [1, 2.000000003]),
         ([0, 2], [1, 3]),
         ([0, 1], [2, 2]),
+        # https://github.com/audeering/audinterface/pull/145
+        ([0, 1.5], [1, 2.000000003]),
+        ([0.000000003, 1.5], [1, 2]),
+        ([1.000000003, 1.5], [1.1, 2]),
+        ([1.000000003, 2.1], [2.000000003, 2.5]),
         # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
     ]
 )
-def test_feature_with_segment(tmpdir, starts, ends):
+def test_feature_with_segment(audio, starts, ends):
+
+    path, signal, sampling_rate = audio
+    root, file = os.path.split(path)
+    duration = signal.shape[1] / sampling_rate
 
     # Segment and process objects
     segment = audinterface.Segment(
@@ -1015,20 +1021,6 @@ def test_feature_with_segment(tmpdir, starts, ends):
     )
     feature = audinterface.Feature('f')
     feature_with_segment = audinterface.Feature('f', segment=segment)
-
-    # Create signal and file
-    sampling_rate = 8000
-    if ends is None:
-        duration = 1
-    else:
-        duration = audmath.duration_in_seconds(
-            max(audeer.to_list(ends))
-        )
-    signal = np.zeros((1, audmath.samples(duration, sampling_rate)))
-    root = tmpdir
-    file = 'file.wav'
-    path = os.path.join(root, file)
-    audiofile.write(path, signal, sampling_rate)
 
     # Expected index
     if starts is None:
