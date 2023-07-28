@@ -9,6 +9,7 @@ import pandas as pd
 
 import audeer
 import audformat
+import audmath
 
 from audinterface.core import utils
 from audinterface.core.segment import Segment
@@ -279,6 +280,16 @@ class Process:
                 ends[0] += start
             if self.keep_nat and (end is None or pd.isna(end)):
                 ends[0] = pd.NaT
+            # Ensure we get the same precision for the end values
+            # by storing what is lost due to rounding
+            # when reading the file
+            if end is not None and not pd.isna(end):
+                end_at_sample = utils.to_timedelta(
+                    audmath.samples(end.total_seconds(), sampling_rate)
+                    / sampling_rate
+                )
+                end_precision_difference = end - end_at_sample
+                ends[-1] += end_precision_difference
 
         return y, files, starts, ends
 

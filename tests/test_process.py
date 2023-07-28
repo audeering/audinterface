@@ -1533,7 +1533,7 @@ def test_process_with_special_args(tmpdir):
         ([0, 1.5], [1.5, 3]),
         # Blocked by https://github.com/audeering/audinterface/issues/134
         # or a similar issue
-        # ([0, 1.5], [1, 2.000000003]),
+        ([0, 1.5], [1, 2.000000003]),
         ([0, 2], [1, 3]),
         ([0, 1], [2, 2]),
         # https://github.com/audeering/audinterface/issues/135
