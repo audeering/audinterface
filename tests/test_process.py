@@ -1645,10 +1645,10 @@ def test_process_with_segment(tmpdir, starts, ends):
     pd.testing.assert_index_equal(index, expected_folder_index)
 
     # https://github.com/audeering/audinterface/issues/139
-    # pd.testing.assert_series_equal(
-    #     process.process_index(index, root=root, preserve_index=True),
-    #     process_with_segment.process_folder(root),
-    # )
+    pd.testing.assert_series_equal(
+        process.process_index(index, root=root, preserve_index=True),
+        process_with_segment.process_folder(root),
+    )
 
     # process index
     index = segment.process_index(audformat.filewise_index(file), root=root)
