@@ -480,6 +480,7 @@ class Feature:
             root: str,
             *,
             filetype: str = 'wav',
+            include_root: bool = True,
     ) -> pd.DataFrame:
         r"""Extract features from files in a folder.
 
@@ -488,6 +489,10 @@ class Feature:
         Args:
             root: root folder
             filetype: file extension
+            include_root: if ``True``
+                the file paths are absolute
+                in the index
+                of the returned result
 
         Raises:
             FileNotFoundError: if folder does not exist
@@ -505,9 +510,12 @@ class Feature:
                 root,
             )
 
-        files = audeer.list_file_names(root, filetype=filetype)
-        files = [os.path.join(root, os.path.basename(f)) for f in files]
-        return self.process_files(files)
+        files = audeer.list_file_names(
+            root,
+            filetype=filetype,
+            basenames=not include_root,
+        )
+        return self.process_files(files, root=root)
 
     def process_index(
             self,
