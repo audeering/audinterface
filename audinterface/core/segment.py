@@ -465,6 +465,12 @@ class Segment:
         ).values[0]
         utils.assert_index(index)
         if start is not None:
+            start = utils.to_timedelta(start)
+            # Here we change directly the levels,
+            # so we need to use
+            # `index.levels[0]`
+            # instead of
+            # `index.get_level_values('start')`
             index = index.set_levels(
                 [
                     index.levels[0] + start,
