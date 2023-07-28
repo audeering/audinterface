@@ -1621,6 +1621,10 @@ def test_process_with_segment(tmpdir, starts, ends):
     #     process_with_segment.process_files([file], root=root)
     # )
 
+    # process index
+    index = segment.process_index(audformat.filewise_index(file), root=root)
+    pd.testing.assert_index_equal(index, expected)
+
 
 def test_read_audio(tmpdir):
     sampling_rate = 8000
