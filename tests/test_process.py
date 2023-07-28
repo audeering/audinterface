@@ -8,6 +8,7 @@ import audeer
 import audformat
 import audiofile
 import audiofile as af
+import audmath
 import audobject
 
 import audinterface
@@ -1551,7 +1552,13 @@ def test_process_with_segment(tmpdir, starts, ends):
 
     # Create signal and file
     sampling_rate = 8000
-    signal = np.zeros((1, 3 * sampling_rate))
+    if ends is None:
+        duration = 1
+    else:
+        duration = audmath.duration_in_seconds(
+            max(audeer.to_list(ends))
+        )
+    signal = np.zeros((1, audmath.samples(duration, sampling_rate)))
     root = tmpdir
     file = 'file.wav'
     path = os.path.join(root, file)
@@ -1567,8 +1574,6 @@ def test_process_with_segment(tmpdir, starts, ends):
     expected = audformat.segmented_index(files, starts, ends)
     expected_folder_index = audformat.segmented_index(files_abs, starts, ends)
     expected_signal_index = audinterface.utils.signal_index(starts, ends)
-
-    print(f'{expected.get_level_values("end")=}')
 
     # process signal
     index = segment.process_signal(signal, sampling_rate)
@@ -1591,13 +1596,13 @@ def test_process_with_segment(tmpdir, starts, ends):
     index = segment.process_signal_from_index(
         signal,
         sampling_rate,
-        audinterface.utils.signal_index(0, 3),
+        audinterface.utils.signal_index(0, duration),
     )
     pd.testing.assert_index_equal(index, expected_signal_index)
     index = segment.process_signal_from_index(
         signal,
         sampling_rate,
-        audformat.segmented_index(file, 0, 3),
+        audformat.segmented_index(file, 0, duration),
     )
     pd.testing.assert_index_equal(index, expected)
     index = segment.process_signal_from_index(
