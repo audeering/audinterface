@@ -373,6 +373,15 @@ class Process:
         if len(files) == 0:
             return pd.Series(dtype=object)
 
+        if self.segment is not None:
+            index = self.segment.process_files(
+                files,
+                starts=starts,
+                ends=ends,
+                root=root,
+            )
+            return self._process_index_wo_segment(index, root)
+
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
             starts = [starts] * len(files)
         if isinstance(ends, (type(None), float, int, str, pd.Timedelta)):
