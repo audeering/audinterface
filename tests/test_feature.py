@@ -420,6 +420,7 @@ def test_process_folder(tmpdir):
     pd.testing.assert_frame_equal(
         df,
         pd.DataFrame(
+            index=pd.Index([], dtype='object'),
             dtype=object,
             columns=feature.column_names,
         ),
