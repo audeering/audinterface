@@ -272,8 +272,8 @@ class Segment:
         ).values[0]
         return audformat.segmented_index(
             files=[file] * len(index),
-            starts=index.levels[0] + start,
-            ends=index.levels[1] + start,
+            starts=index.get_level_values('start') + start,
+            ends=index.get_level_values('end') + start,
         )
 
     def process_files(
@@ -324,8 +324,8 @@ class Segment:
         ends = []
         for (file, start, _), index in y.items():
             files.extend([file] * len(index))
-            starts.extend(index.levels[0] + start)
-            ends.extend(index.levels[1] + start)
+            starts.extend(index.get_level_values('start') + start)
+            ends.extend(index.get_level_values('end') + start)
 
         return audformat.segmented_index(files, starts, ends)
 
@@ -416,8 +416,8 @@ class Segment:
         ends = []
         for (file, start, _), index in y.items():
             files.extend([file] * len(index))
-            starts.extend(index.levels[0] + start)
-            ends.extend(index.levels[1] + start)
+            starts.extend(index.get_level_values('start') + start)
+            ends.extend(index.get_level_values('end') + start)
 
         return audformat.segmented_index(files, starts, ends)
 
@@ -466,6 +466,12 @@ class Segment:
         ).values[0]
         utils.assert_index(index)
         if start is not None:
+            start = utils.to_timedelta(start)
+            # Here we change directly the levels,
+            # so we need to use
+            # `index.levels[0]`
+            # instead of
+            # `index.get_level_values('start')`
             index = index.set_levels(
                 [
                     index.levels[0] + start,
@@ -476,9 +482,10 @@ class Segment:
         if file is not None:
             index = audformat.segmented_index(
                 files=[file] * len(index),
-                starts=index.levels[0],
-                ends=index.levels[1],
+                starts=index.get_level_values('start'),
+                ends=index.get_level_values('end'),
             )
+
         return index
 
     def process_signal_from_index(
