@@ -1520,68 +1520,19 @@ def test_process_with_special_args(tmpdir):
     pd.testing.assert_series_equal(y, expected)
 
 
-#@pytest.mark.parametrize(
-#    'segment, expected',
-#    [
-#        # audinterface.Segment(
-#        #     process_func=lambda x, sr: audinterface.utils.signal_index()
-#        # ),
-#        # audinterface.Segment(
-#        #     process_func=lambda x, sr:
-#        #     audinterface.utils.signal_index(
-#        #         pd.to_timedelta(0),
-#        #         pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-#        #     )
-#        # ),
-#        # audinterface.Segment(
-#        #     process_func=lambda x, sr:
-#        #     audinterface.utils.signal_index(
-#        #         pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-#        #         pd.to_timedelta(x.shape[1] / sr, unit='s'),
-#        #     )
-#        # ),
-#        # audinterface.Segment(
-#        #     process_func=lambda x, sr:
-#        #     audinterface.utils.signal_index(
-#        #         [
-#        #             pd.to_timedelta(0),
-#        #             pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-#        #         ],
-#        #         [
-#        #             pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-#        #             pd.to_timedelta(x.shape[1] / sr),
-#        #         ],
-#        #     )
-#        # ),
-#        # audinterface.Segment(
-#        #     process_func=lambda x, sr:
-#        #     audinterface.utils.signal_index([0, 2], [1, 3])
-#        # ),
-#        # https://github.com/audeering/audinterface/issues/135
-#        (
-#            audinterface.Segment(
-#                process_func=lambda x, sr:
-#                audinterface.utils.signal_index([0, 1], [3, 2])
-#            ),
-#            pd.MultiIndex.from_arrays(
-#                [
-#                    [
-#                        pd.Timedelta('0 days 00:00:00'),
-#                        pd.Timedelta('0 days 00:00:01'),
-#                    ],
-#                    [
-#                        pd.Timedelta('0 days 00:00:03'),
-#                        pd.Timedelta('0 days 00:00:02'),
-#                    ],
-#                ],
-#                names=['start', 'end'],
-#            ),
-#        ),
-#    ]
-#)
 @pytest.mark.parametrize(
+    # `starts` and `ends`
+    # are used to create a segment object
+    # using audinterface.utils.signal_index()
     'starts, ends',
     [
+        (None, None),
+        (0, 1.5),
+        (1.5, 3),
+        ([0, 1.5], [1.5, 3]),
+        # Blocked by https://github.com/audeering/audinterface/issues/134
+        # or a similar issue
+        # ([0, 1.5], [1, 2.000000003]),
         ([0, 2], [1, 3]),
         # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
@@ -1589,27 +1540,23 @@ def test_process_with_special_args(tmpdir):
 )
 def test_process_with_segment(tmpdir, starts, ends):
 
+    # Segment and process objects
     segment = audinterface.Segment(
         process_func=lambda x, sr:
         audinterface.utils.signal_index(starts, ends)
     )
-
-    expected = audformat.segmented_index(
-        files=['file.wav'] * len(starts),
-        starts=starts,
-        ends=ends,
-    )
-    print(expected)
-    print(f'{expected.get_level_values("end")=}')
-
     process = audinterface.Process()
-    process_with_segment = audinterface.Process(
-        segment=segment,
-    )
+    process_with_segment = audinterface.Process(segment=segment)
 
-    # create signal and file
+    # Expected index
+    if starts is None:
+        files = None
+    else:
+        files = ['file.wav'] * len(audeer.to_list(starts))
+    expected = audformat.segmented_index(files, starts, ends)
+
+    # Create signal and file
     sampling_rate = 8000
-    # TODO: make another issue for the case of a shorter signal
     signal = np.zeros((1, 3 * sampling_rate))
     root = tmpdir
     file = 'file.wav'
@@ -1622,33 +1569,20 @@ def test_process_with_segment(tmpdir, starts, ends):
         sampling_rate,
         file=file,
     )
-
     pd.testing.assert_index_equal(index, expected)
 
-    i2 = process_with_segment.process_signal(
-        signal,
-        sampling_rate,
-        file=file,
-    )
-    print(f'{i2.index.get_level_values("start")=}')
-    print(f'{i2.index.get_level_values("end")=}')
-
     pd.testing.assert_series_equal(
-        process.process_index(index, root=root),
-        process_with_segment.process_signal(
-            signal,
-            sampling_rate,
-            file=file,
-        )
+        process.process_index(index, root=root, preserve_index=True),
+        process_with_segment.process_signal(signal, sampling_rate, file=file)
     )
-    assert False
+
     index = segment.process_signal_from_index(
         signal,
         sampling_rate,
         audformat.filewise_index(file),
     )
     pd.testing.assert_series_equal(
-        process.process_index(index, root=root),
+        process.process_index(index, root=root, preserve_index=True),
         process_with_segment.process_signal_from_index(
             signal,
             sampling_rate,
@@ -1659,7 +1593,7 @@ def test_process_with_segment(tmpdir, starts, ends):
     # process file
     index = segment.process_file(file, root=root)
     pd.testing.assert_series_equal(
-        process.process_index(index, root=root),
+        process.process_index(index, root=root, preserve_index=True),
         process_with_segment.process_file(file, root=root)
     )
     index = segment.process_index(
@@ -1667,7 +1601,7 @@ def test_process_with_segment(tmpdir, starts, ends):
         root=root,
     )
     pd.testing.assert_series_equal(
-        process.process_index(index, root=root),
+        process.process_index(index, root=root, preserve_index=True),
         process_with_segment.process_index(
             audformat.filewise_index(file),
             root=root,
