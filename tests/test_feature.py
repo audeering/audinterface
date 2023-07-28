@@ -389,15 +389,22 @@ def test_process_folder(tmpdir):
     )
 
     path = str(tmpdir.mkdir('wav'))
-    files = [
-        os.path.join(path, f'file{n}.wav') for n in range(3)
-    ]
-    for file in files:
+    files = [f'file{n}.wav' for n in range(3)]
+    files_abs = [os.path.join(path, file) for file in files]
+    for file in files_abs:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)
 
+    # folder with include_root=True
     y = feature.process_folder(path)
     y_expected = np.ones((3, NUM_CHANNELS * NUM_FEATURES))
+    assert all(y.index.levels[0] == files_abs)
+    assert all(y.index.levels[1] == index.levels[0])
+    assert all(y.index.levels[2] == index.levels[1])
+    np.testing.assert_array_equal(y.values, y_expected)
 
+    # folder with include_root=False
+    y = feature.process_folder(path, include_root=False)
+    y_expected = np.ones((3, NUM_CHANNELS * NUM_FEATURES))
     assert all(y.index.levels[0] == files)
     assert all(y.index.levels[1] == index.levels[0])
     assert all(y.index.levels[2] == index.levels[1])
