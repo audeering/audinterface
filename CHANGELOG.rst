@@ -7,6 +7,38 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.1.0 (2023/07/28)
+--------------------------
+
+* Added: ``include_root`` argument to
+  ``audinterface.Feature.process_folder()``,
+  ``audinterface.Process.process_folder()``,
+  ``audinterface.Segment.process_folder()``.
+  Returns relative file path
+  in index
+  if set to ``False``.
+  Default value is ``True``
+* Changed: when ``audinterface.Feature``
+  is instantiated with an ``audinterface.Segment``
+  object that returns an empty index,
+  ``audinterface.Feature.process_*()``
+  no longer return ``Index([], dtype='object')``
+  but ``MultiIndex([], names=['file', 'start', 'end'])``
+* Fixed: preserve order of ``start`` and ``end`` values
+  as returned by the segmentation callable
+  in the index returned by ``audinterface.Segment``
+  processing functions
+* Fixed: precision of ``audinterface.utils.to_timedelta()``
+  for ``pd.Timedelta`` objects as input
+* Fixed: precision of ``start`` and ``end`` values
+  as returned by
+  ``process_file()``,
+  ``process_files()``,
+  ``process_folder()``
+  methods of ``audinterface.Process``
+  and ``audinterface.Feature()``
+
+
 Version 1.0.4 (2023/07/13)
 --------------------------
 
