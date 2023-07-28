@@ -1526,16 +1526,16 @@ def test_process_with_special_args(tmpdir):
     # using audinterface.utils.signal_index()
     'starts, ends',
     [
-        #(None, None),
-        #(0, 1.5),
-        #(1.5, 3),
-        #([0, 1.5], [1.5, 3]),
+        (None, None),
+        (0, 1.5),
+        (1.5, 3),
+        ([0, 1.5], [1.5, 3]),
         # Blocked by https://github.com/audeering/audinterface/issues/134
         # or a similar issue
         # ([0, 1.5], [1, 2.000000003]),
-        #([0, 2], [1, 3]),
-        # https://github.com/audeering/audinterface/issues/135
+        ([0, 2], [1, 3]),
         ([0, 1], [2, 2]),
+        # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
     ]
 )
@@ -1584,20 +1584,6 @@ def test_process_with_segment(tmpdir, starts, ends):
         process_with_segment.process_signal(signal, sampling_rate, file=file)
     )
 
-    index = segment.process_signal_from_index(
-        signal,
-        sampling_rate,
-        audformat.filewise_index(file),
-    )
-    pd.testing.assert_series_equal(
-        process.process_index(index, root=root, preserve_index=True),
-        process_with_segment.process_signal_from_index(
-            signal,
-            sampling_rate,
-            audformat.filewise_index(file),
-        )
-    )
-
     # process signal from index
     index = segment.process_signal_from_index(
         signal,
@@ -1611,6 +1597,21 @@ def test_process_with_segment(tmpdir, starts, ends):
         audformat.segmented_index(file, 0, 3),
     )
     pd.testing.assert_index_equal(index, expected)
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audformat.filewise_index(file),
+    )
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_series_equal(
+        process.process_index(index, root=root, preserve_index=True),
+        process_with_segment.process_signal_from_index(
+            signal,
+            sampling_rate,
+            audformat.filewise_index(file),
+        )
+    )
 
     # process file
     index = segment.process_file(file, root=root)
@@ -1620,22 +1621,12 @@ def test_process_with_segment(tmpdir, starts, ends):
         process.process_index(index, root=root, preserve_index=True),
         process_with_segment.process_file(file, root=root)
     )
-    index = segment.process_index(
-        audformat.filewise_index(file),
-        root=root,
-    )
-    pd.testing.assert_series_equal(
-        process.process_index(index, root=root, preserve_index=True),
-        process_with_segment.process_index(
-            audformat.filewise_index(file),
-            root=root,
-        )
-    )
 
     # process files
     index = segment.process_files([file], root=root)
     pd.testing.assert_index_equal(index, expected)
 
+    # https://github.com/audeering/audinterface/issues/138
     # pd.testing.assert_series_equal(
     #     process.process_index(index, root=root, preserve_index=True),
     #     process_with_segment.process_files([file], root=root)
@@ -1645,6 +1636,13 @@ def test_process_with_segment(tmpdir, starts, ends):
     index = segment.process_index(audformat.filewise_index(file), root=root)
     pd.testing.assert_index_equal(index, expected)
 
+    pd.testing.assert_series_equal(
+        process.process_index(index, root=root, preserve_index=True),
+        process_with_segment.process_index(
+            audformat.filewise_index(file),
+            root=root,
+        )
+    )
 
 def test_read_audio(tmpdir):
     sampling_rate = 8000
