@@ -418,6 +418,7 @@ class Segment:
             files.extend([file] * len(index))
             starts.extend(index.get_level_values('start') + start)
             ends.extend(index.get_level_values('end') + start)
+
         return audformat.segmented_index(files, starts, ends)
 
     def process_signal(
