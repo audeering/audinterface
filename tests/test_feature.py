@@ -8,6 +8,7 @@ import audeer
 import audformat
 import audiofile
 import audiofile as af
+import audmath
 
 import audinterface
 
@@ -984,6 +985,157 @@ def test_process_signal_from_index(feature, signal, sampling_rate, index,
         index,
     )
     np.testing.assert_array_equal(df.values, expected)
+
+
+@pytest.mark.parametrize(
+    # `starts` and `ends`
+    # are used to create a segment object
+    # using audinterface.utils.signal_index()
+    'starts, ends',
+    [
+        (None, None),
+        (0, 1.5),
+        (1.5, 3),
+        ([0, 1.5], [1.5, 3]),
+        # Blocked by https://github.com/audeering/audinterface/issues/134
+        # or a similar issue
+        # ([0, 1.5], [1, 2.000000003]),
+        ([0, 2], [1, 3]),
+        ([0, 1], [2, 2]),
+        # https://github.com/audeering/audinterface/issues/135
+        ([0, 1], [3, 2]),
+    ]
+)
+def test_feature_with_segment(tmpdir, starts, ends):
+
+    # Segment and process objects
+    segment = audinterface.Segment(
+        process_func=lambda x, sr:
+        audinterface.utils.signal_index(starts, ends)
+    )
+    feature = audinterface.Feature('f')
+    feature_with_segment = audinterface.Feature('f', segment=segment)
+
+    # Create signal and file
+    sampling_rate = 8000
+    if ends is None:
+        duration = 1
+    else:
+        duration = audmath.duration_in_seconds(
+            max(audeer.to_list(ends))
+        )
+    signal = np.zeros((1, audmath.samples(duration, sampling_rate)))
+    root = tmpdir
+    file = 'file.wav'
+    path = os.path.join(root, file)
+    audiofile.write(path, signal, sampling_rate)
+
+    # Expected index
+    if starts is None:
+        files = None
+        files_abs = None
+    else:
+        files = [file] * len(audeer.to_list(starts))
+        files_abs = [audeer.path(root, file) for file in files]
+    expected = audformat.segmented_index(files, starts, ends)
+    expected_folder_index = audformat.segmented_index(files_abs, starts, ends)
+    expected_signal_index = audinterface.utils.signal_index(starts, ends)
+
+    # process signal
+    index = segment.process_signal(signal, sampling_rate)
+    pd.testing.assert_index_equal(index, expected_signal_index)
+
+    # process signal with start argument
+    index = segment.process_signal(signal, sampling_rate, start=0)
+    pd.testing.assert_index_equal(index, expected_signal_index)
+
+    # process signal with file argument
+    index = segment.process_signal(signal, sampling_rate, file=file)
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_signal(signal, sampling_rate, file=file)
+    )
+
+    # process signal from index
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audinterface.utils.signal_index(0, duration),
+    )
+    pd.testing.assert_index_equal(index, expected_signal_index)
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audformat.segmented_index(file, 0, duration),
+    )
+    pd.testing.assert_index_equal(index, expected)
+    index = segment.process_signal_from_index(
+        signal,
+        sampling_rate,
+        audformat.filewise_index(file),
+    )
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_signal_from_index(
+            signal,
+            sampling_rate,
+            audformat.filewise_index(file),
+        ),
+    )
+
+    # process file
+    index = segment.process_file(file, root=root)
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_file(file, root=root),
+    )
+
+    # process files
+    index = segment.process_files([file], root=root)
+    pd.testing.assert_index_equal(index, expected)
+
+    # https://github.com/audeering/audinterface/issues/138
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_files([file], root=root)
+    )
+
+    # process folder
+    index = segment.process_folder(root)
+    pd.testing.assert_index_equal(index, expected_folder_index)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_folder(root),
+    )
+
+    # process folder without root
+    # https://github.com/audeering/audinterface/issues/139
+    index = segment.process_folder(root, include_root=False)
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_folder(root, include_root=False),
+    )
+
+    # process index
+    index = segment.process_index(audformat.filewise_index(file), root=root)
+    pd.testing.assert_index_equal(index, expected)
+
+    pd.testing.assert_frame_equal(
+        feature.process_index(index, root=root, preserve_index=True),
+        feature_with_segment.process_index(
+            audformat.filewise_index(file),
+            root=root,
+        ),
+    )
 
 
 @pytest.mark.parametrize(

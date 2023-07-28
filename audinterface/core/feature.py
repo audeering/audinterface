@@ -767,7 +767,12 @@ class Feature:
     ) -> pd.DataFrame:
 
         if y.empty:
+            if self.process.segment is None:
+                index = []
+            else:
+                index = audformat.segmented_index()
             return pd.DataFrame(
+                index=index,
                 columns=self.column_names,
                 dtype=object,
             )
