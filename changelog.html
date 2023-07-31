@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v1.0.4
+                v1.1.0
               </div>
             
           
@@ -105,6 +105,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-1-0-2023-07-28">Version 1.1.0 (2023/07/28)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-0-4-2023-07-13">Version 1.0.4 (2023/07/13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-0-3-2023-06-06">Version 1.0.3 (2023/06/06)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-0-2-2023-05-08">Version 1.0.2 (2023/05/08)</a></li>
@@ -190,6 +191,48 @@
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a class="reference external" href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<div class="section" id="version-1-1-0-2023-07-28">
+<h2>Version 1.1.0 (2023/07/28)<a class="headerlink" href="#version-1-1-0-2023-07-28" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Added: <code class="docutils literal notranslate"><span class="pre">include_root</span></code> argument to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_folder()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_folder()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_folder()</span></code>.
+Returns relative file path
+in index
+if set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+Default value is <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>Changed: when <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code>
+is instantiated with an <code class="docutils literal notranslate"><span class="pre">audinterface.Segment</span></code>
+object that returns an empty index,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_*()</span></code>
+no longer return <code class="docutils literal notranslate"><span class="pre">Index([],</span> <span class="pre">dtype='object')</span></code>
+but <code class="docutils literal notranslate"><span class="pre">MultiIndex([],</span> <span class="pre">names=['file',</span> <span class="pre">'start',</span> <span class="pre">'end'])</span></code></p></li>
+<li><p>Fixed: preserve order of <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> values
+as returned by the segmentation callable
+in the index returned by <code class="docutils literal notranslate"><span class="pre">audinterface.Segment</span></code>
+processing functions</p></li>
+<li><p>Fixed: precision of <code class="docutils literal notranslate"><span class="pre">audinterface.utils.to_timedelta()</span></code>
+for <code class="docutils literal notranslate"><span class="pre">pd.Timedelta</span></code> objects as input,
+e.g.
+<code class="docutils literal notranslate"><span class="pre">to_timedelta(pd.Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999'))</span></code>
+now returns
+<code class="docutils literal notranslate"><span class="pre">Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999')</span></code>
+instead of
+<code class="docutils literal notranslate"><span class="pre">Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437')</span></code>.
+This also affects the output of
+<code class="docutils literal notranslate"><span class="pre">audinterface.utils.signal_index()</span></code></p></li>
+<li><p>Fixed: preserve requested <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> values in
+<code class="docutils literal notranslate"><span class="pre">process_file()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_files()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_folder()</span></code>
+methods of <code class="docutils literal notranslate"><span class="pre">audinterface.Process</span></code>
+and <code class="docutils literal notranslate"><span class="pre">audinterface.Feature()</span></code>.
+Before they were rounded
+to the next sample
+in the returned index</p></li>
+</ul>
+</div>
 <div class="section" id="version-1-0-4-2023-07-13">
 <h2>Version 1.0.4 (2023/07/13)<a class="headerlink" href="#version-1-0-4-2023-07-13" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -604,7 +647,7 @@ when process a segmented index</p></li>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v1.0.4
+                v1.1.0
               </div>
             
           
@@ -400,7 +400,7 @@ If a scalar is given, it is applied to all files</p></li>
 <h2>process_folder()<a class="headerlink" href="#process-folder" title="Permalink to this heading">¶</a></h2>
 <dl class="py method">
 <dt class="sig sig-object py" id="audinterface.Segment.process_folder">
-<span class="sig-prename descclassname"><span class="pre">Segment.</span></span><span class="sig-name descname"><span class="pre">process_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filetype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wav'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/segment.html#Segment.process_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.Segment.process_folder" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Segment.</span></span><span class="sig-name descname"><span class="pre">process_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filetype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wav'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/segment.html#Segment.process_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.Segment.process_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Segment files in a folder.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -411,6 +411,10 @@ If a scalar is given, it is applied to all files</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>root</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – root folder</p></li>
 <li><p><strong>filetype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – file extension</p></li>
+<li><p><strong>include_root</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>
+the file paths are absolute
+in the index
+of the returned result</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -569,7 +573,7 @@ See also <a class="reference internal" href="audinterface.utils.signal_index.htm
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

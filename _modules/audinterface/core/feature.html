@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.0.4
+                v1.1.0
               </div>
             
           
@@ -623,6 +623,7 @@
             <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="o">*</span><span class="p">,</span>
             <span class="n">filetype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;wav&#39;</span><span class="p">,</span>
+            <span class="n">include_root</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Extract features from files in a folder.</span>
 
@@ -631,6 +632,10 @@
 <span class="sd">        Args:</span>
 <span class="sd">            root: root folder</span>
 <span class="sd">            filetype: file extension</span>
+<span class="sd">            include_root: if ``True``</span>
+<span class="sd">                the file paths are absolute</span>
+<span class="sd">                in the index</span>
+<span class="sd">                of the returned result</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FileNotFoundError: if folder does not exist</span>
@@ -648,9 +653,12 @@
                 <span class="n">root</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="n">files</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">list_file_names</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">filetype</span><span class="o">=</span><span class="n">filetype</span><span class="p">)</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span></div>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">audeer</span><span class="o">.</span><span class="n">list_file_names</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">filetype</span><span class="o">=</span><span class="n">filetype</span><span class="p">,</span>
+            <span class="n">basenames</span><span class="o">=</span><span class="ow">not</span> <span class="n">include_root</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Feature.process_index"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature.process_index">[docs]</a>    <span class="k">def</span> <span class="nf">process_index</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -902,7 +910,12 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">segment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
                 <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">,</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1060,7 +1073,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

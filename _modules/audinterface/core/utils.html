@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.0.4
+                v1.1.0
               </div>
             
           
@@ -602,17 +602,19 @@
     <span class="p">):</span>
         <span class="c1"># sequence of duration entries</span>
         <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
+            <span class="n">to_timedelta</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">durations</span>
         <span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># single duration entry</span>
+
+        <span class="c1"># avoid converting Timedelta values to ensure precision</span>
+        <span class="c1"># https://github.com/audeering/audinterface/pull/137</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">durations</span>
+
         <span class="n">durations</span> <span class="o">=</span> <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
-
-    <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">):</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">durations</span><span class="p">)</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">durations</span></div>
 </pre></div>
@@ -630,7 +632,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/13 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
