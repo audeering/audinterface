@@ -7,6 +7,48 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.1.0 (2023/07/28)
+--------------------------
+
+* Added: ``include_root`` argument to
+  ``audinterface.Feature.process_folder()``,
+  ``audinterface.Process.process_folder()``,
+  ``audinterface.Segment.process_folder()``.
+  Returns relative file path
+  in index
+  if set to ``False``.
+  Default value is ``True``
+* Changed: when ``audinterface.Feature``
+  is instantiated with an ``audinterface.Segment``
+  object that returns an empty index,
+  ``audinterface.Feature.process_*()``
+  no longer return ``Index([], dtype='object')``
+  but ``MultiIndex([], names=['file', 'start', 'end'])``
+* Fixed: preserve order of ``start`` and ``end`` values
+  as returned by the segmentation callable
+  in the index returned by ``audinterface.Segment``
+  processing functions
+* Fixed: precision of ``audinterface.utils.to_timedelta()``
+  for ``pd.Timedelta`` objects as input,
+  e.g.
+  ``to_timedelta(pd.Timedelta('0 days 00:00:35.511437999'))``
+  now returns
+  ``Timedelta('0 days 00:00:35.511437999')``
+  instead of
+  ``Timedelta('0 days 00:00:35.511437')``.
+  This also affects the output of
+  ``audinterface.utils.signal_index()``
+* Fixed: preserve requested ``start`` and ``end`` values in
+  ``process_file()``,
+  ``process_files()``,
+  ``process_folder()``
+  methods of ``audinterface.Process``
+  and ``audinterface.Feature()``.
+  Before they were rounded
+  to the next sample
+  in the returned index
+
+
 Version 1.0.4 (2023/07/13)
 --------------------------
 
