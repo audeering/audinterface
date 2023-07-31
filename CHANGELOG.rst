@@ -38,8 +38,7 @@ Version 1.1.0 (2023/07/28)
   ``Timedelta('0 days 00:00:35.511437')``.
   This also affects the output of
   ``audinterface.utils.signal_index()``
-* Fixed: preserve precision of
-  requested ``start`` and ``end`` values in
+* Fixed: preserve requested ``start`` and ``end`` values in
   ``process_file()``,
   ``process_files()``,
   ``process_folder()``
