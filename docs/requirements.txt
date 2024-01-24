@@ -4,6 +4,7 @@ auditok
 ipykernel
 jupyter-sphinx
 librosa
+pyarrow
 sphinx
 sphinx-audeering-theme >=1.2.1
 sphinx-autodoc-typehints
