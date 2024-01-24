@@ -757,7 +757,7 @@ def test_process_index_filewise_end_times(tmpdir):
             None,
             None,
             False,
-            np.array([1., 2., 3.]),
+            np.array([[1., 2., 3.]]),
         ),
         (
             None,
@@ -769,7 +769,7 @@ def test_process_index_filewise_end_times(tmpdir):
             None,
             None,
             False,
-            np.array([1., 2., 3.]),
+            np.array([[1., 2., 3.]]),
         ),
         (
             None,
@@ -781,7 +781,7 @@ def test_process_index_filewise_end_times(tmpdir):
             None,
             None,
             False,
-            np.array([1., 2.]),
+            np.array([[1., 2.]]),
         ),
         (
             None,
@@ -793,7 +793,7 @@ def test_process_index_filewise_end_times(tmpdir):
             None,
             None,
             False,
-            np.array([1., 2.]),
+            np.array([[1., 2.]]),
         ),
         (
             signal_max,
@@ -993,7 +993,6 @@ def test_process_signal(
         start=start,
         end=end,
     )
-    signal = np.atleast_2d(signal)
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     elif isinstance(start, (int, float)):
@@ -1002,7 +1001,7 @@ def test_process_signal(
         start = pd.to_timedelta(start)
     if end is None or (pd.isna(end) and not keep_nat):
         end = pd.to_timedelta(
-            signal.shape[1] / sampling_rate,
+            np.atleast_2d(signal).shape[1] / sampling_rate,
             unit='s',
         )
     elif isinstance(end, (int, float)):
