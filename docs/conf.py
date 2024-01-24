@@ -1,6 +1,4 @@
 from datetime import date
-import os
-import shutil
 
 import toml
 
