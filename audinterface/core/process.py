@@ -465,7 +465,7 @@ class Process:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        root = audeer.safe_path(root)
+        root = audeer.path(root)
         if not os.path.exists(root):
             raise FileNotFoundError(
                 errno.ENOENT,

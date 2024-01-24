@@ -502,7 +502,7 @@ class Feature:
                 but ``win_dur`` is not set
 
         """
-        root = audeer.safe_path(root)
+        root = audeer.path(root)
         if not os.path.exists(root):
             raise FileNotFoundError(
                 errno.ENOENT,

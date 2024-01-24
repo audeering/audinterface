@@ -5,9 +5,8 @@ import typing
 import numpy as np
 import pandas as pd
 
-import audeer
 import audformat
-import audiofile as af
+import audiofile
 import audmath
 import audresample
 
@@ -143,8 +142,8 @@ def read_audio(
     else:
         duration = end.total_seconds() - offset
 
-    signal, sampling_rate = af.read(
-        audeer.safe_path(file),
+    signal, sampling_rate = audiofile.read(
+        file,
         always_2d=True,
         offset=offset,
         duration=duration,
