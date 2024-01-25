@@ -1029,7 +1029,7 @@ def test_feature_with_segment(audio, starts, ends):
         files_abs = None
     else:
         files = [file] * len(audeer.to_list(starts))
-        files_abs = [audeer.path(root, file) for file in files]
+        files_abs = [os.path.join(root, file) for file in files]
     expected = audformat.segmented_index(files, starts, ends)
     expected_folder_index = audformat.segmented_index(files_abs, starts, ends)
     expected_signal_index = audinterface.utils.signal_index(starts, ends)

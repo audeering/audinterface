@@ -724,7 +724,7 @@ def test_process_index_filewise_end_times(tmpdir):
     # if NaT is forbidden,
     # see https://github.com/audeering/audinterface/issues/113
 
-    db_root = audeer.mkdir(audeer.path(tmpdir, 'tmp'))
+    db_root = audeer.mkdir(tmpdir, 'tmp')
     sampling_rate = 8000
     duration = 2.5225
     signal = np.ones((1, int(duration * sampling_rate)))
@@ -1561,7 +1561,7 @@ def test_process_with_segment(audio, starts, ends):
         files_abs = None
     else:
         files = [file] * len(audeer.to_list(starts))
-        files_abs = [audeer.path(root, file) for file in files]
+        files_abs = [os.path.join(root, file) for file in files]
     expected = audformat.segmented_index(files, starts, ends)
     expected_folder_index = audformat.segmented_index(files_abs, starts, ends)
     expected_signal_index = audinterface.utils.signal_index(starts, ends)
