@@ -171,21 +171,26 @@ class Process:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
-        # figure out if special arguments
-        # to pass to the processing function
-        signature = inspect.signature(process_func)
-        process_func_args = process_func_args or {}
         self._process_func_special_args = {
             'idx': False,
             'root': False,
             'file': False,
         }
-        for key in self._process_func_special_args:
-            if (
-                    key in signature.parameters
-                    and key not in process_func_args
-            ):
-                self._process_func_special_args[key] = True
+        r"""Special processing function arguments.
+
+        If present in the processing function,
+        those are automatically set
+        if not included in ``process_func_args``.
+
+        """
+
+        self._process_func_args = inspect.signature(process_func).parameters
+        r"""Arguments present in the processing function."""
+
+        # Set value to ``True`` in ``self._process_func_special_args``
+        # that are not contained in ``process_func_args``,
+        # but inside ``self._process_func_args``
+        self._update_special_process_func_args(process_func_args)
 
         self.channels = channels
         r"""Channel selection."""
@@ -214,7 +219,7 @@ class Process:
         self.process_func = process_func
         r"""Processing function."""
 
-        self.process_func_args = process_func_args
+        self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
         self.process_func_is_mono = process_func_is_mono
@@ -681,6 +686,7 @@ class Process:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process audio signal and return result.
 
@@ -941,3 +947,20 @@ class Process:
 
         """
         return self._call(signal, sampling_rate)
+
+    def _update_special_process_func_args(
+            self,
+            process_func_args: typing.Dict[str, typing.Any] = None,
+    ):
+        r"""Set special arguments."""
+        process_func_args = process_func_args or {}
+        self.process_func_args = process_func_args
+
+        # Figure out if special arguments
+        # to pass to the processing function
+        for key in self._process_func_special_args:
+            if (
+                    key in self._process_func_args
+                    and key not in process_func_args
+            ):
+                self._process_func_special_args[key] = True
