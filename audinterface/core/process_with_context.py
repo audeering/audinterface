@@ -119,7 +119,8 @@ class ProcessWithContext:
                 'sampling_rate has to be provided for resample = True.'
             )
 
-        self._process_func_signature = inspect.signature(process_func).parameters
+        signature = inspect.signature(process_func)
+        self._process_func_signature = signature.parameters
         r"""Arguments present in processing function."""
 
         self.channels = channels

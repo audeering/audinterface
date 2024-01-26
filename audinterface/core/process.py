@@ -171,7 +171,8 @@ class Process:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
-        self._process_func_signature = inspect.signature(process_func).parameters
+        signature = inspect.signature(process_func)
+        self._process_func_signature = signature.parameters
         r"""Arguments present in processing function."""
 
         self.channels = channels
