@@ -408,6 +408,7 @@ class Feature:
             start: Timestamp = None,
             end: Timestamp = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an audio file.
 
@@ -420,6 +421,10 @@ class Feature:
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -433,6 +438,7 @@ class Feature:
             start=start,
             end=end,
             root=root,
+            process_func_args=process_func_args,
         )
         return self._series_to_frame(series)
 
@@ -443,6 +449,7 @@ class Feature:
             starts: Timestamps = None,
             ends: Timestamps = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
@@ -459,6 +466,10 @@ class Feature:
                 for further options.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -472,6 +483,7 @@ class Feature:
             starts=starts,
             ends=ends,
             root=root,
+            process_func_args=process_func_args,
         )
         return self._series_to_frame(series)
 
@@ -481,6 +493,7 @@ class Feature:
             *,
             filetype: str = 'wav',
             include_root: bool = True,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from files in a folder.
 
@@ -493,6 +506,10 @@ class Feature:
                 the file paths are absolute
                 in the index
                 of the returned result
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             FileNotFoundError: if folder does not exist
@@ -515,7 +532,11 @@ class Feature:
             filetype=filetype,
             basenames=not include_root,
         )
-        return self.process_files(files, root=root)
+        return self.process_files(
+            files,
+            root=root,
+            process_func_args=process_func_args,
+        )
 
     def process_index(
             self,
@@ -524,6 +545,7 @@ class Feature:
             preserve_index: bool = False,
             root: str = None,
             cache_root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
@@ -547,6 +569,10 @@ class Feature:
                 otherwise always a segmented index is returned
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -569,6 +595,7 @@ class Feature:
             y = self.process.process_index(
                 index,
                 root=root,
+                process_func_args=process_func_args,
             )
             df = self._series_to_frame(y)
 
@@ -590,7 +617,8 @@ class Feature:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
-    ) -> pd.DataFrame:
+            process_func_args: typing.Dict[str, typing.Any] = None,
+   ) -> pd.DataFrame:
         r"""Extract features for an audio signal.
 
         .. note:: If a ``file`` is given, the index of the returned frame
@@ -607,6 +635,10 @@ class Feature:
             end: end processing at this position.
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -627,6 +659,7 @@ class Feature:
             file=file,
             start=start,
             end=end,
+            process_func_args=process_func_args,
         )
         return self._series_to_frame(series)
 
@@ -635,6 +668,7 @@ class Feature:
             signal: np.ndarray,
             sampling_rate: int,
             index: pd.MultiIndex,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Split a signal into segments and extract features for each segment.
 
@@ -645,6 +679,10 @@ class Feature:
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
                 See also :func:`audinterface.utils.signal_index`
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                :attr:`audinterface.Process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -658,6 +696,7 @@ class Feature:
             signal,
             sampling_rate,
             index,
+            process_func_args=process_func_args,
         )
         return self._series_to_frame(series)
 
