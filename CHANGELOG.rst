@@ -22,8 +22,8 @@ Version 1.1.0 (2023/07/28)
   is instantiated with an ``audinterface.Segment``
   object that returns an empty index,
   ``audinterface.Feature.process_*()``
-  no longer return ``Index([], dtype='object')``
-  but ``MultiIndex([], names=['file', 'start', 'end'])``
+  no longer return ``Index([], dtype="object")``
+  but ``MultiIndex([], names=["file", "start", "end"])``
 * Fixed: preserve order of ``start`` and ``end`` values
   as returned by the segmentation callable
   in the index returned by ``audinterface.Segment``
@@ -31,11 +31,11 @@ Version 1.1.0 (2023/07/28)
 * Fixed: precision of ``audinterface.utils.to_timedelta()``
   for ``pd.Timedelta`` objects as input,
   e.g.
-  ``to_timedelta(pd.Timedelta('0 days 00:00:35.511437999'))``
+  ``to_timedelta(pd.Timedelta("0 days 00:00:35.511437999"))``
   now returns
-  ``Timedelta('0 days 00:00:35.511437999')``
+  ``Timedelta("0 days 00:00:35.511437999")``
   instead of
-  ``Timedelta('0 days 00:00:35.511437')``.
+  ``Timedelta("0 days 00:00:35.511437")``.
   This also affects the output of
   ``audinterface.utils.signal_index()``
 * Fixed: preserve requested ``start`` and ``end`` values in
@@ -323,7 +323,7 @@ Version 0.5.2 (2020-12-10)
 --------------------------
 
 * Fixed: ``audinterface.Feature`` allow
-  ``win_dur=None`` with ``unit='samples'``
+  ``win_dur=None`` with ``unit="samples"``
 
 
 Version 0.5.1 (2020-12-04)
