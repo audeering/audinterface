@@ -14,30 +14,33 @@ from audinterface.core.typing import Timestamps
 
 
 def create_process_func(
-        process_func: typing.Optional[typing.Callable[..., pd.MultiIndex]],
-        invert: bool,
+    process_func: typing.Optional[typing.Callable[..., pd.MultiIndex]],
+    invert: bool,
 ) -> typing.Callable[..., pd.MultiIndex]:
     r"""Create processing function."""
     if process_func is None:
+
         def process_func(signal, sr, **kwargs):
             return utils.signal_index()
 
     if invert:
+
         def process_func_invert(signal, sr, **kwargs):
             index = process_func(signal, sr, **kwargs)
-            dur = pd.to_timedelta(signal.shape[-1] / sr, unit='s')
-            index = index.sortlevel('start')[0]
+            dur = pd.to_timedelta(signal.shape[-1] / sr, unit="s")
+            index = index.sortlevel("start")[0]
             index = merge_index(index)
             index = invert_index(index, dur)
             return index
+
         return process_func_invert
     else:
         return process_func
 
 
 def invert_index(
-        index: pd.MultiIndex,
-        dur: pd.Timedelta,
+    index: pd.MultiIndex,
+    dur: pd.Timedelta,
 ) -> pd.MultiIndex:
     r"""Invert index.
 
@@ -47,8 +50,8 @@ def invert_index(
     if index.empty:
         return utils.signal_index(0, dur)
 
-    starts = index.get_level_values('start')
-    ends = index.get_level_values('end')
+    starts = index.get_level_values("start")
+    ends = index.get_level_values("end")
     new_starts = ends[:-1]
     new_ends = starts[1:]
     if starts[0] != pd.to_timedelta(0):
@@ -61,7 +64,7 @@ def invert_index(
 
 
 def merge_index(
-        index: pd.MultiIndex,
+    index: pd.MultiIndex,
 ) -> pd.MultiIndex:
     r"""Merge overlapping segments.
 
@@ -71,8 +74,8 @@ def merge_index(
     if index.empty:
         return index
 
-    starts = index.get_level_values('start')
-    ends = index.get_level_values('end')
+    starts = index.get_level_values("start")
+    ends = index.get_level_values("end")
     new_starts = []
     new_ends = []
     new_start = starts[0]
@@ -154,11 +157,11 @@ class Segment:
     Examples:
         >>> def segment(signal, sampling_rate, *, win_size=0.2, hop_size=0.1):
         ...     size = signal.shape[1] / sampling_rate
-        ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit='s')
-        ...     ends = pd.to_timedelta(np.arange(win_size, size, hop_size), unit='s')
-        ...     return pd.MultiIndex.from_tuples(zip(starts, ends), names=['start', 'end'])
+        ...     starts = pd.to_timedelta(np.arange(0, size - win_size, hop_size), unit="s")
+        ...     ends = pd.to_timedelta(np.arange(win_size, size, hop_size), unit="s")
+        ...     return pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
         >>> interface = Segment(process_func=segment)
-        >>> signal = np.array([1., 2., 3.])
+        >>> signal = np.array([1.0, 2.0, 3.0])
         >>> interface(signal, sampling_rate=3)
         MultiIndex([(       '0 days 00:00:00', '0 days 00:00:00.200000'),
                     ('0 days 00:00:00.100000', '0 days 00:00:00.300000'),
@@ -172,17 +175,17 @@ class Segment:
         >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
-        ...     'emodb',
-        ...     version='1.3.0',
-        ...     media='wav/03a01Fa.wav',
+        ...     "emodb",
+        ...     version="1.3.0",
+        ...     media="wav/03a01Fa.wav",
         ...     full_path=False,
         ...     verbose=False,
         ... )
         >>> interface = Segment(
         ...     process_func=segment,
-        ...     process_func_args={'win_size': 0.5, 'hop_size': 0.25},
+        ...     process_func_args={"win_size": 0.5, "hop_size": 0.25},
         ... )
-        >>> interface.process_index(db['emotion'].index, root=db.root)
+        >>> interface.process_index(db["emotion"].index, root=db.root)
         MultiIndex([('wav/03a01Fa.wav',        '0 days 00:00:00', ...),
                     ('wav/03a01Fa.wav', '0 days 00:00:00.250000', ...),
                     ('wav/03a01Fa.wav', '0 days 00:00:00.500000', ...),
@@ -192,25 +195,27 @@ class Segment:
                    names=['file', 'start', 'end'])
 
     """  # noqa: E501
+
     def __init__(
-            self,
-            *,
-            process_func: typing.Callable[..., pd.MultiIndex] = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-            invert: bool = False,
-            sampling_rate: int = None,
-            resample: bool = False,
-            channels: typing.Union[int, typing.Sequence[int]] = None,
-            mixdown: bool = False,
-            min_signal_dur: Timestamp = None,
-            max_signal_dur: Timestamp = None,
-            keep_nat: bool = False,
-            num_workers: typing.Optional[int] = 1,
-            multiprocessing: bool = False,
-            verbose: bool = False,
+        self,
+        *,
+        process_func: typing.Callable[..., pd.MultiIndex] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        invert: bool = False,
+        sampling_rate: int = None,
+        resample: bool = False,
+        channels: typing.Union[int, typing.Sequence[int]] = None,
+        mixdown: bool = False,
+        min_signal_dur: Timestamp = None,
+        max_signal_dur: Timestamp = None,
+        keep_nat: bool = False,
+        num_workers: typing.Optional[int] = 1,
+        multiprocessing: bool = False,
+        verbose: bool = False,
     ):
         # avoid cycling imports
         from audinterface.core.process import Process
+
         process = Process(
             process_func=create_process_func(process_func, invert),
             process_func_args=process_func_args,
@@ -233,13 +238,13 @@ class Segment:
         r"""Invert segmentation."""
 
     def process_file(
-            self,
-            file: str,
-            *,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        file: str,
+        *,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment the content of an audio file.
 
@@ -279,18 +284,18 @@ class Segment:
         ).values[0]
         return audformat.segmented_index(
             files=[file] * len(index),
-            starts=index.get_level_values('start') + start,
-            ends=index.get_level_values('end') + start,
+            starts=index.get_level_values("start") + start,
+            ends=index.get_level_values("end") + start,
         )
 
     def process_files(
-            self,
-            files: typing.Sequence[str],
-            *,
-            starts: Timestamps = None,
-            ends: Timestamps = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        files: typing.Sequence[str],
+        *,
+        starts: Timestamps = None,
+        ends: Timestamps = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment a list of files.
 
@@ -338,18 +343,18 @@ class Segment:
         ends = []
         for (file, start, _), index in y.items():
             files.extend([file] * len(index))
-            starts.extend(index.get_level_values('start') + start)
-            ends.extend(index.get_level_values('end') + start)
+            starts.extend(index.get_level_values("start") + start)
+            ends.extend(index.get_level_values("end") + start)
 
         return audformat.segmented_index(files, starts, ends)
 
     def process_folder(
-            self,
-            root: str,
-            *,
-            filetype: str = 'wav',
-            include_root: bool = True,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        root: str,
+        *,
+        filetype: str = "wav",
+        include_root: bool = True,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment files in a folder.
 
@@ -399,12 +404,12 @@ class Segment:
         )
 
     def process_index(
-            self,
-            index: pd.Index,
-            *,
-            root: str = None,
-            cache_root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        index: pd.Index,
+        *,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment files or segments from an index.
 
@@ -455,20 +460,20 @@ class Segment:
         ends = []
         for (file, start, _), index in y.items():
             files.extend([file] * len(index))
-            starts.extend(index.get_level_values('start') + start)
-            ends.extend(index.get_level_values('end') + start)
+            starts.extend(index.get_level_values("start") + start)
+            ends.extend(index.get_level_values("end") + start)
 
         return audformat.segmented_index(files, starts, ends)
 
     def process_signal(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            *,
-            file: str = None,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        file: str = None,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment audio signal.
 
@@ -528,18 +533,18 @@ class Segment:
         if file is not None:
             index = audformat.segmented_index(
                 files=[file] * len(index),
-                starts=index.get_level_values('start'),
-                ends=index.get_level_values('end'),
+                starts=index.get_level_values("start"),
+                ends=index.get_level_values("end"),
             )
 
         return index
 
     def process_signal_from_index(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.Index,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.Index,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment parts of a signal.
 
@@ -578,8 +583,9 @@ class Segment:
             params = [
                 (
                     (signal, sampling_rate),
-                    {'start': start, 'end': end},
-                ) for start, end in index
+                    {"start": start, "end": end},
+                )
+                for start, end in index
             ]
         else:
             has_file_level = True
@@ -588,12 +594,13 @@ class Segment:
                 (
                     (signal, sampling_rate),
                     {
-                        'file': file,
-                        'start': start,
-                        'end': end,
-                        'process_func_args': process_func_args,
+                        "file": file,
+                        "start": start,
+                        "end": end,
+                        "process_func_args": process_func_args,
                     },
-                ) for file, start, end in index
+                )
+                for file, start, end in index
             ]
 
         y = audeer.run_tasks(
@@ -602,7 +609,7 @@ class Segment:
             num_workers=self.process.num_workers,
             multiprocessing=self.process.multiprocessing,
             progress_bar=self.process.verbose,
-            task_description=f'Process {len(index)} segments',
+            task_description=f"Process {len(index)} segments",
         )
 
         files = []
@@ -611,9 +618,9 @@ class Segment:
 
         for idx in y:
             if has_file_level:
-                files.extend(idx.get_level_values('file'))
-            starts.extend(idx.get_level_values('start'))
-            ends.extend(idx.get_level_values('end'))
+                files.extend(idx.get_level_values("file"))
+            starts.extend(idx.get_level_values("start"))
+            ends.extend(idx.get_level_values("end"))
 
         if has_file_level:
             index = audformat.segmented_index(files, starts, ends)
@@ -623,9 +630,9 @@ class Segment:
         return index
 
     def __call__(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
     ) -> pd.Index:
         r"""Apply processing to signal.
 

@@ -18,31 +18,33 @@ from audinterface.core.typing import Timestamps
 import audinterface.core.utils as utils
 
 
-def deprecated_process_func_applies_sliding_window_default_value(
-) -> typing.Callable:
+def deprecated_process_func_applies_sliding_window_default_value() -> typing.Callable:
     """Deprecate default value of process_func_applies_sliding_window."""
+
     def _deprecated(func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            argument = 'process_func_applies_sliding_window'
-            change_in_version = '1.2.0'
+            argument = "process_func_applies_sliding_window"
+            change_in_version = "1.2.0"
             default_value = True
             new_default_value = False
             if (
-                    'win_dur' in kwargs
-                    and kwargs['win_dur'] is not None
-                    and argument not in kwargs
+                "win_dur" in kwargs
+                and kwargs["win_dur"] is not None
+                and argument not in kwargs
             ):
                 signature = inspect.signature(func)
                 default_value = signature.parameters[argument].default
                 message = (
                     f"The default of '{argument}' will change from "
                     f"'{default_value}' to '{new_default_value}' "
-                    f'with version {change_in_version}.'
+                    f"with version {change_in_version}."
                 )
                 warnings.warn(message, category=UserWarning, stacklevel=2)
             return func(*args, **kwargs)
+
         return new_func
+
     return _deprecated
 
 
@@ -179,8 +181,8 @@ class Feature:
     Examples:
         >>> def mean_std(signal, sampling_rate):
         ...     return [signal.mean(), signal.std()]
-        >>> interface = Feature(['mean', 'std'], process_func=mean_std)
-        >>> signal = np.array([1., 2., 3.])
+        >>> interface = Feature(["mean", "std"], process_func=mean_std)
+        >>> signal = np.array([1.0, 2.0, 3.0])
         >>> interface(signal, sampling_rate=3)
         array([[[2.        ],
                 [0.81649658]]])
@@ -191,13 +193,13 @@ class Feature:
         >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
-        ...     'emodb',
-        ...     version='1.3.0',
-        ...     media='wav/03a01Fa.wav',
+        ...     "emodb",
+        ...     version="1.3.0",
+        ...     media="wav/03a01Fa.wav",
         ...     full_path=False,
         ...     verbose=False,
         ... )
-        >>> index = db['emotion'].index
+        >>> index = db["emotion"].index
         >>> interface.process_index(index, root=db.root)
                                                            mean       std
         file            start  end
@@ -208,7 +210,7 @@ class Feature:
         wav/03a01Fa.wav -0.000311  0.082317
         >>> # Apply interface with a sliding window
         >>> interface = Feature(
-        ...     ['mean', 'std'],
+        ...     ["mean", "std"],
         ...     process_func=mean_std,
         ...     process_func_applies_sliding_window=False,
         ...     win_dur=1.0,
@@ -235,7 +237,7 @@ class Feature:
         ...     ],
         ... )
         >>> interface = Feature(
-        ...     ['mean', 'std'],
+        ...     ["mean", "std"],
         ...     process_func=mean_std,
         ...     process_func_is_mono=True,
         ...     channels=[0, 1],
@@ -250,41 +252,42 @@ class Feature:
         0 days 0 days 00:00:01.898250 -0.500311  0.082317  0.499689  0.082317
 
     """  # noqa: E501
+
     @deprecated_process_func_applies_sliding_window_default_value()
     def __init__(
-            self,
-            feature_names: typing.Union[str, typing.Sequence[str]],
-            *,
-            name: str = None,
-            params: typing.Dict = None,
-            process_func: typing.Callable[..., typing.Any] = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-            process_func_is_mono: bool = False,
-            process_func_applies_sliding_window: bool = True,
-            sampling_rate: int = None,
-            resample: bool = False,
-            channels: typing.Union[int, typing.Sequence[int]] = 0,
-            mixdown: bool = False,
-            win_dur: Timestamp = None,
-            hop_dur: Timestamp = None,
-            min_signal_dur: Timestamp = None,
-            max_signal_dur: Timestamp = None,
-            segment: Segment = None,
-            keep_nat: bool = False,
-            num_workers: typing.Optional[int] = 1,
-            multiprocessing: bool = False,
-            verbose: bool = False,
-            **kwargs,
+        self,
+        feature_names: typing.Union[str, typing.Sequence[str]],
+        *,
+        name: str = None,
+        params: typing.Dict = None,
+        process_func: typing.Callable[..., typing.Any] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_is_mono: bool = False,
+        process_func_applies_sliding_window: bool = True,
+        sampling_rate: int = None,
+        resample: bool = False,
+        channels: typing.Union[int, typing.Sequence[int]] = 0,
+        mixdown: bool = False,
+        win_dur: Timestamp = None,
+        hop_dur: Timestamp = None,
+        min_signal_dur: Timestamp = None,
+        max_signal_dur: Timestamp = None,
+        segment: Segment = None,
+        keep_nat: bool = False,
+        num_workers: typing.Optional[int] = 1,
+        multiprocessing: bool = False,
+        verbose: bool = False,
+        **kwargs,
     ):
         # ------
         # Handle deprecated 'unit' keyword argument
         def add_unit(dur, unit):
-            if unit == 'samples':
+            if unit == "samples":
                 return str(dur)
             else:
-                return f'{dur}{unit}'
+                return f"{dur}{unit}"
 
-        if 'unit' in kwargs:
+        if "unit" in kwargs:
             message = (
                 "'unit' argument is deprecated "
                 "and will be removed with version '1.2.0'."
@@ -296,7 +299,7 @@ class Feature:
                 category=UserWarning,
                 stacklevel=2,
             )
-            unit = kwargs.pop('unit')
+            unit = kwargs.pop("unit")
             if win_dur is not None:
                 win_dur = add_unit(win_dur, unit)
             if hop_dur is not None:
@@ -320,6 +323,7 @@ class Feature:
             column_names = pd.Index(feature_names)
 
         if process_func is None:
+
             def process_func(signal, _):
                 return np.zeros(
                     (num_channels, len(feature_names)),
@@ -327,9 +331,7 @@ class Feature:
                 )
 
         if win_dur is None and hop_dur is not None:
-            raise ValueError(
-                "You have to specify 'win_dur' if 'hop_dur' is given."
-            )
+            raise ValueError("You have to specify 'win_dur' if 'hop_dur' is given.")
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
@@ -337,16 +339,10 @@ class Feature:
         # if expected by function but not yet set
         process_func_args = process_func_args or {}
         signature = inspect.signature(process_func)
-        if (
-            'win_dur' in signature.parameters
-            and 'win_dur' not in process_func_args
-        ):
-            process_func_args['win_dur'] = win_dur
-        if (
-            'hop_dur' in signature.parameters
-            and 'hop_dur' not in process_func_args
-        ):
-            process_func_args['hop_dur'] = hop_dur
+        if "win_dur" in signature.parameters and "win_dur" not in process_func_args:
+            process_func_args["win_dur"] = win_dur
+        if "hop_dur" in signature.parameters and "hop_dur" not in process_func_args:
+            process_func_args["hop_dur"] = hop_dur
 
         process = Process(
             process_func=process_func,
@@ -391,8 +387,7 @@ class Feature:
         self.process = process
         r"""Processing object."""
 
-        self.process_func_applies_sliding_window = \
-            process_func_applies_sliding_window
+        self.process_func_applies_sliding_window = process_func_applies_sliding_window
         r"""Controls if processing function applies sliding window."""
 
         self.verbose = verbose
@@ -402,13 +397,13 @@ class Feature:
         r"""Window duration."""
 
     def process_file(
-            self,
-            file: str,
-            *,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        file: str,
+        *,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an audio file.
 
@@ -444,13 +439,13 @@ class Feature:
         return self._series_to_frame(series)
 
     def process_files(
-            self,
-            files: typing.Sequence[str],
-            *,
-            starts: Timestamps = None,
-            ends: Timestamps = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        files: typing.Sequence[str],
+        *,
+        starts: Timestamps = None,
+        ends: Timestamps = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
@@ -490,12 +485,12 @@ class Feature:
         return self._series_to_frame(series)
 
     def process_folder(
-            self,
-            root: str,
-            *,
-            filetype: str = 'wav',
-            include_root: bool = True,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        root: str,
+        *,
+        filetype: str = "wav",
+        include_root: bool = True,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from files in a folder.
 
@@ -542,13 +537,13 @@ class Feature:
         )
 
     def process_index(
-            self,
-            index: pd.Index,
-            *,
-            preserve_index: bool = False,
-            root: str = None,
-            cache_root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        index: pd.Index,
+        *,
+        preserve_index: bool = False,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
@@ -591,7 +586,7 @@ class Feature:
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
             hash = audformat.utils.hash(index)
-            cache_path = os.path.join(cache_root, f'{hash}.pkl')
+            cache_path = os.path.join(cache_root, f"{hash}.pkl")
 
         if cache_path and os.path.exists(cache_path):
             df = pd.read_pickle(cache_path)
@@ -614,15 +609,15 @@ class Feature:
         return df
 
     def process_signal(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            *,
-            file: str = None,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-   ) -> pd.DataFrame:
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        file: str = None,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.DataFrame:
         r"""Extract features for an audio signal.
 
         .. note:: If a ``file`` is given, the index of the returned frame
@@ -669,11 +664,11 @@ class Feature:
         return self._series_to_frame(series)
 
     def process_signal_from_index(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.MultiIndex,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.MultiIndex,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
         r"""Split a signal into segments and extract features for each segment.
 
@@ -707,8 +702,8 @@ class Feature:
         return self._series_to_frame(series)
 
     def to_numpy(
-            self,
-            frame: pd.DataFrame,
+        self,
+        frame: pd.DataFrame,
     ) -> np.ndarray:
         r"""Return feature values as a numpy array.
 
@@ -722,10 +717,7 @@ class Feature:
         """
         return frame.values.T.reshape(self.num_channels, self.num_features, -1)
 
-    def _reshape_3d(
-            self,
-            features: typing.Union[np.ndarray, pd.Series]
-    ):
+    def _reshape_3d(self, features: typing.Union[np.ndarray, pd.Series]):
         r"""Reshape to [n_channels, n_features, n_frames]."""
         features = np.array(features)
         features = np.atleast_1d(features)
@@ -737,14 +729,15 @@ class Feature:
             # but since older versions required
             # a channel dimension we have to
             # consider two special cases
-            if (features.ndim == 4) and \
-                    (features.shape[1] == 1):
+            if (features.ndim == 4) and (features.shape[1] == 1):
                 # (channels, 1, features, frames)
                 # -> (channels, features, frames)
                 features = features.squeeze(axis=1)
-            elif (features.ndim == 3) and \
-                    (self.win_dur is None) and \
-                    (features.shape[1] == 1):
+            elif (
+                (features.ndim == 3)
+                and (self.win_dur is None)
+                and (features.shape[1] == 1)
+            ):
                 # (channels, 1, features)
                 # -> (channels, features)
                 features = features.squeeze(axis=1)
@@ -756,8 +749,8 @@ class Feature:
 
         if features.ndim > 3:
             raise RuntimeError(
-                f'Dimension of extracted features must be 1, 2 or 3, '
-                f'not {features.ndim}.'
+                f"Dimension of extracted features must be 1, 2 or 3, "
+                f"not {features.ndim}."
             )
 
         # figure out channels, feature, frames
@@ -766,8 +759,9 @@ class Feature:
             n_features = features.size
             n_frames = 1
         elif features.ndim == 2:
-            if (features.shape[0] == self.num_channels) and \
-                    (features.shape[1] == self.num_features):
+            if (features.shape[0] == self.num_channels) and (
+                features.shape[1] == self.num_features
+            ):
                 n_channels = features.shape[0]
                 n_features = features.shape[1]
                 n_frames = 1
@@ -777,10 +771,9 @@ class Feature:
                 n_frames = features.shape[1]
             else:
                 raise RuntimeError(
-                    f'Cannot determine feature shape from '
-                    f'{features.shape}, ',
-                    f'when expected shape is '
-                    f'({self.num_channels, self.num_features, -1}).'
+                    f"Cannot determine feature shape from " f"{features.shape}, ",
+                    f"when expected shape is "
+                    f"({self.num_channels, self.num_features, -1}).",
                 )
         else:
             n_channels = features.shape[0]
@@ -790,27 +783,26 @@ class Feature:
         # assert channels and features have expected length
         if n_channels != self.num_channels:
             raise RuntimeError(
-                f'Number of channels must be'
-                f' {self.num_channels}, '
-                f'not '
-                f'{n_channels}.'
+                f"Number of channels must be"
+                f" {self.num_channels}, "
+                f"not "
+                f"{n_channels}."
             )
         if n_features != self.num_features:
             raise RuntimeError(
-                f'Number of features must be '
-                f'{self.num_features}, '
-                f'not '
-                f'{n_features}.'
+                f"Number of features must be "
+                f"{self.num_features}, "
+                f"not "
+                f"{n_features}."
             )
 
         # reshape features to (channels,  features, frames)
         return features.reshape([n_channels, n_features, n_frames])
 
     def _series_to_frame(
-            self,
-            y: pd.Series,
+        self,
+        y: pd.Series,
     ) -> pd.DataFrame:
-
         if y.empty:
             if self.process.segment is None:
                 index = []
@@ -822,11 +814,7 @@ class Feature:
                 dtype=object,
             )
 
-        if (
-                self.win_dur is not None and
-                self.process_func_applies_sliding_window
-        ):
-
+        if self.win_dur is not None and self.process_func_applies_sliding_window:
             win_dur = utils.to_timedelta(
                 self.win_dur,
                 self.process.sampling_rate,
@@ -841,11 +829,9 @@ class Feature:
             data = []
 
             if len(y.index.levels) == 3:
-
                 files = []
 
                 for idx, ((file, start, end), values) in enumerate(y.items()):
-
                     frames = self._values_to_frame(values)
                     data.append(frames)
 
@@ -862,7 +848,6 @@ class Feature:
                 index = audformat.segmented_index(files, starts, ends)
 
             else:
-
                 for idx, ((start, end), values) in enumerate(y.items()):
                     frames = self._values_to_frame(values)
                     data.append(frames)
@@ -879,7 +864,6 @@ class Feature:
                 index = utils.signal_index(starts, ends)
 
         else:
-
             index = y.index
             data = [self._values_to_frame(values) for values in y]
 
@@ -894,10 +878,9 @@ class Feature:
         return df
 
     def _values_to_frame(
-            self,
-            features: np.ndarray,
+        self,
+        features: np.ndarray,
     ) -> np.ndarray:
-
         # Convert features to a pd.DataFrame
         # Assumed formats are:
         # [n_channels, n_features, n_frames]
@@ -915,17 +898,15 @@ class Feature:
 
         if n_frames > 1 and self.win_dur is None:
             raise RuntimeError(
-                f"Got "
-                f"{n_frames} "
-                f"frames, but 'win_dur' is not set."
+                f"Got " f"{n_frames} " f"frames, but 'win_dur' is not set."
             )
 
         return features
 
     def __call__(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
     ) -> np.ndarray:
         r"""Apply processing to signal.
 

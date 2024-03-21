@@ -17,35 +17,28 @@ from audinterface.core.typing import Timestamps
 def assert_index(obj: pd.Index):
     r"""Check if index is conform to audformat."""
     if isinstance(obj, pd.MultiIndex) and len(obj.levels) == 2:
-
         if obj.has_duplicates:
             max_display = 10
             duplicates = obj[obj.duplicated()]
-            msg_tail = '\n...' if len(duplicates) > max_display else ''
-            msg_duplicates = '\n'.join(
-                [
-                    str(duplicate) for duplicate
-                    in duplicates[:max_display].tolist()
-                ]
+            msg_tail = "\n..." if len(duplicates) > max_display else ""
+            msg_duplicates = "\n".join(
+                [str(duplicate) for duplicate in duplicates[:max_display].tolist()]
             )
-            raise ValueError(
-                'Found duplicates:\n'
-                f'{msg_duplicates}{msg_tail}'
-            )
+            raise ValueError("Found duplicates:\n" f"{msg_duplicates}{msg_tail}")
 
         if not (
-                obj.names[0] == audformat.define.IndexField.START
-                and obj.names[1] == audformat.define.IndexField.END
+            obj.names[0] == audformat.define.IndexField.START
+            and obj.names[1] == audformat.define.IndexField.END
         ):
             expected_names = [
                 audformat.define.IndexField.START,
                 audformat.define.IndexField.END,
             ]
             raise ValueError(
-                'Found two levels with names '
-                f'{obj.names}, '
-                f'but expected names '
-                f'{expected_names}.'
+                "Found two levels with names "
+                f"{obj.names}, "
+                f"but expected names "
+                f"{expected_names}."
             )
         if not pd.api.types.is_timedelta64_dtype(obj.levels[0].dtype):
             raise ValueError(
@@ -61,17 +54,18 @@ def assert_index(obj: pd.Index):
 
 def is_scalar(value: typing.Any) -> bool:
     r"""Check if value is scalar."""
-    return (value is not None) and \
-           (isinstance(value, str) or not hasattr(value, '__len__'))
+    return (value is not None) and (
+        isinstance(value, str) or not hasattr(value, "__len__")
+    )
 
 
 def preprocess_signal(
-        signal: np.ndarray,
-        sampling_rate: int,
-        expected_rate: int,
-        resample: bool,
-        channels: typing.Union[int, typing.Sequence[int]],
-        mixdown: bool,
+    signal: np.ndarray,
+    sampling_rate: int,
+    expected_rate: int,
+    resample: bool,
+    channels: typing.Union[int, typing.Sequence[int]],
+    mixdown: bool,
 ) -> (np.ndarray, int):
     r"""Pre-process signal."""
     signal = np.atleast_2d(signal)
@@ -82,27 +76,29 @@ def preprocess_signal(
     if expected_rate is not None and sampling_rate != expected_rate:
         if resample:
             signal = audresample.resample(
-                signal, sampling_rate, expected_rate,
+                signal,
+                sampling_rate,
+                expected_rate,
             )
             sampling_rate = expected_rate
         else:
             raise RuntimeError(
-                f'Sampling rate of input signal is '
-                f'{sampling_rate} '
-                f'but the expected sampling rate is '
-                f'{expected_rate} Hz. '
-                f'Enable resampling to avoid this error.'
+                f"Sampling rate of input signal is "
+                f"{sampling_rate} "
+                f"but the expected sampling rate is "
+                f"{expected_rate} Hz. "
+                f"Enable resampling to avoid this error."
             )
 
     return signal, sampling_rate
 
 
 def read_audio(
-        file: str,
-        *,
-        start: pd.Timedelta = None,
-        end: pd.Timedelta = None,
-        root: str = None,
+    file: str,
+    *,
+    start: pd.Timedelta = None,
+    end: pd.Timedelta = None,
+    root: str = None,
 ) -> typing.Tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
@@ -119,12 +115,12 @@ def read_audio(
     Examples:
         >>> import audb
         >>> media = audb.load_media(
-        ...     'emodb',
-        ...     'wav/03a01Fa.wav',
-        ...     version='1.3.0',
+        ...     "emodb",
+        ...     "wav/03a01Fa.wav",
+        ...     version="1.3.0",
         ...     verbose=False,
         ... )
-        >>> signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit='s'))
+        >>> signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit="s"))
         >>> signal.shape
         (1, 160)
 
@@ -153,13 +149,13 @@ def read_audio(
 
 
 def segment_to_indices(
-        signal: np.ndarray,
-        sampling_rate: int,
-        start: pd.Timedelta,
-        end: pd.Timedelta,
+    signal: np.ndarray,
+    sampling_rate: int,
+    start: pd.Timedelta,
+    end: pd.Timedelta,
 ) -> typing.Tuple[int, int]:
     if pd.isna(end):
-        end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
+        end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
     max_i = signal.shape[-1]
     start_i = audmath.samples(start.total_seconds(), sampling_rate)
     start_i = min(start_i, max_i)
@@ -169,9 +165,9 @@ def segment_to_indices(
 
 
 def segments_to_indices(
-        signal: np.ndarray,
-        sampling_rate: int,
-        index: pd.MultiIndex,
+    signal: np.ndarray,
+    sampling_rate: int,
+    index: pd.MultiIndex,
 ) -> typing.Tuple[typing.Sequence[int], typing.Sequence[int]]:
     starts_i = [0] * len(index)
     ends_i = [0] * len(index)
@@ -183,8 +179,8 @@ def segments_to_indices(
 
 
 def signal_index(
-        starts: Timestamps = None,
-        ends: Timestamps = None,
+    starts: Timestamps = None,
+    ends: Timestamps = None,
 ) -> pd.MultiIndex:
     r"""Create signal index.
 
@@ -214,7 +210,7 @@ def signal_index(
         >>> signal_index(0, 1.1)
         MultiIndex([('0 days', '0 days 00:00:01.100000')],
                    names=['start', 'end'])
-        >>> signal_index('0ms', '1ms')
+        >>> signal_index("0ms", "1ms")
         MultiIndex([('0 days', '0 days 00:00:00.001000')],
                    names=['start', 'end'])
         >>> signal_index([None, 1], [1, None])
@@ -223,7 +219,7 @@ def signal_index(
                    names=['start', 'end'])
         >>> signal_index(
         ...     starts=[0, 1],
-        ...     ends=pd.to_timedelta([1000, 2000], unit='ms'),
+        ...     ends=pd.to_timedelta([1000, 2000], unit="ms"),
         ... )
         MultiIndex([('0 days 00:00:00', '0 days 00:00:01'),
                     ('0 days 00:00:01', '0 days 00:00:02')],
@@ -273,10 +269,10 @@ def signal_index(
 
 
 def sliding_window(
-        signal: np.ndarray,
-        sampling_rate: int,
-        win_dur: Timestamp,
-        hop_dur: Timestamp,
+    signal: np.ndarray,
+    sampling_rate: int,
+    win_dur: Timestamp,
+    hop_dur: Timestamp,
 ) -> np.ndarray:
     r"""Reshape signal by applying a sliding window.
 
@@ -343,22 +339,22 @@ def sliding_window(
 
     if win_length <= 0:
         raise ValueError(
-            f'When the sampling rate is '
-            f'{sampling_rate} '
-            f'Hz the window duration must be at least '
-            f'{1.0/sampling_rate}s, '
-            f'but got '
-            f'{win_dur.total_seconds()}s.'
+            f"When the sampling rate is "
+            f"{sampling_rate} "
+            f"Hz the window duration must be at least "
+            f"{1.0/sampling_rate}s, "
+            f"but got "
+            f"{win_dur.total_seconds()}s."
         )
 
     if hop_length <= 0:
         raise ValueError(
-            f'When the sampling rate is '
-            f'{sampling_rate} '
-            f'Hz the hop duration must be at least '
-            f'{1.0/sampling_rate}s, '
-            f'but got '
-            f'{hop_dur.total_seconds()}s.'
+            f"When the sampling rate is "
+            f"{sampling_rate} "
+            f"Hz the hop duration must be at least "
+            f"{1.0/sampling_rate}s, "
+            f"but got "
+            f"{hop_dur.total_seconds()}s."
         )
 
     if signal.shape[1] < win_length:  # signal too short
@@ -387,8 +383,8 @@ def to_array(value: typing.Any) -> np.ndarray:
 
 
 def to_timedelta(
-        durations: Timestamps,
-        sampling_rate: int = None,
+    durations: Timestamps,
+    sampling_rate: int = None,
 ) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
@@ -429,14 +425,15 @@ def to_timedelta(
         Timedelta('0 days 00:00:02')
         >>> to_timedelta(2.0)
         Timedelta('0 days 00:00:02')
-        >>> to_timedelta('2ms')
+        >>> to_timedelta("2ms")
         Timedelta('0 days 00:00:00.002000')
-        >>> to_timedelta('200milliseconds')
+        >>> to_timedelta("200milliseconds")
         Timedelta('0 days 00:00:00.200000')
-        >>> to_timedelta([1, '2000'], 1000)
+        >>> to_timedelta([1, "2000"], 1000)
         [Timedelta('0 days 00:00:01'), Timedelta('0 days 00:00:02')]
 
     """  # noqa: E501
+
     def duration_in_seconds(duration, sampling_rate):
         """Helper function to convert to seconds."""
         if not isinstance(duration, str):
@@ -452,15 +449,11 @@ def to_timedelta(
                 )
         return audmath.duration_in_seconds(duration, sampling_rate)
 
-    if (
-            not isinstance(durations, str)
-            and isinstance(durations, collections.abc.Iterable)
+    if not isinstance(durations, str) and isinstance(
+        durations, collections.abc.Iterable
     ):
         # sequence of duration entries
-        durations = [
-            to_timedelta(duration, sampling_rate)
-            for duration in durations
-        ]
+        durations = [to_timedelta(duration, sampling_rate) for duration in durations]
     else:
         # single duration entry
 
@@ -470,6 +463,6 @@ def to_timedelta(
             return durations
 
         durations = duration_in_seconds(durations, sampling_rate)
-        durations = pd.to_timedelta(durations, unit='s')
+        durations = pd.to_timedelta(durations, unit="s")
 
     return durations

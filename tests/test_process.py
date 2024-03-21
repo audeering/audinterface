@@ -26,17 +26,15 @@ def signal_max(signal, sampling_rate):
 
 
 class SignalObject(audobject.Object):
-
     def __call__(self, signal, sampling_rate):
         return np.max(signal)
 
 
 SEGMENT = audinterface.Segment(
-    process_func=lambda x, sr:
-        audinterface.utils.signal_index(
-            pd.to_timedelta(0),
-            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-        )
+    process_func=lambda x, sr: audinterface.utils.signal_index(
+        pd.to_timedelta(0),
+        pd.to_timedelta(x.shape[1] / sr, unit="s") / 2,
+    )
 )
 
 
@@ -49,8 +47,8 @@ def signal_modification(signal, sampling_rate, subtract=False):
 
 
 @pytest.mark.parametrize(
-    'process_func, segment, signal, sampling_rate, start, end, keep_nat, '
-    'channels, mixdown, expected_output',
+    "process_func, segment, signal, sampling_rate, start, end, keep_nat, "
+    "channels, mixdown, expected_output",
     [
         (
             signal_max,
@@ -91,7 +89,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
         (
             signal_max,
             None,
-            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
             8000,
             None,
             None,
@@ -103,7 +101,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
         (
             signal_max,
             None,
-            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
             8000,
             None,
             None,
@@ -115,7 +113,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
         (
             signal_max,
             None,
-            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
             8000,
             None,
             None,
@@ -127,7 +125,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
         (
             signal_max,
             None,
-            np.array([[0., 0., 0.], [1., 1., 1.]]),
+            np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
             8000,
             None,
             None,
@@ -139,7 +137,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
         (
             signal_max,
             None,
-            np.array([[-1., -1., -1.], [0., 0., 0.], [1., 1., 1.]]),
+            np.array([[-1.0, -1.0, -1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
             8000,
             None,
             None,
@@ -203,7 +201,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             np.zeros((1, 24000)),
             8000,
-            pd.to_timedelta('1s'),
+            pd.to_timedelta("1s"),
             None,
             False,
             None,
@@ -215,7 +213,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             np.zeros((1, 24000)),
             8000,
-            pd.to_timedelta('1s'),
+            pd.to_timedelta("1s"),
             pd.NaT,
             False,
             None,
@@ -228,7 +226,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             np.zeros((1, 24000)),
             8000,
             None,
-            pd.to_timedelta('2s'),
+            pd.to_timedelta("2s"),
             False,
             None,
             False,
@@ -240,7 +238,7 @@ def signal_modification(signal, sampling_rate, subtract=False):
             np.zeros((1, 24000)),
             8000,
             pd.NaT,
-            pd.to_timedelta('2s'),
+            pd.to_timedelta("2s"),
             False,
             None,
             False,
@@ -251,8 +249,8 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             np.zeros((1, 24000)),
             8000,
-            pd.to_timedelta('1s'),
-            pd.to_timedelta('2s'),
+            pd.to_timedelta("1s"),
+            pd.to_timedelta("2s"),
             False,
             None,
             False,
@@ -263,8 +261,8 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             np.zeros((1, 24000)),
             8000,
-            '1s',
-            '2s',
+            "1s",
+            "2s",
             False,
             None,
             False,
@@ -275,8 +273,8 @@ def signal_modification(signal, sampling_rate, subtract=False):
             None,
             np.zeros((1, 24000)),
             8000,
-            '1000ms',
-            '2000ms',
+            "1000ms",
+            "2000ms",
             False,
             None,
             False,
@@ -321,12 +319,12 @@ def signal_modification(signal, sampling_rate, subtract=False):
                 axis=1,
             ),
             16000,
-            pd.Timedelta('0 days 00:00:01.140000'),
-            pd.Timedelta('0 days 00:00:01.560000'),
+            pd.Timedelta("0 days 00:00:01.140000"),
+            pd.Timedelta("0 days 00:00:01.560000"),
             True,
             None,
             False,
-            np.ones((1, 6720), 'float32'),
+            np.ones((1, 6720), "float32"),
         ),
     ],
 )
@@ -355,8 +353,8 @@ def test_process_file(
     )
 
     # create test file
-    root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
+    root = str(tmpdir.mkdir("wav"))
+    file = "file.wav"
     path = os.path.join(root, file)
     af.write(path, signal, sampling_rate, bit_depth=32)
 
@@ -368,7 +366,9 @@ def test_process_file(
     )
 
     np.testing.assert_almost_equal(
-        y.values[0], expected_output, decimal=4,
+        y.values[0],
+        expected_output,
+        decimal=4,
     )
 
     # test relative path
@@ -380,13 +380,14 @@ def test_process_file(
     )
 
     np.testing.assert_almost_equal(
-        y.values[0], expected_output, decimal=4,
+        y.values[0],
+        expected_output,
+        decimal=4,
     )
 
 
 @pytest.mark.parametrize(
-    'process_func, num_files, signal, sampling_rate, starts, ends, '
-    'expected_output',
+    "process_func, num_files, signal, sampling_rate, starts, ends, " "expected_output",
     [
         (
             signal_duration,
@@ -402,8 +403,8 @@ def test_process_file(
             2,
             np.zeros((1, 24000)),
             8000,
-            '1s',
-            '2s',
+            "1s",
+            "2s",
             [1.0] * 2,
         ),
         (
@@ -429,8 +430,8 @@ def test_process_file(
             2,
             np.zeros((1, 24000)),
             8000,
-            [None, '1s'],
-            [None, '2s'],
+            [None, "1s"],
+            [None, "2s"],
             [3.0, 1.0],
         ),
         (
@@ -438,8 +439,8 @@ def test_process_file(
             3,
             np.zeros((1, 24000)),
             8000,
-            [None, '1s'],
-            [None, '2s', None],
+            [None, "1s"],
+            [None, "2s", None],
             [3.0, 1.0],
         ),
         (
@@ -448,7 +449,7 @@ def test_process_file(
             np.zeros((1, 24000)),
             8000,
             [None],
-            [None, '2s'],
+            [None, "2s"],
             [3.0],
         ),
     ],
@@ -475,7 +476,7 @@ def test_process_files(
     paths = []
     root = tmpdir
     for idx in range(num_files):
-        file = f'file{idx}.wav'
+        file = f"file{idx}.wav"
         path = os.path.join(root, file)
         af.write(path, signal, sampling_rate)
         files.append(file)
@@ -508,20 +509,40 @@ def test_process_files(
 
 
 @pytest.mark.parametrize(
-    'num_files, segment, num_workers, multiprocessing',
+    "num_files, segment, num_workers, multiprocessing",
     [
-        (3, None, 1, False, ),
-        (3, None, 2, False, ),
-        (3, None, None, False, ),
-        (3, SEGMENT, 1, False, ),
-    ]
+        (
+            3,
+            None,
+            1,
+            False,
+        ),
+        (
+            3,
+            None,
+            2,
+            False,
+        ),
+        (
+            3,
+            None,
+            None,
+            False,
+        ),
+        (
+            3,
+            SEGMENT,
+            1,
+            False,
+        ),
+    ],
 )
 def test_process_folder(
-        tmpdir,
-        num_files,
-        segment,
-        num_workers,
-        multiprocessing,
+    tmpdir,
+    num_files,
+    segment,
+    num_workers,
+    multiprocessing,
 ):
     process = audinterface.Process(
         process_func=None,
@@ -533,10 +554,8 @@ def test_process_folder(
         verbose=False,
     )
     sampling_rate = 8000
-    root = str(tmpdir.mkdir('wav'))
-    files = [
-        os.path.join(root, f'file{n}.wav') for n in range(num_files)
-    ]
+    root = str(tmpdir.mkdir("wav"))
+    files = [os.path.join(root, f"file{n}.wav") for n in range(num_files)]
     for file in files:
         signal = np.random.uniform(-1.0, 1.0, (1, sampling_rate))
         af.write(file, signal, sampling_rate)
@@ -548,39 +567,48 @@ def test_process_folder(
 
     # non-existing folder
     with pytest.raises(FileNotFoundError):
-        process.process_folder('bad-folder')
+        process.process_folder("bad-folder")
 
     # empty folder
-    root = str(tmpdir.mkdir('empty'))
+    root = str(tmpdir.mkdir("empty"))
     y = process.process_folder(root)
     pd.testing.assert_series_equal(y, pd.Series(dtype=object))
 
 
 def test_process_func_args():
     def process_func(s, sr, arg1, arg2):
-        assert arg1 == 'foo'
-        assert arg2 == 'bar'
+        assert arg1 == "foo"
+        assert arg2 == "bar"
+
     audinterface.Process(
         process_func=process_func,
         process_func_args={
-            'arg1': 'foo',
-            'arg2': 'bar',
-        }
+            "arg1": "foo",
+            "arg2": "bar",
+        },
     )
 
 
-@pytest.mark.parametrize('preserve_index', [False, True])
+@pytest.mark.parametrize("preserve_index", [False, True])
 @pytest.mark.parametrize(
-    'num_workers, multiprocessing',
+    "num_workers, multiprocessing",
     [
-        (1, False, ),
-        (2, False, ),
-        (None, False, ),
-    ]
+        (
+            1,
+            False,
+        ),
+        (
+            2,
+            False,
+        ),
+        (
+            None,
+            False,
+        ),
+    ],
 )
 def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
-
-    cache_root = os.path.join(tmpdir, 'cache')
+    cache_root = os.path.join(tmpdir, "cache")
 
     process = audinterface.Process(
         process_func=None,
@@ -595,8 +623,8 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
     signal = np.random.uniform(-1.0, 1.0, (1, int(duration * sampling_rate)))
 
     # create file
-    root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
+    root = str(tmpdir.mkdir("wav"))
+    file = "file.wav"
     path = os.path.join(root, file)
     af.write(path, signal, sampling_rate)
 
@@ -678,13 +706,17 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         pd.testing.assert_index_equal(y.index, index)
         for file, value in y.items():
             signal, sampling_rate = audinterface.utils.read_audio(
-                file, root=root,
+                file,
+                root=root,
             )
             np.testing.assert_equal(signal, value)
     else:
         for (file, start, end), value in y.items():
             signal, sampling_rate = audinterface.utils.read_audio(
-                file, start=start, end=end, root=root,
+                file,
+                start=start,
+                end=end,
+                root=root,
             )
             np.testing.assert_equal(signal, value)
 
@@ -716,7 +748,6 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
 
 
 def test_process_index_filewise_end_times(tmpdir):
-
     # Ensure the resulting segmented index
     # returned by audinterface.process_index()
     # and by audformat.Table.get()
@@ -724,82 +755,82 @@ def test_process_index_filewise_end_times(tmpdir):
     # if NaT is forbidden,
     # see https://github.com/audeering/audinterface/issues/113
 
-    db_root = audeer.mkdir(tmpdir, 'tmp')
+    db_root = audeer.mkdir(tmpdir, "tmp")
     sampling_rate = 8000
     duration = 2.5225
     signal = np.ones((1, int(duration * sampling_rate)))
-    audiofile.write(audeer.path(db_root, 'f.wav'), signal, sampling_rate)
-    db = audformat.Database('db')
-    index = audformat.filewise_index(['f.wav'])
-    db['table'] = audformat.Table(index)
-    db['table']['column'] = audformat.Column()
-    db['table']['column'].set(['label'])
+    audiofile.write(audeer.path(db_root, "f.wav"), signal, sampling_rate)
+    db = audformat.Database("db")
+    index = audformat.filewise_index(["f.wav"])
+    db["table"] = audformat.Table(index)
+    db["table"]["column"] = audformat.Column()
+    db["table"]["column"].set(["label"])
     db.save(db_root)
 
-    df = db['table'].get(as_segmented=True, allow_nat=False)
+    df = db["table"].get(as_segmented=True, allow_nat=False)
     expected_index = df.index
     interface = audinterface.Process(process_func=lambda x, fs: x.max())
-    df = interface.process_index(db['table'].index, root=db_root)
+    df = interface.process_index(db["table"].index, root=db_root)
     pd.testing.assert_index_equal(df.index, expected_index)
 
 
 @pytest.mark.parametrize(
-    'process_func, process_func_args, segment, signal, '
-    'sampling_rate, file, start, end, keep_nat, expected_signal',
+    "process_func, process_func_args, segment, signal, "
+    "sampling_rate, file, start, end, keep_nat, expected_signal",
     [
         (
             None,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             44100,
             None,
             None,
             None,
             False,
-            np.array([[1., 2., 3.]]),
+            np.array([[1.0, 2.0, 3.0]]),
         ),
         (
             None,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             44100,
-            'file',
+            "file",
             None,
             None,
             False,
-            np.array([[1., 2., 3.]]),
-        ),
-        (
-            None,
-            {},
-            SEGMENT,
-            np.array([1., 2., 3., 4.]),
-            44100,
-            None,
-            None,
-            None,
-            False,
-            np.array([[1., 2.]]),
+            np.array([[1.0, 2.0, 3.0]]),
         ),
         (
             None,
             {},
             SEGMENT,
-            np.array([1., 2., 3., 4.]),
+            np.array([1.0, 2.0, 3.0, 4.0]),
             44100,
-            'file',
+            None,
             None,
             None,
             False,
-            np.array([[1., 2.]]),
+            np.array([[1.0, 2.0]]),
+        ),
+        (
+            None,
+            {},
+            SEGMENT,
+            np.array([1.0, 2.0, 3.0, 4.0]),
+            44100,
+            "file",
+            None,
+            None,
+            False,
+            np.array([[1.0, 2.0]]),
         ),
         (
             signal_max,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             44100,
             None,
             None,
@@ -811,7 +842,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             3,
             None,
             None,
@@ -823,10 +854,10 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
-            pd.to_timedelta('2s'),
+            pd.to_timedelta("2s"),
             None,
             False,
             1.0,
@@ -835,11 +866,11 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
             None,
-            pd.to_timedelta('1s'),
+            pd.to_timedelta("1s"),
             False,
             1.0,
         ),
@@ -847,7 +878,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
             None,
@@ -859,7 +890,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
             None,
@@ -871,11 +902,11 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
-            pd.to_timedelta('1s'),
-            pd.to_timedelta('2s'),
+            pd.to_timedelta("1s"),
+            pd.to_timedelta("2s"),
             False,
             1.0,
         ),
@@ -883,7 +914,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
             1,
@@ -895,7 +926,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
             1.0,
@@ -907,11 +938,11 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
             None,
-            '1s',
-            '2s',
+            "1s",
+            "2s",
             False,
             1.0,
         ),
@@ -919,11 +950,11 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_duration,
             {},
             None,
-            np.array([1., 2., 3.]),
+            np.array([1.0, 2.0, 3.0]),
             1,
-            'file',
-            pd.to_timedelta('1s'),
-            pd.to_timedelta('2s'),
+            "file",
+            pd.to_timedelta("1s"),
+            pd.to_timedelta("2s"),
             False,
             1.0,
         ),
@@ -931,7 +962,7 @@ def test_process_index_filewise_end_times(tmpdir):
             signal_modification,
             {},
             None,
-            np.array([1., 1., 1.]),
+            np.array([1.0, 1.0, 1.0]),
             44100,
             None,
             None,
@@ -941,9 +972,9 @@ def test_process_index_filewise_end_times(tmpdir):
         ),
         (
             signal_modification,
-            {'subtract': False},
+            {"subtract": False},
             None,
-            np.array([1., 1., 1.]),
+            np.array([1.0, 1.0, 1.0]),
             44100,
             None,
             None,
@@ -953,9 +984,9 @@ def test_process_index_filewise_end_times(tmpdir):
         ),
         (
             signal_modification,
-            {'subtract': True},
+            {"subtract": True},
             None,
-            np.array([1., 1., 1.]),
+            np.array([1.0, 1.0, 1.0]),
             44100,
             None,
             None,
@@ -966,16 +997,16 @@ def test_process_index_filewise_end_times(tmpdir):
     ],
 )
 def test_process_signal(
-        process_func,
-        process_func_args,
-        segment,
-        signal,
-        sampling_rate,
-        file,
-        start,
-        end,
-        keep_nat,
-        expected_signal,
+    process_func,
+    process_func_args,
+    segment,
+    signal,
+    sampling_rate,
+    file,
+    start,
+    end,
+    keep_nat,
+    expected_signal,
 ):
     process = audinterface.Process(
         process_func=process_func,
@@ -996,16 +1027,16 @@ def test_process_signal(
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     elif isinstance(start, (int, float)):
-        start = pd.to_timedelta(start, 's')
+        start = pd.to_timedelta(start, "s")
     elif isinstance(start, str):
         start = pd.to_timedelta(start)
     if end is None or (pd.isna(end) and not keep_nat):
         end = pd.to_timedelta(
             np.atleast_2d(signal).shape[1] / sampling_rate,
-            unit='s',
+            unit="s",
         )
     elif isinstance(end, (int, float)):
-        end = pd.to_timedelta(end, 's')
+        end = pd.to_timedelta(end, "s")
     elif isinstance(end, str):
         end = pd.to_timedelta(end)
 
@@ -1033,15 +1064,24 @@ def test_process_signal(
 
 
 @pytest.mark.parametrize(
-    'num_workers, multiprocessing',
+    "num_workers, multiprocessing",
     [
-        (1, False, ),
-        (2, False, ),
-        (None, False, ),
-    ]
+        (
+            1,
+            False,
+        ),
+        (
+            2,
+            False,
+        ),
+        (
+            None,
+            False,
+        ),
+    ],
 )
 @pytest.mark.parametrize(
-    'process_func, signal, sampling_rate, index',
+    "process_func, signal, sampling_rate, index",
     [
         (
             None,
@@ -1054,8 +1094,7 @@ def test_process_signal(
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3)
+                pd.timedelta_range("0s", "3s", 3), pd.timedelta_range("1s", "4s", 3)
             ),
         ),
         (
@@ -1063,8 +1102,8 @@ def test_process_signal(
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
         ),
         (
@@ -1085,10 +1124,10 @@ def test_process_signal(
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.timedelta_range('0s', '3s', 3),
+                    pd.timedelta_range("0s", "3s", 3),
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
             signal_max,
@@ -1096,11 +1135,11 @@ def test_process_signal(
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    ['wrong', 'data', 'type'],
-                    pd.timedelta_range('1s', '4s', 3),
+                    ["wrong", "data", "type"],
+                    pd.timedelta_range("1s", "4s", 3),
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
             signal_max,
@@ -1108,21 +1147,21 @@ def test_process_signal(
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.timedelta_range('0s', '3s', 3),
-                    ['wrong', 'data', 'type'],
+                    pd.timedelta_range("0s", "3s", 3),
+                    ["wrong", "data", "type"],
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
     ],
 )
 def test_process_signal_from_index(
-        num_workers,
-        multiprocessing,
-        process_func,
-        signal,
-        sampling_rate,
-        index,
+    num_workers,
+    multiprocessing,
+    process_func,
+    signal,
+    sampling_rate,
+    index,
 ):
     process = audinterface.Process(
         process_func=process_func,
@@ -1146,13 +1185,12 @@ def test_process_signal_from_index(
     else:
         pd.testing.assert_series_equal(
             result,
-            pd.concat(expected, names=['start', 'end']),
+            pd.concat(expected, names=["start", "end"]),
         )
 
 
 @pytest.mark.parametrize(
-    'process_func, signal, sampling_rate, min_signal_dur, '
-    'max_signal_dur, expected',
+    "process_func, signal, sampling_rate, min_signal_dur, " "max_signal_dur, expected",
     [
         (
             None,
@@ -1184,15 +1222,15 @@ def test_process_signal_from_index(
             0.01,
             np.ones((1, 441)),
         ),
-    ]
+    ],
 )
 def test_process_signal_min_max(
-        process_func,
-        signal,
-        sampling_rate,
-        min_signal_dur,
-        max_signal_dur,
-        expected,
+    process_func,
+    signal,
+    sampling_rate,
+    min_signal_dur,
+    max_signal_dur,
+    expected,
 ):
     process = audinterface.Process(
         process_func=process_func,
@@ -1207,27 +1245,30 @@ def test_process_signal_min_max(
         [expected],
         index=audinterface.utils.signal_index(
             pd.to_timedelta(0),
-            pd.to_timedelta(expected.shape[1] / sampling_rate, unit='s'),
-        )
+            pd.to_timedelta(expected.shape[1] / sampling_rate, unit="s"),
+        ),
     )
     pd.testing.assert_series_equal(result, expected)
 
 
 @pytest.mark.parametrize(
-    'process_func, signal, sampling_rate',
+    "process_func, signal, sampling_rate",
     [
         (
             lambda x, sr: x.mean(),
             np.array([0, 0, 0, 0, 1, 1, 1, 1], dtype=np.float32),
             1,
         ),
-    ]
+    ],
 )
 @pytest.mark.parametrize(
-    'start, end, win_dur, hop_dur, expected',
+    "start, end, win_dur, hop_dur, expected",
     [
         (
-            None, None, 4, None,
+            None,
+            None,
+            4,
+            None,
             pd.Series(
                 [0, 0.5, 1],
                 audinterface.utils.signal_index(
@@ -1238,7 +1279,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            None, None, 4, 2,
+            None,
+            None,
+            4,
+            2,
             pd.Series(
                 [0, 0.5, 1],
                 audinterface.utils.signal_index(
@@ -1249,7 +1293,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            None, None, 4, 3,
+            None,
+            None,
+            4,
+            3,
             pd.Series(
                 [0, 0.75],
                 audinterface.utils.signal_index(
@@ -1260,7 +1307,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            None, None, 4, 4,
+            None,
+            None,
+            4,
+            4,
             pd.Series(
                 [0, 1],
                 audinterface.utils.signal_index(
@@ -1271,7 +1321,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            None, None, 2, 4,
+            None,
+            None,
+            2,
+            4,
             pd.Series(
                 [0, 1.0],
                 audinterface.utils.signal_index(
@@ -1282,7 +1335,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            1.0, None, 4, 2,
+            1.0,
+            None,
+            4,
+            2,
             pd.Series(
                 [0.25, 0.75],
                 audinterface.utils.signal_index(
@@ -1293,7 +1349,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            1.0, 5.0, 4, 2,
+            1.0,
+            5.0,
+            4,
+            2,
             pd.Series(
                 [0.25],
                 audinterface.utils.signal_index(1, 5),
@@ -1301,7 +1360,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            1.0, 2.0, 4, 2,
+            1.0,
+            2.0,
+            4,
+            2,
             pd.Series(
                 [],
                 audinterface.utils.signal_index(),
@@ -1309,7 +1371,10 @@ def test_process_signal_min_max(
             ),
         ),
         (
-            9.0, 15.0, 4, 2,
+            9.0,
+            15.0,
+            4,
+            2,
             pd.Series(
                 [],
                 audinterface.utils.signal_index(),
@@ -1318,25 +1383,29 @@ def test_process_signal_min_max(
         ),
         # missing win duration
         pytest.param(
-            None, None, None, 2, None,
+            None,
+            None,
+            None,
+            2,
+            None,
             marks=pytest.mark.xfail(raises=ValueError),
-        )
-    ]
+        ),
+    ],
 )
 def test_process_with_sliding_window(
-        tmpdir,
-        process_func,
-        signal,
-        sampling_rate,
-        start,
-        end,
-        win_dur,
-        hop_dur,
-        expected,
+    tmpdir,
+    process_func,
+    signal,
+    sampling_rate,
+    start,
+    end,
+    win_dur,
+    hop_dur,
+    expected,
 ):
     # save signal to file
     root = tmpdir
-    file = 'file.wav'
+    file = "file.wav"
     path = os.path.join(root, file)
     audiofile.write(path, signal, sampling_rate, bit_depth=32)
 
@@ -1367,8 +1436,8 @@ def test_process_with_sliding_window(
     # add file to expected index
     expected.index = audformat.segmented_index(
         [file] * len(expected.index),
-        expected.index.get_level_values('start'),
-        expected.index.get_level_values('end'),
+        expected.index.get_level_values("start"),
+        expected.index.get_level_values("end"),
     )
 
     # process signal with file
@@ -1391,7 +1460,6 @@ def test_process_with_sliding_window(
 
 
 def test_process_with_special_args(tmpdir):
-
     duration = 3
     sampling_rate = 1
     signal = np.zeros((2, duration), np.float32)
@@ -1402,7 +1470,7 @@ def test_process_with_special_args(tmpdir):
 
     # create files
     root = tmpdir
-    files = [f'f{idx}.wav' for idx in range(num_files)]
+    files = [f"f{idx}.wav" for idx in range(num_files)]
     index = audformat.segmented_index(
         np.repeat(files, num_frames),
         np.tile(range(num_frames), num_files),
@@ -1501,8 +1569,10 @@ def test_process_with_special_args(tmpdir):
     )
     y = process.process_index(index, root=root)
     expected = pd.Series(
-        [((idx, file, root), (idx, file, root))
-         for idx, (file, _, _) in enumerate(index)],
+        [
+            ((idx, file, root), (idx, file, root))
+            for idx, (file, _, _) in enumerate(index)
+        ],
         index,
     )
     pd.testing.assert_series_equal(y, expected)
@@ -1511,20 +1581,20 @@ def test_process_with_special_args(tmpdir):
 
     process = audinterface.Process(
         process_func=process_func,
-        process_func_args={'idx': 99, 'file': 'my/file', 'root': None},
+        process_func_args={"idx": 99, "file": "my/file", "root": None},
         num_workers=num_workers,
     )
     y = process.process_index(index, root=root)
-    expected = pd.Series([(99, 'my/file', None)] * len(index), index)
+    expected = pd.Series([(99, "my/file", None)] * len(index), index)
     pd.testing.assert_series_equal(y, expected)
 
 
-@pytest.mark.parametrize('audio', [(3, 8000)], indirect=True)  # s, Hz
+@pytest.mark.parametrize("audio", [(3, 8000)], indirect=True)  # s, Hz
 @pytest.mark.parametrize(
     # `starts` and `ends`
     # are used to create a segment object
     # using audinterface.utils.signal_index()
-    'starts, ends',
+    "starts, ends",
     [
         (None, None),
         (0, 1.5),
@@ -1539,18 +1609,16 @@ def test_process_with_special_args(tmpdir):
         ([1.000000003, 2.1], [2.000000003, 2.5]),
         # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
-    ]
+    ],
 )
 def test_process_with_segment(audio, starts, ends):
-
     path, signal, sampling_rate = audio
     root, file = os.path.split(path)
     duration = signal.shape[1] / sampling_rate
 
     # Segment and process objects
     segment = audinterface.Segment(
-        process_func=lambda x, sr:
-        audinterface.utils.signal_index(starts, ends)
+        process_func=lambda x, sr: audinterface.utils.signal_index(starts, ends)
     )
     process = audinterface.Process()
     process_with_segment = audinterface.Process(segment=segment)
@@ -1580,7 +1648,7 @@ def test_process_with_segment(audio, starts, ends):
 
     pd.testing.assert_series_equal(
         process.process_index(index, root=root, preserve_index=True),
-        process_with_segment.process_signal(signal, sampling_rate, file=file)
+        process_with_segment.process_signal(signal, sampling_rate, file=file),
     )
 
     # process signal from index
@@ -1628,7 +1696,7 @@ def test_process_with_segment(audio, starts, ends):
     # https://github.com/audeering/audinterface/issues/138
     pd.testing.assert_series_equal(
         process.process_index(index, root=root, preserve_index=True),
-        process_with_segment.process_files([file], root=root)
+        process_with_segment.process_files([file], root=root),
     )
 
     # process folder
@@ -1662,20 +1730,21 @@ def test_process_with_segment(audio, starts, ends):
         ),
     )
 
-@pytest.mark.parametrize('audio', [(1, 8000)], indirect=True)  # s, Hz
+
+@pytest.mark.parametrize("audio", [(1, 8000)], indirect=True)  # s, Hz
 def test_read_audio(audio):
     file, _, sampling_rate = audio
     s, sr = audinterface.utils.read_audio(
         file,
-        start=pd.Timedelta('00:00:00.1'),
-        end=pd.Timedelta('00:00:00.2'),
+        start=pd.Timedelta("00:00:00.1"),
+        end=pd.Timedelta("00:00:00.2"),
     )
     assert sr == sampling_rate
     assert s.shape[1] == 0.1 * sr
 
 
 @pytest.mark.parametrize(
-    'signal_sampling_rate, model_sampling_rate, resample',
+    "signal_sampling_rate, model_sampling_rate, resample",
     [
         pytest.param(
             44100,
@@ -1707,9 +1776,9 @@ def test_read_audio(audio):
     ],
 )
 def test_sampling_rate_mismatch(
-        signal_sampling_rate,
-        model_sampling_rate,
-        resample,
+    signal_sampling_rate,
+    model_sampling_rate,
+    resample,
 ):
     process = audinterface.Process(
         process_func=None,
@@ -1717,5 +1786,5 @@ def test_sampling_rate_mismatch(
         resample=resample,
         verbose=False,
     )
-    signal = np.array([1., 2., 3.]).astype('float32')
+    signal = np.array([1.0, 2.0, 3.0]).astype("float32")
     process.process_signal(signal, signal_sampling_rate)

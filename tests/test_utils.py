@@ -21,37 +21,37 @@ def to_array(value):
 
 
 @pytest.mark.parametrize(
-    'obj',
+    "obj",
     [
         audinterface.utils.signal_index(),
         pytest.param(  # invalid start type
             pd.MultiIndex.from_arrays(
                 [
                     [0.0, 1.0],
-                    pd.to_timedelta([1.0, 2.0], unit='s'),
+                    pd.to_timedelta([1.0, 2.0], unit="s"),
                 ],
-                names=['start', 'end'],
+                names=["start", "end"],
             ),
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(  # invalid end type
             pd.MultiIndex.from_arrays(
                 [
-                    pd.to_timedelta([0.0, 1.0], unit='s'),
+                    pd.to_timedelta([0.0, 1.0], unit="s"),
                     [1.0, 2.0],
                 ],
-                names=['start', 'end'],
+                names=["start", "end"],
             ),
             marks=pytest.mark.xfail(raises=ValueError),
         ),
-    ]
+    ],
 )
 def test_assert_index(obj):
     audinterface.core.utils.assert_index(obj)
 
 
 @pytest.mark.parametrize(
-    'starts,ends',
+    "starts,ends",
     [
         (
             None,
@@ -62,80 +62,73 @@ def test_assert_index(obj):
             [],
         ),
         (
-            pd.Timedelta('0s'),
+            pd.Timedelta("0s"),
             None,
         ),
         (
-            pd.Timedelta('0s'),
-            pd.Timedelta('1s'),
+            pd.Timedelta("0s"),
+            pd.Timedelta("1s"),
         ),
         (
-            [pd.Timedelta('0s'), pd.Timedelta('1s')],
+            [pd.Timedelta("0s"), pd.Timedelta("1s")],
             None,
         ),
         (
             None,
-            [pd.Timedelta('1s'), pd.Timedelta('2s')],
+            [pd.Timedelta("1s"), pd.Timedelta("2s")],
         ),
         (
-            [pd.Timedelta('0s'), pd.Timedelta('1s')],
-            [pd.Timedelta('1s'), pd.Timedelta('2s')],
+            [pd.Timedelta("0s"), pd.Timedelta("1s")],
+            [pd.Timedelta("1s"), pd.Timedelta("2s")],
         ),
         (
-            pd.timedelta_range('0s', freq='1s', periods=2),
-            pd.timedelta_range('1s', freq='1s', periods=2),
+            pd.timedelta_range("0s", freq="1s", periods=2),
+            pd.timedelta_range("1s", freq="1s", periods=2),
         ),
         pytest.param(  # len starts != len ends
-            [pd.Timedelta('0s'), pd.Timedelta('1s')],
-            [pd.Timedelta('1s')],
+            [pd.Timedelta("0s"), pd.Timedelta("1s")],
+            [pd.Timedelta("1s")],
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(  # duplicates
-            [pd.Timedelta('0s'), pd.Timedelta('0s')],
-            [pd.Timedelta('1s'), pd.Timedelta('1s')],
+            [pd.Timedelta("0s"), pd.Timedelta("0s")],
+            [pd.Timedelta("1s"), pd.Timedelta("1s")],
             marks=pytest.mark.xfail(raises=ValueError),
         ),
-    ]
+    ],
 )
 def test_create_segmented_index(starts, ends):
-
     index = audinterface.utils.signal_index(starts=starts, ends=ends)
 
     starts = to_array(starts)
     ends = to_array(ends)
 
     if starts is None and ends is None:
-
-        assert index.get_level_values(
-            audformat.define.IndexField.START
-        ).tolist() == []
-        assert index.get_level_values(
-            audformat.define.IndexField.END
-        ).tolist() == []
+        assert index.get_level_values(audformat.define.IndexField.START).tolist() == []
+        assert index.get_level_values(audformat.define.IndexField.END).tolist() == []
 
     else:
-
         if starts is not None:
-            assert index.get_level_values(
-                audformat.define.IndexField.START
-            ).tolist() == starts
+            assert (
+                index.get_level_values(audformat.define.IndexField.START).tolist()
+                == starts
+            )
         else:
             assert index.get_level_values(
                 audformat.define.IndexField.START
             ).tolist() == [pd.Timedelta(0)] * len(ends)
 
         if ends is not None:
-            assert index.get_level_values(
-                audformat.define.IndexField.END
-            ).tolist() == ends
+            assert (
+                index.get_level_values(audformat.define.IndexField.END).tolist() == ends
+            )
         else:
-            assert index.get_level_values(
-                audformat.define.IndexField.END
-            ).tolist() == [pd.NaT] * len(starts)
+            assert index.get_level_values(audformat.define.IndexField.END).tolist() == [
+                pd.NaT
+            ] * len(starts)
 
 
 def test_read_audio(tmpdir):
-
     # Ensures that we apply the same rounding
     # when reading with `audinterface.utils.read_audio()`
     # with `start` and `end`
@@ -144,8 +137,8 @@ def test_read_audio(tmpdir):
     # Use critical `start` and `end` values
     # as reported in
     # https://github.com/audeering/audinterface/issues/123
-    start = pd.Timedelta('0 days 00:00:01.140000')
-    end = pd.Timedelta('0 days 00:00:01.560000')
+    start = pd.Timedelta("0 days 00:00:01.140000")
+    end = pd.Timedelta("0 days 00:00:01.560000")
 
     sampling_rate = 16000
     signal = np.zeros((1, 3 * sampling_rate))
@@ -159,7 +152,7 @@ def test_read_audio(tmpdir):
     )
     signal[:, start_i:end_i] = 0.9
 
-    audio_file = audeer.path(tmpdir, 'signal.wav')
+    audio_file = audeer.path(tmpdir, "signal.wav")
     audiofile.write(audio_file, signal, sampling_rate)
 
     signal, _ = audinterface.utils.read_audio(
@@ -174,17 +167,17 @@ def test_read_audio(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'starts, ends, expected',
+    "starts, ends, expected",
     [
         (
             1,
             2,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex([pd.Timedelta('0 days 00:00:01')]),
-                    pd.TimedeltaIndex([pd.Timedelta('0 days 00:00:02')]),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:01")]),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:02")]),
                 ],
-                names=['start', 'end'],
+                names=["start", "end"],
             ),
         ),
         (
@@ -194,36 +187,32 @@ def test_read_audio(tmpdir):
                 [
                     pd.TimedeltaIndex(
                         [
-                            pd.Timedelta('0 days 00:00:01'),
-                            pd.Timedelta('0 days 00:00:02'),
+                            pd.Timedelta("0 days 00:00:01"),
+                            pd.Timedelta("0 days 00:00:02"),
                         ]
                     ),
                     pd.TimedeltaIndex(
                         [
-                            pd.Timedelta('0 days 00:00:03'),
-                            pd.Timedelta('0 days 00:00:04'),
+                            pd.Timedelta("0 days 00:00:03"),
+                            pd.Timedelta("0 days 00:00:04"),
                         ]
                     ),
                 ],
-                names=['start', 'end'],
+                names=["start", "end"],
             ),
         ),
         (
-            [pd.Timedelta('0 days 00:00:35.511437999')],
+            [pd.Timedelta("0 days 00:00:35.511437999")],
             [36],
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex(
-                        [pd.Timedelta('0 days 00:00:35.511437999')]
-                    ),
-                    pd.TimedeltaIndex(
-                        [pd.Timedelta('0 days 00:00:36')]
-                    ),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:35.511437999")]),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:36")]),
                 ],
-                names=['start', 'end'],
+                names=["start", "end"],
             ),
         ),
-    ]
+    ],
 )
 def test_signal_index(starts, ends, expected):
     index = audinterface.utils.signal_index(starts, ends)
@@ -231,53 +220,71 @@ def test_signal_index(starts, ends, expected):
 
 
 @pytest.mark.parametrize(
-    'signal, sampling_rate, win_dur, hop_dur, expected',
+    "signal, sampling_rate, win_dur, hop_dur, expected",
     [
         # empty
         (
             np.array([]),
-            1, 1, 1,
+            1,
+            1,
+            1,
             np.array([]),
         ),
         # single dimension
         (
             np.array([0, 1, 2, 3]),
-            1, 1, 1,
+            1,
+            1,
+            1,
             np.array([[[0, 1, 2, 3]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 1, 1,
+            1,
+            1,
+            1,
             np.array([[[0, 1, 2, 3]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 2, 1,
+            1,
+            2,
+            1,
             np.array([[[0, 1, 2], [1, 2, 3]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 2, 2,
+            1,
+            2,
+            2,
             np.array([[[0, 2], [1, 3]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 2, 3,
+            1,
+            2,
+            3,
             np.array([[[0], [1]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 1, 2,
+            1,
+            1,
+            2,
             np.array([[[0, 2]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 2, 10,
+            1,
+            2,
+            10,
             np.array([[[0], [1]]]),
         ),
         (
             np.array([[0, 1, 2, 3]]),
-            1, 10, 2,
+            1,
+            10,
+            2,
             np.array([]),
         ),
         # multiple dimensions
@@ -289,7 +296,9 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 1, 1,
+            1,
+            1,
+            1,
             np.array(
                 [
                     [
@@ -312,7 +321,9 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 2, 1,
+            1,
+            2,
+            1,
             np.array(
                 [
                     [
@@ -338,7 +349,9 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 2, 2,
+            1,
+            2,
+            2,
             np.array(
                 [
                     [
@@ -364,13 +377,12 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 2, 3,
+            1,
+            2,
+            3,
             np.array(
                 [
-                    [
-                        [10],
-                        [11]
-                    ],
+                    [[10], [11]],
                     [
                         [20],
                         [21],
@@ -378,7 +390,7 @@ def test_signal_index(starts, ends, expected):
                     [
                         [30],
                         [31],
-                    ]
+                    ],
                 ],
             ),
         ),
@@ -390,7 +402,9 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 1, 2,
+            1,
+            1,
+            2,
             np.array(
                 [
                     [
@@ -413,7 +427,9 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 2, 10,
+            1,
+            2,
+            10,
             np.array(
                 [
                     [
@@ -439,24 +455,30 @@ def test_signal_index(starts, ends, expected):
                     [30, 31, 32, 33],
                 ],
             ),
-            1, 10, 2,
+            1,
+            10,
+            2,
             np.array([]),
         ),
         # invalid win duration
         pytest.param(
             np.array([]),
-            1, 0.999, 1,
+            1,
+            0.999,
+            1,
             None,
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         # invalid hop duration
         pytest.param(
             np.array([]),
-            1, 1, 0.999,
+            1,
+            1,
+            0.999,
             None,
             marks=pytest.mark.xfail(raises=ValueError),
         ),
-    ]
+    ],
 )
 def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
     frames = audinterface.utils.sliding_window(
@@ -469,48 +491,48 @@ def test_sliding_window(signal, sampling_rate, win_dur, hop_dur, expected):
 
 
 @pytest.mark.parametrize(
-    'duration, expected',
+    "duration, expected",
     [
         (
             10,
-            pd.to_timedelta(10, unit='s'),
+            pd.to_timedelta(10, unit="s"),
         ),
         (
             [1],
-            [pd.Timedelta('0 days 00:00:01')],
+            [pd.Timedelta("0 days 00:00:01")],
         ),
         (
             [1, 2],
-            [pd.Timedelta('0 days 00:00:01'), pd.Timedelta('0 days 00:00:02')],
+            [pd.Timedelta("0 days 00:00:01"), pd.Timedelta("0 days 00:00:02")],
         ),
         (
-            [1, pd.Timedelta('0 days 00:00:02')],
-            [pd.Timedelta('0 days 00:00:01'), pd.Timedelta('0 days 00:00:02')],
+            [1, pd.Timedelta("0 days 00:00:02")],
+            [pd.Timedelta("0 days 00:00:01"), pd.Timedelta("0 days 00:00:02")],
         ),
         # Example with high precision
         # https://github.com/audeering/audinterface/issues/134
         (
-            pd.Timedelta('0 days 00:00:35.511437999'),
-            pd.Timedelta('0 days 00:00:35.511437999'),
+            pd.Timedelta("0 days 00:00:35.511437999"),
+            pd.Timedelta("0 days 00:00:35.511437999"),
         ),
         (
             [1e-09, 1],
             [
-                pd.Timedelta('0 days 00:00:00.000000001'),
-                pd.Timedelta('0 days 00:00:01'),
+                pd.Timedelta("0 days 00:00:00.000000001"),
+                pd.Timedelta("0 days 00:00:01"),
             ],
         ),
-    ]
+    ],
 )
 def test_to_timedelta(duration, expected):
     assert audinterface.utils.to_timedelta(duration) == expected
 
 
 @pytest.mark.parametrize(
-    'durations, sampling_rate, error_msg, error',
+    "durations, sampling_rate, error_msg, error",
     [
         (
-            '200',
+            "200",
             None,
             (
                 "You have to provide 'sampling_rate' "
@@ -520,7 +542,7 @@ def test_to_timedelta(duration, expected):
             ValueError,
         ),
         (
-            [200, '200'],
+            [200, "200"],
             None,
             (
                 "You have to provide 'sampling_rate' "
@@ -530,7 +552,7 @@ def test_to_timedelta(duration, expected):
             ValueError,
         ),
         (
-            '200 a b',
+            "200 a b",
             None,
             (
                 "Your given duration '200 a b' "
@@ -539,7 +561,7 @@ def test_to_timedelta(duration, expected):
             ValueError,
         ),
         (
-            [200, '200 a b'],
+            [200, "200 a b"],
             None,
             (
                 "Your given duration '200 a b' "
@@ -547,7 +569,7 @@ def test_to_timedelta(duration, expected):
             ),
             ValueError,
         ),
-    ]
+    ],
 )
 def test_to_timedelta_errors(durations, sampling_rate, error_msg, error):
     with pytest.raises(error, match=re.escape(error_msg)):

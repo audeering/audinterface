@@ -94,7 +94,7 @@ class Process:
         >>> def mean(signal, sampling_rate):
         ...     return signal.mean()
         >>> interface = Process(process_func=mean)
-        >>> signal = np.array([1., 2., 3.])
+        >>> signal = np.array([1.0, 2.0, 3.0])
         >>> interface(signal, sampling_rate=3)
         2.0
         >>> interface.process_signal(signal, sampling_rate=3)
@@ -104,13 +104,13 @@ class Process:
         >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
-        ...     'emodb',
-        ...     version='1.3.0',
-        ...     media='wav/03a01Fa.wav',
+        ...     "emodb",
+        ...     version="1.3.0",
+        ...     media="wav/03a01Fa.wav",
         ...     full_path=False,
         ...     verbose=False,
         ... )
-        >>> index = db['emotion'].index
+        >>> index = db["emotion"].index
         >>> interface.process_index(index, root=db.root)
         file             start   end
         wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
@@ -132,42 +132,40 @@ class Process:
         dtype: float32
 
     """  # noqa: E501
+
     def __init__(
-            self,
-            *,
-            process_func: typing.Callable[..., typing.Any] = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-            process_func_is_mono: bool = False,
-            sampling_rate: int = None,
-            resample: bool = False,
-            channels: typing.Union[int, typing.Sequence[int]] = None,
-            mixdown: bool = False,
-            win_dur: Timestamp = None,
-            hop_dur: Timestamp = None,
-            min_signal_dur: Timestamp = None,
-            max_signal_dur: Timestamp = None,
-            segment: Segment = None,
-            keep_nat: bool = False,
-            num_workers: typing.Optional[int] = 1,
-            multiprocessing: bool = False,
-            verbose: bool = False,
+        self,
+        *,
+        process_func: typing.Callable[..., typing.Any] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_is_mono: bool = False,
+        sampling_rate: int = None,
+        resample: bool = False,
+        channels: typing.Union[int, typing.Sequence[int]] = None,
+        mixdown: bool = False,
+        win_dur: Timestamp = None,
+        hop_dur: Timestamp = None,
+        min_signal_dur: Timestamp = None,
+        max_signal_dur: Timestamp = None,
+        segment: Segment = None,
+        keep_nat: bool = False,
+        num_workers: typing.Optional[int] = 1,
+        multiprocessing: bool = False,
+        verbose: bool = False,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
 
         if process_func is None:
+
             def process_func(signal, _):
                 return signal
 
         if resample and sampling_rate is None:
-            raise ValueError(
-                'sampling_rate has to be provided for resample = True.'
-            )
+            raise ValueError("sampling_rate has to be provided for resample = True.")
 
         if win_dur is None and hop_dur is not None:
-            raise ValueError(
-                "You have to specify 'win_dur' if 'hop_dur' is given."
-            )
+            raise ValueError("You have to specify 'win_dur' if 'hop_dur' is given.")
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
@@ -224,21 +222,20 @@ class Process:
         r"""Window duration."""
 
     def _process_file(
-            self,
-            file: str,
-            *,
-            idx: int = 0,
-            root: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        file: str,
+        *,
+        idx: int = 0,
+        root: str = None,
+        start: pd.Timedelta = None,
+        end: pd.Timedelta = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Tuple[
         typing.List[typing.Any],
         typing.List[str],
         typing.List[pd.Timedelta],
         typing.List[pd.Timedelta],
     ]:
-
         if start is not None:
             start = utils.to_timedelta(start, self.sampling_rate)
         if end is not None:
@@ -265,8 +262,7 @@ class Process:
             # by storing what is lost due to rounding
             # when reading the file
             duration_at_sample = utils.to_timedelta(
-                audmath.samples(duration.total_seconds(), sampling_rate)
-                / sampling_rate
+                audmath.samples(duration.total_seconds(), sampling_rate) / sampling_rate
             )
             return duration - duration_at_sample
 
@@ -286,13 +282,13 @@ class Process:
         return y, files, starts, ends
 
     def process_file(
-            self,
-            file: str,
-            *,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        file: str,
+        *,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
@@ -330,7 +326,6 @@ class Process:
             )
             return self._process_index_wo_segment(index, root)
         else:
-
             y, files, starts, ends = self._process_file(
                 file,
                 root=root,
@@ -347,13 +342,13 @@ class Process:
                 return pd.Series(y, index)
 
     def process_files(
-            self,
-            files: typing.Sequence[str],
-            *,
-            starts: Timestamps = None,
-            ends: Timestamps = None,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        files: typing.Sequence[str],
+        *,
+        starts: Timestamps = None,
+        ends: Timestamps = None,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
@@ -409,16 +404,16 @@ class Process:
 
         params = [
             (
-                (file, ),
+                (file,),
                 {
-                    'idx': idx,
-                    'root': root,
-                    'start': start,
-                    'end': end,
-                    'process_func_args': process_func_args,
+                    "idx": idx,
+                    "root": root,
+                    "start": start,
+                    "end": end,
+                    "process_func_args": process_func_args,
                 },
-            ) for idx, (file, start, end)
-            in enumerate(zip(files, starts, ends))
+            )
+            for idx, (file, start, end) in enumerate(zip(files, starts, ends))
         ]
 
         verbose = self.verbose
@@ -429,7 +424,7 @@ class Process:
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
             progress_bar=verbose,
-            task_description=f'Process {len(files)} files',
+            task_description=f"Process {len(files)} files",
         )
         self.verbose = verbose
 
@@ -444,12 +439,12 @@ class Process:
         return y
 
     def process_folder(
-            self,
-            root: str,
-            *,
-            filetype: str = 'wav',
-            include_root: bool = True,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        root: str,
+        *,
+        filetype: str = "wav",
+        include_root: bool = True,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process files in a folder.
 
@@ -499,10 +494,10 @@ class Process:
         )
 
     def _process_index_wo_segment(
-            self,
-            index: pd.Index,
-            root: typing.Optional[str],
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        index: pd.Index,
+        root: typing.Optional[str],
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
@@ -510,13 +505,13 @@ class Process:
 
         params = [
             (
-                (file, ),
+                (file,),
                 {
-                    'idx': idx,
-                    'root': root,
-                    'start': start,
-                    'end': end,
-                    'process_func_args': process_func_args,
+                    "idx": idx,
+                    "root": root,
+                    "start": start,
+                    "end": end,
+                    "process_func_args": process_func_args,
                 },
             )
             for idx, (file, start, end) in enumerate(index)
@@ -528,7 +523,7 @@ class Process:
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
             progress_bar=self.verbose,
-            task_description=f'Process {len(index)} segments',
+            task_description=f"Process {len(index)} segments",
         )
 
         y = list(itertools.chain.from_iterable([x[0] for x in xs]))
@@ -542,13 +537,13 @@ class Process:
         return y
 
     def process_index(
-            self,
-            index: pd.Index,
-            *,
-            preserve_index: bool = False,
-            root: str = None,
-            cache_root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        index: pd.Index,
+        *,
+        preserve_index: bool = False,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
 
@@ -591,7 +586,7 @@ class Process:
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
             hash = audformat.utils.hash(index)
-            cache_path = os.path.join(cache_root, f'{hash}.pkl')
+            cache_path = os.path.join(cache_root, f"{hash}.pkl")
 
         if cache_path and os.path.exists(cache_path):
             y = pd.read_pickle(cache_path)
@@ -621,32 +616,34 @@ class Process:
         return y
 
     def _process_signal(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            *,
-            idx: int = 0,
-            root: str = None,
-            file: str = None,
-            start: pd.Timedelta = None,
-            end: pd.Timedelta = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+        start: pd.Timedelta = None,
+        end: pd.Timedelta = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Tuple[
         typing.List[typing.Any],
         typing.List[str],
         typing.List[pd.Timedelta],
         typing.List[pd.Timedelta],
     ]:
-
         signal = np.atleast_2d(signal)
 
         # Find start and end index
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
         if end is None or (pd.isna(end) and not self.keep_nat):
-            end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit='s')
+            end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
         start_i, end_i = utils.segment_to_indices(
-            signal, sampling_rate, start, end,
+            signal,
+            sampling_rate,
+            start,
+            end,
         )
 
         # Trim signal and ensure it has requested min/max length
@@ -657,10 +654,7 @@ class Process:
                 self.max_signal_dur,
                 sampling_rate,
             )
-            max_samples = int(
-                max_signal_dur.total_seconds()
-                * sampling_rate
-            )
+            max_samples = int(max_signal_dur.total_seconds() * sampling_rate)
             if num_samples > max_samples:
                 end = start + max_signal_dur
                 signal = signal[:, :max_samples]
@@ -669,14 +663,11 @@ class Process:
                 self.min_signal_dur,
                 sampling_rate,
             )
-            min_samples = int(
-                min_signal_dur.total_seconds()
-                * sampling_rate
-            )
+            min_samples = int(min_signal_dur.total_seconds() * sampling_rate)
             if num_samples < min_samples:
                 end = start + min_signal_dur
                 num_pad = min_samples - num_samples
-                signal = np.pad(signal, ((0, 0), (0, num_pad)), 'constant')
+                signal = np.pad(signal, ((0, 0), (0, num_pad)), "constant")
 
         # Process signal
         y = self._call(
@@ -706,14 +697,14 @@ class Process:
         return y, [file] * len(starts), starts, ends
 
     def process_signal(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            *,
-            file: str = None,
-            start: Timestamp = None,
-            end: Timestamp = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        file: str = None,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process audio signal and return result.
 
@@ -787,32 +778,30 @@ class Process:
                 return pd.Series(y, index)
 
     def _process_signal_from_index_wo_segment(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.Index,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.Index,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Like process_signal_from_index, but does not apply segmentation."""
         if index.empty:
             return pd.Series(None, index=index, dtype=object)
 
-        skip_file_level = (
-                isinstance(index, pd.MultiIndex) and
-                len(index.levels) == 2
-        )
+        skip_file_level = isinstance(index, pd.MultiIndex) and len(index.levels) == 2
 
         if skip_file_level:
             params = [
                 (
                     (signal, sampling_rate),
                     {
-                        'idx': idx,
-                        'start': start,
-                        'end': end,
-                        'process_func_args': process_func_args,
+                        "idx": idx,
+                        "start": start,
+                        "end": end,
+                        "process_func_args": process_func_args,
                     },
-                ) for idx, (start, end) in enumerate(index)
+                )
+                for idx, (start, end) in enumerate(index)
             ]
         else:
             index = audformat.utils.to_segmented_index(index)
@@ -820,13 +809,14 @@ class Process:
                 (
                     (signal, sampling_rate),
                     {
-                        'idx': idx,
-                        'file': file,
-                        'start': start,
-                        'end': end,
-                        'process_func_args': process_func_args,
+                        "idx": idx,
+                        "file": file,
+                        "start": start,
+                        "end": end,
+                        "process_func_args": process_func_args,
                     },
-                ) for idx, (file, start, end) in enumerate(index)
+                )
+                for idx, (file, start, end) in enumerate(index)
             ]
 
         xs = audeer.run_tasks(
@@ -835,7 +825,7 @@ class Process:
             num_workers=self.num_workers,
             multiprocessing=self.multiprocessing,
             progress_bar=self.verbose,
-            task_description=f'Process {len(index)} segments',
+            task_description=f"Process {len(index)} segments",
         )
 
         y = list(itertools.chain.from_iterable([x[0] for x in xs]))
@@ -853,11 +843,11 @@ class Process:
         return y
 
     def process_signal_from_index(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.Index,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.Index,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -906,14 +896,14 @@ class Process:
         )
 
     def _call(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            *,
-            idx: int = 0,
-            root: str = None,
-            file: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(
@@ -928,14 +918,11 @@ class Process:
         process_func_args = process_func_args or self.process_func_args
         special_args = {}
         for key, value in [
-            ('idx', idx),
-            ('root', root),
-            ('file', file),
+            ("idx", idx),
+            ("root", root),
+            ("file", file),
         ]:
-            if (
-                    key in self._process_func_signature
-                    and key not in process_func_args
-            ):
+            if key in self._process_func_signature and key not in process_func_args:
                 special_args[key] = value
 
         def _helper(x):
@@ -946,7 +933,8 @@ class Process:
                         sampling_rate,
                         **special_args,
                         **process_func_args,
-                    ) for channel in x
+                    )
+                    for channel in x
                 ]
             else:
                 return self.process_func(
@@ -971,9 +959,9 @@ class Process:
         return y
 
     def __call__(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
     ) -> typing.Any:
         r"""Apply processing to signal.
 

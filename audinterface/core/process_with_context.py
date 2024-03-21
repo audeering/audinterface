@@ -58,13 +58,12 @@ class ProcessWithContext:
     Examples:
         >>> def running_mean(signal, sampling_rate, starts, ends):
         ...     means_per_segment = [
-        ...         signal[:, start:end].mean()
-        ...         for start, end in zip(starts, ends)
+        ...         signal[:, start:end].mean() for start, end in zip(starts, ends)
         ...     ]
         ...     cumsum = np.cumsum(np.pad(means_per_segment, 1))
         ...     return (cumsum[2:] - cumsum[:-2]) / float(2)
         >>> interface = ProcessWithContext(process_func=running_mean)
-        >>> signal = np.array([1., 2., 3., 1., 2., 3.])
+        >>> signal = np.array([1.0, 2.0, 3.0, 1.0, 2.0, 3.0])
         >>> sampling_rate = 3
         >>> starts = [0, sampling_rate]
         >>> ends = [sampling_rate, 2 * sampling_rate]
@@ -73,9 +72,9 @@ class ProcessWithContext:
         >>> # Apply interface on an audformat conform index of a dataframe
         >>> import audb
         >>> db = audb.load(
-        ...     'emodb',
-        ...     version='1.3.0',
-        ...     media='wav/03a01Fa.wav',
+        ...     "emodb",
+        ...     version="1.3.0",
+        ...     media="wav/03a01Fa.wav",
         ...     full_path=False,
         ...     verbose=False,
         ... )
@@ -91,33 +90,28 @@ class ProcessWithContext:
         dtype: float32
 
     """  # noqa: E501
+
     def __init__(
-            self,
-            *,
-            process_func: typing.Callable[
-                ...,
-                typing.Sequence[typing.Any]
-            ] = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-            sampling_rate: int = None,
-            resample: bool = False,
-            channels: typing.Union[int, typing.Sequence[int]] = None,
-            mixdown: bool = False,
-            verbose: bool = False,
+        self,
+        *,
+        process_func: typing.Callable[..., typing.Sequence[typing.Any]] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        sampling_rate: int = None,
+        resample: bool = False,
+        channels: typing.Union[int, typing.Sequence[int]] = None,
+        mixdown: bool = False,
+        verbose: bool = False,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
 
         if process_func is None:
+
             def process_func(signal, _, starts, ends):
-                return [
-                    signal[:, start:end] for start, end in zip(starts, ends)
-                ]
+                return [signal[:, start:end] for start, end in zip(starts, ends)]
 
         if resample and sampling_rate is None:
-            raise ValueError(
-                'sampling_rate has to be provided for resample = True.'
-            )
+            raise ValueError("sampling_rate has to be provided for resample = True.")
 
         signature = inspect.signature(process_func)
         self._process_func_signature = signature.parameters
@@ -145,11 +139,11 @@ class ProcessWithContext:
         r"""Show debug messages."""
 
     def process_index(
-            self,
-            index: pd.Index,
-            *,
-            root: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        index: pd.Index,
+        *,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
@@ -185,12 +179,11 @@ class ProcessWithContext:
         ys = []
 
         with audeer.progress_bar(
-                files,
-                total=len(files),
-                disable=not self.verbose,
+            files,
+            total=len(files),
+            disable=not self.verbose,
         ) as pbar:
             for idx, file in enumerate(pbar):
-
                 if self.verbose:  # pragma: no cover
                     desc = audeer.format_display_message(file, pbar=True)
                     pbar.set_description(desc, refresh=True)
@@ -217,17 +210,16 @@ class ProcessWithContext:
         return y
 
     def _process_signal_from_index(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.Index,
-            *,
-            idx: int = 0,
-            root: str = None,
-            file: str = None,
-            process_func_args: typing.Dict[str, typing.Any] = None,
-   ) -> typing.Any:
-
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.Index,
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Any:
         starts_i, ends_i = utils.segments_to_indices(
             signal,
             sampling_rate,
@@ -243,23 +235,20 @@ class ProcessWithContext:
             file=file,
             process_func_args=process_func_args,
         )
-        if (
-                not isinstance(y, collections.abc.Iterable)
-                or len(y) != len(index)
-        ):
+        if not isinstance(y, collections.abc.Iterable) or len(y) != len(index):
             raise RuntimeError(
-                'process_func has to return a sequence of results, '
-                f'matching the length {len(index)} of the index. '
+                "process_func has to return a sequence of results, "
+                f"matching the length {len(index)} of the index. "
             )
 
         return y
 
     def process_signal_from_index(
-            self,
-            signal: np.ndarray,
-            sampling_rate: int,
-            index: pd.Index,
-            process_func_args: typing.Dict[str, typing.Any] = None,
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        index: pd.Index,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -329,16 +318,12 @@ class ProcessWithContext:
         process_func_args = process_func_args or self.process_func_args
         special_args = {}
         for key, value in [
-            ('idx', idx),
-            ('root', root),
-            ('file', file),
+            ("idx", idx),
+            ("root", root),
+            ("file", file),
         ]:
-            if (
-                    key in self._process_func_signature
-                    and key not in process_func_args
-            ):
+            if key in self._process_func_signature and key not in process_func_args:
                 special_args[key] = value
-
 
         return self.process_func(
             signal,

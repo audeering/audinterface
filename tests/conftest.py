@@ -5,7 +5,7 @@ import audiofile
 import audmath
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def audio(tmpdir_factory, request):
     """Fixture to generate audio file.
 
@@ -13,7 +13,7 @@ def audio(tmpdir_factory, request):
     as parameter to this fixture.
 
     """
-    file = str(tmpdir_factory.mktemp('audio').join('file.wav'))
+    file = str(tmpdir_factory.mktemp("audio").join("file.wav"))
     duration, sampling_rate = request.param
     signal = np.zeros((1, audmath.samples(duration, sampling_rate)))
     audiofile.write(file, signal, sampling_rate)
