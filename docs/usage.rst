@@ -440,11 +440,11 @@ to select the appropriate f0 range.
         # extract mean f0 using a gender adapted range
         y = librosa.yin(
             signal,
-            fmin=f0_range[gender[idx]][0],
-            fmax=f0_range[gender[idx]][1],
+            fmin=f0_range[gender.iloc[idx]][0],
+            fmax=f0_range[gender.iloc[idx]][1],
             sr=sampling_rate,
         ).mean()
-        return y, gender[idx]
+        return y, gender.iloc[idx]
 
     interface = audinterface.Feature(
         ['f0', 'gender'],
