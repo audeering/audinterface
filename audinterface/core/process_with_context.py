@@ -119,21 +119,9 @@ class ProcessWithContext:
                 'sampling_rate has to be provided for resample = True.'
             )
 
-        # figure out if special arguments
-        # to pass to the processing function
         signature = inspect.signature(process_func)
-        process_func_args = process_func_args or {}
-        self._process_func_special_args = {
-            'idx': False,
-            'root': False,
-            'file': False,
-        }
-        for key in self._process_func_special_args:
-            if (
-                    key in signature.parameters
-                    and key not in process_func_args
-            ):
-                self._process_func_special_args[key] = True
+        self._process_func_signature = signature.parameters
+        r"""Arguments present in processing function."""
 
         self.channels = channels
         r"""Channel selection."""
@@ -144,7 +132,7 @@ class ProcessWithContext:
         self.process_func = process_func
         r"""Process function."""
 
-        self.process_func_args = process_func_args
+        self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
         self.resample = resample
@@ -161,12 +149,18 @@ class ProcessWithContext:
             index: pd.Index,
             *,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
         Args:
             index: index with segment information
             root: root folder to expand relative file paths
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.ProcessWithContext.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -212,6 +206,7 @@ class ProcessWithContext:
                     idx=idx,
                     root=root,
                     file=file,
+                    process_func_args=process_func_args,
                 )
 
                 ys.append(y)
@@ -230,7 +225,8 @@ class ProcessWithContext:
             idx: int = 0,
             root: str = None,
             file: str = None,
-    ) -> typing.Any:
+            process_func_args: typing.Dict[str, typing.Any] = None,
+   ) -> typing.Any:
 
         starts_i, ends_i = utils.segments_to_indices(
             signal,
@@ -245,6 +241,7 @@ class ProcessWithContext:
             idx=idx,
             root=root,
             file=file,
+            process_func_args=process_func_args,
         )
         if (
                 not isinstance(y, collections.abc.Iterable)
@@ -262,6 +259,7 @@ class ProcessWithContext:
             signal: np.ndarray,
             sampling_rate: int,
             index: pd.Index,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -272,6 +270,11 @@ class ProcessWithContext:
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
                 See also :func:`audinterface.utils.signal_index`
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.ProcessWithContext.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -295,6 +298,7 @@ class ProcessWithContext:
             signal,
             sampling_rate,
             index,
+            process_func_args=process_func_args,
         )
         y = pd.Series(y, index)
 
@@ -310,6 +314,7 @@ class ProcessWithContext:
         idx: int = 0,
         root: str = None,
         file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(
@@ -321,14 +326,19 @@ class ProcessWithContext:
             self.mixdown,
         )
 
+        process_func_args = process_func_args or self.process_func_args
         special_args = {}
         for key, value in [
             ('idx', idx),
             ('root', root),
             ('file', file),
         ]:
-            if self._process_func_special_args[key]:
+            if (
+                    key in self._process_func_signature
+                    and key not in process_func_args
+            ):
                 special_args[key] = value
+
 
         return self.process_func(
             signal,
@@ -336,7 +346,7 @@ class ProcessWithContext:
             starts,
             ends,
             **special_args,
-            **self.process_func_args,
+            **process_func_args,
         )
 
     def __call__(

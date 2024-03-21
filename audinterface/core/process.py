@@ -171,21 +171,9 @@ class Process:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
-        # figure out if special arguments
-        # to pass to the processing function
         signature = inspect.signature(process_func)
-        process_func_args = process_func_args or {}
-        self._process_func_special_args = {
-            'idx': False,
-            'root': False,
-            'file': False,
-        }
-        for key in self._process_func_special_args:
-            if (
-                    key in signature.parameters
-                    and key not in process_func_args
-            ):
-                self._process_func_special_args[key] = True
+        self._process_func_signature = signature.parameters
+        r"""Arguments present in processing function."""
 
         self.channels = channels
         r"""Channel selection."""
@@ -214,7 +202,7 @@ class Process:
         self.process_func = process_func
         r"""Processing function."""
 
-        self.process_func_args = process_func_args
+        self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
         self.process_func_is_mono = process_func_is_mono
@@ -243,6 +231,7 @@ class Process:
             root: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Tuple[
         typing.List[typing.Any],
         typing.List[str],
@@ -268,6 +257,7 @@ class Process:
             idx=idx,
             root=root,
             file=file,
+            process_func_args=process_func_args,
         )
 
         def precision_offset(duration, sampling_rate):
@@ -302,6 +292,7 @@ class Process:
             start: Timestamp = None,
             end: Timestamp = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
@@ -314,6 +305,11 @@ class Process:
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed file conform to audformat_
@@ -340,6 +336,7 @@ class Process:
                 root=root,
                 start=start,
                 end=end,
+                process_func_args=process_func_args,
             )
 
             index = audformat.segmented_index(files, starts, ends)
@@ -356,6 +353,7 @@ class Process:
             starts: Timestamps = None,
             ends: Timestamps = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
@@ -372,6 +370,11 @@ class Process:
                 for further options.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed files conform to audformat_
@@ -393,7 +396,11 @@ class Process:
                 ends=ends,
                 root=root,
             )
-            return self._process_index_wo_segment(index, root)
+            return self._process_index_wo_segment(
+                index,
+                root,
+                process_func_args=process_func_args,
+            )
 
         if isinstance(starts, (type(None), float, int, str, pd.Timedelta)):
             starts = [starts] * len(files)
@@ -408,6 +415,7 @@ class Process:
                     'root': root,
                     'start': start,
                     'end': end,
+                    'process_func_args': process_func_args,
                 },
             ) for idx, (file, start, end)
             in enumerate(zip(files, starts, ends))
@@ -441,6 +449,7 @@ class Process:
             *,
             filetype: str = 'wav',
             include_root: bool = True,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process files in a folder.
 
@@ -453,6 +462,11 @@ class Process:
                 the file paths are absolute
                 in the index
                 of the returned result
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed files conform to audformat_
@@ -478,12 +492,17 @@ class Process:
             filetype=filetype,
             basenames=not include_root,
         )
-        return self.process_files(files, root=root)
+        return self.process_files(
+            files,
+            root=root,
+            process_func_args=process_func_args,
+        )
 
     def _process_index_wo_segment(
             self,
             index: pd.Index,
             root: typing.Optional[str],
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
@@ -497,6 +516,7 @@ class Process:
                     'root': root,
                     'start': start,
                     'end': end,
+                    'process_func_args': process_func_args,
                 },
             )
             for idx, (file, start, end) in enumerate(index)
@@ -528,6 +548,7 @@ class Process:
             preserve_index: bool = False,
             root: str = None,
             cache_root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
 
@@ -549,6 +570,11 @@ class Process:
                 otherwise always a segmented index is returned
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -578,7 +604,11 @@ class Process:
                     root=root,
                 )
 
-            y = self._process_index_wo_segment(segmented_index, root)
+            y = self._process_index_wo_segment(
+                segmented_index,
+                root,
+                process_func_args=process_func_args,
+            )
 
             if cache_path is not None:
                 y.to_pickle(cache_path, protocol=4)
@@ -600,6 +630,7 @@ class Process:
             file: str = None,
             start: pd.Timedelta = None,
             end: pd.Timedelta = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Tuple[
         typing.List[typing.Any],
         typing.List[str],
@@ -654,6 +685,7 @@ class Process:
             idx=idx,
             root=root,
             file=file,
+            process_func_args=process_func_args,
         )
 
         # Create index
@@ -681,6 +713,7 @@ class Process:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process audio signal and return result.
 
@@ -698,6 +731,11 @@ class Process:
             end: end processing at this position.
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed signal conform to audformat_
@@ -721,6 +759,7 @@ class Process:
                 signal,
                 sampling_rate,
                 index,
+                process_func_args=process_func_args,
             )
         else:
             if start is not None:
@@ -734,6 +773,7 @@ class Process:
                 file=file,
                 start=start,
                 end=end,
+                process_func_args=process_func_args,
             )
 
             if file is not None:
@@ -751,6 +791,7 @@ class Process:
             signal: np.ndarray,
             sampling_rate: int,
             index: pd.Index,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Like process_signal_from_index, but does not apply segmentation."""
         if index.empty:
@@ -769,6 +810,7 @@ class Process:
                         'idx': idx,
                         'start': start,
                         'end': end,
+                        'process_func_args': process_func_args,
                     },
                 ) for idx, (start, end) in enumerate(index)
             ]
@@ -782,6 +824,7 @@ class Process:
                         'file': file,
                         'start': start,
                         'end': end,
+                        'process_func_args': process_func_args,
                     },
                 ) for idx, (file, start, end) in enumerate(index)
             ]
@@ -814,6 +857,7 @@ class Process:
             signal: np.ndarray,
             sampling_rate: int,
             index: pd.Index,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -825,6 +869,11 @@ class Process:
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
                 See also :func:`audinterface.utils.signal_index`
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -853,6 +902,7 @@ class Process:
             signal,
             sampling_rate,
             index,
+            process_func_args=process_func_args,
         )
 
     def _call(
@@ -863,6 +913,7 @@ class Process:
             idx: int = 0,
             root: str = None,
             file: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> typing.Any:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(
@@ -874,13 +925,17 @@ class Process:
             self.mixdown,
         )
 
+        process_func_args = process_func_args or self.process_func_args
         special_args = {}
         for key, value in [
             ('idx', idx),
             ('root', root),
             ('file', file),
         ]:
-            if self._process_func_special_args[key]:
+            if (
+                    key in self._process_func_signature
+                    and key not in process_func_args
+            ):
                 special_args[key] = value
 
         def _helper(x):
@@ -890,7 +945,7 @@ class Process:
                         np.atleast_2d(channel),
                         sampling_rate,
                         **special_args,
-                        **self.process_func_args,
+                        **process_func_args,
                     ) for channel in x
                 ]
             else:
@@ -898,7 +953,7 @@ class Process:
                     x,
                     sampling_rate,
                     **special_args,
-                    **self.process_func_args,
+                    **process_func_args,
                 )
 
         if self.win_dur is not None:
