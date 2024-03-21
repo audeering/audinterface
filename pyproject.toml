@@ -4,8 +4,9 @@
 name = 'audinterface'
 authors = [
     {name = 'Hagen Wierstorf', email = 'hwierstorf@audeering.com'},
-    {name = 'Johannes Wagner', email = 'jwagner@audeering.com'},
-    {name = 'Andreas Triantafyllopoulos', email = 'andreas.triantafyllopoulos@uni-a.de'},
+    {name = 'Johannes Wagner'},
+    {name = 'Maximilian Schmitt', email = 'mschmitt@audeering.com'},
+    {name = 'Andreas Triantafyllopoulos'},
 ]
 description = 'Generic interfaces for signal processing'
 readme = 'README.rst'
