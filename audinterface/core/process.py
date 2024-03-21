@@ -308,6 +308,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
@@ -372,6 +373,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
@@ -463,6 +465,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
@@ -570,6 +573,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
@@ -730,6 +734,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
@@ -867,6 +872,7 @@ class Process:
             process_func_args: (keyword) arguments passed on
                 to the processing function.
                 They will temporarily overwrite
+                the ones stored in
                 :attr:`audinterface.Process.process_func_args`
 
         Returns:
