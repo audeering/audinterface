@@ -8,9 +8,9 @@
 
     def dataframe_to_html(df):
         # Replace beginning of data path with ...
-        if len(df.index) > 0 and df.index.names[0] == 'file':
-            old_path = r'.+/audb/emodb/1.3.0/d3b62a9b/wav/'
-            new_path = r'.../'
+        if len(df.index) > 0 and df.index.names[0] == "file":
+            old_path = r".+/audb/emodb/1.3.0/d3b62a9b/wav/"
+            new_path = r".../"
             # Assuming segmented index
             df.index = df.index.set_levels(
                 df.index.levels[0].str.replace(
@@ -26,7 +26,7 @@
 
     def series_to_html(y):
         df = y.to_frame()
-        df.columns = ['']
+        df.columns = [""]
         return dataframe_to_html(df)
 
 
@@ -35,15 +35,15 @@
         return dataframe_to_html(df)
 
 
-    setattr(pd.Series, '_repr_html_', series_to_html)
-    setattr(pd.Index, '_repr_html_', index_to_html)
-    setattr(pd.DataFrame, '_repr_html_', dataframe_to_html)
+    setattr(pd.Series, "_repr_html_", series_to_html)
+    setattr(pd.Index, "_repr_html_", index_to_html)
+    setattr(pd.DataFrame, "_repr_html_", dataframe_to_html)
 
 .. Specify version for storing and loading objects to YAML
 .. jupyter-execute::
     :hide-code:
 
-    __version__ = '1.0.0'
+    __version__ = "1.0.0"
 
 
 Usage
@@ -76,20 +76,20 @@ and an index.
     import os
 
     media = [
-        'wav/03a01Fa.wav',
-        'wav/03a01Nc.wav',
-        'wav/16b10Wb.wav',
+        "wav/03a01Fa.wav",
+        "wav/03a01Nc.wav",
+        "wav/16b10Wb.wav",
     ]
     db = audb.load(
-        'emodb',
-        version='1.3.0',
+        "emodb",
+        version="1.3.0",
         media=media,
         verbose=False,
     )
 
     files = list(db.files)
     folder = os.path.dirname(files[0])
-    index = db['emotion'].index
+    index = db["emotion"].index
 
 
 Processing interface
@@ -150,7 +150,7 @@ and assigns names to the dimensions/features.
         return [signal.mean(), signal.std()]
 
     interface = audinterface.Feature(
-        ['mean', 'std'],
+        ["mean", "std"],
         process_func=features,
     )
 
@@ -168,7 +168,7 @@ and single frames are passed on to the processing function.
 .. jupyter-execute::
 
     interface = audinterface.Feature(
-        ['mean', 'std'],
+        ["mean", "std"],
         process_func=features,
         process_func_applies_sliding_window=False,
         win_dur=1.0,
@@ -231,7 +231,7 @@ number of channels (here 2).
 .. jupyter-execute::
 
     interface_multi_channel = audinterface.Feature(
-        ['mean', 'std'],
+        ["mean", "std"],
         process_func=features,
         process_func_is_mono=True,
         process_func_applies_sliding_window=False,
@@ -291,9 +291,9 @@ whereas the first dimension is optionally.
 
     n_mfcc = 13
     interface = audinterface.Feature(
-        [f'mfcc-{idx}' for idx in range(n_mfcc)],
+        [f"mfcc-{idx}" for idx in range(n_mfcc)],
         process_func=features,
-        process_func_args={'n_mfcc': n_mfcc},  # 'win_dur' and 'hop_dur' can be omitted
+        process_func_args={"n_mfcc": n_mfcc},  # "win_dur" and "hop_dur" can be omitted
         process_func_applies_sliding_window=True,
         win_dur=0.02,
         hop_dur=0.01,
@@ -324,7 +324,7 @@ and :class:`audobject.Object`.
 
         def __init__(self):
             super().__init__(
-                ['mean', 'std'],
+                ["mean", "std"],
                 process_func=self.features,
             )
 
@@ -341,8 +341,8 @@ and re-instantiate it from there.
 
 .. jupyter-execute::
 
-    fex.to_yaml('mean-std.yaml')
-    fex2 = audobject.from_yaml('mean-std.yaml')
+    fex.to_yaml("mean-std.yaml")
+    fex2 = audobject.from_yaml("mean-std.yaml")
     df = fex2.process_index(index)
     df
 
@@ -364,7 +364,7 @@ would be a voice activity detection algorithm.
 
         # Convert floating point array to 16bit PCM little-endian
         ints = (signal[0, :] * 32767).astype(np.int16)
-        little_endian = ints.astype('<u2')
+        little_endian = ints.astype("<u2")
         signal = little_endian.tobytes()
 
         regions = auditok.split(
@@ -378,12 +378,12 @@ would be a voice activity detection algorithm.
         index = pd.MultiIndex.from_tuples(
             [
                 (
-                    pd.Timedelta(region.meta.start, unit='s'),
-                    pd.Timedelta(region.meta.end, unit='s'),
+                    pd.Timedelta(region.meta.start, unit="s"),
+                    pd.Timedelta(region.meta.end, unit="s"),
                 )
                 for region in regions
             ],
-            names=['start', 'end'],
+            names=["start", "end"],
         )
         return index
 
@@ -411,7 +411,7 @@ root      root folder
 
 The following processing function
 returns the values of
-``'idx'`` and ``'file'``.
+``"idx"`` and ``"file"``.
 
 .. jupyter-execute::
 
@@ -430,10 +430,10 @@ to select the appropriate f0 range.
 
 .. jupyter-execute::
 
-    gender = db['files']['speaker'].get(map='gender')  # gender per file
+    gender = db["files"]["speaker"].get(map="gender")  # gender per file
     f0_range = {
-        'female': [160, 300],  # [fmin, fmax]
-        'male': [60, 180],
+        "female": [160, 300],  # [fmin, fmax]
+        "male": [60, 180],
     }
 
     def f0(signal, sampling_rate, idx, gender, f0_range):
@@ -447,11 +447,11 @@ to select the appropriate f0 range.
         return y, gender.iloc[idx]
 
     interface = audinterface.Feature(
-        ['f0', 'gender'],
+        ["f0", "gender"],
         process_func=f0,
         process_func_args={
-            'gender': gender,
-            'f0_range': f0_range,
+            "gender": gender,
+            "f0_range": f0_range,
         },
     )
     df = interface.process_index(gender.index)
