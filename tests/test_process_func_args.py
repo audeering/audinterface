@@ -15,12 +15,12 @@ def addition(signal, sampling_rate, value=1):
     return signal + value * signal
 
 
-def identity(signal, sampling_rate):
-    return signal
-
-
 def mean(signal, sampling_rate, offset=0):
     return np.mean(signal + offset)
+
+
+def mean_with_context(signal, sampling_rate, starts, ends, offset=0):
+    return [np.mean(signal + offset)]
 
 
 def segment(signal, sampling_rate, offset=0):
@@ -183,7 +183,7 @@ def parse_output(output):
         ),
     ],
 )
-def test_process(
+def test_interfaces(
     tmpdir,
     signal,
     sampling_rate,
@@ -194,7 +194,18 @@ def test_process(
     process_func_args_during_call,
     expected_output,
 ):
+    r"""Test process_func_args for different interfaces.
 
+    This tests the correct behavior
+    for the ``process_func_args``
+    local (when calling process methods)
+    and global settings (when instantiating the interface),
+    for the following interfaces:
+    :class:`audinterface.Process`,
+    :class:`audinterface.Feature`,
+    :class:`audinterface.Segment`.
+
+    """
     # create test file
     folder = audeer.mkdir(tmpdir, 'wav')
     file = os.path.join(folder, 'file.wav')
@@ -213,7 +224,6 @@ def test_process(
         sampling_rate,
         process_func_args=process_func_args_during_call,
     )
-    print(y)
     output = parse_output(y)
     np.testing.assert_equal(output, expected_output)
 
@@ -244,6 +254,87 @@ def test_process(
     # index
     y = interface.process_index(
         audformat.filewise_index([file]),
+        process_func_args=process_func_args_during_call,
+    )
+    output = parse_output(y)
+    np.testing.assert_equal(output, expected_output)
+
+
+@pytest.mark.parametrize('signal', [np.ones((1, 8000))])
+@pytest.mark.parametrize('sampling_rate', [8000])
+@pytest.mark.parametrize('interface_object', [audinterface.ProcessWithContext])
+@pytest.mark.parametrize(
+    'process_func, process_func_args, '
+    'process_func_args_during_call, expected_output',
+    [
+        (
+            mean_with_context,
+            None,
+            None,
+            1,
+        ),
+        (
+            mean_with_context,
+            {'offset': 1},
+            None,
+            2,
+        ),
+        (
+            mean_with_context,
+            None,
+            {'offset': 1},
+            2,
+        ),
+        (
+            mean_with_context,
+            {'offset': 0},
+            {'offset': 2},
+            3,
+        ),
+        (
+            mean_with_context,
+            {'offset': 2},
+            {'offset': 0},
+            1,
+        ),
+    ],
+)
+def test_process_with_context(
+    tmpdir,
+    signal,
+    sampling_rate,
+    interface_object,
+    process_func,
+    process_func_args,
+    process_func_args_during_call,
+    expected_output,
+):
+    r"""Test process_func_args for the ProcessWithContext interface.
+
+    This tests the correct behavior
+    for the ``process_func_args``
+    local (when calling process methods)
+    and global settings (when instantiating the interface).
+
+    As :class:`audinterface.ProcessWithContext`
+    has only a subset of methods,
+    its easier to have a separate test for it.
+
+    """
+    # create test file
+    folder = audeer.mkdir(tmpdir, 'wav')
+    file = os.path.join(folder, 'file.wav')
+    audiofile.write(file, signal, sampling_rate, bit_depth=32)
+
+    interface = interface_object(
+        process_func=process_func,
+        process_func_args=process_func_args,
+        verbose=False,
+    )
+
+    # index
+    y = interface.process_index(
+        audformat.segmented_index(file, 0, 1),
         process_func_args=process_func_args_during_call,
     )
     output = parse_output(y)
