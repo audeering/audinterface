@@ -34,7 +34,7 @@ Version 1.2.0 (2024/03/21)
   It allows to temporarily overwrite
   the ``process_func_args`` argument
   used when instantiating an interface
-* Changed: depend on ``audeer >=1.18.0``
+* Changed: depend on ``audeer>=1.18.0``
 * Fixed: avoid deprecation warning
   by replacing
   ``pkg_resources``
