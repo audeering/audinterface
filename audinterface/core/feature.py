@@ -425,7 +425,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -471,7 +471,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -512,7 +512,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             FileNotFoundError: if folder does not exist
@@ -576,7 +576,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -643,7 +643,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match
@@ -688,7 +688,7 @@ class Feature:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Feature.process.process_func_args`
 
         Raises:
             RuntimeError: if sampling rates do not match

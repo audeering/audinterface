@@ -256,7 +256,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -311,7 +311,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -366,7 +366,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -424,7 +424,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -490,7 +490,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -555,7 +555,7 @@ class Segment:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.Segment.process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_

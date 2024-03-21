@@ -160,7 +160,7 @@ class ProcessWithContext:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.ProcessWithContext.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
@@ -274,7 +274,7 @@ class ProcessWithContext:
                 to the processing function.
                 They will temporarily overwrite
                 the ones stored in
-                :attr:`audinterface.Process.process_func_args`
+                :attr:`audinterface.ProcessWithContext.process_func_args`
 
         Returns:
             Series with processed segments conform to audformat_
