@@ -239,6 +239,7 @@ class Segment:
             start: Timestamp = None,
             end: Timestamp = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment the content of an audio file.
 
@@ -251,6 +252,11 @@ class Segment:
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
             root: root folder to expand relative file path
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -269,6 +275,7 @@ class Segment:
             start=start,
             end=end,
             root=root,
+            process_func_args=process_func_args,
         ).values[0]
         return audformat.segmented_index(
             files=[file] * len(index),
@@ -283,6 +290,7 @@ class Segment:
             starts: Timestamps = None,
             ends: Timestamps = None,
             root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment a list of files.
 
@@ -299,6 +307,11 @@ class Segment:
                 for further options.
                 If a scalar is given, it is applied to all files
             root: root folder to expand relative file paths
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -315,6 +328,7 @@ class Segment:
             starts=starts,
             ends=ends,
             root=root,
+            process_func_args=process_func_args,
         )
         if len(y) == 0:
             return audformat.filewise_index()
@@ -335,6 +349,7 @@ class Segment:
             *,
             filetype: str = 'wav',
             include_root: bool = True,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment files in a folder.
 
@@ -347,6 +362,11 @@ class Segment:
                 the file paths are absolute
                 in the index
                 of the returned result
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -372,7 +392,11 @@ class Segment:
             filetype=filetype,
             basenames=not include_root,
         )
-        return self.process_files(files, root=root)
+        return self.process_files(
+            files,
+            root=root,
+            process_func_args=process_func_args,
+        )
 
     def process_index(
             self,
@@ -380,6 +404,7 @@ class Segment:
             *,
             root: str = None,
             cache_root: str = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment files or segments from an index.
 
@@ -395,6 +420,11 @@ class Segment:
             index: index conform to audformat_
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -417,6 +447,7 @@ class Segment:
             preserve_index=False,
             root=root,
             cache_root=cache_root,
+            process_func_args=process_func_args,
         )
 
         files = []
@@ -437,6 +468,7 @@ class Segment:
             file: str = None,
             start: Timestamp = None,
             end: Timestamp = None,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment audio signal.
 
@@ -454,6 +486,11 @@ class Segment:
             end: end processing at this position.
                 If value is a float or integer it is treated as seconds.
                 See :func:`audinterface.utils.to_timedelta` for further options
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -471,6 +508,7 @@ class Segment:
             file=file,
             start=start,
             end=end,
+            process_func_args=process_func_args,
         ).values[0]
         utils.assert_index(index)
         if start is not None:
@@ -501,6 +539,7 @@ class Segment:
             signal: np.ndarray,
             sampling_rate: int,
             index: pd.Index,
+            process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
         r"""Segment parts of a signal.
 
@@ -512,6 +551,11 @@ class Segment:
                 named `start` and `end` that hold start and end
                 positions as :class:`pandas.Timedelta` objects.
                 See also :func:`audinterface.utils.signal_index`
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
 
         Returns:
             Segmented index conform to audformat_
@@ -543,7 +587,12 @@ class Segment:
             params = [
                 (
                     (signal, sampling_rate),
-                    {'file': file, 'start': start, 'end': end},
+                    {
+                        'file': file,
+                        'start': start,
+                        'end': end,
+                        'process_func_args': process_func_args,
+                    },
                 ) for file, start, end in index
             ]
 
