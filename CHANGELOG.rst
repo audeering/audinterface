@@ -7,6 +7,41 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.2.0 (2024/03/21)
+--------------------------
+
+* Added: ``process_func_args`` argument to
+  ``audinterface.Feature.process_file()``,
+  ``audinterface.Feature.process_files()``,
+  ``audinterface.Feature.process_folder()``,
+  ``audinterface.Feature.process_index()``,
+  ``audinterface.Feature.process_signal()``,
+  ``audinterface.Feature.process_signal_from_index()``,
+  ``audinterface.Process.process_file()``,
+  ``audinterface.Process.process_files()``,
+  ``audinterface.Process.process_folder()``,
+  ``audinterface.Process.process_index()``,
+  ``audinterface.Process.process_signal()``,
+  ``audinterface.Process.process_signal_from_index()``,
+  ``audinterface.ProcessWithContext.process_index()``,
+  ``audinterface.ProcessWithContext.process_signal_from_index()``,
+  ``audinterface.Segment.process_file()``,
+  ``audinterface.Segment.process_files()``,
+  ``audinterface.Segment.process_folder()``,
+  ``audinterface.Segment.process_index()``,
+  ``audinterface.Segment.process_signal()``,
+  ``audinterface.Segment.process_signal_from_index()``.
+  It allows to temporarily overwrite
+  the ``process_func_args`` argument
+  used when instantiating an interface
+* Changed: depend on ``audeer >=1.18.0``
+* Fixed: avoid deprecation warning
+  by replacing
+  ``pkg_resources``
+  internally with
+  ``importlib.metadata``
+
+
 Version 1.1.0 (2023/07/28)
 --------------------------
 
