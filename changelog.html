@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                v1.1.0
+                v1.2.0
               </div>
             
           
@@ -105,6 +105,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-2-0-2024-03-21">Version 1.2.0 (2024/03/21)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-1-0-2023-07-28">Version 1.1.0 (2023/07/28)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-0-4-2023-07-13">Version 1.0.4 (2023/07/13)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-0-3-2023-06-06">Version 1.0.3 (2023/06/06)</a></li>
@@ -191,6 +192,41 @@
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a class="reference external" href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
 and this project adheres to <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+<div class="section" id="version-1-2-0-2024-03-21">
+<h2>Version 1.2.0 (2024/03/21)<a class="headerlink" href="#version-1-2-0-2024-03-21" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Added: <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code> argument to
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_file()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_files()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_folder()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_signal()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_signal_from_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_file()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_files()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_folder()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_signal()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Process.process_signal_from_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.ProcessWithContext.process_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.ProcessWithContext.process_signal_from_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_file()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_files()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_folder()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_index()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_signal()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">audinterface.Segment.process_signal_from_index()</span></code>.
+It allows to temporarily overwrite
+the <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code> argument
+used when instantiating an interface</p></li>
+<li><p>Changed: depend on <code class="docutils literal notranslate"><span class="pre">audeer&gt;=1.18.0</span></code></p></li>
+<li><p>Fixed: avoid deprecation warning
+by replacing
+<code class="docutils literal notranslate"><span class="pre">pkg_resources</span></code>
+internally with
+<code class="docutils literal notranslate"><span class="pre">importlib.metadata</span></code></p></li>
+</ul>
+</div>
 <div class="section" id="version-1-1-0-2023-07-28">
 <h2>Version 1.1.0 (2023/07/28)<a class="headerlink" href="#version-1-1-0-2023-07-28" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -206,8 +242,8 @@ Default value is <code class="docutils literal notranslate"><span class="pre">Tr
 is instantiated with an <code class="docutils literal notranslate"><span class="pre">audinterface.Segment</span></code>
 object that returns an empty index,
 <code class="docutils literal notranslate"><span class="pre">audinterface.Feature.process_*()</span></code>
-no longer return <code class="docutils literal notranslate"><span class="pre">Index([],</span> <span class="pre">dtype='object')</span></code>
-but <code class="docutils literal notranslate"><span class="pre">MultiIndex([],</span> <span class="pre">names=['file',</span> <span class="pre">'start',</span> <span class="pre">'end'])</span></code></p></li>
+no longer return <code class="docutils literal notranslate"><span class="pre">Index([],</span> <span class="pre">dtype=&quot;object&quot;)</span></code>
+but <code class="docutils literal notranslate"><span class="pre">MultiIndex([],</span> <span class="pre">names=[&quot;file&quot;,</span> <span class="pre">&quot;start&quot;,</span> <span class="pre">&quot;end&quot;])</span></code></p></li>
 <li><p>Fixed: preserve order of <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> values
 as returned by the segmentation callable
 in the index returned by <code class="docutils literal notranslate"><span class="pre">audinterface.Segment</span></code>
@@ -215,11 +251,11 @@ processing functions</p></li>
 <li><p>Fixed: precision of <code class="docutils literal notranslate"><span class="pre">audinterface.utils.to_timedelta()</span></code>
 for <code class="docutils literal notranslate"><span class="pre">pd.Timedelta</span></code> objects as input,
 e.g.
-<code class="docutils literal notranslate"><span class="pre">to_timedelta(pd.Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999'))</span></code>
+<code class="docutils literal notranslate"><span class="pre">to_timedelta(pd.Timedelta(&quot;0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999&quot;))</span></code>
 now returns
-<code class="docutils literal notranslate"><span class="pre">Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999')</span></code>
+<code class="docutils literal notranslate"><span class="pre">Timedelta(&quot;0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437999&quot;)</span></code>
 instead of
-<code class="docutils literal notranslate"><span class="pre">Timedelta('0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437')</span></code>.
+<code class="docutils literal notranslate"><span class="pre">Timedelta(&quot;0</span> <span class="pre">days</span> <span class="pre">00:00:35.511437&quot;)</span></code>.
 This also affects the output of
 <code class="docutils literal notranslate"><span class="pre">audinterface.utils.signal_index()</span></code></p></li>
 <li><p>Fixed: preserve requested <code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> values in
@@ -507,7 +543,7 @@ to
 <h2>Version 0.5.2 (2020-12-10)<a class="headerlink" href="#version-0-5-2-2020-12-10" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Fixed: <code class="docutils literal notranslate"><span class="pre">audinterface.Feature</span></code> allow
-<code class="docutils literal notranslate"><span class="pre">win_dur=None</span></code> with <code class="docutils literal notranslate"><span class="pre">unit='samples'</span></code></p></li>
+<code class="docutils literal notranslate"><span class="pre">win_dur=None</span></code> with <code class="docutils literal notranslate"><span class="pre">unit=&quot;samples&quot;</span></code></p></li>
 </ul>
 </div>
 <div class="section" id="version-0-5-1-2020-12-04">
@@ -647,7 +683,7 @@ when process a segmented index</p></li>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -655,7 +691,7 @@ when process a segmented index</p></li>
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2023 audEERING GmbH
+      &copy; 2020-2024 audEERING GmbH
     </p>
   </div> 
 

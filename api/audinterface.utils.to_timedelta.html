@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v1.1.0
+                v1.2.0
               </div>
             
           
@@ -154,10 +154,10 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="audinterface.utils.to_timedelta">
 <span class="sig-prename descclassname"><span class="pre">audinterface.utils.</span></span><span class="sig-name descname"><span class="pre">to_timedelta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">durations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/audinterface/core/utils.html#to_timedelta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#audinterface.utils.to_timedelta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert duration value(s) to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>.</p>
+<dd><p>Convert duration value(s) to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a>.</p>
 <p>The single duration values
 support all formats
-mentioned in <a class="reference external" href="https://audeering.github.io/audmath/api/audmath.duration_in_seconds.html#audmath.duration_in_seconds" title="(in audmath vv1.3.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">audmath.duration_in_seconds()</span></code></a>,
+mentioned in <a class="reference external" href="https://audeering.github.io/audmath/api/audmath.duration_in_seconds.html#audmath.duration_in_seconds" title="(in audmath vv1.4.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">audmath.duration_in_seconds()</span></code></a>,
 like <code class="docutils literal notranslate"><span class="pre">'2</span> <span class="pre">ms'</span></code>, or <code class="docutils literal notranslate"><span class="pre">pandas.to_timedelta(2,</span> <span class="pre">'s')</span></code>.
 The exception is
 that float and integer values
@@ -167,29 +167,29 @@ always as samples.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>durations</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>]]]) – duration value(s).
+<li><p><strong>durations</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>]]]) – duration value(s).
 If value is a float or integer
 it is treated as seconds.
 To specify a unit provide as string,
 e.g. <code class="docutils literal notranslate"><span class="pre">'2ms'</span></code>.
 To specify in samples provide as string without unit,
 e.g. <code class="docutils literal notranslate"><span class="pre">'2000'</span></code></p></li>
-<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – sampling rate in Hz.
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – sampling rate in Hz.
 Needs to be provided
 if any duration value is provided in samples</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>]]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timedelta</span></code></a>]]</p>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>duration value(s) as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a> objects</p>
+<dd class="field-odd"><p>duration value(s) as <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html#pandas.Timedelta" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Timedelta</span></code></a> objects</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if a duration value is given in samples,
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if a duration value is given in samples,
     but <code class="docutils literal notranslate"><span class="pre">sampling_rate</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if a duration is a string
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – if a duration is a string
     that does not match a valid ‘&lt;value&gt;&lt;unit&gt;’ pattern
     or the provided unit is not supported</p></li>
 </ul>
@@ -200,11 +200,11 @@ if any duration value is provided in samples</p></li>
 <span class="go">Timedelta(&#39;0 days 00:00:02&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
 <span class="go">Timedelta(&#39;0 days 00:00:02&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">(</span><span class="s1">&#39;2ms&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">&quot;2ms&quot;</span><span class="p">)</span>
 <span class="go">Timedelta(&#39;0 days 00:00:00.002000&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">(</span><span class="s1">&#39;200milliseconds&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">(</span><span class="s2">&quot;200milliseconds&quot;</span><span class="p">)</span>
 <span class="go">Timedelta(&#39;0 days 00:00:00.200000&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;2000&#39;</span><span class="p">],</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_timedelta</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;2000&quot;</span><span class="p">],</span> <span class="mi">1000</span><span class="p">)</span>
 <span class="go">[Timedelta(&#39;0 days 00:00:01&#39;), Timedelta(&#39;0 days 00:00:02&#39;)]</span>
 </pre></div>
 </div>
@@ -235,7 +235,7 @@ if any duration value is provided in samples</p></li>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -243,7 +243,7 @@ if any duration value is provided in samples</p></li>
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2023 audEERING GmbH
+      &copy; 2020-2024 audEERING GmbH
     </p>
   </div> 
 

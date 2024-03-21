@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.1.0
+                v1.2.0
               </div>
             
           
@@ -148,9 +148,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">import</span> <span class="nn">audeer</span>
 <span class="kn">import</span> <span class="nn">audformat</span>
-<span class="kn">import</span> <span class="nn">audiofile</span> <span class="k">as</span> <span class="nn">af</span>
+<span class="kn">import</span> <span class="nn">audiofile</span>
 <span class="kn">import</span> <span class="nn">audmath</span>
 <span class="kn">import</span> <span class="nn">audresample</span>
 
@@ -161,35 +160,28 @@
 <span class="k">def</span> <span class="nf">assert_index</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if index is conform to audformat.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">has_duplicates</span><span class="p">:</span>
             <span class="n">max_display</span> <span class="o">=</span> <span class="mi">10</span>
             <span class="n">duplicates</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()]</span>
-            <span class="n">msg_tail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">...&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">duplicates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_display</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">msg_duplicates</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">duplicate</span><span class="p">)</span> <span class="k">for</span> <span class="n">duplicate</span>
-                    <span class="ow">in</span> <span class="n">duplicates</span><span class="p">[:</span><span class="n">max_display</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="p">]</span>
+            <span class="n">msg_tail</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">...&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">duplicates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_display</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">msg_duplicates</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">duplicate</span><span class="p">)</span> <span class="k">for</span> <span class="n">duplicate</span> <span class="ow">in</span> <span class="n">duplicates</span><span class="p">[:</span><span class="n">max_display</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Found duplicates:</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">msg_duplicates</span><span class="si">}{</span><span class="n">msg_tail</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Found duplicates:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">msg_duplicates</span><span class="si">}{</span><span class="n">msg_tail</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span>
-                <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span>
+            <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span>
         <span class="p">):</span>
             <span class="n">expected_names</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span><span class="p">,</span>
                 <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">END</span><span class="p">,</span>
             <span class="p">]</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Found two levels with names &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="si">}</span><span class="s1">, &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;but expected names &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">expected_names</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="s2">&quot;Found two levels with names &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obj</span><span class="o">.</span><span class="n">names</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but expected names &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">expected_names</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_timedelta64_dtype</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -205,17 +197,18 @@
 
 <span class="k">def</span> <span class="nf">is_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Check if value is scalar.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
-           <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">preprocess_signal</span><span class="p">(</span>
-        <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">expected_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
-        <span class="n">mixdown</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">expected_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+    <span class="n">mixdown</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Pre-process signal.&quot;&quot;&quot;</span>
     <span class="n">signal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
@@ -226,27 +219,29 @@
     <span class="k">if</span> <span class="n">expected_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">expected_rate</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">resample</span><span class="p">:</span>
             <span class="n">signal</span> <span class="o">=</span> <span class="n">audresample</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
-                <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">expected_rate</span><span class="p">,</span>
+                <span class="n">signal</span><span class="p">,</span>
+                <span class="n">sampling_rate</span><span class="p">,</span>
+                <span class="n">expected_rate</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">expected_rate</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Sampling rate of input signal is &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s1"> &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;but the expected sampling rate is &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">expected_rate</span><span class="si">}</span><span class="s1"> Hz. &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Enable resampling to avoid this error.&#39;</span>
+                <span class="sa">f</span><span class="s2">&quot;Sampling rate of input signal is &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but the expected sampling rate is &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">expected_rate</span><span class="si">}</span><span class="s2"> Hz. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Enable resampling to avoid this error.&quot;</span>
             <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span>
 
 
 <div class="viewcode-block" id="read_audio"><a class="viewcode-back" href="../../../api/audinterface.utils.read_audio.html#audinterface.utils.read_audio">[docs]</a><span class="k">def</span> <span class="nf">read_audio</span><span class="p">(</span>
-        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="o">*</span><span class="p">,</span>
-        <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads (segment of an) audio file.</span>
 
@@ -263,12 +258,12 @@
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; import audb</span>
 <span class="sd">        &gt;&gt;&gt; media = audb.load_media(</span>
-<span class="sd">        ...     &#39;emodb&#39;,</span>
-<span class="sd">        ...     &#39;wav/03a01Fa.wav&#39;,</span>
-<span class="sd">        ...     version=&#39;1.3.0&#39;,</span>
+<span class="sd">        ...     &quot;emodb&quot;,</span>
+<span class="sd">        ...     &quot;wav/03a01Fa.wav&quot;,</span>
+<span class="sd">        ...     version=&quot;1.3.0&quot;,</span>
 <span class="sd">        ...     verbose=False,</span>
 <span class="sd">        ... )</span>
-<span class="sd">        &gt;&gt;&gt; signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit=&#39;s&#39;))</span>
+<span class="sd">        &gt;&gt;&gt; signal, sampling_rate = read_audio(media[0], end=pd.Timedelta(0.01, unit=&quot;s&quot;))</span>
 <span class="sd">        &gt;&gt;&gt; signal.shape</span>
 <span class="sd">        (1, 160)</span>
 
@@ -286,8 +281,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">duration</span> <span class="o">=</span> <span class="n">end</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">-</span> <span class="n">offset</span>
 
-    <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">af</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">audeer</span><span class="o">.</span><span class="n">safe_path</span><span class="p">(</span><span class="n">file</span><span class="p">),</span>
+    <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">audiofile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+        <span class="n">file</span><span class="p">,</span>
         <span class="n">always_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
         <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span>
@@ -297,13 +292,13 @@
 
 
 <span class="k">def</span> <span class="nf">segment_to_indices</span><span class="p">(</span>
-        <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span>
-        <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span>
+    <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span>
+    <span class="n">end</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">end</span><span class="p">):</span>
-        <span class="n">end</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
     <span class="n">max_i</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">start_i</span> <span class="o">=</span> <span class="n">audmath</span><span class="o">.</span><span class="n">samples</span><span class="p">(</span><span class="n">start</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="n">sampling_rate</span><span class="p">)</span>
     <span class="n">start_i</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start_i</span><span class="p">,</span> <span class="n">max_i</span><span class="p">)</span>
@@ -313,9 +308,9 @@
 
 
 <span class="k">def</span> <span class="nf">segments_to_indices</span><span class="p">(</span>
-        <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">,</span>
+    <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
     <span class="n">starts_i</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
     <span class="n">ends_i</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -327,8 +322,8 @@
 
 
 <div class="viewcode-block" id="signal_index"><a class="viewcode-back" href="../../../api/audinterface.utils.signal_index.html#audinterface.utils.signal_index">[docs]</a><span class="k">def</span> <span class="nf">signal_index</span><span class="p">(</span>
-        <span class="n">starts</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">starts</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create signal index.</span>
 
@@ -358,7 +353,7 @@
 <span class="sd">        &gt;&gt;&gt; signal_index(0, 1.1)</span>
 <span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:01.100000&#39;)],</span>
 <span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
-<span class="sd">        &gt;&gt;&gt; signal_index(&#39;0ms&#39;, &#39;1ms&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; signal_index(&quot;0ms&quot;, &quot;1ms&quot;)</span>
 <span class="sd">        MultiIndex([(&#39;0 days&#39;, &#39;0 days 00:00:00.001000&#39;)],</span>
 <span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
 <span class="sd">        &gt;&gt;&gt; signal_index([None, 1], [1, None])</span>
@@ -367,7 +362,7 @@
 <span class="sd">                   names=[&#39;start&#39;, &#39;end&#39;])</span>
 <span class="sd">        &gt;&gt;&gt; signal_index(</span>
 <span class="sd">        ...     starts=[0, 1],</span>
-<span class="sd">        ...     ends=pd.to_timedelta([1000, 2000], unit=&#39;ms&#39;),</span>
+<span class="sd">        ...     ends=pd.to_timedelta([1000, 2000], unit=&quot;ms&quot;),</span>
 <span class="sd">        ... )</span>
 <span class="sd">        MultiIndex([(&#39;0 days 00:00:00&#39;, &#39;0 days 00:00:01&#39;),</span>
 <span class="sd">                    (&#39;0 days 00:00:01&#39;, &#39;0 days 00:00:02&#39;)],</span>
@@ -417,10 +412,10 @@
 
 
 <div class="viewcode-block" id="sliding_window"><a class="viewcode-back" href="../../../api/audinterface.utils.sliding_window.html#audinterface.utils.sliding_window">[docs]</a><span class="k">def</span> <span class="nf">sliding_window</span><span class="p">(</span>
-        <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">win_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
-        <span class="n">hop_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
+    <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">win_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
+    <span class="n">hop_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reshape signal by applying a sliding window.</span>
 
@@ -487,22 +482,22 @@
 
     <span class="k">if</span> <span class="n">win_length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;When the sampling rate is &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s1"> &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;Hz the window duration must be at least &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="mf">1.0</span><span class="o">/</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s1">s, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;but got &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">win_dur</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">}</span><span class="s1">s.&#39;</span>
+            <span class="sa">f</span><span class="s2">&quot;When the sampling rate is &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Hz the window duration must be at least &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mf">1.0</span><span class="o">/</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2">s, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;but got &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">win_dur</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">}</span><span class="s2">s.&quot;</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">hop_length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;When the sampling rate is &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s1"> &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;Hz the hop duration must be at least &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="mf">1.0</span><span class="o">/</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s1">s, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;but got &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">hop_dur</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">}</span><span class="s1">s.&#39;</span>
+            <span class="sa">f</span><span class="s2">&quot;When the sampling rate is &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Hz the hop duration must be at least &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mf">1.0</span><span class="o">/</span><span class="n">sampling_rate</span><span class="si">}</span><span class="s2">s, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;but got &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hop_dur</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="si">}</span><span class="s2">s.&quot;</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">win_length</span><span class="p">:</span>  <span class="c1"># signal too short</span>
@@ -531,8 +526,8 @@
 
 
 <div class="viewcode-block" id="to_timedelta"><a class="viewcode-back" href="../../../api/audinterface.utils.to_timedelta.html#audinterface.utils.to_timedelta">[docs]</a><span class="k">def</span> <span class="nf">to_timedelta</span><span class="p">(</span>
-        <span class="n">durations</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">,</span>
-        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">durations</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert duration value(s) to :class:`pandas.Timedelta`.</span>
 
@@ -573,14 +568,15 @@
 <span class="sd">        Timedelta(&#39;0 days 00:00:02&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; to_timedelta(2.0)</span>
 <span class="sd">        Timedelta(&#39;0 days 00:00:02&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; to_timedelta(&#39;2ms&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; to_timedelta(&quot;2ms&quot;)</span>
 <span class="sd">        Timedelta(&#39;0 days 00:00:00.002000&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; to_timedelta(&#39;200milliseconds&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; to_timedelta(&quot;200milliseconds&quot;)</span>
 <span class="sd">        Timedelta(&#39;0 days 00:00:00.200000&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; to_timedelta([1, &#39;2000&#39;], 1000)</span>
+<span class="sd">        &gt;&gt;&gt; to_timedelta([1, &quot;2000&quot;], 1000)</span>
 <span class="sd">        [Timedelta(&#39;0 days 00:00:01&#39;), Timedelta(&#39;0 days 00:00:02&#39;)]</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+
     <span class="k">def</span> <span class="nf">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper function to convert to seconds.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -596,15 +592,11 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">audmath</span><span class="o">.</span><span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="p">(</span>
-            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">durations</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span>
     <span class="p">):</span>
         <span class="c1"># sequence of duration entries</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">to_timedelta</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">durations</span>
-        <span class="p">]</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">durations</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># single duration entry</span>
 
@@ -614,7 +606,7 @@
             <span class="k">return</span> <span class="n">durations</span>
 
         <span class="n">durations</span> <span class="o">=</span> <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">durations</span></div>
 </pre></div>
@@ -632,7 +624,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2023/07/31 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -640,7 +632,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2023 audEERING GmbH
+      &copy; 2020-2024 audEERING GmbH
     </p>
   </div> 
 
