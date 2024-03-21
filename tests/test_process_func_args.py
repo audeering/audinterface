@@ -47,19 +47,19 @@ def parse_output(output):
     """
     if isinstance(output, pd.MultiIndex):
         output = audinterface.utils.signal_index(
-            output.get_level_values('start'),
-            output.get_level_values('end'),
+            output.get_level_values("start"),
+            output.get_level_values("end"),
         )
     else:
         output = output.values[0]
     return output
 
 
-@pytest.mark.parametrize('signal', [np.ones((1, 3))])
-@pytest.mark.parametrize('sampling_rate', [8000])
+@pytest.mark.parametrize("signal", [np.ones((1, 3))])
+@pytest.mark.parametrize("sampling_rate", [8000])
 @pytest.mark.parametrize(
-    'interface_object, interface_args, process_func, process_func_args, '
-    'process_func_args_during_call, expected_output',
+    "interface_object, interface_args, process_func, process_func_args, "
+    "process_func_args_during_call, expected_output",
     [
         (
             audinterface.Process,
@@ -73,7 +73,7 @@ def parse_output(output):
             audinterface.Process,
             [],
             addition,
-            {'value': 0},
+            {"value": 0},
             None,
             np.ones((1, 3)),
         ),
@@ -82,28 +82,28 @@ def parse_output(output):
             [],
             addition,
             None,
-            {'value': 0},
+            {"value": 0},
             np.ones((1, 3)),
         ),
         (
             audinterface.Process,
             [],
             addition,
-            {'value': 0},
-            {'value': 2},
+            {"value": 0},
+            {"value": 2},
             3 * np.ones((1, 3)),
         ),
         (
             audinterface.Process,
             [],
             addition,
-            {'value': 2},
-            {'value': 0},
+            {"value": 2},
+            {"value": 0},
             np.ones((1, 3)),
         ),
         (
             audinterface.Feature,
-            ['mean'],
+            ["mean"],
             mean,
             None,
             None,
@@ -111,34 +111,34 @@ def parse_output(output):
         ),
         (
             audinterface.Feature,
-            ['mean'],
+            ["mean"],
             mean,
-            {'offset': 1},
+            {"offset": 1},
             None,
             2,
         ),
         (
             audinterface.Feature,
-            ['mean'],
+            ["mean"],
             mean,
             None,
-            {'offset': 1},
+            {"offset": 1},
             2,
         ),
         (
             audinterface.Feature,
-            ['mean'],
+            ["mean"],
             mean,
-            {'offset': 0},
-            {'offset': 2},
+            {"offset": 0},
+            {"offset": 2},
             3,
         ),
         (
             audinterface.Feature,
-            ['mean'],
+            ["mean"],
             mean,
-            {'offset': 2},
-            {'offset': 0},
+            {"offset": 2},
+            {"offset": 0},
             1,
         ),
         (
@@ -153,7 +153,7 @@ def parse_output(output):
             audinterface.Segment,
             [],
             segment,
-            {'offset': 1},
+            {"offset": 1},
             None,
             audinterface.utils.signal_index(1, 2),
         ),
@@ -162,23 +162,23 @@ def parse_output(output):
             [],
             segment,
             None,
-            {'offset': 1},
+            {"offset": 1},
             audinterface.utils.signal_index(1, 2),
         ),
         (
             audinterface.Segment,
             [],
             segment,
-            {'offset': 0},
-            {'offset': 2},
+            {"offset": 0},
+            {"offset": 2},
             audinterface.utils.signal_index(2, 3),
         ),
         (
             audinterface.Segment,
             [],
             segment,
-            {'offset': 2},
-            {'offset': 0},
+            {"offset": 2},
+            {"offset": 0},
             audinterface.utils.signal_index(0, 1),
         ),
     ],
@@ -207,8 +207,8 @@ def test_interfaces(
 
     """
     # create test file
-    folder = audeer.mkdir(tmpdir, 'wav')
-    file = os.path.join(folder, 'file.wav')
+    folder = audeer.mkdir(tmpdir, "wav")
+    file = os.path.join(folder, "file.wav")
     audiofile.write(file, signal, sampling_rate, bit_depth=32)
 
     interface = interface_object(
@@ -260,12 +260,12 @@ def test_interfaces(
     np.testing.assert_equal(output, expected_output)
 
 
-@pytest.mark.parametrize('signal', [np.ones((1, 8000))])
-@pytest.mark.parametrize('sampling_rate', [8000])
-@pytest.mark.parametrize('interface_object', [audinterface.ProcessWithContext])
+@pytest.mark.parametrize("signal", [np.ones((1, 8000))])
+@pytest.mark.parametrize("sampling_rate", [8000])
+@pytest.mark.parametrize("interface_object", [audinterface.ProcessWithContext])
 @pytest.mark.parametrize(
-    'process_func, process_func_args, '
-    'process_func_args_during_call, expected_output',
+    "process_func, process_func_args, "
+    "process_func_args_during_call, expected_output",
     [
         (
             mean_with_context,
@@ -275,26 +275,26 @@ def test_interfaces(
         ),
         (
             mean_with_context,
-            {'offset': 1},
+            {"offset": 1},
             None,
             2,
         ),
         (
             mean_with_context,
             None,
-            {'offset': 1},
+            {"offset": 1},
             2,
         ),
         (
             mean_with_context,
-            {'offset': 0},
-            {'offset': 2},
+            {"offset": 0},
+            {"offset": 2},
             3,
         ),
         (
             mean_with_context,
-            {'offset': 2},
-            {'offset': 0},
+            {"offset": 2},
+            {"offset": 0},
             1,
         ),
     ],
@@ -322,8 +322,8 @@ def test_process_with_context(
 
     """
     # create test file
-    folder = audeer.mkdir(tmpdir, 'wav')
-    file = os.path.join(folder, 'file.wav')
+    folder = audeer.mkdir(tmpdir, "wav")
+    file = os.path.join(folder, "file.wav")
     audiofile.write(file, signal, sampling_rate, bit_depth=32)
 
     interface = interface_object(

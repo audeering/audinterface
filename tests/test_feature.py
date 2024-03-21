@@ -19,11 +19,10 @@ NUM_FRAMES = 5
 SIGNAL_1D = np.ones((1, SAMPLING_RATE))
 SIGNAL_2D = np.ones((NUM_CHANNELS, SAMPLING_RATE))
 SEGMENT = audinterface.Segment(
-    process_func=lambda x, sr:
-        audinterface.utils.signal_index(
-            pd.to_timedelta(0),
-            pd.to_timedelta(x.shape[1] / sr, unit='s') / 2,
-        )
+    process_func=lambda x, sr: audinterface.utils.signal_index(
+        pd.to_timedelta(0),
+        pd.to_timedelta(x.shape[1] / sr, unit="s") / 2,
+    )
 )
 
 
@@ -61,44 +60,38 @@ def mean_sliding_window_mono(signal, sampling_rate, win_dur, hop_dur):
 
 def test_deprecated_process_func_applies_sliding_window_argument():
     interface = audinterface.Feature(
-        'mean',
+        "mean",
         process_func=mean,
     )
-    if (
-            audeer.LooseVersion(audinterface.__version__)
-            < audeer.LooseVersion('1.2.0')
-    ):
+    if audeer.LooseVersion(audinterface.__version__) < audeer.LooseVersion("1.2.0"):
         assert interface.process_func_applies_sliding_window
     else:
         assert not interface.process_func_applies_sliding_window
 
 
 def test_deprecated_unit_argument():
-    if (
-            audeer.LooseVersion(audinterface.__version__)
-            < audeer.LooseVersion('1.2.0')
-    ):
-        with pytest.warns(UserWarning, match='is deprecated'):
+    if audeer.LooseVersion(audinterface.__version__) < audeer.LooseVersion("1.2.0"):
+        with pytest.warns(UserWarning, match="is deprecated"):
             interface = audinterface.Feature(
-                ['a'],
+                ["a"],
                 win_dur=1000,
-                unit='samples',
+                unit="samples",
                 sampling_rate=16000,
             )
-            assert interface.win_dur == '1000'
+            assert interface.win_dur == "1000"
             interface = audinterface.Feature(
-                ['a'],
+                ["a"],
                 win_dur=1000,
                 hop_dur=500,
-                unit='milliseconds',
+                unit="milliseconds",
             )
-            assert interface.win_dur == '1000milliseconds'
-            assert interface.hop_dur == '500milliseconds'
+            assert interface.win_dur == "1000milliseconds"
+            assert interface.hop_dur == "500milliseconds"
     else:
-        with pytest.raises(TypeError, match='unexpected keyword argument'):
+        with pytest.raises(TypeError, match="unexpected keyword argument"):
             audinterface.Feature(
-                ['a'],
-                unit='samples',
+                ["a"],
+                unit="samples",
             )
 
 
@@ -106,37 +99,37 @@ def test_feature():
     # You have to specify sampling rate when win_dur is in samples
     with pytest.raises(ValueError):
         audinterface.Feature(
-            feature_names=('o1', 'o2', 'o3'),
+            feature_names=("o1", "o2", "o3"),
             process_func_applies_sliding_window=False,
             sampling_rate=None,
-            win_dur='2048',
+            win_dur="2048",
         )
     # If no win_dur is given, no error should occur
     audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         sampling_rate=None,
     )
     # Only hop_dur is given
     with pytest.raises(ValueError):
         audinterface.Feature(
-            feature_names=('o1', 'o2', 'o3'),
+            feature_names=("o1", "o2", "o3"),
             hop_dur=0.1,
         )
     audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         process_func_applies_sliding_window=False,
-        win_dur='2048',
+        win_dur="2048",
         sampling_rate=8000,
     )
 
 
 @pytest.mark.parametrize(
-    'signal, feature, expected',
+    "signal, feature, expected",
     [
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names='feature',
+                feature_names="feature",
                 process_func=lambda x, sr: 1,
             ),
             np.ones((1, 1, 1)),
@@ -144,7 +137,7 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names=['feature'],
+                feature_names=["feature"],
                 process_func=lambda x, sr: 1,
             ),
             np.ones((1, 1, 1)),
@@ -152,7 +145,7 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones(3),
             ),
             np.ones((1, 3, 1)),
@@ -160,7 +153,7 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3)),
             ),
             np.ones((1, 3, 1)),
@@ -168,7 +161,7 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((3, 1)),
             ),
             np.ones((1, 3, 1)),
@@ -176,7 +169,7 @@ def test_feature():
         (
             SIGNAL_1D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
             ),
             np.ones((1, 3, 5)),
@@ -184,7 +177,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
                 channels=1,
             ),
@@ -193,7 +186,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((2, 3)),
                 channels=range(2),
             ),
@@ -202,7 +195,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((2, 3, 5)),
                 channels=range(2),
             ),
@@ -211,7 +204,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones(3),
                 channels=range(2),
                 process_func_is_mono=True,
@@ -221,7 +214,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3)),
                 channels=range(2),
                 process_func_is_mono=True,
@@ -231,7 +224,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3, 1)),
                 channels=range(2),
                 process_func_is_mono=True,
@@ -241,7 +234,7 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((3, 5)),
                 channels=range(2),
                 process_func_is_mono=True,
@@ -251,14 +244,14 @@ def test_feature():
         (
             SIGNAL_2D,
             audinterface.Feature(
-                feature_names=['f1', 'f2', 'f3'],
+                feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: np.ones((1, 3, 5)),
                 channels=range(2),
                 process_func_is_mono=True,
             ),
             np.ones((2, 3, 5)),
         ),
-    ]
+    ],
 )
 def test_process_call(signal, feature, expected):
     np.testing.assert_array_equal(
@@ -268,31 +261,31 @@ def test_process_call(signal, feature, expected):
 
 
 @pytest.mark.parametrize(
-    'signal, extractor',
+    "signal, extractor",
     [
         (
             np.random.randn(1, SAMPLING_RATE),
             audinterface.Feature(
-                feature_names='mean',
+                feature_names="mean",
                 process_func=lambda x, sr: np.mean(x, axis=1),
             ),
         ),
         (
             np.random.randn(2, SAMPLING_RATE),
             audinterface.Feature(
-                feature_names='mean',
+                feature_names="mean",
                 process_func=lambda x, sr: np.mean(x, axis=1),
             ),
         ),
         (
             np.random.randn(2, SAMPLING_RATE),
             audinterface.Feature(
-                feature_names='mean',
+                feature_names="mean",
                 process_func=lambda x, sr: np.mean(x, axis=1),
                 channels=0,
             ),
         ),
-    ]
+    ],
 )
 def test_process_call_datatype(signal, extractor):
     features = extractor(signal, SAMPLING_RATE)
@@ -300,25 +293,24 @@ def test_process_call_datatype(signal, extractor):
 
 
 @pytest.mark.parametrize(
-    'start, end, segment',
+    "start, end, segment",
     [
         (None, None, None),
         (None, None, SEGMENT),
         (pd.NaT, pd.NaT, None),
-        (pd.to_timedelta('0.25s'), None, None),
-        (pd.to_timedelta('0.25s'), pd.NaT, None),
-        (None, pd.to_timedelta('0.75s'), None),
-        (pd.NaT, pd.to_timedelta('0.75s'), None),
-        (pd.to_timedelta('0.25s'), pd.to_timedelta('0.75s'), None),
-    ]
+        (pd.to_timedelta("0.25s"), None, None),
+        (pd.to_timedelta("0.25s"), pd.NaT, None),
+        (None, pd.to_timedelta("0.75s"), None),
+        (pd.NaT, pd.to_timedelta("0.75s"), None),
+        (pd.to_timedelta("0.25s"), pd.to_timedelta("0.75s"), None),
+    ],
 )
 def test_process_file(tmpdir, start, end, segment):
-
     start_org = start
     end_org = end
 
     feature = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         process_func=feature_extractor,
         sampling_rate=None,
         channels=range(NUM_CHANNELS),
@@ -329,8 +321,8 @@ def test_process_file(tmpdir, start, end, segment):
     y_expected = np.ones((1, NUM_CHANNELS * NUM_FEATURES))
 
     # create test file
-    root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
+    root = str(tmpdir.mkdir("wav"))
+    file = "file.wav"
     path = os.path.join(root, file)
     af.write(path, SIGNAL_2D, SAMPLING_RATE)
 
@@ -342,7 +334,7 @@ def test_process_file(tmpdir, start, end, segment):
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     if end is None or pd.isna(end):
-        end = pd.to_timedelta(af.duration(path), unit='s')
+        end = pd.to_timedelta(af.duration(path), unit="s")
 
     if segment is not None:
         index = segment.process_file(path)
@@ -362,7 +354,7 @@ def test_process_file(tmpdir, start, end, segment):
     if start is None or pd.isna(start):
         start = pd.to_timedelta(0)
     if end is None or pd.isna(end):
-        end = pd.to_timedelta(af.duration(path), unit='s')
+        end = pd.to_timedelta(af.duration(path), unit="s")
 
     if segment is not None:
         index = segment.process_file(file, root=root)
@@ -376,9 +368,8 @@ def test_process_file(tmpdir, start, end, segment):
 
 
 def test_process_folder(tmpdir):
-
     index = audinterface.utils.signal_index(0, 1)
-    feature_names = ['o1', 'o2', 'o3']
+    feature_names = ["o1", "o2", "o3"]
     feature = audinterface.Feature(
         feature_names,
         process_func=feature_extractor,
@@ -388,8 +379,8 @@ def test_process_folder(tmpdir):
         verbose=False,
     )
 
-    path = str(tmpdir.mkdir('wav'))
-    files = [f'file{n}.wav' for n in range(3)]
+    path = str(tmpdir.mkdir("wav"))
+    files = [f"file{n}.wav" for n in range(3)]
     files_abs = [os.path.join(path, file) for file in files]
     for file in files_abs:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)
@@ -412,15 +403,15 @@ def test_process_folder(tmpdir):
 
     # non-existing folder
     with pytest.raises(FileNotFoundError):
-        feature.process_folder('bad-folder')
+        feature.process_folder("bad-folder")
 
     # empty folder
-    root = str(tmpdir.mkdir('empty'))
+    root = str(tmpdir.mkdir("empty"))
     df = feature.process_folder(root)
     pd.testing.assert_frame_equal(
         df,
         pd.DataFrame(
-            index=pd.Index([], dtype='object'),
+            index=pd.Index([], dtype="object"),
             dtype=object,
             columns=feature.column_names,
         ),
@@ -429,25 +420,25 @@ def test_process_folder(tmpdir):
 
 def test_process_func_args():
     def process_func(s, sr, arg1, arg2):
-        assert arg1 == 'foo'
-        assert arg2 == 'bar'
+        assert arg1 == "foo"
+        assert arg2 == "bar"
+
     audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         process_func=process_func,
         process_func_args={
-            'arg1': 'foo',
-            'arg2': 'bar',
-        }
+            "arg1": "foo",
+            "arg2": "bar",
+        },
     )
 
 
-@pytest.mark.parametrize('preserve_index', [False, True])
+@pytest.mark.parametrize("preserve_index", [False, True])
 def test_process_index(tmpdir, preserve_index):
-
-    cache_root = os.path.join(tmpdir, 'cache')
+    cache_root = os.path.join(tmpdir, "cache")
 
     feature = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         process_func=feature_extractor,
         channels=range(NUM_CHANNELS),
     )
@@ -462,8 +453,8 @@ def test_process_index(tmpdir, preserve_index):
     # non-empty
 
     # create file
-    root = str(tmpdir.mkdir('wav'))
-    files = ['file-1.wav', 'file-2.wav']
+    root = str(tmpdir.mkdir("wav"))
+    files = ["file-1.wav", "file-2.wav"]
     paths = [os.path.join(root, file) for file in files]
     for path in paths:
         af.write(path, SIGNAL_2D, SAMPLING_RATE)
@@ -472,7 +463,7 @@ def test_process_index(tmpdir, preserve_index):
     # absolute paths segmented index
     index = audformat.segmented_index(paths, [0, 1], [None, 3])
     df = feature.process_index(index, preserve_index=preserve_index)
-    assert df.index.get_level_values('file')[0] == paths[0]
+    assert df.index.get_level_values("file")[0] == paths[0]
     if preserve_index:
         pd.testing.assert_index_equal(df.index, index)
     np.testing.assert_array_equal(df.values, df_expected)
@@ -481,7 +472,7 @@ def test_process_index(tmpdir, preserve_index):
     # relative paths segmented index
     index = audformat.segmented_index(files, [0, 1], [None, 3])
     df = feature.process_index(index, preserve_index=preserve_index, root=root)
-    assert df.index.get_level_values('file')[0] == files[0]
+    assert df.index.get_level_values("file")[0] == files[0]
     if preserve_index:
         pd.testing.assert_index_equal(df.index, index)
     np.testing.assert_array_equal(df.values, df_expected)
@@ -494,7 +485,7 @@ def test_process_index(tmpdir, preserve_index):
         assert df.index[0] == paths[0]
         pd.testing.assert_index_equal(df.index, index)
     else:
-        assert df.index.get_level_values('file')[0] == paths[0]
+        assert df.index.get_level_values("file")[0] == paths[0]
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
@@ -505,7 +496,7 @@ def test_process_index(tmpdir, preserve_index):
         assert df.index[0] == files[0]
         pd.testing.assert_index_equal(df.index, index)
     else:
-        assert df.index.get_level_values('file')[0] == files[0]
+        assert df.index.get_level_values("file")[0] == files[0]
     np.testing.assert_array_equal(df.values, df_expected)
     pd.testing.assert_index_equal(df.columns, feature.column_names)
 
@@ -537,8 +528,8 @@ def test_process_index(tmpdir, preserve_index):
 
 
 @pytest.mark.parametrize(
-    'process_func, applies_sliding_window, num_feat, signal, start, end, '
-    'is_mono, expected',
+    "process_func, applies_sliding_window, num_feat, signal, start, end, "
+    "is_mono, expected",
     [
         # no process function
         (
@@ -683,8 +674,8 @@ def test_process_index(tmpdir, preserve_index):
             True,
             3,
             SIGNAL_2D,
-            pd.to_timedelta('1s'),
-            pd.to_timedelta('10s'),
+            pd.to_timedelta("1s"),
+            pd.to_timedelta("10s"),
             False,
             np.ones((1, 2 * 3)),
         ),
@@ -909,14 +900,20 @@ def test_process_index(tmpdir, preserve_index):
             False,
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
-    ]
+    ],
 )
 def test_process_signal(
-        process_func, applies_sliding_window, num_feat, signal, start, end,
-        is_mono, expected,
+    process_func,
+    applies_sliding_window,
+    num_feat,
+    signal,
+    start,
+    end,
+    is_mono,
+    expected,
 ):
     channels = range(signal.shape[0])
-    feature_names = [f'f{i}' for i in range(num_feat)]
+    feature_names = [f"f{i}" for i in range(num_feat)]
 
     feature = audinterface.Feature(
         feature_names=feature_names,
@@ -940,45 +937,44 @@ def test_process_signal(
         for channel in channels:
             np.testing.assert_array_equal(
                 df[channel].values,
-                expected[:, channel * num_feat:(channel + 1) * num_feat],
+                expected[:, channel * num_feat : (channel + 1) * num_feat],
             )
             assert df[channel].columns.to_list() == feature_names
 
 
 @pytest.mark.parametrize(
-    'feature, signal, sampling_rate, index, expected',
+    "feature, signal, sampling_rate, index, expected",
     [
         (
             audinterface.Feature(
-                feature_names=('o1', 'o2', 'o3'),
+                feature_names=("o1", "o2", "o3"),
                 process_func=feature_extractor,
                 channels=range(NUM_CHANNELS),
             ),
             SIGNAL_2D,
             SAMPLING_RATE,
             audinterface.utils.signal_index(
-                [pd.to_timedelta('0s'), pd.to_timedelta('1s')],
-                [pd.to_timedelta('2s'), pd.to_timedelta('3s')],
+                [pd.to_timedelta("0s"), pd.to_timedelta("1s")],
+                [pd.to_timedelta("2s"), pd.to_timedelta("3s")],
             ),
             np.ones((2, NUM_CHANNELS * NUM_FEATURES)),
         ),
         (
             audinterface.Feature(
-                feature_names=('string'),
-                process_func=lambda x, sr, idx: ['a', 'abc'][idx],
+                feature_names=("string"),
+                process_func=lambda x, sr, idx: ["a", "abc"][idx],
             ),
             SIGNAL_1D,
             SAMPLING_RATE,
             audinterface.utils.signal_index(
-                [pd.to_timedelta('0s'), pd.to_timedelta('1s')],
-                [pd.to_timedelta('2s'), pd.to_timedelta('3s')],
+                [pd.to_timedelta("0s"), pd.to_timedelta("1s")],
+                [pd.to_timedelta("2s"), pd.to_timedelta("3s")],
             ),
-            np.array([['a'], ['abc']]),
+            np.array([["a"], ["abc"]]),
         ),
     ],
 )
-def test_process_signal_from_index(feature, signal, sampling_rate, index,
-                                   expected):
+def test_process_signal_from_index(feature, signal, sampling_rate, index, expected):
     df = feature.process_signal_from_index(
         signal,
         sampling_rate,
@@ -987,12 +983,12 @@ def test_process_signal_from_index(feature, signal, sampling_rate, index,
     np.testing.assert_array_equal(df.values, expected)
 
 
-@pytest.mark.parametrize('audio', [(3, 8000)], indirect=True)  # s, Hz
+@pytest.mark.parametrize("audio", [(3, 8000)], indirect=True)  # s, Hz
 @pytest.mark.parametrize(
     # `starts` and `ends`
     # are used to create a segment object
     # using audinterface.utils.signal_index()
-    'starts, ends',
+    "starts, ends",
     [
         (None, None),
         (0, 1.5),
@@ -1007,21 +1003,19 @@ def test_process_signal_from_index(feature, signal, sampling_rate, index,
         ([1.000000003, 2.1], [2.000000003, 2.5]),
         # https://github.com/audeering/audinterface/issues/135
         ([0, 1], [3, 2]),
-    ]
+    ],
 )
 def test_feature_with_segment(audio, starts, ends):
-
     path, signal, sampling_rate = audio
     root, file = os.path.split(path)
     duration = signal.shape[1] / sampling_rate
 
     # Segment and process objects
     segment = audinterface.Segment(
-        process_func=lambda x, sr:
-        audinterface.utils.signal_index(starts, ends)
+        process_func=lambda x, sr: audinterface.utils.signal_index(starts, ends)
     )
-    feature = audinterface.Feature('f')
-    feature_with_segment = audinterface.Feature('f', segment=segment)
+    feature = audinterface.Feature("f")
+    feature_with_segment = audinterface.Feature("f", segment=segment)
 
     # Expected index
     if starts is None:
@@ -1048,7 +1042,7 @@ def test_feature_with_segment(audio, starts, ends):
 
     pd.testing.assert_frame_equal(
         feature.process_index(index, root=root, preserve_index=True),
-        feature_with_segment.process_signal(signal, sampling_rate, file=file)
+        feature_with_segment.process_signal(signal, sampling_rate, file=file),
     )
 
     # process signal from index
@@ -1096,7 +1090,7 @@ def test_feature_with_segment(audio, starts, ends):
     # https://github.com/audeering/audinterface/issues/138
     pd.testing.assert_frame_equal(
         feature.process_index(index, root=root, preserve_index=True),
-        feature_with_segment.process_files([file], root=root)
+        feature_with_segment.process_files([file], root=root),
     )
 
     # process folder
@@ -1132,40 +1126,47 @@ def test_feature_with_segment(audio, starts, ends):
 
 
 @pytest.mark.parametrize(
-    'signal, num_channels, sampling_rate',
+    "signal, num_channels, sampling_rate",
     [
         (SIGNAL_1D, 1, SAMPLING_RATE),
         (SIGNAL_2D, 2, SAMPLING_RATE),
-    ]
+    ],
 )
 @pytest.mark.parametrize(
-    'process_func, is_mono, applies_sliding_window, feature_names',
+    "process_func, is_mono, applies_sliding_window, feature_names",
     [
-        (mean, False, False, 'mean'),
-        (mean_mono, True, False, 'mean'),
-        (mean_sliding_window, False, True, 'mean'),
-        (mean_sliding_window_mono, True, True, 'mean'),
-    ]
+        (mean, False, False, "mean"),
+        (mean_mono, True, False, "mean"),
+        (mean_sliding_window, False, True, "mean"),
+        (mean_sliding_window_mono, True, True, "mean"),
+    ],
 )
 @pytest.mark.parametrize(
-    'win_dur, hop_dur',
+    "win_dur, hop_dur",
     [
         (0.5, None),
         (0.5, 0.25),
         (0.5, 0.5),
         (0.25, 0.5),
-        (pd.to_timedelta(1, unit='s'), pd.to_timedelta(0.5, unit='s')),
-        ('4000', '2000'),
-        ('500ms', '250ms'),
-        ('500milliseconds', '250milliseconds'),
-        (f'{SAMPLING_RATE // 2}', f'{SAMPLING_RATE // 4}'),
+        (pd.to_timedelta(1, unit="s"), pd.to_timedelta(0.5, unit="s")),
+        ("4000", "2000"),
+        ("500ms", "250ms"),
+        ("500milliseconds", "250milliseconds"),
+        (f"{SAMPLING_RATE // 2}", f"{SAMPLING_RATE // 4}"),
     ],
 )
-def test_signal_sliding_window(tmpdir, signal, num_channels,
-                               sampling_rate, process_func, is_mono,
-                               applies_sliding_window,
-                               feature_names, win_dur, hop_dur):
-
+def test_signal_sliding_window(
+    tmpdir,
+    signal,
+    num_channels,
+    sampling_rate,
+    process_func,
+    is_mono,
+    applies_sliding_window,
+    feature_names,
+    win_dur,
+    hop_dur,
+):
     interface = audinterface.Feature(
         feature_names=feature_names,
         process_func=process_func,
@@ -1207,7 +1208,7 @@ def test_signal_sliding_window(tmpdir, signal, num_channels,
 
     # file
 
-    file = audeer.path(tmpdir, 'tmp.wav')
+    file = audeer.path(tmpdir, "tmp.wav")
     audiofile.write(file, signal, sampling_rate, bit_depth=32)
 
     df = interface.process_file(file)
@@ -1223,13 +1224,12 @@ def test_signal_sliding_window(tmpdir, signal, num_channels,
 
 
 def test_signal_sliding_window_error():
-
     interface = audinterface.Feature(
-        feature_names='mean',
+        feature_names="mean",
         process_func=mean_sliding_window,
         process_func_args={
-            'win_dur': 0.5,
-            'hop_dur': 0.25,
+            "win_dur": 0.5,
+            "hop_dur": 0.25,
         },
         process_func_is_mono=False,
         process_func_applies_sliding_window=True,
@@ -1250,7 +1250,7 @@ def test_signal_sliding_window_error():
 def test_to_numpy():
     expected_features = np.ones((NUM_CHANNELS, NUM_FEATURES, 1))
     extractor = audinterface.Feature(
-        feature_names=('o1', 'o2', 'o3'),
+        feature_names=("o1", "o2", "o3"),
         process_func=feature_extractor,
         channels=range(NUM_CHANNELS),
     )

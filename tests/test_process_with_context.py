@@ -23,19 +23,19 @@ def signal_max_with_context(signal, sampling_rate, starts, ends):
 
 def test_process_func_args():
     def process_func(s, sr, starts, ends, arg1, arg2):
-        assert arg1 == 'foo'
-        assert arg2 == 'bar'
+        assert arg1 == "foo"
+        assert arg2 == "bar"
+
     audinterface.ProcessWithContext(
         process_func=process_func,
         process_func_args={
-            'arg1': 'foo',
-            'arg2': 'bar',
-        }
+            "arg1": "foo",
+            "arg2": "bar",
+        },
     )
 
 
 def test_process_index(tmpdir):
-
     process = audinterface.ProcessWithContext(
         process_func=None,
         sampling_rate=None,
@@ -54,29 +54,27 @@ def test_process_index(tmpdir):
     # create file
     sampling_rate = 8000
     signal = np.random.uniform(-1.0, 1.0, (1, 3 * sampling_rate))
-    root = str(tmpdir.mkdir('wav'))
-    file = 'file.wav'
+    root = str(tmpdir.mkdir("wav"))
+    file = "file.wav"
     path = os.path.join(root, file)
     audiofile.write(path, signal, sampling_rate)
 
     # absolute paths
     index = audformat.segmented_index(
         [path] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
+        pd.timedelta_range("0s", "2s", 3),
+        pd.timedelta_range("1s", "3s", 3),
     )
     result = process.process_index(index)
     for (path, start, end), value in result.items():
-        x, sampling_rate = audinterface.utils.read_audio(
-            path, start=start, end=end
-        )
+        x, sampling_rate = audinterface.utils.read_audio(path, start=start, end=end)
         np.testing.assert_equal(x, value)
 
     # relative paths
     index = audformat.segmented_index(
         [file] * 3,
-        pd.timedelta_range('0s', '2s', 3),
-        pd.timedelta_range('1s', '3s', 3),
+        pd.timedelta_range("0s", "2s", 3),
+        pd.timedelta_range("1s", "3s", 3),
     )
     result = process.process_index(index, root=root)
     for (file, start, end), value in result.items():
@@ -133,7 +131,7 @@ def test_process_index(tmpdir):
 
 
 @pytest.mark.parametrize(
-    'process_func,process_func_with_context,signal,sampling_rate,index',
+    "process_func,process_func_with_context,signal,sampling_rate,index",
     [
         (
             None,
@@ -148,8 +146,8 @@ def test_process_index(tmpdir):
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
         ),
         (
@@ -158,8 +156,8 @@ def test_process_index(tmpdir):
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
         ),
         (
@@ -176,10 +174,10 @@ def test_process_index(tmpdir):
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.timedelta_range('0s', '3s', 3),
+                    pd.timedelta_range("0s", "3s", 3),
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
             signal_max,
@@ -188,11 +186,11 @@ def test_process_index(tmpdir):
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    ['wrong', 'data', 'type'],
-                    pd.timedelta_range('1s', '4s', 3),
+                    ["wrong", "data", "type"],
+                    pd.timedelta_range("1s", "4s", 3),
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(
             signal_max,
@@ -201,11 +199,11 @@ def test_process_index(tmpdir):
             44100,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.timedelta_range('0s', '3s', 3),
-                    ['wrong', 'data', 'type'],
+                    pd.timedelta_range("0s", "3s", 3),
+                    ["wrong", "data", "type"],
                 ],
             ),
-            marks=pytest.mark.xfail(raises=ValueError)
+            marks=pytest.mark.xfail(raises=ValueError),
         ),
         pytest.param(  # process_func returns None
             lambda signal, sampling_rate: None,
@@ -213,8 +211,8 @@ def test_process_index(tmpdir):
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
@@ -224,8 +222,8 @@ def test_process_index(tmpdir):
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
@@ -235,8 +233,8 @@ def test_process_index(tmpdir):
             np.random.random(5 * 44100),
             44100,
             audinterface.utils.signal_index(
-                pd.timedelta_range('0s', '3s', 3),
-                pd.timedelta_range('1s', '4s', 3),
+                pd.timedelta_range("0s", "3s", 3),
+                pd.timedelta_range("1s", "4s", 3),
             ),
             marks=pytest.mark.xfail(raises=RuntimeError),
         ),
@@ -251,11 +249,11 @@ def test_process_index(tmpdir):
     ],
 )
 def test_process_signal_from_index(
-        process_func,
-        process_func_with_context,
-        signal,
-        sampling_rate,
-        index,
+    process_func,
+    process_func_with_context,
+    signal,
+    sampling_rate,
+    index,
 ):
     model = audinterface.Process(
         process_func=process_func,
@@ -270,7 +268,9 @@ def test_process_signal_from_index(
         verbose=False,
     )
     result = model_with_context.process_signal_from_index(
-        signal, sampling_rate, index,
+        signal,
+        sampling_rate,
+        index,
     )
 
     expected = []
@@ -286,12 +286,11 @@ def test_process_signal_from_index(
     else:
         pd.testing.assert_series_equal(
             result,
-            pd.concat(expected, names=['start', 'end']),
+            pd.concat(expected, names=["start", "end"]),
         )
 
 
 def test_process_with_special_args(tmpdir):
-
     duration = 3
     sampling_rate = 1
     signal = np.zeros((2, duration), np.float32)
@@ -301,7 +300,7 @@ def test_process_with_special_args(tmpdir):
 
     # create files
     root = tmpdir
-    files = [f'f{idx}.wav' for idx in range(num_files)]
+    files = [f"f{idx}.wav" for idx in range(num_files)]
     for file in files:
         path = os.path.join(root, file)
         audiofile.write(path, signal, sampling_rate, bit_depth=32)
@@ -347,15 +346,15 @@ def test_process_with_special_args(tmpdir):
 
     process = audinterface.ProcessWithContext(
         process_func=process_func,
-        process_func_args={'idx': 99, 'file': 'my/file', 'root': None},
+        process_func_args={"idx": 99, "file": "my/file", "root": None},
     )
     y = process.process_index(index, root=root)
-    expected = pd.Series([(99, 'my/file', None)] * len(index), index)
+    expected = pd.Series([(99, "my/file", None)] * len(index), index)
     pd.testing.assert_series_equal(y, expected)
 
 
 @pytest.mark.parametrize(
-    'signal_sampling_rate,target_rate,resample',
+    "signal_sampling_rate,target_rate,resample",
     [
         pytest.param(
             44100,
@@ -392,9 +391,9 @@ def test_process_with_special_args(tmpdir):
     ],
 )
 def test_sampling_rate_mismatch(
-        signal_sampling_rate,
-        target_rate,
-        resample,
+    signal_sampling_rate,
+    target_rate,
+    resample,
 ):
     model = audinterface.ProcessWithContext(
         process_func=None,
@@ -402,9 +401,9 @@ def test_sampling_rate_mismatch(
         resample=resample,
         verbose=False,
     )
-    signal = np.random.random(5 * 44100).astype('float32')
+    signal = np.random.random(5 * 44100).astype("float32")
     index = audinterface.utils.signal_index(
-        pd.timedelta_range('0s', '3s', 3),
-        pd.timedelta_range('1s', '4s', 3),
+        pd.timedelta_range("0s", "3s", 3),
+        pd.timedelta_range("1s", "4s", 3),
     )
     model.process_signal_from_index(signal, signal_sampling_rate, index)
