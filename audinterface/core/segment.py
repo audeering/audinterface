@@ -13,29 +13,19 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def create_process_func(
-    process_func: typing.Optional[typing.Callable[..., pd.MultiIndex]],
-    invert: bool,
-) -> typing.Callable[..., pd.MultiIndex]:
-    r"""Create processing function."""
-    if process_func is None:
+def signal_index(signal, sampling_rate, **kwargs):
+    r"""Default segment function."""
+    return utils.signal_index()
 
-        def process_func(signal, sr, **kwargs):
-            return utils.signal_index()
 
-    if invert:
-
-        def process_func_invert(signal, sr, **kwargs):
-            index = process_func(signal, sr, **kwargs)
-            dur = pd.to_timedelta(signal.shape[-1] / sr, unit="s")
-            index = index.sortlevel("start")[0]
-            index = merge_index(index)
-            index = invert_index(index, dur)
-            return index
-
-        return process_func_invert
-    else:
-        return process_func
+def signal_index_invert(signal, sampling_rate, **kwargs):
+    r"""Default inverted segment function."""
+    index = process_func(signal, sr, **kwargs)
+    dur = pd.to_timedelta(signal.shape[-1] / sr, unit="s")
+    index = index.sortlevel("start")[0]
+    index = merge_index(index)
+    index = invert_index(index, dur)
+    return index
 
 
 def invert_index(
@@ -216,8 +206,14 @@ class Segment:
         # avoid cycling imports
         from audinterface.core.process import Process
 
+        if process_func is None:
+            process_func = signal_index
+
+        if invert:
+            process_func = signal_index_invert
+
         process = Process(
-            process_func=create_process_func(process_func, invert),
+            process_func=process_func,
             process_func_args=process_func_args,
             sampling_rate=sampling_rate,
             resample=resample,

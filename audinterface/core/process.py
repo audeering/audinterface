@@ -17,6 +17,11 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
+def identity(signal, sampling_rate):
+    r"""Default processing function."""
+    return signal
+
+
 class Process:
     r"""Processing interface.
 
@@ -156,11 +161,6 @@ class Process:
         if channels is not None:
             channels = audeer.to_list(channels)
 
-        if process_func is None:
-
-            def process_func(signal, _):
-                return signal
-
         if resample and sampling_rate is None:
             raise ValueError("sampling_rate has to be provided for resample = True.")
 
@@ -169,6 +169,7 @@ class Process:
         if win_dur is not None and hop_dur is None:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
+        process_func = process_func or identity
         signature = inspect.signature(process_func)
         self._process_func_signature = dict(signature.parameters)
         r"""Arguments present in processing function."""

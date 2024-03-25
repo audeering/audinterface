@@ -330,7 +330,42 @@ def test_process_file(tmpdir, start, end, segment):
     np.testing.assert_array_equal(y, y_expected)
 
 
-def test_process_folder(tmpdir):
+@pytest.mark.parametrize(
+    "num_files, num_workers, multiprocessing",
+    [
+        (
+            3,
+            1,
+            False,
+        ),
+        (
+            3,
+            2,
+            False,
+        ),
+        (
+            3,
+            2,
+            True,
+        ),
+        (
+            3,
+            None,
+            False,
+        ),
+        (
+            3,
+            1,
+            False,
+        ),
+    ],
+)
+def test_process_folder(
+    tmpdir,
+    num_files,
+    num_workers,
+    multiprocessing,
+):
     index = audinterface.utils.signal_index(0, 1)
     feature_names = ["o1", "o2", "o3"]
     feature = audinterface.Feature(
@@ -343,7 +378,7 @@ def test_process_folder(tmpdir):
     )
 
     path = str(tmpdir.mkdir("wav"))
-    files = [f"file{n}.wav" for n in range(3)]
+    files = [f"file{n}.wav" for n in range(num_files)]
     files_abs = [os.path.join(path, file) for file in files]
     for file in files_abs:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)

@@ -18,6 +18,10 @@ ENDS = STARTS + pd.to_timedelta("1s")
 INDEX = audinterface.utils.signal_index(STARTS, ENDS)
 
 
+def predefined_index(signal, sampling_rate):
+    return INDEX
+
+
 @pytest.mark.parametrize(
     "signal, sampling_rate, segment_func, result",
     [
@@ -90,6 +94,10 @@ def test_file(tmpdir):
             False,
         ),
         (
+            2,
+            True,
+        ),
+        (
             None,
             False,
         ),
@@ -97,7 +105,7 @@ def test_file(tmpdir):
 )
 def test_folder(tmpdir, num_workers, multiprocessing):
     segment = audinterface.Segment(
-        process_func=lambda s, sr: INDEX,
+        process_func=predefined_index,
         sampling_rate=None,
         resample=False,
         num_workers=num_workers,
@@ -121,6 +129,44 @@ def test_folder(tmpdir, num_workers, multiprocessing):
     root = str(tmpdir.mkdir("empty"))
     index = segment.process_folder(root)
     pd.testing.assert_index_equal(index, audformat.filewise_index())
+
+
+@pytest.mark.parametrize(
+    "num_workers, multiprocessing",
+    [
+        (
+            1,
+            False,
+        ),
+        (
+            2,
+            False,
+        ),
+        (
+            2,
+            True,
+        ),
+        (
+            None,
+            False,
+        ),
+    ],
+)
+def test_folder_default_process_func(tmpdir, num_workers, multiprocessing):
+    segment = audinterface.Segment(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
+        verbose=False,
+    )
+    path = str(tmpdir.mkdir("wav"))
+    files = [os.path.join(path, f"file{n}.wav") for n in range(3)]
+    for file in files:
+        af.write(file, SIGNAL, SAMPLING_RATE)
+    result = segment.process_folder(path)
+    assert len(result) == 0
 
 
 @pytest.mark.parametrize(
