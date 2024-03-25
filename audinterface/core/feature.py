@@ -1,5 +1,4 @@
 import errno
-import functools
 import inspect
 import os
 import typing
@@ -16,36 +15,6 @@ from audinterface.core.segment import Segment
 from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 import audinterface.core.utils as utils
-
-
-def deprecated_process_func_applies_sliding_window_default_value() -> typing.Callable:
-    """Deprecate default value of process_func_applies_sliding_window."""
-
-    def _deprecated(func):
-        @functools.wraps(func)
-        def new_func(*args, **kwargs):
-            argument = "process_func_applies_sliding_window"
-            change_in_version = "1.2.0"
-            default_value = True
-            new_default_value = False
-            if (
-                "win_dur" in kwargs
-                and kwargs["win_dur"] is not None
-                and argument not in kwargs
-            ):
-                signature = inspect.signature(func)
-                default_value = signature.parameters[argument].default
-                message = (
-                    f"The default of '{argument}' will change from "
-                    f"'{default_value}' to '{new_default_value}' "
-                    f"with version {change_in_version}."
-                )
-                warnings.warn(message, category=UserWarning, stacklevel=2)
-            return func(*args, **kwargs)
-
-        return new_func
-
-    return _deprecated
 
 
 class Feature:
@@ -212,7 +181,6 @@ class Feature:
         >>> interface = Feature(
         ...     ["mean", "std"],
         ...     process_func=mean_std,
-        ...     process_func_applies_sliding_window=False,
         ...     win_dur=1.0,
         ...     hop_dur=0.25,
         ... )
@@ -253,7 +221,6 @@ class Feature:
 
     """  # noqa: E501
 
-    @deprecated_process_func_applies_sliding_window_default_value()
     def __init__(
         self,
         feature_names: typing.Union[str, typing.Sequence[str]],
@@ -263,7 +230,7 @@ class Feature:
         process_func: typing.Callable[..., typing.Any] = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
         process_func_is_mono: bool = False,
-        process_func_applies_sliding_window: bool = True,
+        process_func_applies_sliding_window: bool = False,
         sampling_rate: int = None,
         resample: bool = False,
         channels: typing.Union[int, typing.Sequence[int]] = 0,
