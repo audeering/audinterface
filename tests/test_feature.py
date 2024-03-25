@@ -58,17 +58,6 @@ def mean_sliding_window_mono(signal, sampling_rate, win_dur, hop_dur):
     return frames.mean(axis=1, keepdims=False)
 
 
-def test_deprecated_process_func_applies_sliding_window_argument():
-    interface = audinterface.Feature(
-        "mean",
-        process_func=mean,
-    )
-    if audeer.LooseVersion(audinterface.__version__) < audeer.LooseVersion("1.2.0"):
-        assert interface.process_func_applies_sliding_window
-    else:
-        assert not interface.process_func_applies_sliding_window
-
-
 def test_deprecated_unit_argument():
     if audeer.LooseVersion(audinterface.__version__) < audeer.LooseVersion("1.2.0"):
         with pytest.warns(UserWarning, match="is deprecated"):
