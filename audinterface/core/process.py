@@ -170,7 +170,7 @@ class Process:
             hop_dur = utils.to_timedelta(win_dur, sampling_rate) / 2
 
         signature = inspect.signature(process_func)
-        self._process_func_signature = signature.parameters
+        self._process_func_signature = dict(signature.parameters)
         r"""Arguments present in processing function."""
 
         self.channels = channels
