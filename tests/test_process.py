@@ -526,6 +526,12 @@ def test_process_files(
         (
             3,
             None,
+            2,
+            True,
+        ),
+        (
+            3,
+            None,
             None,
             False,
         ),
