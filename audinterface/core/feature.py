@@ -244,35 +244,7 @@ class Feature:
         num_workers: typing.Optional[int] = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
-        **kwargs,
     ):
-        # ------
-        # Handle deprecated 'unit' keyword argument
-        def add_unit(dur, unit):
-            if unit == "samples":
-                return str(dur)
-            else:
-                return f"{dur}{unit}"
-
-        if "unit" in kwargs:
-            message = (
-                "'unit' argument is deprecated "
-                "and will be removed with version '1.2.0'."
-                "The unit can now directly specified "
-                "within the 'win_dur' and 'hop_dur' arguments."
-            )
-            warnings.warn(
-                message,
-                category=UserWarning,
-                stacklevel=2,
-            )
-            unit = kwargs.pop("unit")
-            if win_dur is not None:
-                win_dur = add_unit(win_dur, unit)
-            if hop_dur is not None:
-                hop_dur = add_unit(hop_dur, unit)
-        # ------
-
         if mixdown or isinstance(channels, int):
             num_channels = 1
         else:
