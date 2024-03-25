@@ -58,32 +58,6 @@ def mean_sliding_window_mono(signal, sampling_rate, win_dur, hop_dur):
     return frames.mean(axis=1, keepdims=False)
 
 
-def test_deprecated_unit_argument():
-    if audeer.LooseVersion(audinterface.__version__) < audeer.LooseVersion("1.2.0"):
-        with pytest.warns(UserWarning, match="is deprecated"):
-            interface = audinterface.Feature(
-                ["a"],
-                win_dur=1000,
-                unit="samples",
-                sampling_rate=16000,
-            )
-            assert interface.win_dur == "1000"
-            interface = audinterface.Feature(
-                ["a"],
-                win_dur=1000,
-                hop_dur=500,
-                unit="milliseconds",
-            )
-            assert interface.win_dur == "1000milliseconds"
-            assert interface.hop_dur == "500milliseconds"
-    else:
-        with pytest.raises(TypeError, match="unexpected keyword argument"):
-            audinterface.Feature(
-                ["a"],
-                unit="samples",
-            )
-
-
 def test_feature():
     # You have to specify sampling rate when win_dur is in samples
     with pytest.raises(ValueError):
