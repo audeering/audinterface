@@ -13,29 +13,61 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def create_process_func(
-    process_func: typing.Optional[typing.Callable[..., pd.MultiIndex]],
-    invert: bool,
-) -> typing.Callable[..., pd.MultiIndex]:
-    r"""Create processing function."""
-    if process_func is None:
+def signal_index(signal, sampling_rate, **kwargs) -> pd.MultiIndex:
+    r"""Default segment process function.
 
-        def process_func(signal, sr, **kwargs):
-            return utils.signal_index()
+    This function is used,
+    when ``Segment`` is instantiated
+    with ``process_func=None``.
+    It returns an empty multi-index,
+    with levels ``start`` and ``end``.
 
-    if invert:
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        **kwargs: additional keyword arguments of the processing function
 
-        def process_func_invert(signal, sr, **kwargs):
-            index = process_func(signal, sr, **kwargs)
-            dur = pd.to_timedelta(signal.shape[-1] / sr, unit="s")
-            index = index.sortlevel("start")[0]
-            index = merge_index(index)
-            index = invert_index(index, dur)
-            return index
+    Returns:
+        index with segments
 
-        return process_func_invert
-    else:
-        return process_func
+    """
+    return utils.signal_index()
+
+
+def inverted_process_func(
+    signal,
+    sampling_rate,
+    *,
+    __process_func,
+    **kwargs,
+) -> pd.MultiIndex:
+    r"""Inverted segment process function.
+
+    This function is used,
+    when ``Segment`` is instantiated
+    with ``invert=True``.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        __process_func: process func to invert.
+            Note, ``__process_func`` needs to be added to ``process_func_args``
+            before calling this function.
+            This means, a user cannot use ``__process_func``
+            as argument name
+            in ``process_func``
+        **kwargs: additional keyword arguments of the processing function
+
+    Returns:
+        index with segments
+
+    """
+    index = __process_func(signal, sampling_rate, **kwargs)
+    duration = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
+    index = index.sortlevel("start")[0]
+    index = merge_index(index)
+    index = invert_index(index, duration)
+    return index
 
 
 def invert_index(
@@ -216,8 +248,16 @@ class Segment:
         # avoid cycling imports
         from audinterface.core.process import Process
 
+        if process_func is None:
+            process_func = signal_index
+
+        if invert:
+            process_func_args = process_func_args or {}
+            process_func_args["__process_func"] = process_func
+            process_func = inverted_process_func
+
         process = Process(
-            process_func=create_process_func(process_func, invert),
+            process_func=process_func,
             process_func_args=process_func_args,
             sampling_rate=sampling_rate,
             resample=resample,

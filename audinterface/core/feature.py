@@ -16,6 +16,30 @@ from audinterface.core.typing import Timestamps
 import audinterface.core.utils as utils
 
 
+def zeros(signal, sampling_rate, num_channels, num_features) -> np.ndarray:
+    r"""Default feature process function.
+
+    This function is used,
+    when ``Feature`` is instantiated
+    with ``process_func=None``.
+    It returns zeros for all channels and features.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        num_channels: number of audio channels
+        num_features: number of features
+
+    Returns:
+        zeros with size ``(num_channels, num_features)``
+
+    """
+    return np.zeros(
+        (num_channels, num_features),
+        dtype=object,
+    )
+
+
 class Feature:
     r"""Feature extraction interface.
 
@@ -260,13 +284,11 @@ class Feature:
         else:
             column_names = pd.Index(feature_names)
 
+        process_func_args = process_func_args or {}
         if process_func is None:
-
-            def process_func(signal, _):
-                return np.zeros(
-                    (num_channels, len(feature_names)),
-                    dtype=object,
-                )
+            process_func_args["num_channels"] = num_channels
+            process_func_args["num_features"] = len(feature_names)
+            process_func = zeros
 
         if win_dur is None and hop_dur is not None:
             raise ValueError("You have to specify 'win_dur' if 'hop_dur' is given.")
@@ -275,7 +297,6 @@ class Feature:
 
         # add 'win_dur' and 'hop_dur' to process_func_args
         # if expected by function but not yet set
-        process_func_args = process_func_args or {}
         signature = inspect.signature(process_func)
         if "win_dur" in signature.parameters and "win_dur" not in process_func_args:
             process_func_args["win_dur"] = win_dur

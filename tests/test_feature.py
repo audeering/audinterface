@@ -18,12 +18,16 @@ NUM_FEATURES = 3
 NUM_FRAMES = 5
 SIGNAL_1D = np.ones((1, SAMPLING_RATE))
 SIGNAL_2D = np.ones((NUM_CHANNELS, SAMPLING_RATE))
-SEGMENT = audinterface.Segment(
-    process_func=lambda x, sr: audinterface.utils.signal_index(
+
+
+def segment(signal, sampling_rate):
+    return audinterface.utils.signal_index(
         pd.to_timedelta(0),
-        pd.to_timedelta(x.shape[1] / sr, unit="s") / 2,
+        pd.to_timedelta(signal.shape[1] / sampling_rate, unit="s") / 2,
     )
-)
+
+
+SEGMENT = audinterface.Segment(process_func=segment)
 
 
 def feature_extractor(signal, _):
@@ -330,7 +334,15 @@ def test_process_file(tmpdir, start, end, segment):
     np.testing.assert_array_equal(y, y_expected)
 
 
-def test_process_folder(tmpdir):
+@pytest.mark.parametrize("num_files", [3])
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
+def test_process_folder(
+    tmpdir,
+    num_files,
+    num_workers,
+    multiprocessing,
+):
     index = audinterface.utils.signal_index(0, 1)
     feature_names = ["o1", "o2", "o3"]
     feature = audinterface.Feature(
@@ -343,7 +355,7 @@ def test_process_folder(tmpdir):
     )
 
     path = str(tmpdir.mkdir("wav"))
-    files = [f"file{n}.wav" for n in range(3)]
+    files = [f"file{n}.wav" for n in range(num_files)]
     files_abs = [os.path.join(path, file) for file in files]
     for file in files_abs:
         af.write(file, SIGNAL_2D, SAMPLING_RATE)
@@ -379,6 +391,35 @@ def test_process_folder(tmpdir):
             columns=feature.column_names,
         ),
     )
+
+
+@pytest.mark.parametrize("num_files", [3])
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
+def test_process_folder_default_process_func(
+    tmpdir,
+    num_files,
+    num_workers,
+    multiprocessing,
+):
+    feature_names = ["o1", "o2", "o3"]
+    feature = audinterface.Feature(
+        feature_names,
+        process_func=None,
+        sampling_rate=None,
+        channels=range(NUM_CHANNELS),
+        resample=False,
+        verbose=False,
+    )
+
+    path = str(tmpdir.mkdir("wav"))
+    files = [f"file{n}.wav" for n in range(num_files)]
+    files_abs = [os.path.join(path, file) for file in files]
+    for file in files_abs:
+        af.write(file, SIGNAL_2D, SAMPLING_RATE)
+
+    y = feature.process_folder(path)
+    assert all(y.index.levels[0] == files_abs)
 
 
 def test_process_func_args():

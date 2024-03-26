@@ -12,6 +12,27 @@ import audformat
 from audinterface.core import utils
 
 
+def identity(signal, sampling_rate, starts, ends) -> typing.List[np.ndarray]:
+    r"""Default processing function.
+
+    This function is used,
+    when ``ProcessWithContext`` is instantiated
+    with ``process_func=None``.
+    It returns all given segments.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        starts: start indices
+        ends: end indices
+
+    Returns:
+        list of segments
+
+    """
+    return [signal[:, start:end] for start, end in zip(starts, ends)]
+
+
 class ProcessWithContext:
     r"""Alternate processing interface that provides signal context.
 
@@ -105,14 +126,10 @@ class ProcessWithContext:
         if channels is not None:
             channels = audeer.to_list(channels)
 
-        if process_func is None:
-
-            def process_func(signal, _, starts, ends):
-                return [signal[:, start:end] for start, end in zip(starts, ends)]
-
         if resample and sampling_rate is None:
             raise ValueError("sampling_rate has to be provided for resample = True.")
 
+        process_func = process_func or identity
         signature = inspect.signature(process_func)
         self._process_func_signature = signature.parameters
         r"""Arguments present in processing function."""
