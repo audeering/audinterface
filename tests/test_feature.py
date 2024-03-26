@@ -416,6 +416,62 @@ def test_process_folder(
     )
 
 
+@pytest.mark.parametrize(
+    "num_files, num_workers, multiprocessing",
+    [
+        (
+            3,
+            1,
+            False,
+        ),
+        (
+            3,
+            2,
+            False,
+        ),
+        (
+            3,
+            2,
+            True,
+        ),
+        (
+            3,
+            None,
+            False,
+        ),
+        (
+            3,
+            1,
+            False,
+        ),
+    ],
+)
+def test_process_folder_default_process_func(
+    tmpdir,
+    num_files,
+    num_workers,
+    multiprocessing,
+):
+    feature_names = ["o1", "o2", "o3"]
+    feature = audinterface.Feature(
+        feature_names,
+        process_func=None,
+        sampling_rate=None,
+        channels=range(NUM_CHANNELS),
+        resample=False,
+        verbose=False,
+    )
+
+    path = str(tmpdir.mkdir("wav"))
+    files = [f"file{n}.wav" for n in range(num_files)]
+    files_abs = [os.path.join(path, file) for file in files]
+    for file in files_abs:
+        af.write(file, SIGNAL_2D, SAMPLING_RATE)
+
+    y = feature.process_folder(path)
+    assert all(y.index.levels[0] == files_abs)
+
+
 def test_process_func_args():
     def process_func(s, sr, arg1, arg2):
         assert arg1 == "foo"
