@@ -17,7 +17,7 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def identity(signal, sampling_rate):
+def identity(signal, sampling_rate) -> np.ndarray:
     r"""Default processing function.
 
     This function is used,

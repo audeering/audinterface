@@ -13,7 +13,7 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def signal_index(signal, sampling_rate, **kwargs):
+def signal_index(signal, sampling_rate, **kwargs) -> pd.MultiIndex:
     r"""Default segment process function.
 
     This function is used,
@@ -34,7 +34,13 @@ def signal_index(signal, sampling_rate, **kwargs):
     return utils.signal_index()
 
 
-def inverted_process_func(signal, sampling_rate, *, __process_func, **kwargs):
+def inverted_process_func(
+    signal,
+    sampling_rate,
+    *,
+    __process_func,
+    **kwargs,
+) -> pd.MultiIndex:
     r"""Inverted segment process function.
 
     This function is used,

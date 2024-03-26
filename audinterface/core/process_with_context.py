@@ -12,7 +12,7 @@ import audformat
 from audinterface.core import utils
 
 
-def identity(signal, sampling_rate, starts, ends):
+def identity(signal, sampling_rate, starts, ends) -> typing.List[np.ndarray]:
     r"""Default processing function.
 
     This function is used,
