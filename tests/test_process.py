@@ -30,12 +30,14 @@ class SignalObject(audobject.Object):
         return np.max(signal)
 
 
-SEGMENT = audinterface.Segment(
-    process_func=lambda x, sr: audinterface.utils.signal_index(
+def segment(signal, sampling_rate):
+    return audinterface.utils.signal_index(
         pd.to_timedelta(0),
-        pd.to_timedelta(x.shape[1] / sr, unit="s") / 2,
+        pd.to_timedelta(signal.shape[1] / sampling_rate, unit="s") / 2,
     )
-)
+
+
+SEGMENT = audinterface.Segment(process_func=segment)
 
 
 def signal_modification(signal, sampling_rate, subtract=False):
@@ -508,41 +510,10 @@ def test_process_files(
     )
 
 
-@pytest.mark.parametrize(
-    "num_files, segment, num_workers, multiprocessing",
-    [
-        (
-            3,
-            None,
-            1,
-            False,
-        ),
-        (
-            3,
-            None,
-            2,
-            False,
-        ),
-        (
-            3,
-            None,
-            2,
-            True,
-        ),
-        (
-            3,
-            None,
-            None,
-            False,
-        ),
-        (
-            3,
-            SEGMENT,
-            1,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_files", [3])
+@pytest.mark.parametrize("segment", [None, SEGMENT])
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 def test_process_folder(
     tmpdir,
     num_files,
@@ -595,24 +566,9 @@ def test_process_func_args():
     )
 
 
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 @pytest.mark.parametrize("preserve_index", [False, True])
-@pytest.mark.parametrize(
-    "num_workers, multiprocessing",
-    [
-        (
-            1,
-            False,
-        ),
-        (
-            2,
-            False,
-        ),
-        (
-            None,
-            False,
-        ),
-    ],
-)
 def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
     cache_root = os.path.join(tmpdir, "cache")
 
@@ -1069,23 +1025,8 @@ def test_process_signal(
     pd.testing.assert_series_equal(x, y)
 
 
-@pytest.mark.parametrize(
-    "num_workers, multiprocessing",
-    [
-        (
-            1,
-            False,
-        ),
-        (
-            2,
-            False,
-        ),
-        (
-            None,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 @pytest.mark.parametrize(
     "process_func, signal, sampling_rate, index",
     [

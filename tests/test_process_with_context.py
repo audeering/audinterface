@@ -35,11 +35,13 @@ def test_process_func_args():
     )
 
 
-def test_process_index(tmpdir):
+def test_process_index(tmpdir, num_workers, multiprocessing):
     process = audinterface.ProcessWithContext(
         process_func=None,
         sampling_rate=None,
         resample=False,
+        num_workers=num_workers,
+        multiprocessing=multiprocessing,
         verbose=False,
     )
 

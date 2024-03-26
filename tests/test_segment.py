@@ -82,27 +82,8 @@ def test_file(tmpdir):
     assert all(result.levels[2] == INDEX.levels[1] + pd.to_timedelta("1s"))
 
 
-@pytest.mark.parametrize(
-    "num_workers, multiprocessing",
-    [
-        (
-            1,
-            False,
-        ),
-        (
-            2,
-            False,
-        ),
-        (
-            2,
-            True,
-        ),
-        (
-            None,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 def test_folder(tmpdir, num_workers, multiprocessing):
     segment = audinterface.Segment(
         process_func=predefined_index,
@@ -131,27 +112,8 @@ def test_folder(tmpdir, num_workers, multiprocessing):
     pd.testing.assert_index_equal(index, audformat.filewise_index())
 
 
-@pytest.mark.parametrize(
-    "num_workers, multiprocessing",
-    [
-        (
-            1,
-            False,
-        ),
-        (
-            2,
-            False,
-        ),
-        (
-            2,
-            True,
-        ),
-        (
-            None,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 def test_folder_default_process_func(tmpdir, num_workers, multiprocessing):
     segment = audinterface.Segment(
         process_func=None,
@@ -169,29 +131,13 @@ def test_folder_default_process_func(tmpdir, num_workers, multiprocessing):
     assert len(result) == 0
 
 
-@pytest.mark.parametrize(
-    "num_workers, multiprocessing",
-    [
-        (
-            1,
-            False,
-        ),
-        (
-            2,
-            False,
-        ),
-        (
-            None,
-            False,
-        ),
-    ],
-)
-def test_index(tmpdir, num_workers, multiprocessing):
-    def process_func(x, sr):
-        dur = pd.to_timedelta(x.shape[-1] / sr, unit="s")
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+def test_index(tmpdir, num_workers):
+    def process_func(signal, sampling_rate):
+        duration = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
         return audinterface.utils.signal_index(
             "0.1s",
-            dur - pd.to_timedelta("0.1s"),
+            duration - pd.to_timedelta("0.1s"),
         )
 
     segment = audinterface.Segment(
@@ -199,7 +145,6 @@ def test_index(tmpdir, num_workers, multiprocessing):
         sampling_rate=None,
         resample=False,
         num_workers=num_workers,
-        multiprocessing=multiprocessing,
         verbose=False,
     )
 
@@ -288,7 +233,6 @@ def test_index(tmpdir, num_workers, multiprocessing):
         sampling_rate=None,
         resample=False,
         num_workers=num_workers,
-        multiprocessing=multiprocessing,
         verbose=False,
     )
 

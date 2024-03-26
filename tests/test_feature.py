@@ -18,12 +18,16 @@ NUM_FEATURES = 3
 NUM_FRAMES = 5
 SIGNAL_1D = np.ones((1, SAMPLING_RATE))
 SIGNAL_2D = np.ones((NUM_CHANNELS, SAMPLING_RATE))
-SEGMENT = audinterface.Segment(
-    process_func=lambda x, sr: audinterface.utils.signal_index(
+
+
+def segment(signal, sampling_rate):
+    return audinterface.utils.signal_index(
         pd.to_timedelta(0),
-        pd.to_timedelta(x.shape[1] / sr, unit="s") / 2,
+        pd.to_timedelta(signal.shape[1] / sampling_rate, unit="s") / 2,
     )
-)
+
+
+SEGMENT = audinterface.Segment(process_func=segment)
 
 
 def feature_extractor(signal, _):
@@ -330,36 +334,9 @@ def test_process_file(tmpdir, start, end, segment):
     np.testing.assert_array_equal(y, y_expected)
 
 
-@pytest.mark.parametrize(
-    "num_files, num_workers, multiprocessing",
-    [
-        (
-            3,
-            1,
-            False,
-        ),
-        (
-            3,
-            2,
-            False,
-        ),
-        (
-            3,
-            2,
-            True,
-        ),
-        (
-            3,
-            None,
-            False,
-        ),
-        (
-            3,
-            1,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_files", [3])
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 def test_process_folder(
     tmpdir,
     num_files,
@@ -416,36 +393,9 @@ def test_process_folder(
     )
 
 
-@pytest.mark.parametrize(
-    "num_files, num_workers, multiprocessing",
-    [
-        (
-            3,
-            1,
-            False,
-        ),
-        (
-            3,
-            2,
-            False,
-        ),
-        (
-            3,
-            2,
-            True,
-        ),
-        (
-            3,
-            None,
-            False,
-        ),
-        (
-            3,
-            1,
-            False,
-        ),
-    ],
-)
+@pytest.mark.parametrize("num_files", [3])
+@pytest.mark.parametrize("num_workers", [1, 2, None])
+@pytest.mark.parametrize("multiprocessing", [False, True])
 def test_process_folder_default_process_func(
     tmpdir,
     num_files,
