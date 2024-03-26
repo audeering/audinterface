@@ -14,17 +14,51 @@ from audinterface.core.typing import Timestamps
 
 
 def signal_index(signal, sampling_rate, **kwargs):
-    r"""Default segment function."""
+    r"""Default segment process function.
+
+    This function is used,
+    when ``Segment`` is instantiated
+    with ``process_func=None``.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        **kwargs: additional keyword arguments of the processing function
+
+    Returns:
+        index with segments
+
+    """
     return utils.signal_index()
 
 
-def signal_index_invert(signal, sampling_rate, **kwargs):
-    r"""Default inverted segment function."""
-    index = process_func(signal, sr, **kwargs)
-    dur = pd.to_timedelta(signal.shape[-1] / sr, unit="s")
+def inverted_process_func(signal, sampling_rate, *, __process_func, **kwargs):
+    r"""Inverted segment process function.
+
+    This function is used,
+    when ``Segment`` is instantiated
+    with ``invert=True``.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        __process_func: process func to invert.
+            Note, ``__process_func`` needs to be added to ``process_func_args``
+            before calling this function.
+            This means, a user cannot use ``__process_func``
+            as argument name
+            in ``process_func``
+        **kwargs: additional keyword arguments of the processing function
+
+    Returns:
+        index with segments
+
+    """
+    index = __process_func(signal, sampling_rate, **kwargs)
+    duration = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
     index = index.sortlevel("start")[0]
     index = merge_index(index)
-    index = invert_index(index, dur)
+    index = invert_index(index, duration)
     return index
 
 
@@ -210,7 +244,9 @@ class Segment:
             process_func = signal_index
 
         if invert:
-            process_func = signal_index_invert
+            process_func_args = process_func_args or {}
+            process_func_args["__process_func"] = process_func
+            process_func = inverted_process_func
 
         process = Process(
             process_func=process_func,
