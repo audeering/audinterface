@@ -19,6 +19,8 @@ def signal_index(signal, sampling_rate, **kwargs):
     This function is used,
     when ``Segment`` is instantiated
     with ``process_func=None``.
+    It returns an empty multi-index,
+    with levels ``start`` and ``end``.
 
     Args:
         signal: signal

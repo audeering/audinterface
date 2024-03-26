@@ -13,7 +13,23 @@ from audinterface.core import utils
 
 
 def identity(signal, sampling_rate, starts, ends):
-    r"""Default processing function."""
+    r"""Default processing function.
+
+    This function is used,
+    when ``ProcessWithContext`` is instantiated
+    with ``process_func=None``.
+    It returns all given segments.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+        starts: start indices
+        ends: end indices
+
+    Returns:
+        list of segments
+
+    """
     return [signal[:, start:end] for start, end in zip(starts, ends)]
 
 

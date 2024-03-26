@@ -18,7 +18,21 @@ from audinterface.core.typing import Timestamps
 
 
 def identity(signal, sampling_rate):
-    r"""Default processing function."""
+    r"""Default processing function.
+
+    This function is used,
+    when ``Process`` is instantiated
+    with ``process_func=None``.
+    It returns the given signal.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+
+    Returns:
+        signal
+
+    """
     return signal
 
 
