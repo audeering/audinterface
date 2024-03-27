@@ -7,6 +7,22 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.2.1 (2024/03/27)
+--------------------------
+
+* Changed: default value of
+  ``process_func_applies_sliding_window``
+  argument of ``audinterface.Feature``
+  from ``True`` to ``False``
+* Fixed: ``multiprocessing`` for
+  ``audinterface.Feature``,
+  ``audinterface.Process``,
+  ``audinterface.ProcessWithContext``,
+  ``audinterface.Segment``
+* Removed: deprecated ``unit`` argument
+  from ``audinterface.Feature``
+
+
 Version 1.2.0 (2024/03/21)
 --------------------------
 
