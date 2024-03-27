@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.0
+                v1.2.1
               </div>
             
           
@@ -156,29 +156,61 @@
 <span class="kn">from</span> <span class="nn">audinterface.core.typing</span> <span class="kn">import</span> <span class="n">Timestamps</span>
 
 
-<span class="k">def</span> <span class="nf">create_process_func</span><span class="p">(</span>
-    <span class="n">process_func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]],</span>
-    <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">]:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create processing function.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">signal_index</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Default segment process function.</span>
 
-        <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">()</span>
+<span class="sd">    This function is used,</span>
+<span class="sd">    when ``Segment`` is instantiated</span>
+<span class="sd">    with ``process_func=None``.</span>
+<span class="sd">    It returns an empty multi-index,</span>
+<span class="sd">    with levels ``start`` and ``end``.</span>
 
-    <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
+<span class="sd">    Args:</span>
+<span class="sd">        signal: signal</span>
+<span class="sd">        sampling_rate: sampling rate in Hz</span>
+<span class="sd">        **kwargs: additional keyword arguments of the processing function</span>
 
-        <span class="k">def</span> <span class="nf">process_func_invert</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">dur</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sr</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">sortlevel</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">merge_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">invert_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">dur</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">index</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        index with segments</span>
 
-        <span class="k">return</span> <span class="n">process_func_invert</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">process_func</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">signal_index</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">inverted_process_func</span><span class="p">(</span>
+    <span class="n">signal</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">__process_func</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Inverted segment process function.</span>
+
+<span class="sd">    This function is used,</span>
+<span class="sd">    when ``Segment`` is instantiated</span>
+<span class="sd">    with ``invert=True``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        signal: signal</span>
+<span class="sd">        sampling_rate: sampling rate in Hz</span>
+<span class="sd">        __process_func: process func to invert.</span>
+<span class="sd">            Note, ``__process_func`` needs to be added to ``process_func_args``</span>
+<span class="sd">            before calling this function.</span>
+<span class="sd">            This means, a user cannot use ``__process_func``</span>
+<span class="sd">            as argument name</span>
+<span class="sd">            in ``process_func``</span>
+<span class="sd">        **kwargs: additional keyword arguments of the processing function</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        index with segments</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">__process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">sortlevel</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">merge_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">invert_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index</span>
 
 
 <span class="k">def</span> <span class="nf">invert_index</span><span class="p">(</span>
@@ -359,8 +391,16 @@
         <span class="c1"># avoid cycling imports</span>
         <span class="kn">from</span> <span class="nn">audinterface.core.process</span> <span class="kn">import</span> <span class="n">Process</span>
 
+        <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">process_func</span> <span class="o">=</span> <span class="n">signal_index</span>
+
+        <span class="k">if</span> <span class="n">invert</span><span class="p">:</span>
+            <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">process_func_args</span><span class="p">[</span><span class="s2">&quot;__process_func&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_func</span>
+            <span class="n">process_func</span> <span class="o">=</span> <span class="n">inverted_process_func</span>
+
         <span class="n">process</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span>
-            <span class="n">process_func</span><span class="o">=</span><span class="n">create_process_func</span><span class="p">(</span><span class="n">process_func</span><span class="p">,</span> <span class="n">invert</span><span class="p">),</span>
+            <span class="n">process_func</span><span class="o">=</span><span class="n">process_func</span><span class="p">,</span>
             <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
             <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
             <span class="n">resample</span><span class="o">=</span><span class="n">resample</span><span class="p">,</span>
@@ -817,7 +857,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/27 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

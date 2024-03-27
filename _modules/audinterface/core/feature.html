@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.0
+                v1.2.1
               </div>
             
           
@@ -142,11 +142,9 @@
             
   <h1>Source code for audinterface.core.feature</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">errno</span>
-<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -161,34 +159,28 @@
 <span class="kn">import</span> <span class="nn">audinterface.core.utils</span> <span class="k">as</span> <span class="nn">utils</span>
 
 
-<span class="k">def</span> <span class="nf">deprecated_process_func_applies_sliding_window_default_value</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecate default value of process_func_applies_sliding_window.&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">num_channels</span><span class="p">,</span> <span class="n">num_features</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Default feature process function.</span>
 
-    <span class="k">def</span> <span class="nf">_deprecated</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-            <span class="n">argument</span> <span class="o">=</span> <span class="s2">&quot;process_func_applies_sliding_window&quot;</span>
-            <span class="n">change_in_version</span> <span class="o">=</span> <span class="s2">&quot;1.2.0&quot;</span>
-            <span class="n">default_value</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">new_default_value</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="s2">&quot;win_dur&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span>
-                <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;win_dur&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="ow">and</span> <span class="n">argument</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
-            <span class="p">):</span>
-                <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-                <span class="n">default_value</span> <span class="o">=</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">argument</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The default of &#39;</span><span class="si">{</span><span class="n">argument</span><span class="si">}</span><span class="s2">&#39; will change from &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">default_value</span><span class="si">}</span><span class="s2">&#39; to &#39;</span><span class="si">{</span><span class="n">new_default_value</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;with version </span><span class="si">{</span><span class="n">change_in_version</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="sd">    This function is used,</span>
+<span class="sd">    when ``Feature`` is instantiated</span>
+<span class="sd">    with ``process_func=None``.</span>
+<span class="sd">    It returns zeros for all channels and features.</span>
 
-        <span class="k">return</span> <span class="n">new_func</span>
+<span class="sd">    Args:</span>
+<span class="sd">        signal: signal</span>
+<span class="sd">        sampling_rate: sampling rate in Hz</span>
+<span class="sd">        num_channels: number of audio channels</span>
+<span class="sd">        num_features: number of features</span>
 
-    <span class="k">return</span> <span class="n">_deprecated</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        zeros with size ``(num_channels, num_features)``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">num_channels</span><span class="p">,</span> <span class="n">num_features</span><span class="p">),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="Feature"><a class="viewcode-back" href="../../../api/audinterface.Feature.html#audinterface.Feature">[docs]</a><span class="k">class</span> <span class="nc">Feature</span><span class="p">:</span>
@@ -355,7 +347,6 @@
 <span class="sd">        &gt;&gt;&gt; interface = Feature(</span>
 <span class="sd">        ...     [&quot;mean&quot;, &quot;std&quot;],</span>
 <span class="sd">        ...     process_func=mean_std,</span>
-<span class="sd">        ...     process_func_applies_sliding_window=False,</span>
 <span class="sd">        ...     win_dur=1.0,</span>
 <span class="sd">        ...     hop_dur=0.25,</span>
 <span class="sd">        ... )</span>
@@ -396,7 +387,6 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
 
-    <span class="nd">@deprecated_process_func_applies_sliding_window_default_value</span><span class="p">()</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">feature_names</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
@@ -406,7 +396,7 @@
         <span class="n">process_func</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">process_func_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">process_func_is_mono</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">process_func_applies_sliding_window</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">process_func_applies_sliding_window</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">resample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">channels</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -420,35 +410,7 @@
         <span class="n">num_workers</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">multiprocessing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="c1"># ------</span>
-        <span class="c1"># Handle deprecated &#39;unit&#39; keyword argument</span>
-        <span class="k">def</span> <span class="nf">add_unit</span><span class="p">(</span><span class="n">dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;samples&quot;</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">dur</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dur</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span>
-
-        <span class="k">if</span> <span class="s2">&quot;unit&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;&#39;unit&#39; argument is deprecated &quot;</span>
-                <span class="s2">&quot;and will be removed with version &#39;1.2.0&#39;.&quot;</span>
-                <span class="s2">&quot;The unit can now directly specified &quot;</span>
-                <span class="s2">&quot;within the &#39;win_dur&#39; and &#39;hop_dur&#39; arguments.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="n">message</span><span class="p">,</span>
-                <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">win_dur</span> <span class="o">=</span> <span class="n">add_unit</span><span class="p">(</span><span class="n">win_dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">hop_dur</span> <span class="o">=</span> <span class="n">add_unit</span><span class="p">(</span><span class="n">hop_dur</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-        <span class="c1"># ------</span>
-
         <span class="k">if</span> <span class="n">mixdown</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">num_channels</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
@@ -465,13 +427,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">column_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
 
+        <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">process_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">def</span> <span class="nf">process_func</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">num_channels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)),</span>
-                    <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">process_func_args</span><span class="p">[</span><span class="s2">&quot;num_channels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_channels</span>
+            <span class="n">process_func_args</span><span class="p">[</span><span class="s2">&quot;num_features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)</span>
+            <span class="n">process_func</span> <span class="o">=</span> <span class="n">zeros</span>
 
         <span class="k">if</span> <span class="n">win_dur</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hop_dur</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You have to specify &#39;win_dur&#39; if &#39;hop_dur&#39; is given.&quot;</span><span class="p">)</span>
@@ -480,7 +440,6 @@
 
         <span class="c1"># add &#39;win_dur&#39; and &#39;hop_dur&#39; to process_func_args</span>
         <span class="c1"># if expected by function but not yet set</span>
-        <span class="n">process_func_args</span> <span class="o">=</span> <span class="n">process_func_args</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">process_func</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;win_dur&quot;</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">and</span> <span class="s2">&quot;win_dur&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">process_func_args</span><span class="p">:</span>
             <span class="n">process_func_args</span><span class="p">[</span><span class="s2">&quot;win_dur&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">win_dur</span>
@@ -1099,7 +1058,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/27 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
