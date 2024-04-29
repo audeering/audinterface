@@ -582,10 +582,12 @@ class Segment:
                 ends.extend(index.get_level_values("end") + start)
                 labels.extend([[table.iloc[j].values] * len(index)])
             labels = np.vstack(labels)
+            if labels.shape == (1, 0):
+                labels = labels.squeeze()
 
         index = audformat.segmented_index(files, starts, ends)
 
-        if type(table) == pd.core.frame.Series:
+        if isinstance(table, pd.Series):
             table = pd.Series(labels, index, name=table.name)
         else:
             table = pd.DataFrame(labels, index, columns=table.columns)
