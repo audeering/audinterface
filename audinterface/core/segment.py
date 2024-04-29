@@ -513,8 +513,7 @@ class Segment:
         cache_root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Index:
-        r"""Segment files or segments from a table
-        (``pd.Series`` or ``pd.DataFrame``).
+        r"""Segment files or segments from a table.
 
         If ``cache_root`` is not ``None``,
         a hash value is created from the index
