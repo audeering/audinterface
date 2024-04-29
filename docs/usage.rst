@@ -391,6 +391,21 @@ would be a voice activity detection algorithm.
     idx = interface.process_file(files[0])
     idx
 
+Sometimes, it is required that a table (i.e., `pd.Series`
+or `pd.DataFrame`) is segmented and the ``labels`` from
+the original segments should be kept. For this,
+:class:`audinterface.Segment` has a dedicated method
+``process_table()``. This method is useful, if a
+segmentation (e.g., voice activity detection) is
+performed on an already labelled dataset in order
+to do data augmentation or teacher-student training,
+improving model performance for shorter chunks.
+
+.. jupyter-execute::
+
+    df_segmented = interface.process_table(df)
+    df_segmented
+
 
 Special processing function arguments
 -------------------------------------

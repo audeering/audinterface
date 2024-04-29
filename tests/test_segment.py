@@ -156,12 +156,15 @@ def test_index(tmpdir, num_workers):
     path = os.path.join(root, file)
     af.write(path, signal, sampling_rate)
 
-    # empty index
+    # empty index and table
     index = audformat.segmented_index()
     result = segment.process_index(index)
     assert result.empty
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     assert result.empty
+    table = audformat.Table(index)
+    result = segment.process_table(table.get())
+    assert result.index.empty
 
     # segmented index without file level
     index = audinterface.utils.signal_index(
@@ -191,6 +194,25 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
+    # segmented index with absolute paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [0, 1, 2]})
+    expected_series = pd.Series(table.get()["values"].values,
+                                index=expected,
+                                name="values",
+                                dtype=np.int64)
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["a", "b", "c"]})
+    expected_dataframe = pd.DataFrame(table_df.get().values,
+                                      index=expected,
+                                      columns=["values", "string"])
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
     # filewise index with absolute paths
     index = pd.Index([path], name="file")
     expected = audformat.segmented_index(path, "0.1s", "2.9s")
@@ -198,6 +220,25 @@ def test_index(tmpdir, num_workers):
     pd.testing.assert_index_equal(result, expected)
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
+
+    # filewise index with absolute paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [5]})
+    expected_series = pd.Series(table.get()["values"].values,
+                                index=expected,
+                                name="values",
+                                dtype=np.int64)
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["d"]})
+    expected_dataframe = pd.DataFrame(table_df.get().values,
+                                      index=expected,
+                                      columns=["values", "string"])
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
 
     # segmented index with relative paths
     index = audformat.segmented_index(
@@ -215,6 +256,25 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
+    # segmented index with relative paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [0, 1, 2]})
+    expected_series = pd.Series(table.get()["values"].values,
+                                index=expected,
+                                name="values",
+                                dtype=np.int64)
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["a", "b", "c"]})
+    expected_dataframe = pd.DataFrame(table_df.get().values,
+                                      index=expected,
+                                      columns=["values", "string"])
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
     # filewise index with relative paths
     index = pd.Index([file], name="file")
     expected = audformat.segmented_index(file, "0.1s", "2.9s")
@@ -223,7 +283,26 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
-    # empty index returned by process func
+    # filewise index with relative paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [5]})
+    expected_series = pd.Series(table.get()["values"].values,
+                                index=expected,
+                                name="values",
+                                dtype=np.int64)
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["d"]})
+    expected_dataframe = pd.DataFrame(table_df.get().values,
+                                      index=expected,
+                                      columns=["values", "string"])
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
+    # empty index / series / dataframe returned by process func
 
     def process_func(x, sr):
         return audinterface.utils.signal_index()
@@ -240,6 +319,16 @@ def test_index(tmpdir, num_workers):
     expected = audformat.segmented_index()
     result = segment.process_index(index)
     pd.testing.assert_index_equal(result, expected)
+
+    table = pd.Series([0], index)
+    expected_series = pd.Series([], expected, dtype=np.float64)
+    result = segment.process_table(table)
+    pd.testing.assert_series_equal(result, expected_series)
+
+    table_df = pd.DataFrame([0], index, columns=["col"])
+    expected_df = pd.DataFrame([], expected, columns=["col"], dtype=np.float64)
+    result = segment.process_table(table_df)
+    pd.testing.assert_frame_equal(result, expected_df)
 
 
 @pytest.mark.parametrize(
