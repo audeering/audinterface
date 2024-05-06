@@ -198,18 +198,17 @@ def test_index(tmpdir, num_workers):
     table = audformat.Table(index)
     table["values"] = audformat.Column()
     table.set({"values": [0, 1, 2]})
-    expected_series = pd.Series(table.get()["values"].values,
-                                index=expected,
-                                name="values",
-                                dtype=np.int64)
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+    )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["a", "b", "c"]})
-    expected_dataframe = pd.DataFrame(table_df.get().values,
-                                      index=expected,
-                                      columns=["values", "string"])
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -225,18 +224,17 @@ def test_index(tmpdir, num_workers):
     table = audformat.Table(index)
     table["values"] = audformat.Column()
     table.set({"values": [5]})
-    expected_series = pd.Series(table.get()["values"].values,
-                                index=expected,
-                                name="values",
-                                dtype=np.int64)
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+    )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["d"]})
-    expected_dataframe = pd.DataFrame(table_df.get().values,
-                                      index=expected,
-                                      columns=["values", "string"])
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -260,18 +258,17 @@ def test_index(tmpdir, num_workers):
     table = audformat.Table(index)
     table["values"] = audformat.Column()
     table.set({"values": [0, 1, 2]})
-    expected_series = pd.Series(table.get()["values"].values,
-                                index=expected,
-                                name="values",
-                                dtype=np.int64)
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+    )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["a", "b", "c"]})
-    expected_dataframe = pd.DataFrame(table_df.get().values,
-                                      index=expected,
-                                      columns=["values", "string"])
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -287,18 +284,17 @@ def test_index(tmpdir, num_workers):
     table = audformat.Table(index)
     table["values"] = audformat.Column()
     table.set({"values": [5]})
-    expected_series = pd.Series(table.get()["values"].values,
-                                index=expected,
-                                name="values",
-                                dtype=np.int64)
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+    )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["d"]})
-    expected_dataframe = pd.DataFrame(table_df.get().values,
-                                      index=expected,
-                                      columns=["values", "string"])
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 

@@ -545,8 +545,7 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        if (not isinstance(table, pd.Series) and
-           not isinstance(table, pd.DataFrame)):
+        if not isinstance(table, pd.Series) and not isinstance(table, pd.DataFrame):
             raise ValueError("table has to be pd.Series or pd.DataFrame")
 
         index = audformat.utils.to_segmented_index(table.index)
