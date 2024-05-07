@@ -352,7 +352,7 @@ def test_index_and_table(tmpdir, num_workers):
         process_func=process_func_increase,
         sampling_rate=None,
         resample=False,
-        num_workers=1,
+        num_workers=num_workers,
         verbose=False,
     )
     index = audformat.segmented_index(
