@@ -403,8 +403,9 @@ improving model performance for shorter chunks.
 
 .. jupyter-execute::
 
-    df_segmented = interface.process_table(df)
-    df_segmented
+    table = pd.DataFrame({"label": [i*2 for i in range(len(index))]}, index=index)
+    table_segmented = interface.process_table(table)
+    table_segmented
 
 
 Special processing function arguments
