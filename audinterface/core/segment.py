@@ -585,7 +585,7 @@ class Segment:
             if len(labels) > 0:
                 labels = np.vstack(labels)
             else:
-                labels = np.empty((0, table.shape[1]))
+                labels = np.empty((0, table.shape[1]))  # avoid issue below
 
         index = audformat.segmented_index(files, starts, ends)
 
@@ -593,7 +593,9 @@ class Segment:
             table = pd.Series(labels, index, name=table.name, dtype=dtype)
         else:
             labels = {
-                col: labels[:, icol].astype(dtypes[icol])
+                col: pd.Series(
+                    labels[:, icol], index=index, dtype=dtypes[icol]
+                )  # supports also category
                 for icol, col in enumerate(table.columns)
             }
             table = pd.DataFrame(labels, index)
