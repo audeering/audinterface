@@ -261,7 +261,7 @@ def test_index(tmpdir, num_workers):
     expected_series = pd.Series(
         table.get()["values"].values, index=expected, name="values", dtype=np.int64
     )
-    result = segment.process_table(table.get()["values"])
+    result = segment.process_table(table.get()["values"], root=root)
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
@@ -269,7 +269,7 @@ def test_index(tmpdir, num_workers):
     expected_dataframe = pd.DataFrame(
         table_df.get().values, index=expected, columns=["values", "string"]
     )
-    result = segment.process_table(table_df.get())
+    result = segment.process_table(table_df.get(), root=root)
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
     # filewise index with relative paths
@@ -287,7 +287,7 @@ def test_index(tmpdir, num_workers):
     expected_series = pd.Series(
         table.get()["values"].values, index=expected, name="values", dtype=np.int64
     )
-    result = segment.process_table(table.get()["values"])
+    result = segment.process_table(table.get()["values"], root=root)
     pd.testing.assert_series_equal(result, expected_series)
     table_df = table.copy()
     table_df["string"] = audformat.Column()
@@ -295,7 +295,7 @@ def test_index(tmpdir, num_workers):
     expected_dataframe = pd.DataFrame(
         table_df.get().values, index=expected, columns=["values", "string"]
     )
-    result = segment.process_table(table_df.get())
+    result = segment.process_table(table_df.get(), root=root)
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
     # empty index / series / dataframe returned by process func
