@@ -406,15 +406,20 @@ def test_index_and_table(tmpdir, num_workers):
         np.array([0, 1, 2], dtype=np.int64), index=index, name="values"
     )
     result_series = segment.process_table(table_series)
+    pd.testing.assert_series_equal(result_series, expected_series)
 
     table_df = pd.DataFrame(
         {"values": np.array([0, 1, 2], dtype=np.int64), "string": ["a", "b", "c"]},
         index=index,
     )
     result_df = segment.process_table(table_df)
-
-    pd.testing.assert_series_equal(result_series, expected_series)
     pd.testing.assert_frame_equal(result_df, expected_df)
+
+    # single-column dataframe
+    table_df1 = pd.DataFrame(table_series)
+    expected_df1 = pd.DataFrame(expected_series)
+    result_df1 = segment.process_table(table_df1)
+    pd.testing.assert_frame_equal(result_df1, expected_df1)
 
 
 @pytest.mark.parametrize(
