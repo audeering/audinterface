@@ -166,6 +166,10 @@ def test_index_and_table(tmpdir, num_workers):
     result = segment.process_table(table.get())
     assert result.index.empty
 
+    # non-table object for process_table()
+    with pytest.raises(ValueError):
+        segment.process_table(index)
+
     # segmented index without file level
     index = audinterface.utils.signal_index(
         pd.timedelta_range("0s", "2s", 3),
