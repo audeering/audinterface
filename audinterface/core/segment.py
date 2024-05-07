@@ -567,6 +567,7 @@ class Segment:
         ends = []
         labels = []
         if isinstance(table, pd.Series):
+            dtype = table.dtype
             for j, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
@@ -574,6 +575,7 @@ class Segment:
                 labels.extend([[table.iloc[j]] * len(index)])
             labels = np.hstack(labels)
         else:
+            dtypes = [table[col].dtype for col in table.columns]
             for j, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
@@ -586,9 +588,13 @@ class Segment:
         index = audformat.segmented_index(files, starts, ends)
 
         if isinstance(table, pd.Series):
-            table = pd.Series(labels, index, name=table.name)
+            table = pd.Series(labels, index, name=table.name, dtype=dtype)
         else:
-            table = pd.DataFrame(labels, index, columns=table.columns)
+            labels = {
+                col: labels[:, icol].astype(dtypes[icol])
+                for icol, col in enumerate(table.columns)
+            }
+            table = pd.DataFrame(labels, index)
 
         return table
 

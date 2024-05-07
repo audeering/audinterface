@@ -396,17 +396,25 @@ def test_index_and_table(tmpdir, num_workers):
         [2, "c"],
         [2, "c"],
     ]
-    expected = pd.DataFrame(
+
+    expected_df = pd.DataFrame(
         expected_values, index=expected_index, columns=["values", "string"]
     )
-    table = audformat.Table(index)
-    table["values"] = audformat.Column()
-    table.set({"values": [0, 1, 2]})
-    table["string"] = audformat.Column()
-    table.set({"string": ["a", "b", "c"]})
-    result = segment.process_table(table.get())
-    pd.testing.assert_frame_equal(result, expected, check_dtype=False)
-    # dtype check fails as int in table are object
+    expected_series = expected_df["values"]
+
+    table_series = pd.Series(
+        np.array([0, 1, 2], dtype=np.int64), index=index, name="values"
+    )
+    result_series = segment.process_table(table_series)
+
+    table_df = pd.DataFrame(
+        {"values": np.array([0, 1, 2], dtype=np.int64), "string": ["a", "b", "c"]},
+        index=index,
+    )
+    result_df = segment.process_table(table_df)
+
+    pd.testing.assert_series_equal(result_series, expected_series)
+    pd.testing.assert_frame_equal(result_df, expected_df)
 
 
 @pytest.mark.parametrize(
