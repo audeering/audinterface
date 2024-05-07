@@ -203,7 +203,7 @@ def test_index_and_table(tmpdir, num_workers):
     table["values"] = audformat.Column()
     table.set({"values": [0, 1, 2]})
     expected_series = pd.Series(
-        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+        table.get()["values"].values, index=expected, name="values"
     )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
@@ -229,7 +229,7 @@ def test_index_and_table(tmpdir, num_workers):
     table["values"] = audformat.Column()
     table.set({"values": [5]})
     expected_series = pd.Series(
-        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+        table.get()["values"].values, index=expected, name="values"
     )
     result = segment.process_table(table.get()["values"])
     pd.testing.assert_series_equal(result, expected_series)
@@ -263,7 +263,7 @@ def test_index_and_table(tmpdir, num_workers):
     table["values"] = audformat.Column()
     table.set({"values": [0, 1, 2]})
     expected_series = pd.Series(
-        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+        table.get()["values"].values, index=expected, name="values"
     )
     result = segment.process_table(table.get()["values"], root=root)
     pd.testing.assert_series_equal(result, expected_series)
@@ -289,7 +289,7 @@ def test_index_and_table(tmpdir, num_workers):
     table["values"] = audformat.Column()
     table.set({"values": [5]})
     expected_series = pd.Series(
-        table.get()["values"].values, index=expected, name="values", dtype=np.int64
+        table.get()["values"].values, index=expected, name="values"
     )
     result = segment.process_table(table.get()["values"], root=root)
     pd.testing.assert_series_equal(result, expected_series)
@@ -321,12 +321,12 @@ def test_index_and_table(tmpdir, num_workers):
     pd.testing.assert_index_equal(result, expected)
 
     table = pd.Series([0], index)
-    expected_series = pd.Series([], expected, dtype=np.float64)
+    expected_series = pd.Series([], expected)
     result = segment.process_table(table)
     pd.testing.assert_series_equal(result, expected_series)
 
     table_df = pd.DataFrame([0], index, columns=["col"])
-    expected_df = pd.DataFrame([], expected, columns=["col"], dtype=np.float64)
+    expected_df = pd.DataFrame([], expected, columns=["col"])
     result = segment.process_table(table_df)
     pd.testing.assert_frame_equal(result, expected_df)
 
