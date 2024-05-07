@@ -330,6 +330,84 @@ def test_index_and_table(tmpdir, num_workers):
     result = segment.process_table(table_df)
     pd.testing.assert_frame_equal(result, expected_df)
 
+    # correct assignment of labels if output has more segments
+    def process_func_increase(signal, sampling_rate, chunk_len=0.4):
+        duration = signal.shape[-1] / sampling_rate
+        chunks = []
+        for i in range(int(duration // chunk_len) + 1):
+            chunks.append((i * chunk_len, np.min([(i + 1) * chunk_len, duration])))
+        index = pd.MultiIndex.from_tuples(
+            [
+                (
+                    pd.Timedelta(start, unit="s"),
+                    pd.Timedelta(end, unit="s"),
+                )
+                for start, end in chunks
+            ],
+            names=["start", "end"],
+        )
+        return index
+
+    segment = audinterface.Segment(
+        process_func=process_func_increase,
+        sampling_rate=None,
+        resample=False,
+        num_workers=1,
+        verbose=False,
+    )
+    index = audformat.segmented_index(
+        [path] * 3,
+        pd.timedelta_range("0s", "2s", 3),
+        pd.timedelta_range("1s", "3s", 3),
+    )
+    expected_index = audformat.segmented_index(
+        [path] * 9,
+        [
+            pd.to_timedelta("0.0s"),
+            pd.to_timedelta("0.4s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.4s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.4s"),
+            pd.to_timedelta("2.8s"),
+        ],
+        [
+            pd.to_timedelta("0.4s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.4s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.4s"),
+            pd.to_timedelta("2.8s"),
+            pd.to_timedelta("3.0s"),
+        ],
+    )
+    expected_values = [
+        [0, "a"],
+        [0, "a"],
+        [0, "a"],
+        [1, "b"],
+        [1, "b"],
+        [1, "b"],
+        [2, "c"],
+        [2, "c"],
+        [2, "c"],
+    ]
+    expected = pd.DataFrame(
+        expected_values, index=expected_index, columns=["values", "string"]
+    )
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [0, 1, 2]})
+    table["string"] = audformat.Column()
+    table.set({"string": ["a", "b", "c"]})
+    result = segment.process_table(table.get())
+    pd.testing.assert_frame_equal(result, expected, check_dtype=False)
+    # dtype check fails as int in table are object
+
 
 @pytest.mark.parametrize(
     "signal, sampling_rate, segment_func, result",
