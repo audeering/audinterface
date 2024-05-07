@@ -132,7 +132,7 @@ def test_folder_default_process_func(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize("num_workers", [1, 2, None])
-def test_index(tmpdir, num_workers):
+def test_index_and_table(tmpdir, num_workers):
     def process_func(signal, sampling_rate):
         duration = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
         return audinterface.utils.signal_index(
