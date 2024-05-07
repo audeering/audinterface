@@ -326,7 +326,7 @@ def test_index_and_table(tmpdir, num_workers):
     pd.testing.assert_series_equal(result, expected_series)
 
     table_df = pd.DataFrame([0], index, columns=["col"])
-    expected_df = pd.DataFrame([], expected, columns=["col"])
+    expected_df = pd.DataFrame([], expected, columns=["col"], dtype=np.int64)
     result = segment.process_table(table_df)
     pd.testing.assert_frame_equal(result, expected_df)
 
