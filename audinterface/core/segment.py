@@ -515,6 +515,9 @@ class Segment:
     ) -> typing.Union[pd.Series, pd.DataFrame]:
         r"""Segment files or segments from a table.
 
+        The labels of the table
+        are reassigned to the new segments.
+
         If ``cache_root`` is not ``None``,
         a hash value is created from the index
         using :func:`audformat.utils.hash` and
@@ -570,7 +573,6 @@ class Segment:
         ends = []
         labels = []
         if isinstance(table, pd.Series):
-            dtype = table.dtype
             for j, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
@@ -578,7 +580,6 @@ class Segment:
                 labels.extend([[table.iloc[j]] * len(index)])
             labels = np.hstack(labels)
         else:
-            dtypes = [table[col].dtype for col in table.columns]
             for j, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
@@ -593,8 +594,10 @@ class Segment:
         index = audformat.segmented_index(files, starts, ends)
 
         if isinstance(table, pd.Series):
+            dtype = table.dtype
             table = pd.Series(labels, index, name=table.name, dtype=dtype)
         else:
+            dtypes = [table[col].dtype for col in table.columns]
             labels = {
                 col: pd.Series(
                     labels[:, icol], index=index, dtype=dtypes[icol]
