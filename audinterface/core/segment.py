@@ -573,19 +573,19 @@ class Segment:
         ends = []
         labels = []
         if isinstance(table, pd.Series):
-            for j, ((file, start, _), index) in enumerate(y.items()):
+            for n, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
                 ends.extend(index.get_level_values("end") + start)
-                labels.extend([[table.iloc[j]] * len(index)])
+                labels.extend([[table.iloc[n]] * len(index)])
             labels = np.hstack(labels)
         else:
-            for j, ((file, start, _), index) in enumerate(y.items()):
+            for n, ((file, start, _), index) in enumerate(y.items()):
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
                 ends.extend(index.get_level_values("end") + start)
                 if len(index) > 0:  # avoid issues when stacking 0-length dataframes
-                    labels.extend([[table.iloc[j].values] * len(index)])
+                    labels.extend([[table.iloc[n].values] * len(index)])
             if len(labels) > 0:
                 labels = np.vstack(labels)
             else:
@@ -600,9 +600,9 @@ class Segment:
             dtypes = [table[col].dtype for col in table.columns]
             labels = {
                 col: pd.Series(
-                    labels[:, icol], index=index, dtype=dtypes[icol]
+                    labels[:, ncol], index=index, dtype=dtypes[ncol]
                 )  # supports also category
-                for icol, col in enumerate(table.columns)
+                for ncol, col in enumerate(table.columns)
             }
             table = pd.DataFrame(labels, index)
 
