@@ -538,7 +538,8 @@ class Segment:
             Segmented table with an index conform to audformat_
 
         Raises:
-            RuntimeError: if table has a wrong type
+            ValueError: if table is not a :class:`pandas.Series`
+                or a :class:`pandas.DataFrame`
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
