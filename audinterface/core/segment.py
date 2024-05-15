@@ -563,6 +563,8 @@ class Segment:
             process_func_args=process_func_args,
         )
 
+        # Assign labels from the original table
+        # to the newly created segments
         files = []
         starts = []
         ends = []
