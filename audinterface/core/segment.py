@@ -524,7 +524,7 @@ class Segment:
         results will be read from the cached file.
 
         Args:
-            table: ``pd.Series`` or ``pd.DataFrame``
+            table: :class:`pandas.Series` or :class:`pandas.DataFrame`
                 with an index conform to audformat_
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
