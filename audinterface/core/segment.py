@@ -512,7 +512,7 @@ class Segment:
         root: str = None,
         cache_root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Index:
+    ) -> typing.Union[pd.Series, pd.DataFrame]:
         r"""Segment files or segments from a table.
 
         If ``cache_root`` is not ``None``,
