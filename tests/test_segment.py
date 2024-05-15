@@ -167,7 +167,8 @@ def test_index_and_table(tmpdir, num_workers):
     assert result.index.empty
 
     # non-table object for process_table()
-    with pytest.raises(ValueError):
+    error_msg = "table has to be pd.Series or pd.DataFrame"
+    with pytest.raises(ValueError, match=error_msg):
         segment.process_table(index)
 
     # segmented index without file level
