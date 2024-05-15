@@ -5,21 +5,25 @@
 
     import pandas as pd
 
+    import audformat
 
-    def dataframe_to_html(df):
+    def dataframe_to_html(df_original):
         # Replace beginning of data path with ...
+        df = df_original.copy()
         if len(df.index) > 0 and df.index.names[0] == "file":
             old_path = r".+/audb/emodb/1.3.0/d3b62a9b/wav/"
             new_path = r".../"
-            # Assuming segmented index
-            df.index = df.index.set_levels(
-                df.index.levels[0].str.replace(
-                    old_path,
-                    new_path,
-                    regex=True,
-                ),
-                level=0,
-            )
+            if audformat.is_segmented_index(df.index):
+                df.index = df.index.set_levels(
+                    df.index.levels[0].str.replace(
+                        old_path,
+                        new_path,
+                        regex=True,
+                    ),
+                    level=0,
+                )
+            else:
+                df.index = df.index.str.replace(old_path, new_path, regex=True)
 
         return df.to_html(max_rows=6, max_cols=4)
 
