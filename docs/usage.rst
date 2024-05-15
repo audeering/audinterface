@@ -410,6 +410,10 @@ or teacher-student training.
 .. jupyter-execute::
 
     table = pd.DataFrame({"label": [i*2 for i in range(len(index))]}, index=index)
+    table
+    
+.. jupyter-execute::
+
     table_segmented = interface.process_table(table)
     table_segmented
 
