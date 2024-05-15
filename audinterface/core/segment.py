@@ -584,7 +584,7 @@ class Segment:
                 files.extend([file] * len(index))
                 starts.extend(index.get_level_values("start") + start)
                 ends.extend(index.get_level_values("end") + start)
-                if len(index) > 0:  # avoid issues when stacking 2D 0-len
+                if len(index) > 0:  # avoid issues when stacking 0-length dataframes
                     labels.extend([[table.iloc[j].values] * len(index)])
             if len(labels) > 0:
                 labels = np.vstack(labels)
