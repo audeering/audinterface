@@ -332,11 +332,15 @@ def test_index_and_table(tmpdir, num_workers):
     pd.testing.assert_frame_equal(result, expected_df)
 
     # correct assignment of labels if output has more segments
-    def process_func_increase(signal, sampling_rate, chunk_len=0.4):
+    def process_func_increase(signal, sampling_rate, chunk_len=0.4, chunk_step=0.4):
         duration = signal.shape[-1] / sampling_rate
         chunks = []
-        for i in range(int(duration // chunk_len) + 1):
-            chunks.append((i * chunk_len, np.min([(i + 1) * chunk_len, duration])))
+        for i in range(
+            int((duration - chunk_len + chunk_step - 1e-4) // chunk_step) + 1
+        ):
+            chunks.append(
+                (i * chunk_step, np.min([i * chunk_step + chunk_len, duration]))
+            )
         index = pd.MultiIndex.from_tuples(
             [
                 (
@@ -398,6 +402,59 @@ def test_index_and_table(tmpdir, num_workers):
         [2, "c"],
     ]
 
+    expected_df = pd.DataFrame(
+        expected_values, index=expected_index, columns=["values", "string"]
+    )
+    expected_series = expected_df["values"]
+
+    table_series = pd.Series(
+        np.array([0, 1, 2], dtype=np.int64), index=index, name="values"
+    )
+    result_series = segment.process_table(table_series)
+    pd.testing.assert_series_equal(result_series, expected_series)
+
+    table_df = pd.DataFrame(
+        {"values": np.array([0, 1, 2], dtype=np.int64), "string": ["a", "b", "c"]},
+        index=index,
+    )
+    result_df = segment.process_table(table_df)
+    pd.testing.assert_frame_equal(result_df, expected_df)
+
+    # correct assignment of labels if output has more and overlapping segments
+    segment = audinterface.Segment(
+        process_func=process_func_increase,
+        process_func_args={"chunk_len": 0.5, "chunk_step": 0.3},
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        verbose=False,
+    )
+
+    expected_index = audformat.segmented_index(
+        [path] * 9,
+        [
+            pd.to_timedelta("0.0s"),
+            pd.to_timedelta("0.3s"),
+            pd.to_timedelta("0.6s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.3s"),
+            pd.to_timedelta("1.6s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.3s"),
+            pd.to_timedelta("2.6s"),
+        ],
+        [
+            pd.to_timedelta("0.5s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.5s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.5s"),
+            pd.to_timedelta("2.8s"),
+            pd.to_timedelta("3.0s"),
+        ],
+    )
     expected_df = pd.DataFrame(
         expected_values, index=expected_index, columns=["values", "string"]
     )
