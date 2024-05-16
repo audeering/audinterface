@@ -1,5 +1,5 @@
 audeer >=1.21.0
-audb
+git+https://github.com/audeering/audb.git@fix-old-cache
 audobject >=0.7.5
 pytest
 pytest-doctestplus
