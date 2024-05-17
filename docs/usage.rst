@@ -1,53 +1,8 @@
-.. Specify pandas format output in cells
-.. jupyter-execute::
-    :hide-code:
-    :hide-output:
-
-    import pandas as pd
-
-    import audformat
-
-    def dataframe_to_html(df_original):
-        # Replace beginning of data path with ...
-        df = df_original.copy()
-        if len(df.index) > 0 and df.index.names[0] == "file":
-            old_path = r".+/audb/emodb/1.3.0/d3b62a9b/wav/"
-            new_path = r".../"
-            if audformat.is_segmented_index(df.index):
-                df.index = df.index.set_levels(
-                    df.index.levels[0].str.replace(
-                        old_path,
-                        new_path,
-                        regex=True,
-                    ),
-                    level=0,
-                )
-            else:
-                df.index = df.index.str.replace(old_path, new_path, regex=True)
-
-        return df.to_html(max_rows=6, max_cols=4)
-
-
-    def series_to_html(y):
-        df = y.to_frame()
-        df.columns = [""]
-        return dataframe_to_html(df)
-
-
-    def index_to_html(index):
-        df = pd.DataFrame(index=index)
-        return dataframe_to_html(df)
-
-
-    setattr(pd.Series, "_repr_html_", series_to_html)
-    setattr(pd.Index, "_repr_html_", index_to_html)
-    setattr(pd.DataFrame, "_repr_html_", dataframe_to_html)
-
 .. Specify version for storing and loading objects to YAML
-.. jupyter-execute::
-    :hide-code:
 
-    __version__ = "1.0.0"
+   invisible-code-block: python
+
+    >>> __version__ = "1.0.0"
 
 
 Usage
@@ -74,7 +29,7 @@ and define a list of files,
 a folder,
 and an index.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audb
     import os
@@ -90,7 +45,6 @@ and an index.
         media=media,
         verbose=False,
     )
-
     files = list(db.files)
     folder = os.path.dirname(files[0])
     index = db["emotion"].index
@@ -104,7 +58,7 @@ value in dB.
 We first define the function
 and create an interface for it using :class:`audinterface.Process`.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audinterface
     import numpy as np
@@ -119,26 +73,59 @@ apply the algorithm
 and all return the same result
 as a :class:`pandas.Series`.
 
-.. jupyter-execute::
+.. doctest::
 
-    y = interface.process_files(files)
-    y = interface.process_folder(folder)
-    y = interface.process_index(index)
-    y
+    >>> interface.process_files(files)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    file             start   end
+    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
+    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+    dtype: float64
+
+.. doctest::
+
+    >>> interface.process_folder(folder)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    file             start   end
+    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
+    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+    dtype: float64
+
+.. doctest::
+
+    >>> interface.process_index(index)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+    file             start   end
+    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
+    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+    dtype: float64
 
 To calculate RMS with a sliding window,
 we create a new interface
 and set a window and hop duration.
 
-.. jupyter-execute::
+.. testcode::
 
     interface = audinterface.Process(
         process_func=rms,
         win_dur=1.0,
         hop_dur=0.5,
     )
-    y = interface.process_files(files)
-    y
+    interface.process_files(files)
+
+.. testoutput::
+
+    file             start                   end
+    .../03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.165248
+                     0 days 00:00:00.500000  0 days 00:00:01.500000   -23.472970
+    .../03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.386614
+                     0 days 00:00:00.500000  0 days 00:00:01.500000   -19.502597
+    .../16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.733990
+                     0 days 00:00:00.500000  0 days 00:00:01.500000   -20.233054
+                     0 days 00:00:01         0 days 00:00:02          -18.856522
+                     0 days 00:00:01.500000  0 days 00:00:02.500000   -20.403574
+    dtype: float64
+
 
 Feature interface
 -----------------
@@ -148,7 +135,7 @@ it is recommended to use :class:`audinterface.Feature`,
 which returns a :class:`pandas.DataFrame`
 and assigns names to the dimensions/features.
 
-.. jupyter-execute::
+.. testcode::
 
     def features(signal, sampling_rate):
         return [signal.mean(), signal.std()]
@@ -159,7 +146,11 @@ and assigns names to the dimensions/features.
     )
 
     df = interface.process_index(index)
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 To calculate features with a sliding window,
 we create a new interface
@@ -169,7 +160,7 @@ By setting
 the windowing is automatically handled
 and single frames are passed on to the processing function.
 
-.. jupyter-execute::
+.. testcode::
 
     interface = audinterface.Feature(
         ["mean", "std"],
@@ -179,8 +170,11 @@ and single frames are passed on to the processing function.
         hop_dur=0.5,
     )
     df = interface.process_files(files)
-    df
 
+.. doctest::
+
+    >>> df
+    bla
 
 Feature interface for multi-channel input
 -----------------------------------------
@@ -192,7 +186,7 @@ We can prove this
 by running the previous interface
 on the following multi-channel signal.
 
-.. jupyter-execute::
+.. testcode::
 
     import audiofile
 
@@ -208,15 +202,23 @@ on the following multi-channel signal.
             signal + 0.5,
         ],
     )
-    signal_multi_channel.shape
 
-.. jupyter-execute::
+.. doctest::
+
+    >>> signal_multi_channel.shape
+    (4, 30372)
+
+.. testcode::
 
     df = interface.process_signal(
         signal_multi_channel,
         sampling_rate,
     )
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 To process the second and fourth channel,
 we create a new interface
@@ -232,7 +234,7 @@ the processing function must
 return an array with the correct
 number of channels (here 2).
 
-.. jupyter-execute::
+.. code-block::
 
     interface_multi_channel = audinterface.Feature(
         ["mean", "std"],
@@ -248,14 +250,19 @@ number of channels (here 2).
         signal_multi_channel,
         sampling_rate,
     )
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 We can access the features of a specific
 channel by its index.
 
-.. jupyter-execute::
+.. doctest::
 
-    df[3]
+    >>> df[3]
+    bla
 
 
 Feature interface for external function
@@ -277,7 +284,7 @@ and returning the values in the correct shape,
 namely ``(num_channels, num_features, num_frames)``,
 whereas the first dimension is optionally.
 
-.. jupyter-execute::
+.. testcode::
 
     import librosa
 
@@ -303,7 +310,11 @@ whereas the first dimension is optionally.
         hop_dur=0.01,
     )
     df = interface.process_index(index)
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 
 Serializable feature interface
@@ -320,7 +331,7 @@ we create a class that inherits
 from :class:`audinterface.Feature`
 and :class:`audobject.Object`.
 
-.. jupyter-execute::
+.. testcode::
 
     import audobject
 
@@ -337,18 +348,26 @@ and :class:`audobject.Object`.
 
     fex = MeanStd()
     df = fex.process_index(index)
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 The advantage of the feature extraction object is
 that we can save it to a YAML file
 and re-instantiate it from there.
 
-.. jupyter-execute::
+.. testcode::
 
     fex.to_yaml("mean-std.yaml")
     fex2 = audobject.from_yaml("mean-std.yaml")
     df = fex2.process_index(index)
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 
 Segmentation interface
@@ -360,7 +379,7 @@ which returns a segmented index conform to audformat_.
 An example for such a processing function
 would be a voice activity detection algorithm.
 
-.. jupyter-execute::
+.. testcode::
 
     import auditok
 
@@ -393,7 +412,11 @@ would be a voice activity detection algorithm.
 
     interface = audinterface.Segment(process_func=segments)
     idx = interface.process_file(files[0])
-    idx
+
+.. doctest::
+
+    >>> idx
+    bla
 
 Sometimes,
 it is required that a table
@@ -443,14 +466,17 @@ The following processing function
 returns the values of
 ``"idx"`` and ``"file"``.
 
-.. jupyter-execute::
+.. testcode::
 
     def special_args(signal, sampling_rate, idx, file):
         return idx, os.path.basename(file)
 
     interface = audinterface.Process(process_func=special_args)
     y = interface.process_files(files)
-    y
+
+.. doctest::
+
+    >>> y
 
 For instance,
 we can pass a list with gender labels
@@ -458,7 +484,7 @@ to the processing function
 and use the running index
 to select the appropriate f0 range.
 
-.. jupyter-execute::
+.. testcode::
 
     gender = db["files"]["speaker"].get(map="gender")  # gender per file
     f0_range = {
@@ -485,7 +511,11 @@ to select the appropriate f0 range.
         },
     )
     df = interface.process_index(gender.index)
-    df
+
+.. doctest::
+
+    >>> df
+    bla
 
 
 .. _audformat: https://audeering.github.io/audformat/
