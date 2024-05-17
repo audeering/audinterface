@@ -413,7 +413,7 @@ or teacher-student training.
 
 .. jupyter-execute::
 
-    table = pd.DataFrame({"label": [i*2 for i in range(len(index))]}, index=index)
+    table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
     table
     
 .. jupyter-execute::
