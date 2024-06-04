@@ -5,21 +5,25 @@
 
     import pandas as pd
 
+    import audformat
 
-    def dataframe_to_html(df):
+    def dataframe_to_html(df_original):
         # Replace beginning of data path with ...
+        df = df_original.copy()
         if len(df.index) > 0 and df.index.names[0] == "file":
             old_path = r".+/audb/emodb/1.3.0/d3b62a9b/wav/"
             new_path = r".../"
-            # Assuming segmented index
-            df.index = df.index.set_levels(
-                df.index.levels[0].str.replace(
-                    old_path,
-                    new_path,
-                    regex=True,
-                ),
-                level=0,
-            )
+            if audformat.is_segmented_index(df.index):
+                df.index = df.index.set_levels(
+                    df.index.levels[0].str.replace(
+                        old_path,
+                        new_path,
+                        regex=True,
+                    ),
+                    level=0,
+                )
+            else:
+                df.index = df.index.str.replace(old_path, new_path, regex=True)
 
         return df.to_html(max_rows=6, max_cols=4)
 
@@ -390,6 +394,32 @@ would be a voice activity detection algorithm.
     interface = audinterface.Segment(process_func=segments)
     idx = interface.process_file(files[0])
     idx
+
+Sometimes,
+it is required that a table
+(i.e., :class:`pandas.Series` or :class`pandas.DataFrame`)
+is segmented
+and the ``labels`` from the original segments
+should be kept.
+For this,
+:class:`audinterface.Segment` has a dedicated method
+:meth:`process_table() <audinterface.Segment.process_table>`.
+This method is useful,
+if a segmentation
+(e.g., voice activity detection)
+is performed on an already labelled dataset
+in order to do data augmentation
+or teacher-student training.
+
+.. jupyter-execute::
+
+    table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
+    table
+    
+.. jupyter-execute::
+
+    table_segmented = interface.process_table(table)
+    table_segmented
 
 
 Special processing function arguments

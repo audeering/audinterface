@@ -505,6 +505,109 @@ class Segment:
 
         return audformat.segmented_index(files, starts, ends)
 
+    def process_table(
+        self,
+        table: typing.Union[pd.Series, pd.DataFrame],
+        *,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Union[pd.Series, pd.DataFrame]:
+        r"""Segment files or segments from a table.
+
+        The labels of the table
+        are reassigned to the new segments.
+
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        results will be read from the cached file.
+
+        Args:
+            table: :class:`pandas.Series` or :class:`pandas.DataFrame`
+                with an index conform to audformat_
+            root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Segment.process.process_func_args`
+
+        Returns:
+            Segmented table with an index conform to audformat_
+
+        Raises:
+            ValueError: if table is not a :class:`pandas.Series`
+                or a :class:`pandas.DataFrame`
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        if not isinstance(table, pd.Series) and not isinstance(table, pd.DataFrame):
+            raise ValueError("table has to be pd.Series or pd.DataFrame")
+
+        index = audformat.utils.to_segmented_index(table.index)
+        utils.assert_index(index)
+
+        if index.empty:
+            return table
+
+        y = self.process.process_index(
+            index,
+            preserve_index=False,
+            root=root,
+            cache_root=cache_root,
+            process_func_args=process_func_args,
+        )
+
+        # Assign labels from the original table
+        # to the newly created segments
+        files = []
+        starts = []
+        ends = []
+        labels = []
+        if isinstance(table, pd.Series):
+            for n, ((file, start, _), index) in enumerate(y.items()):
+                files.extend([file] * len(index))
+                starts.extend(index.get_level_values("start") + start)
+                ends.extend(index.get_level_values("end") + start)
+                labels.extend([[table.iloc[n]] * len(index)])
+            labels = np.hstack(labels)
+        else:
+            for n, ((file, start, _), index) in enumerate(y.items()):
+                files.extend([file] * len(index))
+                starts.extend(index.get_level_values("start") + start)
+                ends.extend(index.get_level_values("end") + start)
+                if len(index) > 0:  # avoid issues when stacking 0-length dataframes
+                    labels.extend([[table.iloc[n].values] * len(index)])
+            if len(labels) > 0:
+                labels = np.vstack(labels)
+            else:
+                labels = np.empty((0, table.shape[1]))  # avoid issue below
+
+        index = audformat.segmented_index(files, starts, ends)
+
+        if isinstance(table, pd.Series):
+            dtype = table.dtype
+            table = pd.Series(labels, index, name=table.name, dtype=dtype)
+        else:
+            dtypes = [table[col].dtype for col in table.columns]
+            labels = {
+                col: pd.Series(
+                    labels[:, ncol], index=index, dtype=dtypes[ncol]
+                )  # supports also category
+                for ncol, col in enumerate(table.columns)
+            }
+            table = pd.DataFrame(labels, index)
+
+        return table
+
     def process_signal(
         self,
         signal: np.ndarray,

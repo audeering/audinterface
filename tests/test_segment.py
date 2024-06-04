@@ -132,7 +132,7 @@ def test_folder_default_process_func(tmpdir, num_workers, multiprocessing):
 
 
 @pytest.mark.parametrize("num_workers", [1, 2, None])
-def test_index(tmpdir, num_workers):
+def test_index_and_table(tmpdir, num_workers):
     def process_func(signal, sampling_rate):
         duration = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
         return audinterface.utils.signal_index(
@@ -156,12 +156,20 @@ def test_index(tmpdir, num_workers):
     path = os.path.join(root, file)
     af.write(path, signal, sampling_rate)
 
-    # empty index
+    # empty index and table
     index = audformat.segmented_index()
     result = segment.process_index(index)
     assert result.empty
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     assert result.empty
+    table = audformat.Table(index)
+    result = segment.process_table(table.get())
+    assert result.index.empty
+
+    # non-table object for process_table()
+    error_msg = "table has to be pd.Series or pd.DataFrame"
+    with pytest.raises(ValueError, match=error_msg):
+        segment.process_table(index)
 
     # segmented index without file level
     index = audinterface.utils.signal_index(
@@ -191,6 +199,24 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
+    # segmented index with absolute paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [0, 1, 2]})
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values"
+    )
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["a", "b", "c"]})
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
     # filewise index with absolute paths
     index = pd.Index([path], name="file")
     expected = audformat.segmented_index(path, "0.1s", "2.9s")
@@ -198,6 +224,24 @@ def test_index(tmpdir, num_workers):
     pd.testing.assert_index_equal(result, expected)
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
+
+    # filewise index with absolute paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [5]})
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values"
+    )
+    result = segment.process_table(table.get()["values"])
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["d"]})
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
+    result = segment.process_table(table_df.get())
+    pd.testing.assert_frame_equal(result, expected_dataframe)
 
     # segmented index with relative paths
     index = audformat.segmented_index(
@@ -215,6 +259,24 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
+    # segmented index with relative paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [0, 1, 2]})
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values"
+    )
+    result = segment.process_table(table.get()["values"], root=root)
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["a", "b", "c"]})
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
+    result = segment.process_table(table_df.get(), root=root)
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
     # filewise index with relative paths
     index = pd.Index([file], name="file")
     expected = audformat.segmented_index(file, "0.1s", "2.9s")
@@ -223,7 +285,25 @@ def test_index(tmpdir, num_workers):
     result = segment.process_signal_from_index(signal, sampling_rate, index)
     pd.testing.assert_index_equal(result, expected)
 
-    # empty index returned by process func
+    # filewise index with relative paths: series and dataframe
+    table = audformat.Table(index)
+    table["values"] = audformat.Column()
+    table.set({"values": [5]})
+    expected_series = pd.Series(
+        table.get()["values"].values, index=expected, name="values"
+    )
+    result = segment.process_table(table.get()["values"], root=root)
+    pd.testing.assert_series_equal(result, expected_series)
+    table_df = table.copy()
+    table_df["string"] = audformat.Column()
+    table_df.set({"string": ["d"]})
+    expected_dataframe = pd.DataFrame(
+        table_df.get().values, index=expected, columns=["values", "string"]
+    )
+    result = segment.process_table(table_df.get(), root=root)
+    pd.testing.assert_frame_equal(result, expected_dataframe)
+
+    # empty index / series / dataframe returned by process func
 
     def process_func(x, sr):
         return audinterface.utils.signal_index()
@@ -240,6 +320,164 @@ def test_index(tmpdir, num_workers):
     expected = audformat.segmented_index()
     result = segment.process_index(index)
     pd.testing.assert_index_equal(result, expected)
+
+    table = pd.Series([0], index)
+    expected_series = pd.Series([], expected, dtype=np.int64)
+    result = segment.process_table(table)
+    pd.testing.assert_series_equal(result, expected_series)
+
+    table_df = pd.DataFrame([0], index, columns=["col"])
+    expected_df = pd.DataFrame([], expected, columns=["col"], dtype=np.int64)
+    result = segment.process_table(table_df)
+    pd.testing.assert_frame_equal(result, expected_df)
+
+    # correct assignment of labels if output has more segments
+    def process_func_increase(signal, sampling_rate, chunk_len=0.4, chunk_step=0.4):
+        duration = signal.shape[-1] / sampling_rate
+        chunks = []
+        for i in range(
+            int((duration - chunk_len + chunk_step - 1e-4) // chunk_step) + 1
+        ):
+            chunks.append(
+                (i * chunk_step, np.min([i * chunk_step + chunk_len, duration]))
+            )
+        index = pd.MultiIndex.from_tuples(
+            [
+                (
+                    pd.Timedelta(start, unit="s"),
+                    pd.Timedelta(end, unit="s"),
+                )
+                for start, end in chunks
+            ],
+            names=["start", "end"],
+        )
+        return index
+
+    segment = audinterface.Segment(
+        process_func=process_func_increase,
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        verbose=False,
+    )
+    index = audformat.segmented_index(
+        [path] * 3,
+        pd.timedelta_range("0s", "2s", 3),
+        pd.timedelta_range("1s", "3s", 3),
+    )
+    expected_index = audformat.segmented_index(
+        [path] * 9,
+        [
+            pd.to_timedelta("0.0s"),
+            pd.to_timedelta("0.4s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.4s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.4s"),
+            pd.to_timedelta("2.8s"),
+        ],
+        [
+            pd.to_timedelta("0.4s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.4s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.4s"),
+            pd.to_timedelta("2.8s"),
+            pd.to_timedelta("3.0s"),
+        ],
+    )
+    expected_values = [
+        [0, "a"],
+        [0, "a"],
+        [0, "a"],
+        [1, "b"],
+        [1, "b"],
+        [1, "b"],
+        [2, "c"],
+        [2, "c"],
+        [2, "c"],
+    ]
+
+    expected_df = pd.DataFrame(
+        expected_values, index=expected_index, columns=["values", "string"]
+    )
+    expected_series = expected_df["values"]
+
+    table_series = pd.Series(
+        np.array([0, 1, 2], dtype=np.int64), index=index, name="values"
+    )
+    result_series = segment.process_table(table_series)
+    pd.testing.assert_series_equal(result_series, expected_series)
+
+    table_df = pd.DataFrame(
+        {"values": np.array([0, 1, 2], dtype=np.int64), "string": ["a", "b", "c"]},
+        index=index,
+    )
+    result_df = segment.process_table(table_df)
+    pd.testing.assert_frame_equal(result_df, expected_df)
+
+    # correct assignment of labels if output has more and overlapping segments
+    segment = audinterface.Segment(
+        process_func=process_func_increase,
+        process_func_args={"chunk_len": 0.5, "chunk_step": 0.3},
+        sampling_rate=None,
+        resample=False,
+        num_workers=num_workers,
+        verbose=False,
+    )
+
+    expected_index = audformat.segmented_index(
+        [path] * 9,
+        [
+            pd.to_timedelta("0.0s"),
+            pd.to_timedelta("0.3s"),
+            pd.to_timedelta("0.6s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.3s"),
+            pd.to_timedelta("1.6s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.3s"),
+            pd.to_timedelta("2.6s"),
+        ],
+        [
+            pd.to_timedelta("0.5s"),
+            pd.to_timedelta("0.8s"),
+            pd.to_timedelta("1.0s"),
+            pd.to_timedelta("1.5s"),
+            pd.to_timedelta("1.8s"),
+            pd.to_timedelta("2.0s"),
+            pd.to_timedelta("2.5s"),
+            pd.to_timedelta("2.8s"),
+            pd.to_timedelta("3.0s"),
+        ],
+    )
+    expected_df = pd.DataFrame(
+        expected_values, index=expected_index, columns=["values", "string"]
+    )
+    expected_series = expected_df["values"]
+
+    table_series = pd.Series(
+        np.array([0, 1, 2], dtype=np.int64), index=index, name="values"
+    )
+    result_series = segment.process_table(table_series)
+    pd.testing.assert_series_equal(result_series, expected_series)
+
+    table_df = pd.DataFrame(
+        {"values": np.array([0, 1, 2], dtype=np.int64), "string": ["a", "b", "c"]},
+        index=index,
+    )
+    result_df = segment.process_table(table_df)
+    pd.testing.assert_frame_equal(result_df, expected_df)
+
+    # single-column dataframe
+    table_df1 = pd.DataFrame(table_series)
+    expected_df1 = pd.DataFrame(expected_series)
+    result_df1 = segment.process_table(table_df1)
+    pd.testing.assert_frame_equal(result_df1, expected_df1)
 
 
 @pytest.mark.parametrize(
