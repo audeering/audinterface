@@ -4,6 +4,7 @@ auditok
 ipykernel
 jupyter-sphinx
 librosa
+numpy <2.0.0  # https://github.com/dofuuz/python-soxr/issues/28
 pyarrow
 sphinx
 sphinx-apipages >=0.1.2
