@@ -35,7 +35,7 @@ dependencies = [
     'audeer >=1.18.0',
     'audformat >=1.0.1,<2.0.0',
     'audiofile >=1.3.0',
-    'audmath >=1.3.0',
+    'audmath >=1.4.1',
     'audresample >=1.1.0,<2.0.0',
 ]
 # Get version dynamically from git
