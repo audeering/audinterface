@@ -111,7 +111,7 @@ class Process:
 
     Examples:
         >>> def mean(signal, sampling_rate):
-        ...     return signal.mean()
+        ...     return float(signal.mean())
         >>> interface = Process(process_func=mean)
         >>> signal = np.array([1.0, 2.0, 3.0])
         >>> interface(signal, sampling_rate=3)
@@ -133,11 +133,11 @@ class Process:
         >>> interface.process_index(index, root=db.root)
         file             start   end
         wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311
-        dtype: float32
+        dtype: float64
         >>> interface.process_index(index, root=db.root, preserve_index=True)
         file
         wav/03a01Fa.wav  -0.000311
-        dtype: float32
+        dtype: float64
         >>> # Apply interface with a sliding window
         >>> interface = Process(
         ...     process_func=mean,
@@ -148,7 +148,7 @@ class Process:
         file             start                   end
         wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -0.000329
                          0 days 00:00:00.500000  0 days 00:00:01.500000   -0.000285
-        dtype: float32
+        dtype: float64
 
     """  # noqa: E501
 
