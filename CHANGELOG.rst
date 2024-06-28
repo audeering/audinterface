@@ -7,6 +7,17 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.2.2 (2024/06/28)
+--------------------------
+
+* Added: ``audinterface.Segment.process_table()``,
+  that segments a dataframe or series
+  and expands its row values
+  to the new segments
+* Added: support for ``numpy`` 2.0
+* Changed: depend on ``audmath>=1.4.1``
+
+
 Version 1.2.1 (2024/03/27)
 --------------------------
 
