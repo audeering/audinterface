@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.1
+                v1.2.2
               </div>
             
           
@@ -648,6 +648,109 @@
 
         <span class="k">return</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Segment.process_table"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_table">[docs]</a>    <span class="k">def</span> <span class="nf">process_table</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">table</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">process_func_args</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Segment files or segments from a table.</span>
+
+<span class="sd">        The labels of the table</span>
+<span class="sd">        are reassigned to the new segments.</span>
+
+<span class="sd">        If ``cache_root`` is not ``None``,</span>
+<span class="sd">        a hash value is created from the index</span>
+<span class="sd">        using :func:`audformat.utils.hash` and</span>
+<span class="sd">        the result is stored as</span>
+<span class="sd">        ``&lt;cache_root&gt;/&lt;hash&gt;.pkl``.</span>
+<span class="sd">        When called again with the same index,</span>
+<span class="sd">        results will be read from the cached file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            table: :class:`pandas.Series` or :class:`pandas.DataFrame`</span>
+<span class="sd">                with an index conform to audformat_</span>
+<span class="sd">            root: root folder to expand relative file paths</span>
+<span class="sd">            cache_root: cache folder (see description)</span>
+<span class="sd">            process_func_args: (keyword) arguments passed on</span>
+<span class="sd">                to the processing function.</span>
+<span class="sd">                They will temporarily overwrite</span>
+<span class="sd">                the ones stored in</span>
+<span class="sd">                :attr:`audinterface.Segment.process.process_func_args`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Segmented table with an index conform to audformat_</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if table is not a :class:`pandas.Series`</span>
+<span class="sd">                or a :class:`pandas.DataFrame`</span>
+<span class="sd">            RuntimeError: if sampling rates do not match</span>
+<span class="sd">            RuntimeError: if channel selection is invalid</span>
+
+<span class="sd">        .. _audformat: https://audeering.github.io/audformat/data-format.html</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;table has to be pd.Series or pd.DataFrame&quot;</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">to_segmented_index</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">assert_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">table</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span>
+            <span class="n">index</span><span class="p">,</span>
+            <span class="n">preserve_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+            <span class="n">cache_root</span><span class="o">=</span><span class="n">cache_root</span><span class="p">,</span>
+            <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Assign labels from the original table</span>
+        <span class="c1"># to the newly created segments</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">((</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="n">index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+                <span class="n">starts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+                <span class="n">ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+                <span class="n">labels</span><span class="o">.</span><span class="n">extend</span><span class="p">([[</span><span class="n">table</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">n</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)])</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">((</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">_</span><span class="p">),</span> <span class="n">index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+                <span class="n">starts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+                <span class="n">ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">start</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># avoid issues when stacking 0-length dataframes</span>
+                    <span class="n">labels</span><span class="o">.</span><span class="n">extend</span><span class="p">([[</span><span class="n">table</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># avoid issue below</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="n">audformat</span><span class="o">.</span><span class="n">segmented_index</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">table</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">col</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="n">labels</span><span class="p">[:,</span> <span class="n">ncol</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="n">ncol</span><span class="p">]</span>
+                <span class="p">)</span>  <span class="c1"># supports also category</span>
+                <span class="k">for</span> <span class="n">ncol</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">table</span></div>
+
 <div class="viewcode-block" id="Segment.process_signal"><a class="viewcode-back" href="../../../api/audinterface.Segment.html#audinterface.Segment.process_signal">[docs]</a>    <span class="k">def</span> <span class="nf">process_signal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -857,7 +960,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/27 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/06/28 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

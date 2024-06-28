@@ -42,3 +42,7 @@ process\_signal\_from\_index\(\)
 --------------------------------
 .. automethod:: Segment.process_signal_from_index
     
+process\_table\(\)
+------------------
+.. automethod:: Segment.process_table
+    

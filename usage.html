@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                v1.2.1
+                v1.2.2
               </div>
             
           
@@ -169,7 +169,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
 and the sampling rate as input.</p>
 <p>The interface can then apply the algorithm
 on a list of files,
@@ -230,7 +230,7 @@ and create an interface for it using <a class="reference internal" href="api/aud
 <p>The following three commands
 apply the algorithm
 and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
@@ -267,7 +267,7 @@ as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/s
       <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
-      <td>-18.040704</td>
+      <td>-18.040703</td>
     </tr>
     <tr>
       <th>.../16b10Wb.wav</th>
@@ -314,12 +314,12 @@ and set a window and hop duration.</p>
       <th rowspan="2" valign="top">.../03a01Fa.wav</th>
       <th>0 days 00:00:00</th>
       <th>0 days 00:00:01</th>
-      <td>-20.165248</td>
+      <td>-20.165249</td>
     </tr>
     <tr>
       <th>0 days 00:00:00.500000</th>
       <th>0 days 00:00:01.500000</th>
-      <td>-23.472970</td>
+      <td>-23.472969</td>
     </tr>
     <tr>
       <th>.../03a01Nc.wav</th>
@@ -337,7 +337,7 @@ and set a window and hop duration.</p>
       <th rowspan="3" valign="top">.../16b10Wb.wav</th>
       <th>0 days 00:00:00.500000</th>
       <th>0 days 00:00:01.500000</th>
-      <td>-20.233054</td>
+      <td>-20.233055</td>
     </tr>
     <tr>
       <th>0 days 00:00:01</th>
@@ -357,7 +357,7 @@ and set a window and hop duration.</p>
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
@@ -1047,6 +1047,111 @@ would be a voice activity detection algorithm.</p>
   </tbody>
 </table></div></div>
 </div>
+<p>Sometimes,
+it is required that a table
+(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
+is segmented
+and the <code class="docutils literal notranslate"><span class="pre">labels</span></code> from the original segments
+should be kept.
+For this,
+<a class="reference internal" href="api/audinterface.Segment.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a> has a dedicated method
+<a class="reference internal" href="api/audinterface.Segment.html#audinterface.Segment.process_table" title="audinterface.Segment.process_table"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_table()</span></code></a>.
+This method is useful,
+if a segmentation
+(e.g., voice activity detection)
+is performed on an already labelled dataset
+in order to do data augmentation
+or teacher-student training.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))]},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+<span class="n">table</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>label</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>.../03a01Fa.wav</th>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>.../03a01Nc.wav</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>.../16b10Wb.wav</th>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table_segmented</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="n">table_segmented</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>label</th>
+    </tr>
+    <tr>
+      <th>file</th>
+      <th>start</th>
+      <th>end</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
+      <th>0 days 00:00:00.150000</th>
+      <th>0 days 00:00:00.700000</th>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:00.900000</th>
+      <th>0 days 00:00:01.600000</th>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>.../03a01Nc.wav</th>
+      <th>0 days 00:00:00.100000</th>
+      <th>0 days 00:00:01.350000</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">.../16b10Wb.wav</th>
+      <th>0 days 00:00:00.300000</th>
+      <th>0 days 00:00:01</th>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>0 days 00:00:01.050000</th>
+      <th>0 days 00:00:02.500000</th>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
 </div>
 <div class="section" id="special-processing-function-arguments">
 <h2>Special processing function arguments<a class="headerlink" href="#special-processing-function-arguments" title="Permalink to this heading">¶</a></h2>
@@ -1188,21 +1293,21 @@ to select the appropriate f0 range.</p>
       <th>.../03a01Fa.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.898250</th>
-      <td>128.8100011952554</td>
+      <td>128.8100011977164</td>
       <td>male</td>
     </tr>
     <tr>
       <th>.../03a01Nc.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:01.611250</th>
-      <td>111.6334972484757</td>
+      <td>111.63351213181389</td>
       <td>male</td>
     </tr>
     <tr>
       <th>.../16b10Wb.wav</th>
       <th>0 days</th>
       <th>0 days 00:00:02.522499999</th>
-      <td>229.09341831755435</td>
+      <td>229.09341877352415</td>
       <td>female</td>
     </tr>
   </tbody>
@@ -1234,7 +1339,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/27 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/06/28 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>

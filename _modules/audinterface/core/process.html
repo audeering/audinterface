@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.1
+                v1.2.2
               </div>
             
           
@@ -254,7 +254,7 @@
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; def mean(signal, sampling_rate):</span>
-<span class="sd">        ...     return signal.mean()</span>
+<span class="sd">        ...     return float(signal.mean())</span>
 <span class="sd">        &gt;&gt;&gt; interface = Process(process_func=mean)</span>
 <span class="sd">        &gt;&gt;&gt; signal = np.array([1.0, 2.0, 3.0])</span>
 <span class="sd">        &gt;&gt;&gt; interface(signal, sampling_rate=3)</span>
@@ -276,11 +276,11 @@
 <span class="sd">        &gt;&gt;&gt; interface.process_index(index, root=db.root)</span>
 <span class="sd">        file             start   end</span>
 <span class="sd">        wav/03a01Fa.wav  0 days  0 days 00:00:01.898250    -0.000311</span>
-<span class="sd">        dtype: float32</span>
+<span class="sd">        dtype: float64</span>
 <span class="sd">        &gt;&gt;&gt; interface.process_index(index, root=db.root, preserve_index=True)</span>
 <span class="sd">        file</span>
 <span class="sd">        wav/03a01Fa.wav  -0.000311</span>
-<span class="sd">        dtype: float32</span>
+<span class="sd">        dtype: float64</span>
 <span class="sd">        &gt;&gt;&gt; # Apply interface with a sliding window</span>
 <span class="sd">        &gt;&gt;&gt; interface = Process(</span>
 <span class="sd">        ...     process_func=mean,</span>
@@ -291,7 +291,7 @@
 <span class="sd">        file             start                   end</span>
 <span class="sd">        wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -0.000329</span>
 <span class="sd">                         0 days 00:00:00.500000  0 days 00:00:01.500000   -0.000285</span>
-<span class="sd">        dtype: float32</span>
+<span class="sd">        dtype: float64</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
 
@@ -1157,7 +1157,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/03/27 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/06/28 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
