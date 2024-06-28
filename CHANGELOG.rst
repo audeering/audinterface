@@ -11,7 +11,7 @@ Version 1.2.2 (2024/06/28)
 --------------------------
 
 * Added: ``audinterface.Segment.process_table()``,
-  that segments a dataframe
+  that segments a dataframe or series
   and expands its row values
   to the new segments
 * Added: support for ``numpy`` 2.0
