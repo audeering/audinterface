@@ -50,7 +50,7 @@ def write_text_file(file: str, data: typing.Union[dict, str]):
 
 
 @pytest.mark.parametrize(
-    "process_func, data, file_format, expected_output",
+    "process_func, data, file_format, expected_data",
     [
         (identity, "abc", "txt", "abc"),
         (identity, {"a": 0}, "json", {"a": 0}),
@@ -61,7 +61,7 @@ def test_process_file(
     process_func,
     data,
     file_format,
-    expected_output,
+    expected_data,
 ):
     process = audinterface.Process(process_func=process_func, verbose=False)
 
@@ -73,11 +73,21 @@ def test_process_file(
 
     # test absolute path
     y = process.process_file(path)
-    assert y == expected_output
+    expected_series = pd.Series(
+        [expected_data],
+        index=audformat.filewise_index(path),
+    )
+    print(f"{y=}")
+    print(f"{expected_series=}")
+    pd.testing.assert_series_equal(y, expected_series)
 
     # test relative path
     y = process.process_file(file, root=root)
-    assert y == expected_output
+    expected_series = pd.Series(
+        [expected_data],
+        index=audformat.filewise_index(file),
+    )
+    pd.testing.assert_series_equal(y, expected_series)
 
 
 @pytest.mark.parametrize(
