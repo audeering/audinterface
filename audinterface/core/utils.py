@@ -1,10 +1,12 @@
 import collections
+import json
 import os
 import typing
 
 import numpy as np
 import pandas as pd
 
+import audeer
 import audformat
 import audiofile
 import audmath
@@ -146,6 +148,37 @@ def read_audio(
     )
 
     return signal, sampling_rate
+
+
+def read_text(
+    file: str,
+    *,
+    root: str = None,
+) -> typing.Union[dict, str]:
+    """Reads text file.
+
+    Args:
+        file: path to audio file
+        root: root folder
+
+    Returns:
+        dictionary with values,
+        if ``file`` is a json file,
+        else content of file as string
+
+    """
+    if root is not None and not os.path.isabs(file):
+        file = os.path.join(root, file)
+
+    ext = audeer.file_extension(file).lower()
+    if ext == "json":
+        with open(file) as json_file:
+            data = json.load(json_file)
+    elif ext == "txt":
+        with open(file) as txt_file:
+            data = txt_file.read()
+
+    return data
 
 
 def segment_to_indices(
