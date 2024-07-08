@@ -6,6 +6,7 @@ import typing
 import numpy as np
 import pandas as pd
 
+import audeer
 import audformat
 import audiofile
 import audmath
@@ -172,7 +173,7 @@ def read_text(
     ext = audeer.file_extension(file).lower()
     if ext == "json":
         with open(file) as json_file:
-            data = json.load(f)
+            data = json.load(json_file)
     elif ext == "txt":
         with open(file) as txt_file:
             data = txt_file.read()
