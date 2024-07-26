@@ -35,7 +35,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosectionlabel",
-    "sphinx.ext.doctest",
     "sphinx_copybutton",  # for "copy to clipboard" buttons
     "sphinx_apipages",
 ]
