@@ -69,15 +69,15 @@ and create an interface for it using :class:`audinterface.Process`.
 
     interface = audinterface.Process(process_func=rms)
 
-The following three commands
-apply the algorithm
-and all return the same result
+You can then use one of the
+``process_files()``,
+``process_folder()``,
+or ``process_index()`` methods
+to apply the algorithm
+and return the result
 as a :class:`pandas.Series`.
 
->>> y = interface.process_files(files, root=db.root)
->>> y = interface.process_folder(folder, include_root=False)
->>> y = interface.process_index(index, root=db.root)
->>> y
+>>> interface.process_index(index, root=db.root)
 file             start   end
 wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
 wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
