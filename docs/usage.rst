@@ -1,3 +1,10 @@
+.. Limit precision of pandas output for doctests
+.. invisible-code-block: python
+
+    import pandas as pd
+    pd.set_option("display.precision", 4)
+
+
 Usage
 =====
 
@@ -69,23 +76,23 @@ as a :class:`pandas.Series`.
 
 >>> interface.process_files(files, root=db.root)
 file             start   end
-wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
-wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
 dtype: float32
 
 >>> interface.process_folder(folder, include_root=False)
 file             start   end
-03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
-16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
+03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
+16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
 dtype: float32
 
 >>> interface.process_index(index, root=db.root)
 file             start   end
-wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
-wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
 dtype: float32
 
 To calculate RMS with a sliding window,
@@ -95,14 +102,14 @@ and set a window and hop duration.
 >>> interface = audinterface.Process(process_func=rms, win_dur=1.0, hop_dur=0.5)
 >>> interface.process_files(files, root=db.root)
 file             start                   end
-wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.165249
-                 0 days 00:00:00.500000  0 days 00:00:01.500000   -23.472969
-wav/03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.386614
-                 0 days 00:00:00.500000  0 days 00:00:01.500000   -19.502598
-wav/16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.733990
-                 0 days 00:00:00.500000  0 days 00:00:01.500000   -20.233055
-                 0 days 00:00:01         0 days 00:00:02          -18.856522
-                 0 days 00:00:01.500000  0 days 00:00:02.500000   -20.403574
+wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.1652
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -23.4730
+wav/03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.3866
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -19.5026
+wav/16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.7340
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -20.2331
+                 0 days 00:00:01         0 days 00:00:02          -18.8565
+                 0 days 00:00:01.500000  0 days 00:00:02.500000   -20.4036
 dtype: float32
 
 
@@ -125,11 +132,11 @@ and assigns names to the dimensions/features.
     )
 
 >>> interface.process_index(index, root=db.root)
-                                                      mean       std
+                                                    mean     std
 file            start  end
-wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
-wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
-wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 To calculate features with a sliding window,
 we create a new interface
@@ -150,16 +157,16 @@ and single frames are passed on to the processing function.
     )
 
 >>> interface.process_files(files, root=db.root)
-                                                                   mean       std
-file            start                  end
-wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
-                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
-wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:01         0.000039  0.151590
-                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000412  0.105893
-wav/16b10Wb.wav 0 days 00:00:00        0 days 00:00:01        -0.000455  0.081902
-                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000461  0.097351
-                0 days 00:00:01        0 days 00:00:02        -0.000469  0.114070
-                0 days 00:00:01.500000 0 days 00:00:02.500000 -0.000447  0.095459
+                                                                     mean     std
+file            start                  end                                       
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -3.2866e-04  0.0981
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -2.8513e-04  0.0670
+wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:01         3.8935e-05  0.1516
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.1219e-04  0.1059
+wav/16b10Wb.wav 0 days 00:00:00        0 days 00:00:01        -4.5467e-04  0.0819
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.6149e-04  0.0974
+                0 days 00:00:01        0 days 00:00:02        -4.6923e-04  0.1141
+                0 days 00:00:01.500000 0 days 00:00:02.500000 -4.4670e-04  0.0955
 
 
 Feature interface for multi-channel input
@@ -192,10 +199,10 @@ on the following multi-channel signal.
 >>> signal_multi_channel.shape
 (4, 30372)
 >>> interface.process_signal(signal_multi_channel, sampling_rate)
-                                                   mean       std
+                                                 mean     std
 start                  end                                       
-0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
-0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
+0 days 00:00:00        0 days 00:00:01        -0.0003  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000 -0.0003  0.0670
 
 To process the second and fourth channel,
 we create a new interface
@@ -226,20 +233,20 @@ number of channels (here 2).
     df = interface_multi_channel.process_signal(signal_multi_channel, sampling_rate)
 
 >>> df
-                                                 1              3          
-                                              mean  std      mean       std
+                                                 1            3          
+                                              mean  std    mean     std
 start                  end                                                 
-0 days 00:00:00        0 days 00:00:01         0.0  0.0  0.499671  0.098115
-0 days 00:00:00.500000 0 days 00:00:01.500000  0.0  0.0  0.499715  0.067042
+0 days 00:00:00        0 days 00:00:01         0.0  0.0  0.4997  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.0  0.0  0.4997  0.0670
 
 We can access the features of a specific
 channel by its index.
 
 >>> df[3]
-                                                   mean       std
+                                                 mean     std
 start                  end                                       
-0 days 00:00:00        0 days 00:00:01         0.499671  0.098115
-0 days 00:00:00.500000 0 days 00:00:01.500000  0.499715  0.067042
+0 days 00:00:00        0 days 00:00:01         0.4997  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.4997  0.0670
 
 
 Feature interface for external function
@@ -288,19 +295,19 @@ whereas the first dimension is optionally.
     )
 
 >>> interface.process_index(index, root=db.root)
-                                                                   mfcc-0  ...    mfcc-12
-file            start                  end                                 ...            
-wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.020000 -611.993286  ...   1.151396
-                0 days 00:00:00.010000 0 days 00:00:00.030000 -668.175842  ...  14.068543
-                0 days 00:00:00.020000 0 days 00:00:00.040000 -664.612793  ...   7.949757
-                0 days 00:00:00.030000 0 days 00:00:00.050000 -667.714722  ...  12.957479
-                0 days 00:00:00.040000 0 days 00:00:00.060000 -669.367432  ...   4.396849
-...                                                                   ...  ...        ...
-wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.673584  ...   1.863654
-                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.958069  ...   9.345045
-                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.156494  ...   7.411011
-                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.545898  ...  17.645359
-                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.805237  ...   3.711080
+                                                                 mfcc-0  ...  mfcc-12
+file            start                  end                               ...         
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.020000 -611.9933  ...   1.1514
+                0 days 00:00:00.010000 0 days 00:00:00.030000 -668.1758  ...  14.0685
+                0 days 00:00:00.020000 0 days 00:00:00.040000 -664.6128  ...   7.9498
+                0 days 00:00:00.030000 0 days 00:00:00.050000 -667.7147  ...  12.9575
+                0 days 00:00:00.040000 0 days 00:00:00.060000 -669.3674  ...   4.3968
+...                                                                 ...  ...      ...
+wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.6736  ...   1.8637
+                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.9581  ...   9.3450
+                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.1565  ...   7.4110
+                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.5459  ...  17.6454
+                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.8052  ...   3.7111
 <BLANKLINE>
 [605 rows x 13 columns]
 
@@ -337,11 +344,11 @@ and :class:`audobject.Object`.
     fex = MeanStd()
 
 >>> fex.process_index(index, root=db.root)
-                                                      mean       std
+                                                    mean     std
 file            start  end                                          
-wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
-wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
-wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 The advantage of the feature extraction object is
 that we can save it to a YAML file
@@ -357,11 +364,11 @@ and re-instantiate it from there.
 >>> fex.to_yaml("mean-std.yaml")
 >>> fex2 = audobject.from_yaml("mean-std.yaml")
 >>> fex2.process_index(index, root=db.root)
-                                                      mean       std
+                                                    mean     std
 file            start  end                                          
-wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
-wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
-wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 
 Segmentation interface
@@ -501,7 +508,7 @@ to select the appropriate f0 range.
             fmin=f0_range[gender.iloc[idx]][0],
             fmax=f0_range[gender.iloc[idx]][1],
             sr=sampling_rate,
-        ).mean()
+        ).mean().round(2)
         return y, gender.iloc[idx]
 
     interface = audinterface.Feature(
@@ -514,11 +521,11 @@ to select the appropriate f0 range.
     )
 
 >>> interface.process_index(gender.index, root=db.root)
-                                                                  f0  gender
+                                                       f0  gender
 file            start  end                                                  
-wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.8100011977164    male
-wav/03a01Nc.wav 0 days 0 days 00:00:01.611250     111.63351213181389    male
-wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999  229.09341877352415  female
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.81    male
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      111.63    male
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   229.09  female
 
 
 .. _audformat: https://audeering.github.io/audformat/
