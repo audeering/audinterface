@@ -1,10 +1,3 @@
-.. Specify version for storing and loading objects to YAML
-
-   invisible-code-block: python
-
-    >>> __version__ = "1.0.0"
-
-
 Usage
 =====
 
@@ -43,10 +36,11 @@ and an index.
         "emodb",
         version="1.3.0",
         media=media,
+        full_path=False,
         verbose=False,
     )
     files = list(db.files)
-    folder = os.path.dirname(files[0])
+    folder = os.path.join(db.root, os.path.dirname(files[0]))
     index = db["emotion"].index
 
 
@@ -73,58 +67,43 @@ apply the algorithm
 and all return the same result
 as a :class:`pandas.Series`.
 
-.. doctest::
+>>> interface.process_files(files, root=db.root)
+file             start   end
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+dtype: float32
 
-    >>> interface.process_files(files)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    file             start   end
-    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
-    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
-    dtype: float64
+>>> interface.process_folder(folder, include_root=False)
+file             start   end
+03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
+16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+dtype: float32
 
-.. doctest::
-
-    >>> interface.process_folder(folder)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    file             start   end
-    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
-    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
-    dtype: float64
-
-.. doctest::
-
-    >>> interface.process_index(index)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-    file             start   end
-    .../03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
-    .../03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040704
-    .../16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
-    dtype: float64
+>>> interface.process_index(index, root=db.root)
+file             start   end
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.690142
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.040703
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.394533
+dtype: float32
 
 To calculate RMS with a sliding window,
 we create a new interface
 and set a window and hop duration.
 
-.. testcode::
-
-    interface = audinterface.Process(
-        process_func=rms,
-        win_dur=1.0,
-        hop_dur=0.5,
-    )
-    interface.process_files(files)
-
-.. testoutput::
-
-    file             start                   end
-    .../03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.165248
-                     0 days 00:00:00.500000  0 days 00:00:01.500000   -23.472970
-    .../03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.386614
-                     0 days 00:00:00.500000  0 days 00:00:01.500000   -19.502597
-    .../16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.733990
-                     0 days 00:00:00.500000  0 days 00:00:01.500000   -20.233054
-                     0 days 00:00:01         0 days 00:00:02          -18.856522
-                     0 days 00:00:01.500000  0 days 00:00:02.500000   -20.403574
-    dtype: float64
+>>> interface = audinterface.Process(process_func=rms, win_dur=1.0, hop_dur=0.5)
+>>> interface.process_files(files, root=db.root)
+file             start                   end
+wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.165249
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -23.472969
+wav/03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.386614
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -19.502598
+wav/16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.733990
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -20.233055
+                 0 days 00:00:01         0 days 00:00:02          -18.856522
+                 0 days 00:00:01.500000  0 days 00:00:02.500000   -20.403574
+dtype: float32
 
 
 Feature interface
@@ -135,7 +114,7 @@ it is recommended to use :class:`audinterface.Feature`,
 which returns a :class:`pandas.DataFrame`
 and assigns names to the dimensions/features.
 
-.. testcode::
+.. code-block:: python
 
     def features(signal, sampling_rate):
         return [signal.mean(), signal.std()]
@@ -145,12 +124,12 @@ and assigns names to the dimensions/features.
         process_func=features,
     )
 
-    df = interface.process_index(index)
-
-.. doctest::
-
-    >>> df
-    bla
+>>> interface.process_index(index, root=db.root)
+                                                      mean       std
+file            start  end
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
 
 To calculate features with a sliding window,
 we create a new interface
@@ -160,7 +139,7 @@ By setting
 the windowing is automatically handled
 and single frames are passed on to the processing function.
 
-.. testcode::
+.. code-block:: python
 
     interface = audinterface.Feature(
         ["mean", "std"],
@@ -169,12 +148,19 @@ and single frames are passed on to the processing function.
         win_dur=1.0,
         hop_dur=0.5,
     )
-    df = interface.process_files(files)
 
-.. doctest::
+>>> interface.process_files(files, root=db.root)
+                                                                   mean       std
+file            start                  end
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
+wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:01         0.000039  0.151590
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000412  0.105893
+wav/16b10Wb.wav 0 days 00:00:00        0 days 00:00:01        -0.000455  0.081902
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000461  0.097351
+                0 days 00:00:01        0 days 00:00:02        -0.000469  0.114070
+                0 days 00:00:01.500000 0 days 00:00:02.500000 -0.000447  0.095459
 
-    >>> df
-    bla
 
 Feature interface for multi-channel input
 -----------------------------------------
@@ -186,12 +172,12 @@ We can prove this
 by running the previous interface
 on the following multi-channel signal.
 
-.. testcode::
+.. code-block:: python
 
     import audiofile
 
     signal, sampling_rate = audiofile.read(
-        files[0],
+        os.path.join(db.root, files[0]),
         always_2d=True,
     )
     signal_multi_channel = np.concatenate(
@@ -203,22 +189,13 @@ on the following multi-channel signal.
         ],
     )
 
-.. doctest::
-
-    >>> signal_multi_channel.shape
-    (4, 30372)
-
-.. testcode::
-
-    df = interface.process_signal(
-        signal_multi_channel,
-        sampling_rate,
-    )
-
-.. doctest::
-
-    >>> df
-    bla
+>>> signal_multi_channel.shape
+(4, 30372)
+>>> interface.process_signal(signal_multi_channel, sampling_rate)
+                                                   mean       std
+start                  end                                       
+0 days 00:00:00        0 days 00:00:01        -0.000329  0.098115
+0 days 00:00:00.500000 0 days 00:00:01.500000 -0.000285  0.067042
 
 To process the second and fourth channel,
 we create a new interface
@@ -234,7 +211,7 @@ the processing function must
 return an array with the correct
 number of channels (here 2).
 
-.. code-block::
+.. code-block:: python
 
     interface_multi_channel = audinterface.Feature(
         ["mean", "std"],
@@ -246,23 +223,23 @@ number of channels (here 2).
         channels=[1, 3],
     )
 
-    df = interface_multi_channel.process_signal(
-        signal_multi_channel,
-        sampling_rate,
-    )
+    df = interface_multi_channel.process_signal(signal_multi_channel, sampling_rate)
 
-.. doctest::
-
-    >>> df
-    bla
+>>> df
+                                                 1              3          
+                                              mean  std      mean       std
+start                  end                                                 
+0 days 00:00:00        0 days 00:00:01         0.0  0.0  0.499671  0.098115
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.0  0.0  0.499715  0.067042
 
 We can access the features of a specific
 channel by its index.
 
-.. doctest::
-
-    >>> df[3]
-    bla
+>>> df[3]
+                                                   mean       std
+start                  end                                       
+0 days 00:00:00        0 days 00:00:01         0.499671  0.098115
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.499715  0.067042
 
 
 Feature interface for external function
@@ -284,7 +261,7 @@ and returning the values in the correct shape,
 namely ``(num_channels, num_features, num_frames)``,
 whereas the first dimension is optionally.
 
-.. testcode::
+.. code-block:: python
 
     import librosa
 
@@ -309,12 +286,23 @@ whereas the first dimension is optionally.
         win_dur=0.02,
         hop_dur=0.01,
     )
-    df = interface.process_index(index)
 
-.. doctest::
-
-    >>> df
-    bla
+>>> interface.process_index(index, root=db.root)
+                                                                   mfcc-0  ...    mfcc-12
+file            start                  end                                 ...            
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.020000 -611.993286  ...   1.151396
+                0 days 00:00:00.010000 0 days 00:00:00.030000 -668.175842  ...  14.068543
+                0 days 00:00:00.020000 0 days 00:00:00.040000 -664.612793  ...   7.949757
+                0 days 00:00:00.030000 0 days 00:00:00.050000 -667.714722  ...  12.957479
+                0 days 00:00:00.040000 0 days 00:00:00.060000 -669.367432  ...   4.396849
+...                                                                   ...  ...        ...
+wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.673584  ...   1.863654
+                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.958069  ...   9.345045
+                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.156494  ...   7.411011
+                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.545898  ...  17.645359
+                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.805237  ...   3.711080
+<BLANKLINE>
+[605 rows x 13 columns]
 
 
 Serializable feature interface
@@ -331,7 +319,7 @@ we create a class that inherits
 from :class:`audinterface.Feature`
 and :class:`audobject.Object`.
 
-.. testcode::
+.. code-block:: python
 
     import audobject
 
@@ -347,27 +335,33 @@ and :class:`audobject.Object`.
             return [signal.mean(), signal.std()]
 
     fex = MeanStd()
-    df = fex.process_index(index)
 
-.. doctest::
-
-    >>> df
-    bla
+>>> fex.process_index(index, root=db.root)
+                                                      mean       std
+file            start  end                                          
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
 
 The advantage of the feature extraction object is
 that we can save it to a YAML file
 and re-instantiate it from there.
 
-.. testcode::
+.. Specify version for storing and loading objects to YAML
+.. invisible-code-block: python
 
-    fex.to_yaml("mean-std.yaml")
-    fex2 = audobject.from_yaml("mean-std.yaml")
-    df = fex2.process_index(index)
+    __builtins__["__version__"] = "1.0.0"
+    __builtins__["MeanStd"] = MeanStd
 
-.. doctest::
 
-    >>> df
-    bla
+>>> fex.to_yaml("mean-std.yaml")
+>>> fex2 = audobject.from_yaml("mean-std.yaml")
+>>> fex2.process_index(index, root=db.root)
+                                                      mean       std
+file            start  end                                          
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.000311  0.082317
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.000312  0.125304
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.000464  0.095558
 
 
 Segmentation interface
@@ -379,9 +373,10 @@ which returns a segmented index conform to audformat_.
 An example for such a processing function
 would be a voice activity detection algorithm.
 
-.. testcode::
+.. code-block:: python
 
     import auditok
+    import pandas as pd
 
     def segments(signal, sampling_rate):
 
@@ -411,12 +406,11 @@ would be a voice activity detection algorithm.
         return index
 
     interface = audinterface.Segment(process_func=segments)
-    idx = interface.process_file(files[0])
 
-.. doctest::
-
-    >>> idx
-    bla
+>>> interface.process_file(files[0], root=db.root)
+MultiIndex([('wav/03a01Fa.wav', '0 days 00:00:00.150000', ...),
+            ('wav/03a01Fa.wav', '0 days 00:00:00.900000', ...)],
+           names=['file', 'start', 'end'])
 
 Sometimes,
 it is required that a table
@@ -434,15 +428,21 @@ is performed on an already labelled dataset
 in order to do data augmentation
 or teacher-student training.
 
-.. jupyter-execute::
-
-    table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
-    table
-    
-.. jupyter-execute::
-
-    table_segmented = interface.process_table(table)
-    table_segmented
+>>> table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
+>>> table
+                 label
+file                  
+wav/03a01Fa.wav      0
+wav/03a01Nc.wav      2
+wav/16b10Wb.wav      4
+>>> interface.process_table(table, root=db.root)
+                                                               label
+file            start                  end                          
+wav/03a01Fa.wav 0 days 00:00:00.150000 0 days 00:00:00.700000      0
+                0 days 00:00:00.900000 0 days 00:00:01.600000      0
+wav/03a01Nc.wav 0 days 00:00:00.100000 0 days 00:00:01.350000      2
+wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4
+                0 days 00:00:01.050000 0 days 00:00:02.500000      4
 
 
 Special processing function arguments
@@ -466,17 +466,19 @@ The following processing function
 returns the values of
 ``"idx"`` and ``"file"``.
 
-.. testcode::
+.. code-block:: python
 
     def special_args(signal, sampling_rate, idx, file):
         return idx, os.path.basename(file)
 
     interface = audinterface.Process(process_func=special_args)
-    y = interface.process_files(files)
 
-.. doctest::
-
-    >>> y
+>>> interface.process_files(files, root=db.root)
+file             start   end                      
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250       (0, 03a01Fa.wav)
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250       (1, 03a01Nc.wav)
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999    (2, 16b10Wb.wav)
+dtype: object
 
 For instance,
 we can pass a list with gender labels
@@ -484,7 +486,7 @@ to the processing function
 and use the running index
 to select the appropriate f0 range.
 
-.. testcode::
+.. code-block:: python
 
     gender = db["files"]["speaker"].get(map="gender")  # gender per file
     f0_range = {
@@ -510,12 +512,13 @@ to select the appropriate f0 range.
             "f0_range": f0_range,
         },
     )
-    df = interface.process_index(gender.index)
 
-.. doctest::
-
-    >>> df
-    bla
+>>> interface.process_index(gender.index, root=db.root)
+                                                                  f0  gender
+file            start  end                                                  
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.8100011977164    male
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250     111.63351213181389    male
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999  229.09341877352415  female
 
 
 .. _audformat: https://audeering.github.io/audformat/

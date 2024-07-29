@@ -69,12 +69,10 @@ skip = './audinterface.egg-info,./build,./docs/api,./docs/_templates,./misc'
 cache_dir = '.cache/pytest'
 xfail_strict = true
 addopts = '''
-    --doctest-plus
     --cov=audinterface
     --cov-fail-under=100
     --cov-report term-missing
     --cov-report xml
-    --ignore=docs/
 '''
 
 
