@@ -1,6 +1,9 @@
 audeer >=1.21.0
 audb
+auditok
 audobject >=0.7.5
+librosa
 pytest
 pytest-cov
+soxr >=0.4.0b1  # for numpy 2, https://github.com/dofuuz/python-soxr/issues/28
 sybil
