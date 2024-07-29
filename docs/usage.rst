@@ -74,21 +74,10 @@ apply the algorithm
 and all return the same result
 as a :class:`pandas.Series`.
 
->>> interface.process_files(files, root=db.root)
-file             start   end
-wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
-wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
-wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
-dtype: float32
-
->>> interface.process_folder(folder, include_root=False)
-file             start   end
-03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
-03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
-16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
-dtype: float32
-
->>> interface.process_index(index, root=db.root)
+>>> y = interface.process_files(files, root=db.root)
+>>> y = interface.process_folder(folder, include_root=False)
+>>> y = interface.process_index(index, root=db.root)
+>>> y
 file             start   end
 wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
 wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
