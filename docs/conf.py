@@ -29,7 +29,6 @@ exclude_patterns = [
 ]
 pygments_style = None
 extensions = [
-    "jupyter_sphinx",
     "sphinx.ext.napoleon",  # support for Google-style docstrings
     "sphinx_autodoc_typehints",
     "sphinx.ext.viewcode",
