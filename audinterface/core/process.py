@@ -2,6 +2,7 @@ import errno
 import inspect
 import itertools
 import os
+import pathlib
 import typing
 
 import numpy as np
@@ -34,6 +35,15 @@ def identity(signal, sampling_rate) -> np.ndarray:
 
     """
     return signal
+
+
+def data_identity(data):
+    r"""Default processing function for non-signal data.
+
+    In analogy to  the identity function for signals,
+    it returns the data itself
+    """
+    return data
 
 
 class Process:
@@ -212,6 +222,7 @@ class Process:
         self.num_workers = num_workers
         r"""Number of workers."""
 
+        # leaving process_func unaltered here, currently deferred
         self.process_func = process_func
         r"""Processing function."""
 
@@ -271,10 +282,14 @@ class Process:
             end = utils.to_timedelta(end, self.sampling_rate)
 
         ext = audeer.file_extension(file).lower()
-
+        # print(ext, exit is None)
         # Text files
         if ext in ["json", "txt"]:
+            self._processing_mode = "text"  # convenience
+            print("set processing mode")
             data = utils.read_text(file, root=root)
+            # should be idempotent, but is currently deferred
+            # self._handle_processing_func_args(data_type="text")
             y, file = self._process_data(
                 data,
                 idx=idx,
@@ -288,6 +303,7 @@ class Process:
 
         # Audio/video files
         else:
+            self._processing_mode = "signal"  # convenience
             signal, sampling_rate = utils.read_audio(
                 file,
                 start=start,
@@ -568,6 +584,22 @@ class Process:
             process_func_args=process_func_args,
         )
 
+    def _set_processing_mode(self, index):
+        """Set processsing mode to text depending on input data extension."""
+
+        self._processing_mode = "signal"
+
+        if audformat.is_segmented_index(index):
+            extensions = [
+                pathlib.Path(x).suffix[1:] for x in index.get_level_values("file")
+            ]
+        else:
+            # never getting filewise indices so far?
+            pass
+
+        if set(extensions).issubset(set(["json", "txt"])):
+            self._processing_mode = "text"
+
     def _process_index_wo_segment(
         self,
         index: pd.Index,
@@ -592,6 +624,9 @@ class Process:
             for idx, (file, start, end) in enumerate(index)
         ]
 
+        # modify procesing mode variable when getting json or text files
+        self._set_processing_mode(index)
+
         xs = audeer.run_tasks(
             self._process_file,
             params,
@@ -601,20 +636,38 @@ class Process:
             task_description=f"Process {len(index)} segments",
         )
 
-        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
-        files = list(itertools.chain.from_iterable([x[1] for x in xs]))
-        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
-        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+        if self._processing_mode == "text":
+            y = [x[0] for x in xs]
+            files = list(itertools.chain.from_iterable([x[1] for x in xs]))
+            starts = [x[2] for x in xs]
+            ends = [x[3] for x in xs]
+            if (
+                len(audeer.unique(starts)) == 1
+                and audeer.unique(starts)[0] is None
+                and len(audeer.unique(ends)) == 1
+                and audeer.unique(ends)[0] is None
+            ):
+                index = audformat.filewise_index(files)
+            else:
+                # leave index untouched
+                # index = audformat.segmented_index(files, starts, ends)
+                pass
 
-        if (
-            len(audeer.unique(starts)) == 1
-            and audeer.unique(starts)[0] is None
-            and len(audeer.unique(ends)) == 1
-            and audeer.unique(ends)[0] is None
-        ):
-            index = audformat.filewise_index(files)
         else:
-            index = audformat.segmented_index(files, starts, ends)
+            y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+            files = list(itertools.chain.from_iterable([x[1] for x in xs]))
+            starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+            ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+            if (
+                len(audeer.unique(starts)) == 1
+                and audeer.unique(starts)[0] is None
+                and len(audeer.unique(ends)) == 1
+                and audeer.unique(ends)[0] is None
+            ):
+                index = audformat.filewise_index(files)
+            else:
+                index = audformat.segmented_index(files, starts, ends)
 
         y = pd.Series(y, index)
 
@@ -686,9 +739,7 @@ class Process:
                 )
 
             y = self._process_index_wo_segment(
-                segmented_index,
-                root,
-                process_func_args=process_func_args,
+                segmented_index, root, process_func_args=process_func_args
             )
 
             if cache_path is not None:
@@ -1117,6 +1168,25 @@ class Process:
 
         return y
 
+    def _handle_processing_func_for_text(self):
+        """Handle data identity based on input modality.
+
+        As text data never have sampling rate the
+        functional is exchanged
+
+        """
+
+        f = data_identity
+        process_func = f
+        self.process_func = process_func
+        signature = inspect.signature(process_func)
+        self._process_func_signature = dict(signature.parameters)
+
+    @staticmethod
+    def _handle_processing_func_args_for_text(process_func_args):
+        """If process_func_args has an sr, strip it."""
+        ...
+
     def _call_data(
         self,
         data: typing.Any,
@@ -1146,7 +1216,9 @@ class Process:
         """
         process_func_args = process_func_args or self.process_func_args
         special_args = self._special_args(idx, root, file, process_func_args)
+        self._handle_processing_func_for_text()
         y = self.process_func(data, **special_args, **process_func_args)
+
         return y
 
     def _special_args(
