@@ -1,53 +1,8 @@
-.. Specify pandas format output in cells
-.. jupyter-execute::
-    :hide-code:
-    :hide-output:
+.. Limit precision of pandas output for doctests
+.. invisible-code-block: python
 
     import pandas as pd
-
-    import audformat
-
-    def dataframe_to_html(df_original):
-        # Replace beginning of data path with ...
-        df = df_original.copy()
-        if len(df.index) > 0 and df.index.names[0] == "file":
-            old_path = r".+/audb/emodb/1.3.0/d3b62a9b/wav/"
-            new_path = r".../"
-            if audformat.is_segmented_index(df.index):
-                df.index = df.index.set_levels(
-                    df.index.levels[0].str.replace(
-                        old_path,
-                        new_path,
-                        regex=True,
-                    ),
-                    level=0,
-                )
-            else:
-                df.index = df.index.str.replace(old_path, new_path, regex=True)
-
-        return df.to_html(max_rows=6, max_cols=4)
-
-
-    def series_to_html(y):
-        df = y.to_frame()
-        df.columns = [""]
-        return dataframe_to_html(df)
-
-
-    def index_to_html(index):
-        df = pd.DataFrame(index=index)
-        return dataframe_to_html(df)
-
-
-    setattr(pd.Series, "_repr_html_", series_to_html)
-    setattr(pd.Index, "_repr_html_", index_to_html)
-    setattr(pd.DataFrame, "_repr_html_", dataframe_to_html)
-
-.. Specify version for storing and loading objects to YAML
-.. jupyter-execute::
-    :hide-code:
-
-    __version__ = "1.0.0"
+    pd.set_option("display.precision", 4)
 
 
 Usage
@@ -74,7 +29,7 @@ and define a list of files,
 a folder,
 and an index.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audb
     import os
@@ -88,11 +43,11 @@ and an index.
         "emodb",
         version="1.3.0",
         media=media,
+        full_path=False,
         verbose=False,
     )
-
     files = list(db.files)
-    folder = os.path.dirname(files[0])
+    folder = os.path.join(db.root, os.path.dirname(files[0]))
     index = db["emotion"].index
 
 
@@ -104,7 +59,7 @@ value in dB.
 We first define the function
 and create an interface for it using :class:`audinterface.Process`.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audinterface
     import numpy as np
@@ -114,31 +69,38 @@ and create an interface for it using :class:`audinterface.Process`.
 
     interface = audinterface.Process(process_func=rms)
 
-The following three commands
-apply the algorithm
-and all return the same result
+You can then use one of the
+``process_files()``,
+``process_folder()``,
+or ``process_index()`` methods
+to apply the algorithm
+and return the result
 as a :class:`pandas.Series`.
 
-.. jupyter-execute::
-
-    y = interface.process_files(files)
-    y = interface.process_folder(folder)
-    y = interface.process_index(index)
-    y
+>>> interface.process_index(index, root=db.root)
+file             start   end
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945
+dtype: float32
 
 To calculate RMS with a sliding window,
 we create a new interface
 and set a window and hop duration.
 
-.. jupyter-execute::
+>>> interface = audinterface.Process(process_func=rms, win_dur=1.0, hop_dur=0.5)
+>>> interface.process_files(files, root=db.root)
+file             start                   end
+wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.1652
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -23.4730
+wav/03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.3866
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -19.5026
+wav/16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.7340
+                 0 days 00:00:00.500000  0 days 00:00:01.500000   -20.2331
+                 0 days 00:00:01         0 days 00:00:02          -18.8565
+                 0 days 00:00:01.500000  0 days 00:00:02.500000   -20.4036
+dtype: float32
 
-    interface = audinterface.Process(
-        process_func=rms,
-        win_dur=1.0,
-        hop_dur=0.5,
-    )
-    y = interface.process_files(files)
-    y
 
 Feature interface
 -----------------
@@ -148,7 +110,7 @@ it is recommended to use :class:`audinterface.Feature`,
 which returns a :class:`pandas.DataFrame`
 and assigns names to the dimensions/features.
 
-.. jupyter-execute::
+.. code-block:: python
 
     def features(signal, sampling_rate):
         return [signal.mean(), signal.std()]
@@ -158,8 +120,12 @@ and assigns names to the dimensions/features.
         process_func=features,
     )
 
-    df = interface.process_index(index)
-    df
+>>> interface.process_index(index, root=db.root)
+                                                    mean     std
+file            start  end
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 To calculate features with a sliding window,
 we create a new interface
@@ -169,7 +135,7 @@ By setting
 the windowing is automatically handled
 and single frames are passed on to the processing function.
 
-.. jupyter-execute::
+.. code-block:: python
 
     interface = audinterface.Feature(
         ["mean", "std"],
@@ -178,8 +144,18 @@ and single frames are passed on to the processing function.
         win_dur=1.0,
         hop_dur=0.5,
     )
-    df = interface.process_files(files)
-    df
+
+>>> interface.process_files(files, root=db.root)
+                                                                     mean     std
+file            start                  end                                       
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -3.2866e-04  0.0981
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -2.8513e-04  0.0670
+wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:01         3.8935e-05  0.1516
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.1219e-04  0.1059
+wav/16b10Wb.wav 0 days 00:00:00        0 days 00:00:01        -4.5467e-04  0.0819
+                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.6149e-04  0.0974
+                0 days 00:00:01        0 days 00:00:02        -4.6923e-04  0.1141
+                0 days 00:00:01.500000 0 days 00:00:02.500000 -4.4670e-04  0.0955
 
 
 Feature interface for multi-channel input
@@ -192,12 +168,12 @@ We can prove this
 by running the previous interface
 on the following multi-channel signal.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audiofile
 
     signal, sampling_rate = audiofile.read(
-        files[0],
+        os.path.join(db.root, files[0]),
         always_2d=True,
     )
     signal_multi_channel = np.concatenate(
@@ -208,15 +184,14 @@ on the following multi-channel signal.
             signal + 0.5,
         ],
     )
-    signal_multi_channel.shape
 
-.. jupyter-execute::
-
-    df = interface.process_signal(
-        signal_multi_channel,
-        sampling_rate,
-    )
-    df
+>>> signal_multi_channel.shape
+(4, 30372)
+>>> interface.process_signal(signal_multi_channel, sampling_rate)
+                                                 mean     std
+start                  end                                       
+0 days 00:00:00        0 days 00:00:01        -0.0003  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000 -0.0003  0.0670
 
 To process the second and fourth channel,
 we create a new interface
@@ -232,7 +207,7 @@ the processing function must
 return an array with the correct
 number of channels (here 2).
 
-.. jupyter-execute::
+.. code-block:: python
 
     interface_multi_channel = audinterface.Feature(
         ["mean", "std"],
@@ -244,18 +219,23 @@ number of channels (here 2).
         channels=[1, 3],
     )
 
-    df = interface_multi_channel.process_signal(
-        signal_multi_channel,
-        sampling_rate,
-    )
-    df
+    df = interface_multi_channel.process_signal(signal_multi_channel, sampling_rate)
+
+>>> df
+                                                 1            3          
+                                              mean  std    mean     std
+start                  end                                                 
+0 days 00:00:00        0 days 00:00:01         0.0  0.0  0.4997  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.0  0.0  0.4997  0.0670
 
 We can access the features of a specific
 channel by its index.
 
-.. jupyter-execute::
-
-    df[3]
+>>> df[3]
+                                                 mean     std
+start                  end                                       
+0 days 00:00:00        0 days 00:00:01         0.4997  0.0981
+0 days 00:00:00.500000 0 days 00:00:01.500000  0.4997  0.0670
 
 
 Feature interface for external function
@@ -277,7 +257,7 @@ and returning the values in the correct shape,
 namely ``(num_channels, num_features, num_frames)``,
 whereas the first dimension is optionally.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import librosa
 
@@ -302,8 +282,23 @@ whereas the first dimension is optionally.
         win_dur=0.02,
         hop_dur=0.01,
     )
-    df = interface.process_index(index)
-    df
+
+>>> interface.process_index(index, root=db.root)
+                                                                 mfcc-0  ...  mfcc-12
+file            start                  end                               ...         
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.020000 -611.9933  ...   1.1514
+                0 days 00:00:00.010000 0 days 00:00:00.030000 -668.1758  ...  14.0685
+                0 days 00:00:00.020000 0 days 00:00:00.040000 -664.6128  ...   7.9498
+                0 days 00:00:00.030000 0 days 00:00:00.050000 -667.7147  ...  12.9575
+                0 days 00:00:00.040000 0 days 00:00:00.060000 -669.3674  ...   4.3968
+...                                                                 ...  ...      ...
+wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.6736  ...   1.8637
+                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.9581  ...   9.3450
+                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.1565  ...   7.4110
+                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.5459  ...  17.6454
+                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.8052  ...   3.7111
+<BLANKLINE>
+[605 rows x 13 columns]
 
 
 Serializable feature interface
@@ -320,7 +315,7 @@ we create a class that inherits
 from :class:`audinterface.Feature`
 and :class:`audobject.Object`.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import audobject
 
@@ -336,19 +331,33 @@ and :class:`audobject.Object`.
             return [signal.mean(), signal.std()]
 
     fex = MeanStd()
-    df = fex.process_index(index)
-    df
+
+>>> fex.process_index(index, root=db.root)
+                                                    mean     std
+file            start  end                                          
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 The advantage of the feature extraction object is
 that we can save it to a YAML file
 and re-instantiate it from there.
 
-.. jupyter-execute::
+.. Specify version for storing and loading objects to YAML
+.. invisible-code-block: python
 
-    fex.to_yaml("mean-std.yaml")
-    fex2 = audobject.from_yaml("mean-std.yaml")
-    df = fex2.process_index(index)
-    df
+    __builtins__["__version__"] = "1.0.0"
+    __builtins__["MeanStd"] = MeanStd
+
+
+>>> fex.to_yaml("mean-std.yaml")
+>>> fex2 = audobject.from_yaml("mean-std.yaml")
+>>> fex2.process_index(index, root=db.root)
+                                                    mean     std
+file            start  end                                          
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956
 
 
 Segmentation interface
@@ -360,9 +369,10 @@ which returns a segmented index conform to audformat_.
 An example for such a processing function
 would be a voice activity detection algorithm.
 
-.. jupyter-execute::
+.. code-block:: python
 
     import auditok
+    import pandas as pd
 
     def segments(signal, sampling_rate):
 
@@ -392,8 +402,11 @@ would be a voice activity detection algorithm.
         return index
 
     interface = audinterface.Segment(process_func=segments)
-    idx = interface.process_file(files[0])
-    idx
+
+>>> interface.process_file(files[0], root=db.root)
+MultiIndex([('wav/03a01Fa.wav', '0 days 00:00:00.150000', ...),
+            ('wav/03a01Fa.wav', '0 days 00:00:00.900000', ...)],
+           names=['file', 'start', 'end'])
 
 Sometimes,
 it is required that a table
@@ -411,15 +424,21 @@ is performed on an already labelled dataset
 in order to do data augmentation
 or teacher-student training.
 
-.. jupyter-execute::
-
-    table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
-    table
-    
-.. jupyter-execute::
-
-    table_segmented = interface.process_table(table)
-    table_segmented
+>>> table = pd.DataFrame({"label": [n * 2 for n in range(len(index))]}, index=index)
+>>> table
+                 label
+file                  
+wav/03a01Fa.wav      0
+wav/03a01Nc.wav      2
+wav/16b10Wb.wav      4
+>>> interface.process_table(table, root=db.root)
+                                                               label
+file            start                  end                          
+wav/03a01Fa.wav 0 days 00:00:00.150000 0 days 00:00:00.700000      0
+                0 days 00:00:00.900000 0 days 00:00:01.600000      0
+wav/03a01Nc.wav 0 days 00:00:00.100000 0 days 00:00:01.350000      2
+wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4
+                0 days 00:00:01.050000 0 days 00:00:02.500000      4
 
 
 Special processing function arguments
@@ -443,14 +462,19 @@ The following processing function
 returns the values of
 ``"idx"`` and ``"file"``.
 
-.. jupyter-execute::
+.. code-block:: python
 
     def special_args(signal, sampling_rate, idx, file):
         return idx, os.path.basename(file)
 
     interface = audinterface.Process(process_func=special_args)
-    y = interface.process_files(files)
-    y
+
+>>> interface.process_files(files, root=db.root)
+file             start   end                      
+wav/03a01Fa.wav  0 days  0 days 00:00:01.898250       (0, 03a01Fa.wav)
+wav/03a01Nc.wav  0 days  0 days 00:00:01.611250       (1, 03a01Nc.wav)
+wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999    (2, 16b10Wb.wav)
+dtype: object
 
 For instance,
 we can pass a list with gender labels
@@ -458,7 +482,7 @@ to the processing function
 and use the running index
 to select the appropriate f0 range.
 
-.. jupyter-execute::
+.. code-block:: python
 
     gender = db["files"]["speaker"].get(map="gender")  # gender per file
     f0_range = {
@@ -473,7 +497,7 @@ to select the appropriate f0 range.
             fmin=f0_range[gender.iloc[idx]][0],
             fmax=f0_range[gender.iloc[idx]][1],
             sr=sampling_rate,
-        ).mean()
+        ).mean().round(2)
         return y, gender.iloc[idx]
 
     interface = audinterface.Feature(
@@ -484,8 +508,13 @@ to select the appropriate f0 range.
             "f0_range": f0_range,
         },
     )
-    df = interface.process_index(gender.index)
-    df
+
+>>> interface.process_index(gender.index, root=db.root)
+                                                       f0  gender
+file            start  end                                                  
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.81    male
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      111.63    male
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   229.09  female
 
 
 .. _audformat: https://audeering.github.io/audformat/

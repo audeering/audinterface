@@ -1,11 +1,5 @@
 audb
 audeer
-auditok
-ipykernel
-jupyter-sphinx
-librosa
-pyarrow
-soxr >=0.4.0b1  # for numpy 2, https://github.com/dofuuz/python-soxr/issues/28
 sphinx
 sphinx-apipages >=0.1.2
 sphinx-audeering-theme >=1.2.1
