@@ -248,6 +248,35 @@ class _Process(object):
 
 
 class _ProcessText(_Process):
+    @staticmethod
+    def identity(data):
+        return data
+
+    def __init__(
+        self,
+        *,
+        process_func: typing.Callable[..., typing.Any] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        num_workers: typing.Optional[int] = 1,
+        multiprocessing: bool = False,
+        verbose: bool = False,
+    ):
+        process_func = process_func or self.identity
+        signature = inspect.signature(process_func)
+        self._process_func_signature = dict(signature.parameters)
+        r"""Arguments present in processing function."""
+        self.multiprocessing = multiprocessing
+        r"""Use multiprocessing."""
+
+        self.num_workers = num_workers
+        r"""Number of workers."""
+
+        self.process_func = process_func
+        r"""Processing function."""
+
+        self.process_func_args = process_func_args or {}
+        r"""Additional keyword arguments to processing function."""
+
     def process_file(
         self,
         file: str,
