@@ -17,26 +17,7 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def identity(signal, sampling_rate) -> np.ndarray:
-    r"""Default processing function.
-
-    This function is used,
-    when ``Process`` is instantiated
-    with ``process_func=None``.
-    It returns the given signal.
-
-    Args:
-        signal: signal
-        sampling_rate: sampling rate in Hz
-
-    Returns:
-        signal
-
-    """
-    return signal
-
-
-class Process:
+class Process(object):
     r"""Processing interface.
 
     Args:
@@ -152,6 +133,89 @@ class Process:
 
     """  # noqa: E501
 
+    def __new__(
+        cls,
+        *,
+        process_func: typing.Callable[..., typing.Any] = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_is_mono: bool = False,
+        sampling_rate: int = None,
+        resample: bool = False,
+        channels: typing.Union[int, typing.Sequence[int]] = None,
+        mixdown: bool = False,
+        win_dur: Timestamp = None,
+        hop_dur: Timestamp = None,
+        min_signal_dur: Timestamp = None,
+        max_signal_dur: Timestamp = None,
+        segment: Segment = None,
+        keep_nat: bool = False,
+        num_workers: typing.Optional[int] = 1,
+        multiprocessing: bool = False,
+        verbose: bool = False,
+        processing_mode: str = "signal",
+    ):
+        process_kwargs = dict((k, v) for (k, v) in locals().items())
+        processing_mode = process_kwargs.pop("processing_mode")
+        class_ = process_kwargs.pop("cls")
+
+        if processing_mode == "signal":
+            return _ProcessSignal(**process_kwargs)
+
+    @staticmethod
+    def _common_kwargs():
+        """Optional kwargs for all processing modes."""
+        common_kwargs = [
+            "num_workers",
+            "multiprocessing",
+            "verbose",
+        ]
+        return common_kwargs
+
+    @staticmethod
+    def _mandatory_kwargs():
+        """Mandatory kwargs for all processing modes."""
+        return ["process_func", "process_func_args"]
+
+    @staticmethod
+    def _signal_specific_kwargs():
+        """Return the list of kwargs that are specific to the processing mode."""
+        signals_specific_kwargs = [
+            "process_func_is_mono",
+            "sampling_rate",
+            "resample",
+            "channels",
+            "mixdown",
+            "win_dur",
+            "hop_dur",
+            "min_signal_dur",
+            "max_signal_dur",
+            "segment",
+            "keep_nat",
+        ]
+
+        return signals_specific_kwargs
+
+
+def identity(signal, sampling_rate) -> np.ndarray:
+    r"""Default processing function.
+
+    This function is used,
+    when ``Process`` is instantiated
+    with ``process_func=None``.
+    It returns the given signal.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+
+    Returns:
+        signal
+
+    """
+    return signal
+
+
+class _ProcessSignal:
     def __init__(
         self,
         *,
