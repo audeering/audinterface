@@ -325,6 +325,45 @@ class _ProcessText(_Process):
 
         return y, files
 
+    def process_data(
+        self,
+        data: typing.Any,
+        file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        r"""Process audio signal and return result.
+
+        If file is given,
+        the returned series contains a filewise index.
+        Otherwise, an integer index is returned.
+
+        Args:
+            data: data to process
+            file: file path
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
+
+        Returns:
+            Series with processed data
+
+        """
+        y, file = self._process_data(
+            data,
+            file=file,
+            process_func_args=process_func_args,
+        )
+        if file is not None:
+            index = audformat.filewise_index([file])
+        else:
+            index = pd.Index([0], dtype="int")
+        if len(y) == 0:
+            return pd.Series([], index, dtype=object)
+        else:
+            return pd.Series([y], index)
+
     def _process_data(
         self,
         data: typing.Any,
@@ -999,45 +1038,6 @@ class _ProcessSignal(_Process):
             process_func_args=process_func_args,
         )
         return y, file
-
-    def process_data(
-        self,
-        data: typing.Any,
-        file: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        r"""Process audio signal and return result.
-
-        If file is given,
-        the returned series contains a filewise index.
-        Otherwise, an integer index is returned.
-
-        Args:
-            data: data to process
-            file: file path
-            process_func_args: (keyword) arguments passed on
-                to the processing function.
-                They will temporarily overwrite
-                the ones stored in
-                :attr:`audinterface.Process.process_func_args`
-
-        Returns:
-            Series with processed data
-
-        """
-        y, file = self._process_data(
-            data,
-            file=file,
-            process_func_args=process_func_args,
-        )
-        if file is not None:
-            index = audformat.filewise_index([file])
-        else:
-            index = pd.Index([0], dtype="int")
-        if len(y) == 0:
-            return pd.Series([], index, dtype=object)
-        else:
-            return pd.Series([y], index)
 
     def process_signal(
         self,
