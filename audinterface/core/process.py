@@ -1,3 +1,5 @@
+from abc import ABCMeta
+from abc import abstractmethod
 import errno
 import inspect
 import itertools
@@ -215,7 +217,28 @@ def identity(signal, sampling_rate) -> np.ndarray:
     return signal
 
 
-class _Process(object):
+class _Process(object, metaclass=ABCMeta):
+    @abstractmethod
+    def process_file(self):
+        pass
+
+    @abstractmethod
+    def process_files(self):
+        pass
+
+    @abstractmethod
+    def process_folder(self):
+        pass
+
+    @abstractmethod
+    def process_index(self):
+        pass
+
+    # this is specific to data-specific subclass
+    # @abstractmethod
+    # def process_data(self):
+    #     pass
+
     def _special_args(
         self,
         idx: int,
@@ -294,7 +317,8 @@ class _ProcessText(_Process):
         *,
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series: ...
+    ) -> pd.Series:
+        ...
 
     def process_file(
         self,
@@ -304,6 +328,7 @@ class _ProcessText(_Process):
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         """We will need a separate function.
+
         This is a stub
         """
         ...
@@ -371,7 +396,8 @@ class _ProcessText(_Process):
         start: Timestamp = None,
         end: Timestamp = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series: ...
+    ) -> pd.Series:
+        ...
 
     def _process_file(
         self,
@@ -866,7 +892,6 @@ class _ProcessSignal(_Process):
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation.
-
 
         Optional conversion to filewise index undone!
         """
