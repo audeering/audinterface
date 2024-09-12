@@ -218,8 +218,8 @@ def identity(signal, sampling_rate) -> np.ndarray:
 class _Process(object):
     pass
 
-class _ProcessText(_Process):
 
+class _ProcessText(_Process):
     def process_file(
         self,
         file: str,
@@ -227,12 +227,8 @@ class _ProcessText(_Process):
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
-        """Wir brauchen eine seprate Funktion für Text.
-
-
-        """
+        """We will need a separate function."""
         ...
-
 
     def _process_data(
         self,
@@ -253,8 +249,6 @@ class _ProcessText(_Process):
         )
         return y, file
 
-    #
-    # Currently only copied from the existing thing
     def _call_data(
         self,
         data: typing.Any,
@@ -286,8 +280,6 @@ class _ProcessText(_Process):
         special_args = self._special_args(idx, root, file, process_func_args)
         y = self.process_func(data, **special_args, **process_func_args)
         return y
-
-
 
 
 class _ProcessSignal(_Process):
@@ -1210,38 +1202,6 @@ class _ProcessSignal(_Process):
         else:
             y = _helper(signal)
 
-        return y
-
-    def _call_data(
-        self,
-        data: typing.Any,
-        *,
-        idx: int = 0,
-        root: str = None,
-        file: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Any:
-        r"""Call processing function on general data.
-
-        It does not make any assumptions about ``data``.
-
-        Special arguments are extracted,
-        and passed to the processing function.
-
-        Args:
-            data: data object passed to processing function
-            idx: index
-            root: root path
-            file: file path
-            process_func_args: processing function arguments
-
-        Returns:
-            result of processing function
-
-        """
-        process_func_args = process_func_args or self.process_func_args
-        special_args = self._special_args(idx, root, file, process_func_args)
-        y = self.process_func(data, **special_args, **process_func_args)
         return y
 
     def _special_args(
