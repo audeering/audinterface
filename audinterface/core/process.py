@@ -248,10 +248,6 @@ class _Process(object):
 
 
 class _ProcessText(_Process):
-    @staticmethod
-    def identity(data):
-        return data
-
     def __init__(
         self,
         *,
@@ -277,6 +273,10 @@ class _ProcessText(_Process):
         self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
+    @staticmethod
+    def identity(data):
+        return data
+
     def process_folder(
         self,
         root: str,
@@ -288,16 +288,13 @@ class _ProcessText(_Process):
         r"""Process files in a folder."""
         ...
 
-
     def process_files(
         self,
         files: typing.Sequence[str],
         *,
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        ...
-
+    ) -> pd.Series: ...
 
     def process_file(
         self,
@@ -310,7 +307,6 @@ class _ProcessText(_Process):
         This is a stub
         """
         ...
-
 
     def process_index(
         self,
@@ -375,9 +371,7 @@ class _ProcessText(_Process):
         start: Timestamp = None,
         end: Timestamp = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        ...
-
+    ) -> pd.Series: ...
 
     def _process_file(
         self,
