@@ -310,6 +310,28 @@ class _ProcessText(_Process):
         return y
 
 
+    def __call__(
+        self,
+        data: typing.Any,
+    ) -> typing.Any:
+        r"""Apply processing to data.
+
+        This function processes the data
+        **without** transforming the output into a :class:`pd.Series`.
+        Instead, it will return the raw processed data.
+
+        Args:
+            data: data or signal
+
+        Returns:
+            Processed data
+
+        """
+        return self._call_data(data)
+
+
+
+
 class _ProcessSignal(_Process):
     def __init__(
         self,
