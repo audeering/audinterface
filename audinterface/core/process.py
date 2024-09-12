@@ -215,7 +215,13 @@ def identity(signal, sampling_rate) -> np.ndarray:
     return signal
 
 
-class _ProcessSignal:
+class _Process(object):
+    pass
+
+class _ProcessText(_Process):
+    pass
+
+class _ProcessSignal(_Process):
     def __init__(
         self,
         *,
