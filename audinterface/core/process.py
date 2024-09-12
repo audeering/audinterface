@@ -216,7 +216,35 @@ def identity(signal, sampling_rate) -> np.ndarray:
 
 
 class _Process(object):
-    pass
+    def _special_args(
+        self,
+        idx: int,
+        root: typing.Optional[str],
+        file: typing.Optional[str],
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Dict[str, typing.Union[int, str]]:
+        r"""Identify special arguments in processing function.
+
+        If one of the arguments of the processing function is named
+        ``"idx"``, ``"root"``, or ``"file"``,
+        and not provided in ``process_func_args``,
+        it is identified as a special argument.
+
+        Args:
+            idx: index
+            root: root path
+            file: file path
+            process_func_args: processing function arguments
+
+        Returns:
+            special arguments dictionary
+
+        """
+        special_args = {}
+        for key, value in [("idx", idx), ("root", root), ("file", file)]:
+            if key in self._process_func_signature and key not in process_func_args:
+                special_args[key] = value
+        return special_args
 
 
 class _ProcessText(_Process):
@@ -1203,36 +1231,6 @@ class _ProcessSignal(_Process):
             y = _helper(signal)
 
         return y
-
-    def _special_args(
-        self,
-        idx: int,
-        root: typing.Optional[str],
-        file: typing.Optional[str],
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Dict[str, typing.Union[int, str]]:
-        r"""Identify special arguments in processing function.
-
-        If one of the arguments of the processing function is named
-        ``"idx"``, ``"root"``, or ``"file"``,
-        and not provided in ``process_func_args``,
-        it is identified as a special argument.
-
-        Args:
-            idx: index
-            root: root path
-            file: file path
-            process_func_args: processing function arguments
-
-        Returns:
-            special arguments dictionary
-
-        """
-        special_args = {}
-        for key, value in [("idx", idx), ("root", root), ("file", file)]:
-            if key in self._process_func_signature and key not in process_func_args:
-                special_args[key] = value
-        return special_args
 
     def __call__(
         self,
