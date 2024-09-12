@@ -277,6 +277,28 @@ class _ProcessText(_Process):
         self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
 
+    def process_folder(
+        self,
+        root: str,
+        *,
+        filetype: str = "wav",
+        include_root: bool = True,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        r"""Process files in a folder."""
+        ...
+
+
+    def process_files(
+        self,
+        files: typing.Sequence[str],
+        *,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        ...
+
+
     def process_file(
         self,
         file: str,
@@ -284,47 +306,26 @@ class _ProcessText(_Process):
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
-        """We will need a separate function."""
+        """We will need a separate function.
+        This is a stub
+        """
         ...
 
-    def _process_file(
+
+    def process_index(
         self,
-        file: str,
+        index: pd.Index,
         *,
-        idx: int = 0,
+        preserve_index: bool = False,
         root: str = None,
+        cache_root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Tuple[
-        typing.List[typing.Any],
-        typing.List[str],
-    ]:
-        r"""Process a text file.
+    ) -> pd.Series:
+        r"""Process from an index conform to audformat_."""
+        ...
 
-        Args:
-            file: file path
-            idx: index value
-            root: optional root path of file
-            process_func_args: arguments to pass to process function
-
-        Returns:
-            result of processing function, files, starts, ends
-
-        """
-        ext = audeer.file_extension(file).lower()
-        # Text files
-        if ext in ["json", "txt"]:
-            data = utils.read_text(file, root=root)
-            y, file = self._process_data(
-                data,
-                idx=idx,
-                root=root,
-                file=file,
-                process_func_args=process_func_args,
-            )
-            files = [file]
-
-        return y, files
-
+    # copied from process-text branch
+    # signal strand does not have this
     def process_data(
         self,
         data: typing.Any,
@@ -363,6 +364,58 @@ class _ProcessText(_Process):
             return pd.Series([], index, dtype=object)
         else:
             return pd.Series([y], index)
+
+    # not needed - stub to compare with process_data
+    def process_signal(
+        self,
+        signal: np.ndarray,
+        sampling_rate: int,
+        *,
+        file: str = None,
+        start: Timestamp = None,
+        end: Timestamp = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        ...
+
+
+    def _process_file(
+        self,
+        file: str,
+        *,
+        idx: int = 0,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Tuple[
+        typing.List[typing.Any],
+        typing.List[str],
+    ]:
+        r"""Process a text file.
+
+        Args:
+            file: file path
+            idx: index value
+            root: optional root path of file
+            process_func_args: arguments to pass to process function
+
+        Returns:
+            result of processing function, files, starts, ends
+
+        """
+        ext = audeer.file_extension(file).lower()
+        # Text files
+        if ext in ["json", "txt"]:
+            data = utils.read_text(file, root=root)
+            y, file = self._process_data(
+                data,
+                idx=idx,
+                root=root,
+                file=file,
+                process_func_args=process_func_args,
+            )
+            files = [file]
+
+        return y, files
 
     def _process_data(
         self,
