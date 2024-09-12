@@ -318,8 +318,8 @@ class _ProcessSignal(_Process):
     ) -> typing.Tuple[
         typing.List[typing.Any],
         typing.List[str],
-        typing.Optional[typing.List[pd.Timedelta]],
-        typing.Optional[typing.List[pd.Timedelta]],
+        typing.List[pd.Timedelta],
+        typing.List[pd.Timedelta],
     ]:
         r"""Process a file.
 
@@ -340,62 +340,43 @@ class _ProcessSignal(_Process):
         if end is not None:
             end = utils.to_timedelta(end, self.sampling_rate)
 
-        ext = audeer.file_extension(file).lower()
+        signal, sampling_rate = utils.read_audio(
+            file,
+            start=start,
+            end=end,
+            root=root,
+        )
 
-        # Text files
-        if ext in ["json", "txt"]:
-            data = utils.read_text(file, root=root)
-            y, file = self._process_data(
-                data,
-                idx=idx,
-                root=root,
-                file=file,
-                process_func_args=process_func_args,
+        y, files, starts, ends = self._process_signal(
+            signal,
+            sampling_rate,
+            idx=idx,
+            root=root,
+            file=file,
+            process_func_args=process_func_args,
+        )
+
+        def precision_offset(duration, sampling_rate):
+            # Ensure we get the same precision
+            # by storing what is lost due to rounding
+            # when reading the file
+            duration_at_sample = utils.to_timedelta(
+                audmath.samples(duration.total_seconds(), sampling_rate) / sampling_rate
             )
-            files = [file]
-            starts = None
-            ends = None
+            return duration - duration_at_sample
 
-        # Audio/video files
+        if self.win_dur is not None:
+            if start is not None:
+                starts = starts + start
+                ends = ends + start
         else:
-            signal, sampling_rate = utils.read_audio(
-                file,
-                start=start,
-                end=end,
-                root=root,
-            )
-
-            y, files, starts, ends = self._process_signal(
-                signal,
-                sampling_rate,
-                idx=idx,
-                root=root,
-                file=file,
-                process_func_args=process_func_args,
-            )
-
-            def precision_offset(duration, sampling_rate):
-                # Ensure we get the same precision
-                # by storing what is lost due to rounding
-                # when reading the file
-                duration_at_sample = utils.to_timedelta(
-                    audmath.samples(duration.total_seconds(), sampling_rate)
-                    / sampling_rate
-                )
-                return duration - duration_at_sample
-
-            if self.win_dur is not None:
-                if start is not None:
-                    starts = starts + start
-                    ends = ends + start
-            else:
-                if start is not None and not pd.isna(start):
-                    starts[0] += start
-                    ends[0] += start - precision_offset(start, sampling_rate)
-                if self.keep_nat and (end is None or pd.isna(end)):
-                    ends[0] = pd.NaT
-                if end is not None and not pd.isna(end):
-                    ends[-1] += precision_offset(end, sampling_rate)
+            if start is not None and not pd.isna(start):
+                starts[0] += start
+                ends[0] += start - precision_offset(start, sampling_rate)
+            if self.keep_nat and (end is None or pd.isna(end)):
+                ends[0] = pd.NaT
+            if end is not None and not pd.isna(end):
+                ends[-1] += precision_offset(end, sampling_rate)
 
         return y, files, starts, ends
 
