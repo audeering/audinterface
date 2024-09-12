@@ -258,6 +258,44 @@ class _ProcessText(_Process):
         """We will need a separate function."""
         ...
 
+    def _process_file(
+        self,
+        file: str,
+        *,
+        idx: int = 0,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Tuple[
+        typing.List[typing.Any],
+        typing.List[str],
+    ]:
+        r"""Process a text file.
+
+        Args:
+            file: file path
+            idx: index value
+            root: optional root path of file
+            process_func_args: arguments to pass to process function
+
+        Returns:
+            result of processing function, files, starts, ends
+
+        """
+        ext = audeer.file_extension(file).lower()
+        # Text files
+        if ext in ["json", "txt"]:
+            data = utils.read_text(file, root=root)
+            y, file = self._process_data(
+                data,
+                idx=idx,
+                root=root,
+                file=file,
+                process_func_args=process_func_args,
+            )
+            files = [file]
+
+        return y, files
+
     def _process_data(
         self,
         data: typing.Any,
@@ -309,7 +347,6 @@ class _ProcessText(_Process):
         y = self.process_func(data, **special_args, **process_func_args)
         return y
 
-
     def __call__(
         self,
         data: typing.Any,
@@ -328,8 +365,6 @@ class _ProcessText(_Process):
 
         """
         return self._call_data(data)
-
-
 
 
 class _ProcessSignal(_Process):
