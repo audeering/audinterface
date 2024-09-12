@@ -219,7 +219,76 @@ class _Process(object):
     pass
 
 class _ProcessText(_Process):
-    pass
+
+    def process_file(
+        self,
+        file: str,
+        *,
+        root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        """Wir brauchen eine seprate Funktion für Text.
+
+
+        """
+        ...
+
+
+    def _process_data(
+        self,
+        data: typing.Any,
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Tuple[typing.Any, str]:
+        r"""Process signal and handle special processing function arguments."""
+        y = self._call_data(
+            data,
+            idx=idx,
+            root=root,
+            file=file,
+            process_func_args=process_func_args,
+        )
+        return y, file
+
+    #
+    # Currently only copied from the existing thing
+    def _call_data(
+        self,
+        data: typing.Any,
+        *,
+        idx: int = 0,
+        root: str = None,
+        file: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> typing.Any:
+        r"""Call processing function on general data.
+
+        It does not make any assumptions about ``data``.
+
+        Special arguments are extracted,
+        and passed to the processing function.
+
+        Args:
+            data: data object passed to processing function
+            idx: index
+            root: root path
+            file: file path
+            process_func_args: processing function arguments
+
+        Returns:
+            result of processing function
+
+        """
+        process_func_args = process_func_args or self.process_func_args
+        special_args = self._special_args(idx, root, file, process_func_args)
+        y = self.process_func(data, **special_args, **process_func_args)
+        return y
+
+
+
 
 class _ProcessSignal(_Process):
     def __init__(
@@ -392,9 +461,7 @@ class _ProcessSignal(_Process):
         r"""Process the content of an audio file.
 
         The results of processed audio/video files
-        are returned with a segmented index,
-        all other processed files
-        with a filewise index.
+        are returned with a segmented index.
 
         Args:
             file: file path
@@ -437,10 +504,8 @@ class _ProcessSignal(_Process):
                 end=end,
                 process_func_args=process_func_args,
             )
-            if starts is None and ends is None:
-                index = audformat.filewise_index(files)
-            else:
-                index = audformat.segmented_index(files, starts, ends)
+
+            index = audformat.segmented_index(files, starts, ends)
 
             if len(y) == 0:
                 return pd.Series([], index, dtype=object)
@@ -458,11 +523,8 @@ class _ProcessSignal(_Process):
     ) -> pd.Series:
         r"""Process a list of files.
 
-        The index of the returned series
-        is a segmented index,
-        if any of the processed files
-        are audio/video files.
-        Otherwise it is a filewise index.
+        Question: So far I am using the old
+        behavrion: always a segmented index
 
         Args:
             files: list of file paths
@@ -545,15 +607,7 @@ class _ProcessSignal(_Process):
         starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
         ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
 
-        if (
-            len(audeer.unique(starts)) == 1
-            and audeer.unique(starts)[0] is None
-            and len(audeer.unique(ends)) == 1
-            and audeer.unique(ends)[0] is None
-        ):
-            index = audformat.filewise_index(files)
-        else:
-            index = audformat.segmented_index(files, starts, ends)
+        index = audformat.segmented_index(files, starts, ends)
         y = pd.Series(y, index)
 
         return y
@@ -567,12 +621,6 @@ class _ProcessSignal(_Process):
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
         r"""Process files in a folder.
-
-        The index of the returned series
-        is a segmented index,
-        if any of the processed files
-        are audio/video files.
-        Otherwise it is a filewise index.
 
         .. note:: At the moment does not scan in sub-folders!
 
@@ -625,7 +673,11 @@ class _ProcessSignal(_Process):
         root: typing.Optional[str],
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.Series:
-        r"""Like process_index, but does not apply segmentation."""
+        r"""Like process_index, but does not apply segmentation.
+
+
+        Optional conversion to filewise index undone!
+        """
         if index.empty:
             return pd.Series(None, index=index, dtype=object)
 
@@ -657,16 +709,7 @@ class _ProcessSignal(_Process):
         starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
         ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
 
-        if (
-            len(audeer.unique(starts)) == 1
-            and audeer.unique(starts)[0] is None
-            and len(audeer.unique(ends)) == 1
-            and audeer.unique(ends)[0] is None
-        ):
-            index = audformat.filewise_index(files)
-        else:
-            index = audformat.segmented_index(files, starts, ends)
-
+        index = audformat.segmented_index(files, starts, ends)
         y = pd.Series(y, index)
 
         return y
@@ -696,10 +739,8 @@ class _ProcessSignal(_Process):
                 and :attr:`audinterface.Process.segment` is ``None``
                 the returned index
                 will be of same type
-                as the original one.
-                Otherwise it will be a segmented index
-                if any audio/video files are processed,
-                or a filewise index otherwise
+                as the original one,
+                otherwise always a segmented index is returned
             root: root folder to expand relative file paths
             cache_root: cache folder (see description)
             process_func_args: (keyword) arguments passed on
@@ -895,7 +936,7 @@ class _ProcessSignal(_Process):
     def process_signal(
         self,
         signal: np.ndarray,
-        sampling_rate: int = None,
+        sampling_rate: int,
         *,
         file: str = None,
         start: Timestamp = None,
@@ -1132,6 +1173,9 @@ class _ProcessSignal(_Process):
             self.mixdown,
         )
 
+        # there is a special treatment removed from the main
+        # branch that I cannot interpret
+        # taking from process-text branch
         process_func_args = process_func_args or self.process_func_args
         special_args = self._special_args(idx, root, file, process_func_args)
 
@@ -1232,35 +1276,27 @@ class _ProcessSignal(_Process):
 
     def __call__(
         self,
-        data: typing.Any,
-        sampling_rate: int = None,
+        signal: np.ndarray,
+        sampling_rate: int,
     ) -> typing.Any:
-        r"""Apply processing to data/signal.
+        r"""Apply processing to signal.
 
-        This function processes the data/signal
-        **without** transforming the output into a :class:`pd.Series`.
-        Instead, it will return the raw processed data/signal.
-        However,
-        if channel selection, mixdown and/or resampling is enabled,
-        and ``sampling_rate`` is not ``None``,
-        the signal will be first remixed and resampled
-        if the input sampling rate does not fit the expected sampling rate.
+        This function processes the signal **without** transforming the output
+        into a :class:`pd.Series`. Instead, it will return the raw processed
+        signal. However, if channel selection, mixdown and/or resampling
+        is enabled, the signal will be first remixed and resampled if the
+        input sampling rate does not fit the expected sampling rate.
 
         Args:
-            data: data or signal
-            sampling_rate: sampling rate in Hz.
-                If not ``None``,
-                ``data`` is expected to be a :class:`numpy.ndarray`
+            signal: signal values
+            sampling_rate: sampling rate in Hz
 
         Returns:
-            Processed data/signal
+            Processed signal
 
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
         """
-        if sampling_rate is not None:
-            return self._call(data, sampling_rate)
-        else:
-            return self._call_data(data)
+        return self._call(signal, sampling_rate)
