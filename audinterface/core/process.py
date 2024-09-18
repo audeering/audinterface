@@ -19,6 +19,34 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
+def data_identity(data):
+    r"""Default processing function for non-signal data.
+
+    In analogy to  the identity function for signals,
+    it returns the data itself
+    """
+    return data
+
+
+def identity(signal, sampling_rate) -> np.ndarray:
+    r"""Default processing function.
+
+    This function is used,
+    when ``Process`` is instantiated
+    with ``process_func=None``.
+    It returns the given signal.
+
+    Args:
+        signal: signal
+        sampling_rate: sampling rate in Hz
+
+    Returns:
+        signal
+
+    """
+    return signal
+
+
 class Process(object):
     r"""Processing interface.
 
@@ -198,27 +226,7 @@ class Process(object):
         return signals_specific_kwargs
 
 
-def identity(signal, sampling_rate) -> np.ndarray:
-    r"""Default processing function.
-
-    This function is used,
-    when ``Process`` is instantiated
-    with ``process_func=None``.
-    It returns the given signal.
-
-    Args:
-        signal: signal
-        sampling_rate: sampling rate in Hz
-
-    Returns:
-        signal
-
-    """
-    return signal
-
-
 class _Process(object, metaclass=ABCMeta):
-
     def process_index(
         self,
         index: pd.Index,
@@ -299,8 +307,6 @@ class _Process(object, metaclass=ABCMeta):
             y.index = index
 
         return y
-
-
 
     @abstractmethod
     def process_file(self):
@@ -397,8 +403,7 @@ class _ProcessText(_Process):
         *,
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        ...
+    ) -> pd.Series: ...
 
     def process_file(
         self,
@@ -476,8 +481,7 @@ class _ProcessText(_Process):
         start: Timestamp = None,
         end: Timestamp = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        ...
+    ) -> pd.Series: ...
 
     def _process_file(
         self,
