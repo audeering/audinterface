@@ -366,7 +366,7 @@ class _ProcessText(_Process):
         multiprocessing: bool = False,
         verbose: bool = False,
     ):
-        process_func = process_func or self.identity
+        process_func = process_func or data_identity
         signature = inspect.signature(process_func)
         self._process_func_signature = dict(signature.parameters)
         r"""Arguments present in processing function."""
@@ -381,10 +381,6 @@ class _ProcessText(_Process):
 
         self.process_func_args = process_func_args or {}
         r"""Additional keyword arguments to processing function."""
-
-    @staticmethod
-    def identity(data):
-        return data
 
     def process_folder(
         self,
