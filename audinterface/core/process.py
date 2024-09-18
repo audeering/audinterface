@@ -227,86 +227,11 @@ class Process(object):
 
 
 class _Process(object, metaclass=ABCMeta):
-    def process_index(
-        self,
-        index: pd.Index,
-        *,
-        preserve_index: bool = False,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> pd.Series:
-        r"""Process from an index conform to audformat_.
 
-        If ``cache_root`` is not ``None``,
-        a hash value is created from the index
-        using :func:`audformat.utils.hash` and
-        the result is stored as
-        ``<cache_root>/<hash>.pkl``.
-        When called again with the same index,
-        results will be read from the cached file.
+    @abstractmethod
+    def process_index(self):
+        pass
 
-        Args:
-            index: index with segment information
-            preserve_index: if ``True``
-                and :attr:`audinterface.Process.segment` is ``None``
-                the returned index
-                will be of same type
-                as the original one.
-                Otherwise it will be a segmented index
-                if any audio/video files are processed,
-                or a filewise index otherwise
-            root: root folder to expand relative file paths
-            cache_root: cache folder (see description)
-            process_func_args: (keyword) arguments passed on
-                to the processing function.
-                They will temporarily overwrite
-                the ones stored in
-                :attr:`audinterface.Process.process_func_args`
-
-        Returns:
-            Series with processed segments conform to audformat_
-
-        Raises:
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-
-        .. _audformat: https://audeering.github.io/audformat/data-format.html
-
-        """
-        cache_path = None
-
-        if cache_root is not None:
-            cache_root = audeer.mkdir(cache_root)
-            hash = audformat.utils.hash(index)
-            cache_path = os.path.join(cache_root, f"{hash}.pkl")
-
-        if cache_path and os.path.exists(cache_path):
-            y = pd.read_pickle(cache_path)
-        else:
-            segmented_index = audformat.utils.to_segmented_index(index)
-
-            if self.segment is not None:
-                segmented_index = self.segment.process_index(
-                    segmented_index,
-                    root=root,
-                )
-
-            y = self._process_index_wo_segment(
-                segmented_index,
-                root,
-                process_func_args=process_func_args,
-            )
-
-            if cache_path is not None:
-                y.to_pickle(cache_path, protocol=4)
-
-        if self.segment is None and preserve_index:
-            # Convert segmented index to filewise index
-            # if original index was filewise
-            y.index = index
-
-        return y
 
     @abstractmethod
     def process_file(self):
@@ -672,6 +597,87 @@ class _ProcessSignal(_Process):
 
         self.win_dur = win_dur
         r"""Window duration."""
+
+    def process_index(
+        self,
+        index: pd.Index,
+        *,
+        preserve_index: bool = False,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.Series:
+        r"""Process from an index conform to audformat_.
+
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        results will be read from the cached file.
+
+        Args:
+            index: index with segment information
+            preserve_index: if ``True``
+                and :attr:`audinterface.Process.segment` is ``None``
+                the returned index
+                will be of same type
+                as the original one.
+                Otherwise it will be a segmented index
+                if any audio/video files are processed,
+                or a filewise index otherwise
+            root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.Process.process_func_args`
+
+        Returns:
+            Series with processed segments conform to audformat_
+
+        Raises:
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        cache_path = None
+
+        if cache_root is not None:
+            cache_root = audeer.mkdir(cache_root)
+            hash = audformat.utils.hash(index)
+            cache_path = os.path.join(cache_root, f"{hash}.pkl")
+
+        if cache_path and os.path.exists(cache_path):
+            y = pd.read_pickle(cache_path)
+        else:
+            segmented_index = audformat.utils.to_segmented_index(index)
+
+            if self.segment is not None:
+                segmented_index = self.segment.process_index(
+                    segmented_index,
+                    root=root,
+                )
+
+            y = self._process_index_wo_segment(
+                segmented_index,
+                root,
+                process_func_args=process_func_args,
+            )
+
+            if cache_path is not None:
+                y.to_pickle(cache_path, protocol=4)
+
+        if self.segment is None and preserve_index:
+            # Convert segmented index to filewise index
+            # if original index was filewise
+            y.index = index
+
+        return y
 
     def _process_file(
         self,
