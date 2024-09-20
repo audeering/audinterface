@@ -104,6 +104,12 @@ class Process:
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
+        read_func: function to read in signals/data. When specified,
+            it needs to be able to read signals BOTH other data.
+            Per default, :func:`audinterface.utils.read_audio`
+            will be used for signal file(s), and
+            :func:`audinterface.utils.read_text` for files
+            with ``.json`` or ``text``extensions.
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
@@ -171,6 +177,7 @@ class Process:
         num_workers: typing.Optional[int] = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
+        read_func: typing.Callable[..., typing.Any] = None,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
@@ -236,6 +243,14 @@ class Process:
         self.win_dur = win_dur
         r"""Window duration."""
 
+        # set read_audio and read_text methods
+        if read_func is None:
+            setattr(self.__class__, "read_audio", staticmethod(utils.read_audio))
+            setattr(self.__class__, "read_text", staticmethod(utils.read_text))
+        else:
+            setattr(self.__class__, "read_audio", staticmethod(read_func))
+            setattr(self.__class__, "read_text", staticmethod(read_func))
+
     def _process_file(
         self,
         file: str,
@@ -274,7 +289,7 @@ class Process:
 
         # Text files
         if ext in ["json", "txt"]:
-            data = utils.read_text(file, root=root)
+            data = self.read_text(file, root=root)
             y, file = self._process_data(
                 data,
                 idx=idx,
@@ -288,7 +303,7 @@ class Process:
 
         # Audio/video files
         else:
-            signal, sampling_rate = utils.read_audio(
+            signal, sampling_rate = self.read_audio(
                 file,
                 start=start,
                 end=end,
