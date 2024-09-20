@@ -1,4 +1,5 @@
 import errno
+from collections.abc import Iterable
 import inspect
 import itertools
 import os
@@ -616,10 +617,44 @@ class Process:
             task_description=f"Process {len(index)} segments",
         )
 
-        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+        ys = [x[0] for x in xs]
+        all_dict = all(map(lambda x : isinstance(x, dict), [x[0] for x in xs]))
+        all_iterable = all(map(lambda x : isinstance(x, Iterable), [x[0] for x in xs]))
+        all_text = all(map(lambda x : isinstance(x, str), [x[0] for x in xs]))
+        # print(all_dict, all_iterable)
+
+        if all_dict:
+            # prevent to convert to list of values
+            keys = list(itertools.chain.from_iterable([x.keys() for x in ys]))
+            values = list(itertools.chain.from_iterable([x.values() for x in ys]))
+            y = [{x:y} for (x, y) in zip(keys, values)]
+            # y = list(itertools.chain.from_iterable([[x[0]] for x in xs]))
+        else:
+            if all_iterable and all_text:
+                y = list(itertools.chain.from_iterable([[x[0]] for x in xs]))
+            else:
+                y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+
         files = list(itertools.chain.from_iterable([x[1] for x in xs]))
-        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
-        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+        # avoid 'NoneType' object is not iterable error
+        # this happends when all entries are None
+        try:
+            starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+        except TypeError:
+            pass
+            starts_non_iterable = [x for x in filter(None, [x[2] for x in xs])] == []
+            assert starts_non_iterable, "unknown problem"
+            starts =  [x[2] for x in xs]
+
+        try:
+            ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+        except TypeError:
+            pass
+            ends_non_iterable = [x for x in filter(None, [x[3] for x in xs])] == []
+            assert ends_non_iterable, "unknown problem"
+            ends =  [x[3] for x in xs]
+
 
         if (
             len(audeer.unique(starts)) == 1
