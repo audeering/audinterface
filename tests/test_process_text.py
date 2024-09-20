@@ -493,4 +493,4 @@ def test_read_data(tmpdir, data):
     file = audeer.path(tmpdir, "media.txt")
     with open(file, "w") as fp:
         fp.write(data)
-    assert audinterface.utils.read_data(file) == data
+    assert audinterface.utils.read_text(file) == data
