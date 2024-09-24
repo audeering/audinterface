@@ -179,7 +179,7 @@ def test_process_folder(
     files = [os.path.join(root, f"file{n}.{file_format}") for n in range(num_files)]
     for file in files:
         write_text_file(file, data)
-    y = process.process_folder(root)
+    y = process.process_folder(root, filetype=file_format)
     pd.testing.assert_series_equal(
         y,
         process.process_files(files),
