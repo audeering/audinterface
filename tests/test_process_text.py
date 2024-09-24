@@ -207,7 +207,6 @@ def _get_idx_type(preserve_index, segment_is_None, idx):
     if any audio/video files are processed,
     or a filewise index otherwise
     """
-
     if preserve_index and segment_is_None:
         idx_type = "segmented" if audformat.is_segmented_index(idx) else "filewise"
         return idx_type
@@ -230,13 +229,14 @@ def _series_generator(y, index_type: str):
             file = idx
             yield file, value
         elif index_type == "segmented":
-           (file, _, _) = idx
-           yield file, value
+            (file, _, _) = idx
+            yield file, value
         else:
             raise ValueError("index type invalid")
 
+
 @pytest.mark.parametrize("num_workers", [1, 2, None])
-@pytest.mark.parametrize("file_format", ["json", "txt"]) # "json","txt"
+@pytest.mark.parametrize("file_format", ["json", "txt"])
 @pytest.mark.parametrize("multiprocessing", [False, True])
 @pytest.mark.parametrize("preserve_index", [False, True])
 @pytest.mark.parametrize("process_func", [data_identity, None, identity])
@@ -298,7 +298,6 @@ def test_process_index(
     #     assert audinterface.utils.read_text(path) == data
     #     assert value == data
 
-
     # # Segmented index with relative paths
     index = audformat.segmented_index(
         [file] * 4,
@@ -330,21 +329,18 @@ def test_process_index(
 
     if preserve_index:
         pd.testing.assert_index_equal(y.index, index)
-        # for path, value in y.items():
-        #     assert audinterface.utils.read_text(path) == data
-        #     assert value == data
-        expected_idx_type = _get_idx_type(preserve_index, process.segment is None, index)
+        expected_idx_type = _get_idx_type(
+            preserve_index, process.segment is None, index
+        )
         for path, value in _series_generator(y, expected_idx_type):
             assert audinterface.utils.read_text(path) == data
             assert value == data
     else:
-        expected_idx_type = _get_idx_type(preserve_index, process.segment is None, index)
+        expected_idx_type = _get_idx_type(
+            preserve_index, process.segment is None, index
+        )
         expected_index = audformat.filewise_index(files=list(index))
         pd.testing.assert_index_equal(y.index, expected_index)
-        # for (path, _, _), value in y.items():
-        #     assert audinterface.utils.read_text(path) == data
-        #     assert value == data
-        # expected_idx_type = _get_idx_type(preserve_index, process.segment is None, index)
         for path, value in _series_generator(y, "filewise"):
             assert audinterface.utils.read_text(path) == data
             assert value == data
