@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import errno
 import inspect
 import itertools
@@ -17,7 +18,7 @@ from audinterface.core.typing import Timestamp
 from audinterface.core.typing import Timestamps
 
 
-def identity(signal, sampling_rate) -> np.ndarray:
+def identity(signal, sampling_rate=None) -> np.ndarray:
     r"""Default processing function.
 
     This function is used,
@@ -104,6 +105,13 @@ class Process:
             multiprocessing
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
+        read_func: function to read in signals/data. When specified,
+            it needs to be able to read signals signal data as well
+            as text data.
+            Per default, :func:`audinterface.utils.read_audio`
+            will be used for signal file(s), and
+            :func:`audinterface.utils.read_text` for files
+            with ``.json`` or ``text``extensions.
 
     Raises:
         ValueError: if ``resample = True``, but ``sampling_rate = None``
@@ -171,6 +179,7 @@ class Process:
         num_workers: typing.Optional[int] = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
+        read_func: typing.Callable[..., typing.Any] = None,
     ):
         if channels is not None:
             channels = audeer.to_list(channels)
@@ -236,6 +245,14 @@ class Process:
         self.win_dur = win_dur
         r"""Window duration."""
 
+        # set read_audio and read_text methods
+        if read_func is None:
+            setattr(self.__class__, "read_audio", staticmethod(utils.read_audio))
+            setattr(self.__class__, "read_text", staticmethod(utils.read_text))
+        else:
+            setattr(self.__class__, "read_audio", staticmethod(read_func))
+            setattr(self.__class__, "read_text", staticmethod(read_func))
+
     def _process_file(
         self,
         file: str,
@@ -274,7 +291,7 @@ class Process:
 
         # Text files
         if ext in ["json", "txt"]:
-            data = utils.read_text(file, root=root)
+            data = self.read_text(file, root=root)
             y, file = self._process_data(
                 data,
                 idx=idx,
@@ -288,7 +305,7 @@ class Process:
 
         # Audio/video files
         else:
-            signal, sampling_rate = utils.read_audio(
+            signal, sampling_rate = self.read_audio(
                 file,
                 start=start,
                 end=end,
@@ -489,22 +506,7 @@ class Process:
         )
         self.verbose = verbose
 
-        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
-        files = list(itertools.chain.from_iterable([x[1] for x in xs]))
-        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
-        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
-
-        if (
-            len(audeer.unique(starts)) == 1
-            and audeer.unique(starts)[0] is None
-            and len(audeer.unique(ends)) == 1
-            and audeer.unique(ends)[0] is None
-        ):
-            index = audformat.filewise_index(files)
-        else:
-            index = audformat.segmented_index(files, starts, ends)
-        y = pd.Series(y, index)
-
+        y = self._postprocess_xs(xs)
         return y
 
     def process_folder(
@@ -601,10 +603,69 @@ class Process:
             task_description=f"Process {len(index)} segments",
         )
 
-        y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+        y = self._postprocess_xs(xs)
+        return y
+
+    @staticmethod
+    def _postprocess_xs(xs):
+        """Postprocesses a list of tuples containing processed data,
+        files, starts, and ends, and returns a pandas Series.
+
+        This is mainly factored into a separate method as it
+        is used in multiple places:
+
+        - :meth:`process._process_index_wo_segment`
+        - :meth:`process._postprocess_xs`
+
+        I find it hard to come up with less inelegance
+
+        Parameters:
+            xs (list): A list of tuples containing processed data,
+                files, starts, and ends.
+            index (pd.Index): The index of the resulting pandas Series.
+
+        Returns:
+            pd.Series: A pandas Series containing the postprocessed data.
+        """
+        ys = [x[0] for x in xs]
+        # TODO: put into single list comprehension for all these three diagnostics
+        all_dict = all(map(lambda x: isinstance(x, dict), [x[0] for x in xs]))
+        all_iterable = all(map(lambda x: isinstance(x, Iterable), [x[0] for x in xs]))
+        all_text = all(map(lambda x: isinstance(x, str), [x[0] for x in xs]))
+
+        if all_dict:
+            # prevent pd.Series from converting0 to list of values
+            keys = list(itertools.chain.from_iterable([x.keys() for x in ys]))
+            values = list(itertools.chain.from_iterable([x.values() for x in ys]))
+            y = [{x: y} for (x, y) in zip(keys, values)]
+        else:
+            # if all text, need to pack into a list in order to avoid flattening
+            # and the resulting dimension problems
+            if all_iterable and all_text:
+                y = list(itertools.chain.from_iterable([[x[0]] for x in xs]))
+            else:
+                y = list(itertools.chain.from_iterable([x[0] for x in xs]))
+
         files = list(itertools.chain.from_iterable([x[1] for x in xs]))
-        starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
-        ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+
+        # avoid 'NoneType' object is not iterable error in itertools.chain
+        # for starts: this happens when all entries are None
+        try:
+            starts = list(itertools.chain.from_iterable([x[2] for x in xs]))
+        except TypeError:
+            pass
+            starts_non_iterable = [x for x in filter(None, [x[2] for x in xs])] == []
+            assert starts_non_iterable, "unknown problem"
+            starts = [x[2] for x in xs]
+
+        # same as for starts
+        try:
+            ends = list(itertools.chain.from_iterable([x[3] for x in xs]))
+        except TypeError:
+            pass
+            ends_non_iterable = [x for x in filter(None, [x[3] for x in xs])] == []
+            assert ends_non_iterable, "unknown problem"
+            ends = [x[3] for x in xs]
 
         if (
             len(audeer.unique(starts)) == 1
@@ -1147,6 +1208,8 @@ class Process:
         process_func_args = process_func_args or self.process_func_args
         special_args = self._special_args(idx, root, file, process_func_args)
         y = self.process_func(data, **special_args, **process_func_args)
+        # ensure non-scalar answer
+        y = [y] if len(y) == 1 else y
         return y
 
     def _special_args(

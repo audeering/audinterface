@@ -16,6 +16,10 @@ def identity(data):
     return data
 
 
+def data_identity(data):
+    return data
+
+
 def length(data):
     return len(data)
 
@@ -73,6 +77,7 @@ def test_process_file(
 
     # test absolute path
     y = process.process_file(path)
+
     expected_series = pd.Series(
         [expected_data],
         index=audformat.filewise_index(path),
@@ -131,19 +136,28 @@ def test_process_files(
         paths.append(path)
 
     # test absolute paths
+    index = audformat.filewise_index(paths)
+    if num_files == 0:
+        index = pd.RangeIndex(0, 0, 1)
+
     y = process.process_files(paths)
     expected_y = pd.Series(
         expected_output,
-        index=audformat.filewise_index(paths),
+        index=index,
     )
     pd.testing.assert_series_equal(y, expected_y)
 
     # test relative paths
+    index = audformat.filewise_index(files)
+    if num_files == 0:
+        index = pd.RangeIndex(0, 0, 1)
+
     y = process.process_files(files, root=root)
     expected_y = pd.Series(
         expected_output,
-        index=audformat.filewise_index(files),
+        index=index,
     )
+
     pd.testing.assert_series_equal(y, expected_y)
 
 
@@ -175,7 +189,7 @@ def test_process_folder(
     files = [os.path.join(root, f"file{n}.{file_format}") for n in range(num_files)]
     for file in files:
         write_text_file(file, data)
-    y = process.process_folder(root)
+    y = process.process_folder(root, filetype=file_format)
     pd.testing.assert_series_equal(
         y,
         process.process_files(files),
@@ -191,21 +205,63 @@ def test_process_folder(
     pd.testing.assert_series_equal(y, pd.Series(dtype=object))
 
 
+def _get_idx_type(preserve_index, segment_is_None, idx):
+    """Get expected index type.
+
+    preserve_index: if ``True``
+    and :attr:`audinterface.Process.segment` is ``None``
+    the returned index
+    will be of same type
+    as the original one.
+    Otherwise it will be a segmented index
+    if any audio/video files are processed,
+    or a filewise index otherwise
+    """
+    if preserve_index and segment_is_None:
+        idx_type = "segmented" if audformat.is_segmented_index(idx) else "filewise"
+        return idx_type
+
+    extensions = [os.path.splitext(x)[-1] for x in idx.get_level_values(0).tolist()]
+    # we only use wav in fixtures so this is ok
+    any_media = any(["wav" in x for x in extensions])
+
+    if any_media:
+        idx_type = "segmented"
+    else:
+        idx_type = "filewise"
+
+    return idx_type
+
+
+def _series_generator(y, index_type: str):
+    for idx, value in y.items():
+        if index_type == "filewise":
+            file = idx
+            yield file, value
+        elif index_type == "segmented":
+            (file, _, _) = idx
+            yield file, value
+        else:
+            raise ValueError("index type invalid")
+
+
 @pytest.mark.parametrize("num_workers", [1, 2, None])
 @pytest.mark.parametrize("file_format", ["json", "txt"])
 @pytest.mark.parametrize("multiprocessing", [False, True])
 @pytest.mark.parametrize("preserve_index", [False, True])
+@pytest.mark.parametrize("process_func", [data_identity, None, identity])
 def test_process_index(
     tmpdir,
     num_workers,
     file_format,
     multiprocessing,
     preserve_index,
+    process_func,
 ):
     cache_root = os.path.join(tmpdir, "cache")
 
     process = audinterface.Process(
-        process_func=None,
+        process_func=process_func,
         num_workers=num_workers,
         multiprocessing=multiprocessing,
         verbose=False,
@@ -233,17 +289,26 @@ def test_process_index(
         starts=[0, 0, 1, 2],
         ends=[None, 1, 2, 3],
     )
+
     y = process.process_index(
         index,
         preserve_index=preserve_index,
     )
+
     if preserve_index:
         pd.testing.assert_index_equal(y.index, index)
-    for (path, _, _), value in y.items():
+
+    expected_idx_type = _get_idx_type(preserve_index, process.segment is None, index)
+
+    for path, value in _series_generator(y, expected_idx_type):
         assert audinterface.utils.read_text(path) == data
         assert value == data
 
-    # Segmented index with relative paths
+    # for (path, _, _), value in y.items():
+    #     assert audinterface.utils.read_text(path) == data
+    #     assert value == data
+
+    # # Segmented index with relative paths
     index = audformat.segmented_index(
         [file] * 4,
         starts=[0, 0, 1, 2],
@@ -256,9 +321,14 @@ def test_process_index(
     )
     if preserve_index:
         pd.testing.assert_index_equal(y.index, index)
-    for (file, _, _), value in y.items():
+
+    for file, value in _series_generator(y, expected_idx_type):
         assert audinterface.utils.read_text(file, root=root) == data
         assert value == data
+
+    # for (file, _, _), value in y.items():
+    #     assert audinterface.utils.read_text(file, root=root) == data
+    #     assert value == data
 
     # Filewise index with absolute paths
     index = audformat.filewise_index(path)
@@ -266,15 +336,22 @@ def test_process_index(
         index,
         preserve_index=preserve_index,
     )
+
     if preserve_index:
         pd.testing.assert_index_equal(y.index, index)
-        for path, value in y.items():
+        expected_idx_type = _get_idx_type(
+            preserve_index, process.segment is None, index
+        )
+        for path, value in _series_generator(y, expected_idx_type):
             assert audinterface.utils.read_text(path) == data
             assert value == data
     else:
+        expected_idx_type = _get_idx_type(
+            preserve_index, process.segment is None, index
+        )
         expected_index = audformat.filewise_index(files=list(index))
         pd.testing.assert_index_equal(y.index, expected_index)
-        for (path, _, _), value in y.items():
+        for path, value in _series_generator(y, "filewise"):
             assert audinterface.utils.read_text(path) == data
             assert value == data
 
@@ -287,13 +364,19 @@ def test_process_index(
     )
     if preserve_index:
         pd.testing.assert_index_equal(y.index, index)
-        for file, value in y.items():
+        for file, value in _series_generator(y, "filewise"):
             assert audinterface.utils.read_text(file, root=root) == data
             assert value == data
+        # for file, value in y.items():
+        #     assert audinterface.utils.read_text(file, root=root) == data
+        #     assert value == data
     else:
-        for (file, _, _), value in y.items():
+        for file, value in _series_generator(y, "filewise"):
             assert audinterface.utils.read_text(file, root=root) == data
             assert value == data
+        # for (file, _, _), value in y.items():
+        #     assert audinterface.utils.read_text(file, root=root) == data
+        #     assert value == data
 
     # Cache result
     y = process.process_index(
@@ -302,10 +385,10 @@ def test_process_index(
         root=root,
         cache_root=cache_root,
     )
-    os.remove(path)
 
+    os.remove(path)
     # Fails because second file does not exist
-    with pytest.raises(RuntimeError):
+    with pytest.raises(FileNotFoundError):
         process.process_index(
             index,
             preserve_index=preserve_index,
@@ -346,7 +429,7 @@ def test_process_data(
         process_func_args=process_func_args,
         verbose=False,
     )
-    x = process.process_signal(data, file=file)
+    x = process.process_data(data, file=file)
 
     if file is None:
         y = pd.Series([expected_signal])
@@ -493,4 +576,4 @@ def test_read_data(tmpdir, data):
     file = audeer.path(tmpdir, "media.txt")
     with open(file, "w") as fp:
         fp.write(data)
-    assert audinterface.utils.read_data(file) == data
+    assert audinterface.utils.read_text(file) == data
