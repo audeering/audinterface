@@ -135,19 +135,28 @@ def test_process_files(
         paths.append(path)
 
     # test absolute paths
+    index = audformat.filewise_index(paths)
+    if num_files == 0:
+        index = pd.RangeIndex(0, 0, 1)
+
     y = process.process_files(paths)
     expected_y = pd.Series(
         expected_output,
-        index=audformat.filewise_index(paths),
+        index=index,
     )
     pd.testing.assert_series_equal(y, expected_y)
 
     # test relative paths
+    index = audformat.filewise_index(files)
+    if num_files == 0:
+        index = pd.RangeIndex(0, 0, 1)
+
     y = process.process_files(files, root=root)
     expected_y = pd.Series(
         expected_output,
-        index=audformat.filewise_index(files),
+        index=index,
     )
+
     pd.testing.assert_series_equal(y, expected_y)
 
 
@@ -375,8 +384,6 @@ def test_process_index(
         root=root,
         cache_root=cache_root,
     )
-
-    # breakpoint()
 
     os.remove(path)
     # Fails because second file does not exist
