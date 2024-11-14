@@ -428,7 +428,7 @@ def test_process_data(
         process_func_args=process_func_args,
         verbose=False,
     )
-    x = process.process_signal(data, file=file)
+    x = process.process_data(data, file=file)
 
     if file is None:
         y = pd.Series([expected_signal])
