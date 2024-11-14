@@ -106,7 +106,8 @@ class Process:
         multiprocessing: use multiprocessing instead of multithreading
         verbose: show debug messages
         read_func: function to read in signals/data. When specified,
-            it needs to be able to read signals BOTH other data.
+            it needs to be able to read signals signal data as well
+            as text data.
             Per default, :func:`audinterface.utils.read_audio`
             will be used for signal file(s), and
             :func:`audinterface.utils.read_text` for files
