@@ -15,6 +15,7 @@ import audinterface
 def identity(data):
     return data
 
+
 def data_identity(data):
     return data
 
