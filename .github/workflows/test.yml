@@ -32,7 +32,7 @@ jobs:
     - name: Prepare Macos
       run: |
         brew install portaudio
-      if matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-latest'
 
     - name: Prepare Ubuntu
       run: |
