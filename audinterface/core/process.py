@@ -440,6 +440,7 @@ class Process:
             multiprocessing=self.multiprocessing,
             progress_bar=verbose,
             task_description=f"Process {len(files)} files",
+            maximum_refresh_time=1,
         )
         self.verbose = verbose
 
@@ -539,6 +540,7 @@ class Process:
             multiprocessing=self.multiprocessing,
             progress_bar=self.verbose,
             task_description=f"Process {len(index)} segments",
+            maximum_refresh_time=1,
         )
 
         y = list(itertools.chain.from_iterable([x[0] for x in xs]))
@@ -841,6 +843,7 @@ class Process:
             multiprocessing=self.multiprocessing,
             progress_bar=self.verbose,
             task_description=f"Process {len(index)} segments",
+            maximum_refresh_time=1,
         )
 
         y = list(itertools.chain.from_iterable([x[0] for x in xs]))

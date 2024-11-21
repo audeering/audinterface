@@ -199,6 +199,7 @@ class ProcessWithContext:
             files,
             total=len(files),
             disable=not self.verbose,
+            maximum_refresh_time=1,
         ) as pbar:
             for idx, file in enumerate(pbar):
                 if self.verbose:  # pragma: no cover

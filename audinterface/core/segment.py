@@ -753,6 +753,7 @@ class Segment:
             multiprocessing=self.process.multiprocessing,
             progress_bar=self.process.verbose,
             task_description=f"Process {len(index)} segments",
+            maximum_refresh_time=1,
         )
 
         files = []
