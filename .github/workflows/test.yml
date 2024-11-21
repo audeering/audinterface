@@ -37,7 +37,7 @@ jobs:
     - name: Prepare Ubuntu
       run: |
         sudo apt-get update
-        sudo apt-get install --no-install-recommends --yes libsndfile1 sox
+        sudo apt-get install --no-install-recommends --yes libsndfile1 sox portaudio19-dev
       if: matrix.os == 'ubuntu-latest'
 
     - name: Install dependencies
