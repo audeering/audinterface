@@ -243,7 +243,7 @@ Feature interface for external function
 
 If we interface a function from an external library
 that already applies a sliding window,
-we again specfiy the
+we again specify the
 ``win_dur`` and ``hop_dur``
 arguments.
 However,
