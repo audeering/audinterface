@@ -1,5 +1,5 @@
 audeer >=1.21.0
-audb
+audb >=1.11.0
 auditok
 audobject >=0.7.5
 librosa
