@@ -1,4 +1,5 @@
 """Generic processing interfaces."""
+
 from audinterface import utils
 from audinterface.core.feature import Feature
 from audinterface.core.process import Process
