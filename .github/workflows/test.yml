@@ -29,10 +29,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Prepare Macos
+      run: |
+        brew install portaudio
+      if: matrix.os == 'macos-latest'
+
     - name: Prepare Ubuntu
       run: |
         sudo apt-get update
-        sudo apt-get install --no-install-recommends --yes libsndfile1 sox
+        sudo apt-get install --no-install-recommends --yes libsndfile1 sox portaudio19-dev
       if: matrix.os == 'ubuntu-latest'
 
     - name: Install dependencies
