@@ -1,4 +1,4 @@
-audb
+audb >=1.11.0
 audeer
 sphinx
 sphinx-apipages >=0.1.2
