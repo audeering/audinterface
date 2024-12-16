@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.2.3 (2024/12/16)
+--------------------------
+
+* Added: support for Python 3.12
+* Changed: update progress bar at least every second
+
+
 Version 1.2.2 (2024/06/28)
 --------------------------
 
