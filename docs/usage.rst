@@ -392,8 +392,8 @@ would be a voice activity detection algorithm.
         index = pd.MultiIndex.from_tuples(
             [
                 (
-                    pd.Timedelta(region.meta.start, unit="s"),
-                    pd.Timedelta(region.meta.end, unit="s"),
+                    pd.Timedelta(region.start, unit="s"),
+                    pd.Timedelta(region.end, unit="s"),
                 )
                 for region in regions
             ],
