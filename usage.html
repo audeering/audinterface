@@ -28,8 +28,6 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/audeering.css" type="text/css" />
-  <link rel="stylesheet" href="_static/jupyter-sphinx.css" type="text/css" />
-  <link rel="stylesheet" href="_static/thebelab.css" type="text/css" />
   <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -67,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.2
+                v1.2.3
               </div>
             
           
@@ -151,15 +149,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-</div>
-</div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-</div>
-</div>
-<div class="section" id="usage">
+  <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
 <p>The basic idea of <a class="reference internal" href="api/audinterface.html#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> is
 to provide easy and standardized interfaces
@@ -169,7 +159,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
 and the sampling rate as input.</p>
 <p>The interface can then apply the algorithm
 on a list of files,
@@ -180,9 +170,7 @@ In the following we load three files from the <a class="reference external" href
 and define a list of files,
 a folder,
 and an index.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audb</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audb</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="n">media</span> <span class="o">=</span> <span class="p">[</span>
@@ -194,17 +182,13 @@ and an index.</p>
     <span class="s2">&quot;emodb&quot;</span><span class="p">,</span>
     <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.3.0&quot;</span><span class="p">,</span>
     <span class="n">media</span><span class="o">=</span><span class="n">media</span><span class="p">,</span>
+    <span class="n">full_path</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
-
 <span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">files</span><span class="p">)</span>
-<span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 <span class="n">index</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;emotion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-</div>
 </div>
 <div class="section" id="processing-interface">
 <h2>Processing interface<a class="headerlink" href="#processing-interface" title="Permalink to this heading">¶</a></h2>
@@ -212,9 +196,7 @@ and an index.</p>
 value in dB.
 We first define the function
 and create an interface for it using <a class="reference internal" href="api/audinterface.Process.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Process</span></code></a>.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audinterface</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audinterface</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
@@ -223,199 +205,61 @@ and create an interface for it using <a class="reference internal" href="api/aud
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-</div>
-</div>
-<p>The following three commands
-apply the algorithm
-and all return the same result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-<span class="n">y</span>
+<p>You can then use one of the
+<code class="docutils literal notranslate"><span class="pre">process_files()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">process_folder()</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">process_index()</span></code> methods
+to apply the algorithm
+and return the result
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">file             start   end</span>
+<span class="go">wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901</span>
+<span class="go">wav/03a01Nc.wav  0 days  0 days 00:00:01.611250      -18.0407</span>
+<span class="go">wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999   -20.3945</span>
+<span class="go">dtype: float32</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>-21.690142</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>-18.040703</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>-20.394533</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 <p>To calculate RMS with a sliding window,
 we create a new interface
 and set a window and hop duration.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
-    <span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">,</span>
-    <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-<span class="n">y</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">,</span> <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">file             start                   end</span>
+<span class="go">wav/03a01Fa.wav  0 days 00:00:00         0 days 00:00:01          -20.1652</span>
+<span class="go">                 0 days 00:00:00.500000  0 days 00:00:01.500000   -23.4730</span>
+<span class="go">wav/03a01Nc.wav  0 days 00:00:00         0 days 00:00:01          -16.3866</span>
+<span class="go">                 0 days 00:00:00.500000  0 days 00:00:01.500000   -19.5026</span>
+<span class="go">wav/16b10Wb.wav  0 days 00:00:00         0 days 00:00:01          -21.7340</span>
+<span class="go">                 0 days 00:00:00.500000  0 days 00:00:01.500000   -20.2331</span>
+<span class="go">                 0 days 00:00:01         0 days 00:00:02          -18.8565</span>
+<span class="go">                 0 days 00:00:01.500000  0 days 00:00:02.500000   -20.4036</span>
+<span class="go">dtype: float32</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>-20.165249</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>-23.472969</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>-16.386614</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <th>...</th>
-      <th>...</th>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>-20.233055</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:01</th>
-      <th>0 days 00:00:02</th>
-      <td>-18.856522</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:01.500000</th>
-      <th>0 days 00:00:02.500000</th>
-      <td>-20.403574</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 </div>
 <div class="section" id="feature-interface">
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
     <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
     <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>-0.000311</td>
-      <td>0.082317</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>-0.000312</td>
-      <td>0.125304</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>-0.000464</td>
-      <td>0.095558</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                    mean     std</span>
+<span class="go">file            start  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823</span>
+<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253</span>
+<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956</span>
+</pre></div>
 </div>
 <p>To calculate features with a sliding window,
 we create a new interface
@@ -424,87 +268,27 @@ By setting
 <code class="docutils literal notranslate"><span class="pre">process_func_applies_sliding_window=False</span></code>
 the windowing is automatically handled
 and single frames are passed on to the processing function.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
     <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
     <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
     <span class="n">process_func_applies_sliding_window</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">win_dur</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-<span class="n">df</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>-0.000329</td>
-      <td>0.098115</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>-0.000285</td>
-      <td>0.067042</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>0.000039</td>
-      <td>0.151590</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <th>...</th>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>-0.000461</td>
-      <td>0.097351</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:01</th>
-      <th>0 days 00:00:02</th>
-      <td>-0.000469</td>
-      <td>0.114070</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:01.500000</th>
-      <th>0 days 00:00:02.500000</th>
-      <td>-0.000447</td>
-      <td>0.095459</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                                     mean     std</span>
+<span class="go">file            start                  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:01        -3.2866e-04  0.0981</span>
+<span class="go">                0 days 00:00:00.500000 0 days 00:00:01.500000 -2.8513e-04  0.0670</span>
+<span class="go">wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:01         3.8935e-05  0.1516</span>
+<span class="go">                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.1219e-04  0.1059</span>
+<span class="go">wav/16b10Wb.wav 0 days 00:00:00        0 days 00:00:01        -4.5467e-04  0.0819</span>
+<span class="go">                0 days 00:00:00.500000 0 days 00:00:01.500000 -4.6149e-04  0.0974</span>
+<span class="go">                0 days 00:00:01        0 days 00:00:02        -4.6923e-04  0.1141</span>
+<span class="go">                0 days 00:00:01.500000 0 days 00:00:02.500000 -4.4670e-04  0.0955</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="feature-interface-for-multi-channel-input">
@@ -515,12 +299,10 @@ the first channel of an audio signal.
 We can prove this
 by running the previous interface
 on the following multi-channel signal.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audiofile</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audiofile</span>
 
 <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">audiofile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-    <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
     <span class="n">always_2d</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">signal_multi_channel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
@@ -531,57 +313,16 @@ on the following multi-channel signal.</p>
         <span class="n">signal</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">,</span>
     <span class="p">],</span>
 <span class="p">)</span>
-<span class="n">signal_multi_channel</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>(4, 30372)
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">signal_multi_channel</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(4, 30372)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span><span class="n">signal_multi_channel</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
+<span class="go">                                                 mean     std</span>
+<span class="go">start                  end</span>
+<span class="go">0 days 00:00:00        0 days 00:00:01        -0.0003  0.0981</span>
+<span class="go">0 days 00:00:00.500000 0 days 00:00:01.500000 -0.0003  0.0670</span>
 </pre></div>
-</div>
-</div>
-</div>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
-    <span class="n">signal_multi_channel</span><span class="p">,</span>
-    <span class="n">sampling_rate</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>-0.000329</td>
-      <td>0.098115</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>-0.000285</td>
-      <td>0.067042</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 <p>To process the second and fourth channel,
 we create a new interface
@@ -596,9 +337,7 @@ Otherwise,
 the processing function must
 return an array with the correct
 number of channels (here 2).</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface_multi_channel</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">interface_multi_channel</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
     <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
     <span class="n">process_func</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
     <span class="n">process_func_is_mono</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -608,99 +347,25 @@ number of channels (here 2).</p>
     <span class="n">channels</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
 <span class="p">)</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">interface_multi_channel</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span>
-    <span class="n">signal_multi_channel</span><span class="p">,</span>
-    <span class="n">sampling_rate</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">df</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">interface_multi_channel</span><span class="o">.</span><span class="n">process_signal</span><span class="p">(</span><span class="n">signal_multi_channel</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr>
-      <th></th>
-      <th></th>
-      <th colspan="2" halign="left">1</th>
-      <th colspan="2" halign="left">3</th>
-    </tr>
-    <tr>
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.499671</td>
-      <td>0.098115</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.499715</td>
-      <td>0.067042</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">                                                 1            3</span>
+<span class="go">                                              mean  std    mean     std</span>
+<span class="go">start                  end</span>
+<span class="go">0 days 00:00:00        0 days 00:00:01         0.0  0.0  0.4997  0.0981</span>
+<span class="go">0 days 00:00:00.500000 0 days 00:00:01.500000  0.0  0.0  0.4997  0.0670</span>
+</pre></div>
 </div>
 <p>We can access the features of a specific
 channel by its index.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">                                                 mean     std</span>
+<span class="go">start                  end</span>
+<span class="go">0 days 00:00:00        0 days 00:00:01         0.4997  0.0981</span>
+<span class="go">0 days 00:00:00.500000 0 days 00:00:01.500000  0.4997  0.0670</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:01</th>
-      <td>0.499671</td>
-      <td>0.098115</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.500000</th>
-      <th>0 days 00:00:01.500000</th>
-      <td>0.499715</td>
-      <td>0.067042</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 </div>
 <div class="section" id="feature-interface-for-external-function">
@@ -720,9 +385,7 @@ for extracting the features in a framewise manner
 and returning the values in the correct shape,
 namely <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_frames)</span></code>,
 whereas the first dimension is optionally.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">librosa</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">librosa</span>
 
 <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">win_dur</span><span class="p">,</span> <span class="n">hop_dur</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="p">):</span>
     <span class="n">hop_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hop_dur</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
@@ -745,104 +408,25 @@ whereas the first dimension is optionally.</p>
     <span class="n">win_dur</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
     <span class="n">hop_dur</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>mfcc-0</th>
-      <th>mfcc-1</th>
-      <th>...</th>
-      <th>mfcc-11</th>
-      <th>mfcc-12</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="3" valign="top">.../03a01Fa.wav</th>
-      <th>0 days 00:00:00</th>
-      <th>0 days 00:00:00.020000</th>
-      <td>-611.993286</td>
-      <td>47.627602</td>
-      <td>...</td>
-      <td>10.659678</td>
-      <td>1.151390</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.010000</th>
-      <th>0 days 00:00:00.030000</th>
-      <td>-668.175842</td>
-      <td>35.650566</td>
-      <td>...</td>
-      <td>13.644274</td>
-      <td>14.068543</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.020000</th>
-      <th>0 days 00:00:00.040000</th>
-      <td>-664.612793</td>
-      <td>43.068939</td>
-      <td>...</td>
-      <td>5.081633</td>
-      <td>7.949757</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <th>...</th>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th rowspan="3" valign="top">.../16b10Wb.wav</th>
-      <th>0 days 00:00:02.500000</th>
-      <th>0 days 00:00:02.520000</th>
-      <td>-644.156494</td>
-      <td>34.024551</td>
-      <td>...</td>
-      <td>2.472639</td>
-      <td>7.411011</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:02.510000</th>
-      <th>0 days 00:00:02.530000</th>
-      <td>-618.545898</td>
-      <td>44.741577</td>
-      <td>...</td>
-      <td>12.690891</td>
-      <td>17.645359</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:02.520000</th>
-      <th>0 days 00:00:02.540000</th>
-      <td>-666.805237</td>
-      <td>19.845566</td>
-      <td>...</td>
-      <td>4.124321</td>
-      <td>3.711080</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                                 mfcc-0  ...  mfcc-12</span>
+<span class="go">file            start                  end                               ...</span>
+<span class="go">wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.020000 -611.9933  ...   1.1514</span>
+<span class="go">                0 days 00:00:00.010000 0 days 00:00:00.030000 -668.1758  ...  14.0685</span>
+<span class="go">                0 days 00:00:00.020000 0 days 00:00:00.040000 -664.6128  ...   7.9498</span>
+<span class="go">                0 days 00:00:00.030000 0 days 00:00:00.050000 -667.7147  ...  12.9575</span>
+<span class="go">                0 days 00:00:00.040000 0 days 00:00:00.060000 -669.3674  ...   4.3968</span>
+<span class="go">...                                                                 ...  ...      ...</span>
+<span class="go">wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.6736  ...   1.8637</span>
+<span class="go">                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.9581  ...   9.3450</span>
+<span class="go">                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.1565  ...   7.4110</span>
+<span class="go">                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.5459  ...  17.6454</span>
+<span class="go">                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.8052  ...   3.7111</span>
+
+<span class="go">[605 rows x 13 columns]</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="serializable-feature-interface">
@@ -856,9 +440,7 @@ One example of such a feature extractor is <a class="reference external" href="h
 we create a class that inherits
 from <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
 and <a class="reference external" href="https://audeering.github.io/audobject/api/audobject.Object.html#audobject.Object" title="(in audobject)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audobject</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audobject</span>
 
 <span class="k">class</span> <span class="nc">MeanStd</span><span class="p">(</span><span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">,</span> <span class="n">audobject</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
 
@@ -872,108 +454,28 @@ and <a class="reference external" href="https://audeering.github.io/audobject/ap
         <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
 
 <span class="n">fex</span> <span class="o">=</span> <span class="n">MeanStd</span><span class="p">()</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">fex</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>-0.000311</td>
-      <td>0.082317</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>-0.000312</td>
-      <td>0.125304</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>-0.000464</td>
-      <td>0.095558</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fex</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                    mean     std</span>
+<span class="go">file            start  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823</span>
+<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253</span>
+<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956</span>
+</pre></div>
 </div>
 <p>The advantage of the feature extraction object is
 that we can save it to a YAML file
 and re-instantiate it from there.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fex</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="s2">&quot;mean-std.yaml&quot;</span><span class="p">)</span>
-<span class="n">fex2</span> <span class="o">=</span> <span class="n">audobject</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;mean-std.yaml&quot;</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">fex2</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fex</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="s2">&quot;mean-std.yaml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fex2</span> <span class="o">=</span> <span class="n">audobject</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="s2">&quot;mean-std.yaml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fex2</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                    mean     std</span>
+<span class="go">file            start  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250    -0.0003  0.0823</span>
+<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250    -0.0003  0.1253</span>
+<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>mean</th>
-      <th>std</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>-0.000311</td>
-      <td>0.082317</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>-0.000312</td>
-      <td>0.125304</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>-0.000464</td>
-      <td>0.095558</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 </div>
 <div class="section" id="segmentation-interface">
@@ -983,9 +485,8 @@ it is recommended to use <a class="reference internal" href="api/audinterface.Se
 which returns a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
 An example for such a processing function
 would be a voice activity detection algorithm.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">auditok</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">auditok</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
 
@@ -1005,8 +506,8 @@ would be a voice activity detection algorithm.</p>
     <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span>
         <span class="p">],</span>
@@ -1015,41 +516,17 @@ would be a voice activity detection algorithm.</p>
     <span class="k">return</span> <span class="n">index</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Segment</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">segments</span><span class="p">)</span>
-<span class="n">idx</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_file</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">idx</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
-      <th>0 days 00:00:00.150000</th>
-      <th>0 days 00:00:00.700000</th>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.900000</th>
-      <th>0 days 00:00:01.600000</th>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_file</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">MultiIndex([(&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:00.150000&#39;, ...),</span>
+<span class="go">            (&#39;wav/03a01Fa.wav&#39;, &#39;0 days 00:00:00.900000&#39;, ...)],</span>
+<span class="go">           names=[&#39;file&#39;, &#39;start&#39;, &#39;end&#39;])</span>
+</pre></div>
 </div>
 <p>Sometimes,
 it is required that a table
-(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
+(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
 is segmented
 and the <code class="docutils literal notranslate"><span class="pre">labels</span></code> from the original segments
 should be kept.
@@ -1062,95 +539,22 @@ if a segmentation
 is performed on an already labelled dataset
 in order to do data augmentation
 or teacher-student training.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))]},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
-<span class="n">table</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">n</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">))]},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span>
+<span class="go">                 label</span>
+<span class="go">file</span>
+<span class="go">wav/03a01Fa.wav      0</span>
+<span class="go">wav/03a01Nc.wav      2</span>
+<span class="go">wav/16b10Wb.wav      4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                               label</span>
+<span class="go">file            start                  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 00:00:00.150000 0 days 00:00:00.700000      0</span>
+<span class="go">                0 days 00:00:00.900000 0 days 00:00:01.600000      0</span>
+<span class="go">wav/03a01Nc.wav 0 days 00:00:00.100000 0 days 00:00:01.350000      2</span>
+<span class="go">wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4</span>
+<span class="go">                0 days 00:00:01.050000 0 days 00:00:02.500000      4</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>label</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <td>4</td>
-    </tr>
-  </tbody>
-</table></div></div>
-</div>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">table_segmented</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
-<span class="n">table_segmented</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>label</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan="2" valign="top">.../03a01Fa.wav</th>
-      <th>0 days 00:00:00.150000</th>
-      <th>0 days 00:00:00.700000</th>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:00.900000</th>
-      <th>0 days 00:00:01.600000</th>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days 00:00:00.100000</th>
-      <th>0 days 00:00:01.350000</th>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th rowspan="2" valign="top">.../16b10Wb.wav</th>
-      <th>0 days 00:00:00.300000</th>
-      <th>0 days 00:00:01</th>
-      <td>4</td>
-    </tr>
-    <tr>
-      <th>0 days 00:00:01.050000</th>
-      <th>0 days 00:00:02.500000</th>
-      <td>4</td>
-    </tr>
-  </tbody>
-</table></div></div>
 </div>
 </div>
 <div class="section" id="special-processing-function-arguments">
@@ -1185,63 +589,26 @@ if they are not specified in
 <p>The following processing function
 returns the values of
 <code class="docutils literal notranslate"><span class="pre">&quot;idx&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">special_args</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">special_args</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">idx</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">special_args</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-<span class="n">y</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>(0, 03a01Fa.wav)</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>(1, 03a01Nc.wav)</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>(2, 16b10Wb.wav)</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">file             start   end</span>
+<span class="go">wav/03a01Fa.wav  0 days  0 days 00:00:01.898250       (0, 03a01Fa.wav)</span>
+<span class="go">wav/03a01Nc.wav  0 days  0 days 00:00:01.611250       (1, 03a01Nc.wav)</span>
+<span class="go">wav/16b10Wb.wav  0 days  0 days 00:00:02.522499999    (2, 16b10Wb.wav)</span>
+<span class="go">dtype: object</span>
+</pre></div>
 </div>
 <p>For instance,
 we can pass a list with gender labels
 to the processing function
 and use the running index
 to select the appropriate f0 range.</p>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gender</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">][</span><span class="s2">&quot;speaker&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">map</span><span class="o">=</span><span class="s2">&quot;gender&quot;</span><span class="p">)</span>  <span class="c1"># gender per file</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gender</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">][</span><span class="s2">&quot;speaker&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">map</span><span class="o">=</span><span class="s2">&quot;gender&quot;</span><span class="p">)</span>  <span class="c1"># gender per file</span>
 <span class="n">f0_range</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;female&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">160</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span>  <span class="c1"># [fmin, fmax]</span>
     <span class="s2">&quot;male&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">180</span><span class="p">],</span>
@@ -1254,7 +621,7 @@ to select the appropriate f0 range.</p>
         <span class="n">fmin</span><span class="o">=</span><span class="n">f0_range</span><span class="p">[</span><span class="n">gender</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]][</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">fmax</span><span class="o">=</span><span class="n">f0_range</span><span class="p">[</span><span class="n">gender</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]][</span><span class="mi">1</span><span class="p">],</span>
         <span class="n">sr</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">gender</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
@@ -1265,53 +632,15 @@ to select the appropriate f0 range.</p>
         <span class="s2">&quot;f0_range&quot;</span><span class="p">:</span> <span class="n">f0_range</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">gender</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<span class="n">df</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_html"><table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th></th>
-      <th></th>
-      <th>f0</th>
-      <th>gender</th>
-    </tr>
-    <tr>
-      <th>file</th>
-      <th>start</th>
-      <th>end</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>.../03a01Fa.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.898250</th>
-      <td>128.8100011977164</td>
-      <td>male</td>
-    </tr>
-    <tr>
-      <th>.../03a01Nc.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:01.611250</th>
-      <td>111.63351213181389</td>
-      <td>male</td>
-    </tr>
-    <tr>
-      <th>.../16b10Wb.wav</th>
-      <th>0 days</th>
-      <th>0 days 00:00:02.522499999</th>
-      <td>229.09341877352415</td>
-      <td>female</td>
-    </tr>
-  </tbody>
-</table></div></div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">gender</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                       f0  gender</span>
+<span class="go">file            start  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.81    male</span>
+<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      111.63    male</span>
+<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   229.09  female</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -1339,7 +668,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a> on 2024/06/28 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2024/12/16 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -1377,11 +706,8 @@ to select the appropriate f0 range.</p>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/thebelab-helper.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     
 
   
