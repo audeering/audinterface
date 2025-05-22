@@ -5,6 +5,7 @@ from audinterface.core.feature import Feature
 from audinterface.core.process import Process
 from audinterface.core.process_with_context import ProcessWithContext
 from audinterface.core.segment import Segment
+from audinterface.core.segment_with_feature import SegmentWithFeature
 
 
 # Disencourage from audinterface import *

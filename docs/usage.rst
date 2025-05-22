@@ -441,6 +441,82 @@ wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4
                 0 days 00:00:01.050000 0 days 00:00:02.500000      4
 
 
+Segmentation with feature interface
+----------------------
+
+In some cases,
+a processing function performs
+both segmentation and feature extraction.
+For this,
+:class:`audinterface.SegmentWithFeature` can be used.
+This interface returns a :class:`pd.DataFrame`
+with a segmented index conform to audformat_.
+An example for such a processing function
+would be a speech recognition model
+that also generates time stamps for its results.
+
+.. code-block:: python
+
+    from faster_whisper import WhisperModel
+    import pandas as pd
+
+    model_size = "tiny"
+    model = WhisperModel(model_size, device="cpu")
+
+    def word_transcripts(signal, sampling_rate):
+        segments, _ = model.transcribe(
+            signal[0], task="transcribe", word_timestamps=True
+        )
+        index = []
+        words = []
+        for segment in segments:
+            for word in segment.words:
+                index.append(
+                    (
+                        pd.to_timedelta(word.start, unit="s"),
+                        pd.to_timedelta(word.end, unit="s")
+                    )
+                )
+                words.append(word.word.strip())
+        index = pd.MultiIndex.from_tuples(index, names=["start", "end"])
+        return pd.Series(data=words, index=index)
+
+    interface = audinterface.SegmentWithFeature(
+        feature_names="word", process_func=word_transcripts
+    )
+
+>>> interface.process_file(files[0], root=db.root)
+                                                                      word
+file            start                  end
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.360000          Der
+                0 days 00:00:00.360000 0 days 00:00:00.720000       Lappen
+                0 days 00:00:00.720000 0 days 00:00:00.880000        liegt
+                0 days 00:00:00.880000 0 days 00:00:01.080000          auf
+                0 days 00:00:01.080000 0 days 00:00:01.220000          dem
+                0 days 00:00:01.220000 0 days 00:00:01.820000  Eisschrank.
+
+Similarly to :class:`audinterface.Segment`,
+:class:`audinterface.SegmentWithFeature`
+also has a method
+:meth:`process_table() <audinterface.SegmentWithFeature.process_table>`,
+which can be applied on an already labelled dataset.
+>>> interface.process_table(table.head(2), root=db.root)
+                                                                      word  label
+file            start                  end
+wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.360000          Der      0
+                0 days 00:00:00.360000 0 days 00:00:00.720000       Lappen      0
+                0 days 00:00:00.720000 0 days 00:00:00.880000        liegt      0
+                0 days 00:00:00.880000 0 days 00:00:01.080000          auf      0
+                0 days 00:00:01.080000 0 days 00:00:01.220000          dem      0
+                0 days 00:00:01.220000 0 days 00:00:01.820000  Eisschrank.      0
+wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:00.240000          Der      2
+                0 days 00:00:00.240000 0 days 00:00:00.520000       Lappen      2
+                0 days 00:00:00.520000 0 days 00:00:00.660000        liegt      2
+                0 days 00:00:00.660000 0 days 00:00:00.820000          auf      2
+                0 days 00:00:00.820000 0 days 00:00:00.960000          dem      2
+                0 days 00:00:00.960000 0 days 00:00:01.480000    Eiscrank.      2
+
+
 Special processing function arguments
 -------------------------------------
 

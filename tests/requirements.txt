@@ -2,6 +2,7 @@ audeer >=1.21.0
 audb >=1.11.0
 auditok >=0.3.0
 audobject >=0.7.5
+faster-whisper
 librosa
 pytest
 pytest-cov
