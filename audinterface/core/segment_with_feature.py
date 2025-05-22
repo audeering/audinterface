@@ -542,12 +542,17 @@ class SegmentWithFeature:
 
         The labels of the table
         are reassigned to the new segments.
-        If the columns of the table overlap with the extracted feature names,
+        If the columns of the table overlap
+        with the :attr:`audinterface.SegmentWithFeature.column_names`,
         the ``tablesuffix`` or the ``featuresuffix`` must be specified.
         The provided ``tablesuffix`` is added
         to the table's overlapping column names
         and the provided ``featuresuffix`` is added
         to the extracted features' overlapping column names.
+        In case the number of channels is greater than 1,
+        the first level of the column names
+        (corresponding to the channel ID)
+        is renamed.
 
         If ``cache_root`` is not ``None``,
         a hash value is created from the index
@@ -568,7 +573,7 @@ class SegmentWithFeature:
                 the ones stored in
                 :attr:`audinterface.SegmentWithFeature.process.process_func_args`
             tablesuffix: suffix to use for the table's overlapping columns
-            featuresuffix: suffix to use for the compute feature's overlapping columns
+            featuresuffix: suffix to use for the features' overlapping columns
 
         Returns:
             :class:`pandas.DataFrame` with segmented index conform to audformat_
@@ -576,6 +581,7 @@ class SegmentWithFeature:
         Raises:
             ValueError: if table is not a :class:`pandas.Series`
                 or a :class:`pandas.DataFrame`
+            ValueError: if the table columns have more than 2 levels
             ValueError: if the table columns and the extract feature columns overlap
                 and no suffix is specified
             RuntimeError: if sampling rates do not match
@@ -676,6 +682,7 @@ class SegmentWithFeature:
             #     )
             #     channel_tables.append(channel_table)
             # table = pd.concat(channel_tables, axis=1)
+
             # Add empty level to columns
             table.columns = pd.MultiIndex.from_tuples(
                 [(col, "") for col in table.columns]
@@ -907,7 +914,7 @@ class SegmentWithFeature:
                 dtype=object,
             )
         index = y.index
-        data = [self._values_to_frame(values) for values in y]
+        data = [self._values_to_frame_order(values) for values in y]
         data = np.stack(data)
         df = pd.DataFrame(
             data,
@@ -916,11 +923,11 @@ class SegmentWithFeature:
         )
         return df
 
-    def _values_to_frame(
+    def _values_to_frame_order(
         self,
         features: np.ndarray,
     ) -> np.ndarray:
-        # Convert features to a pd.DataFrame
+        r"""Reshape features to the expected column order of output dataframe."""
         # Assumed formats are:
         # [n_channels, n_features]
         # [n_features]
@@ -940,7 +947,7 @@ class SegmentWithFeature:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output
-        into a :class:`pd.MultiIndex`. Instead, it will return the raw
+        into a :class:`pd.DataFrame`. Instead, it will return the raw
         processed signal. However, if channel selection, mixdown
         and/or resampling is enabled, the signal will be first remixed and
         resampled if the input sampling rate does not fit the expected
