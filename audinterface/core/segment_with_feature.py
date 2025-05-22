@@ -40,8 +40,8 @@ class SegmentWithFeature:
     r"""Segmentation with feature interface.
 
     Interface for functions that apply a segmentation to the input signal,
-    and also compute features for those segments at the same time.
-    e.g. an speech recognition model that recognizes speech
+    and also compute features for those segments at the same time,
+    e.g. a speech recognition model that recognizes speech
     and also provides the time stamps of that speech.
 
     The features are returned as a :class:`pandas.DataFrame`.
@@ -286,7 +286,7 @@ class SegmentWithFeature:
         root: str = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
     ) -> pd.DataFrame:
-        r"""Segment the content of an audio file and extract their features.
+        r"""Segment the content of an audio file and extract features.
 
         Args:
             file: file path
@@ -582,7 +582,7 @@ class SegmentWithFeature:
             ValueError: if table is not a :class:`pandas.Series`
                 or a :class:`pandas.DataFrame`
             ValueError: if the table columns have more than 2 levels
-            ValueError: if the table columns and the extract feature columns overlap
+            ValueError: if the table columns and the extracted feature columns overlap
                 and no suffix is specified
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
