@@ -442,7 +442,7 @@ wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4
 
 
 Segmentation with feature interface
-----------------------
+-----------------------------------
 
 In some cases,
 a processing function performs
