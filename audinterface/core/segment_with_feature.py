@@ -39,7 +39,7 @@ def empty_series(signal, sampling_rate, **kwargs) -> pd.Series:
 class SegmentWithFeature:
     r"""Segmentation with feature interface.
 
-    Interface for models that apply a segmentation to the input signal,
+    Interface for functions that apply a segmentation to the input signal,
     and also compute features for those segments at the same time.
     e.g. an speech recognition model that recognizes speech
     and also provides the time stamps of that speech.
@@ -81,7 +81,7 @@ class SegmentWithFeature:
             positions as :class:`pandas.Timedelta` objects,
             and with elements in the shape of
             ``(num_features)``
-            or ``(num_channels, num_features).
+            or ``(num_channels, num_features)``.
         process_func_args: (keyword) arguments passed on to the processing
             function
         process_func_is_mono: apply ``process_func`` to every channel
