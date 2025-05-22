@@ -500,6 +500,7 @@ Similarly to :class:`audinterface.Segment`,
 also has a method
 :meth:`process_table() <audinterface.SegmentWithFeature.process_table>`,
 which can be applied on an already labelled dataset.
+
 >>> interface.process_table(table.head(2), root=db.root)
                                                                       word  label
 file            start                  end
