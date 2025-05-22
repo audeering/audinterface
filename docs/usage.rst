@@ -512,9 +512,9 @@ to select the appropriate f0 range.
 >>> interface.process_index(gender.index, root=db.root)
                                                        f0  gender
 file            start  end                                                  
-wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.81    male
-wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      111.63    male
-wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   229.09  female
+wav/03a01Fa.wav 0 days 0 days 00:00:01.898250       134.0    male
+wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      113.16    male
+wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   234.86  female
 
 
 .. _audformat: https://audeering.github.io/audformat/
