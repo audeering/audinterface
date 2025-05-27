@@ -1,5 +1,4 @@
 import errno
-from functools import reduce
 import os
 import typing
 
@@ -44,18 +43,13 @@ class SegmentWithFeature:
     e.g. a speech recognition model that recognizes speech
     and also provides the time stamps of that speech.
 
-    The features are returned as a :class:`pandas.DataFrame`.
-    If the input signal has ``num_channels``,
-    the returned object has ``num_channels * num_features`` columns
+    The features are returned as a :class:`pandas.DataFrame`
+    with ``num_features`` columns
     and one row per detected segment.
 
     Args:
         feature_names: features are stored as columns in a data frame,
             where ``feature_names`` defines the names of the columns.
-            If ``len(channels)`` > 1,
-            the data frame has a multi-column index with
-            with channel ID as first level
-            and ``feature_names`` as second level
         name: name of the feature set, e.g. ``'stft'``
         params: parameters that describe the feature set,
             e.g. ``{'win_size': 512, 'hop_size': 256, 'num_fft': 512}``.
@@ -80,12 +74,9 @@ class SegmentWithFeature:
             named `start` and `end` that hold start and end
             positions as :class:`pandas.Timedelta` objects,
             and with elements in the shape of
-            ``(num_features)``
-            or ``(num_channels, num_features)``.
+            ``(num_features)``.
         process_func_args: (keyword) arguments passed on to the processing
             function
-        process_func_is_mono: apply ``process_func`` to every channel
-            individually
         sampling_rate: sampling rate in Hz.
             If ``None`` it will call ``process_func`` with the actual
             sampling rate of the signal
@@ -129,12 +120,11 @@ class SegmentWithFeature:
         ...     ends = pd.to_timedelta(
         ...         np.arange(win_size, size + (1 / sampling_rate), hop_size), unit="s"
         ...     )
-        ...     # Get windows of shape (channels, samples, frames)
-        ...     frames = utils.sliding_window(signal, sampling_rate, win_size, hop_size)
-        ...     # Reshape to (frames, channels, samples)
-        ...     frames = frames.transpose(2, 0, 1)
-        ...     means = frames.mean(axis=2)
-        ...     stds = frames.std(axis=2)
+        ...     # Get windows of shape (samples, frames)
+        ...     frames = utils.sliding_window(signal, sampling_rate, win_size, hop_size)[0]
+        ...     frames = frames.transpose(1, 0)
+        ...     means = frames.mean(axis=1)
+        ...     stds = frames.std(axis=1)
         ...     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
         ...     # Pass list of arrays with shape (channels, features) to create series
         ...     features = list(np.stack((means, stds), axis=-1))
@@ -145,9 +135,9 @@ class SegmentWithFeature:
         >>> signal = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         >>> interface(signal, sampling_rate=2)
         start            end
-        0 days 00:00:00  0 days 00:00:01    [[1.5, 0.5]]
-        0 days 00:00:01  0 days 00:00:02    [[3.5, 0.5]]
-        0 days 00:00:02  0 days 00:00:03    [[5.5, 0.5]]
+        0 days 00:00:00  0 days 00:00:01    [1.5, 0.5]
+        0 days 00:00:01  0 days 00:00:02    [3.5, 0.5]
+        0 days 00:00:02  0 days 00:00:03    [5.5, 0.5]
         dtype: object
         >>> interface.process_signal(signal, sampling_rate=2)
                                         mean  std
@@ -169,31 +159,6 @@ class SegmentWithFeature:
                                                     mean       std
         file            start  end
         wav/03a01Fa.wav 0 days 0 days 00:00:01 -0.000329  0.098115
-        >>> # Application on a multi-channel signal
-        >>> import audiofile
-        >>> signal, sampling_rate = audiofile.read(
-        ...     audeer.path(db.root, db.files[0]),
-        ...     always_2d=True,
-        ... )
-        >>> signal_multi_channel = np.concatenate(
-        ...     [
-        ...         signal - 0.5,
-        ...         signal + 0.5,
-        ...     ],
-        ... )
-        >>> interface = SegmentWithFeature(
-        ...     feature_names=["mean", "std"],
-        ...     process_func=segment_with_mean_std,
-        ...     channels=[0, 1],
-        ... )
-        >>> interface.process_signal(
-        ...     signal_multi_channel,
-        ...     sampling_rate,
-        ... )
-                                    0                   1
-                                    mean       std      mean       std
-        start  end
-        0 days 0 days 00:00:01 -0.500329  0.098115  0.499671  0.098115
 
     """  # noqa: E501
 
@@ -205,7 +170,6 @@ class SegmentWithFeature:
         params: typing.Dict = None,
         process_func: typing.Callable[..., pd.Series] = None,
         process_func_args: typing.Dict[str, typing.Any] = None,
-        process_func_is_mono: bool = False,
         sampling_rate: int = None,
         resample: bool = False,
         channels: typing.Union[int, typing.Sequence[int]] = 0,
@@ -225,15 +189,7 @@ class SegmentWithFeature:
         else:
             num_channels = len(channels)
         feature_names = audeer.to_list(feature_names)
-        if num_channels > 1:
-            column_names = []
-            for channel in channels:
-                column_names.extend(
-                    [(channel, feature_name) for feature_name in feature_names]
-                )
-            column_names = pd.MultiIndex.from_tuples(column_names)
-        else:
-            column_names = pd.Index(feature_names)
+        column_names = pd.Index(feature_names)
 
         process_func_args = process_func_args or {}
         if process_func is None:
@@ -244,7 +200,6 @@ class SegmentWithFeature:
         process = Process(
             process_func=process_func,
             process_func_args=process_func_args,
-            process_func_is_mono=process_func_is_mono,
             sampling_rate=sampling_rate,
             resample=resample,
             channels=channels,
@@ -382,8 +337,7 @@ class SegmentWithFeature:
         starts = []
         ends = []
         features = {col: [] for col in self.column_names}
-        for (file, start, _), series_or_list in y.items():
-            series = self._reshape_series_or_list(series_or_list)
+        for (file, start, _), series in y.items():
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
@@ -509,8 +463,7 @@ class SegmentWithFeature:
         starts = []
         ends = []
         features = {col: [] for col in self.column_names}
-        for (file, start, _), series_or_list in y.items():
-            series = self._reshape_series_or_list(series_or_list)
+        for (file, start, _), series in y.items():
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
@@ -527,169 +480,6 @@ class SegmentWithFeature:
             data=features,
             columns=self.column_names,
         )
-
-    def process_table(
-        self,
-        table: typing.Union[pd.Series, pd.DataFrame],
-        *,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-        tablesuffix: str = "",
-        featuresuffix: str = "",
-    ) -> pd.DataFrame:
-        r"""Segment and extract features for files or segments from a table.
-
-        The labels of the table
-        are reassigned to the new segments.
-        If the columns of the table overlap
-        with the :attr:`audinterface.SegmentWithFeature.column_names`,
-        the ``tablesuffix`` or the ``featuresuffix`` must be specified.
-        The provided ``tablesuffix`` is added
-        to the table's overlapping column names
-        and the provided ``featuresuffix`` is added
-        to the extracted features' overlapping column names.
-        In case the number of channels is greater than 1,
-        the first level of the column names
-        (corresponding to the channel ID)
-        is renamed.
-
-        If ``cache_root`` is not ``None``,
-        a hash value is created from the index
-        using :func:`audformat.utils.hash` and
-        the result is stored as
-        ``<cache_root>/<hash>.pkl``.
-        When called again with the same index,
-        results will be read from the cached file.
-
-        Args:
-            table: :class:`pandas.Series` or :class:`pandas.DataFrame`
-                with an index conform to audformat_
-            root: root folder to expand relative file paths
-            cache_root: cache folder (see description)
-            process_func_args: (keyword) arguments passed on
-                to the processing function.
-                They will temporarily overwrite
-                the ones stored in
-                :attr:`audinterface.SegmentWithFeature.process.process_func_args`
-            tablesuffix: suffix to use for the table's overlapping columns
-            featuresuffix: suffix to use for the features' overlapping columns
-
-        Returns:
-            :class:`pandas.DataFrame` with segmented index conform to audformat_
-
-        Raises:
-            ValueError: if table is not a :class:`pandas.Series`
-                or a :class:`pandas.DataFrame`
-            ValueError: if the table columns have more than 2 levels
-            ValueError: if the table columns and the extracted feature columns overlap
-                and no suffix is specified
-            RuntimeError: if sampling rates do not match
-            RuntimeError: if channel selection is invalid
-
-        .. _audformat: https://audeering.github.io/audformat/data-format.html
-
-        """
-        if not isinstance(table, pd.Series) and not isinstance(table, pd.DataFrame):
-            raise ValueError("table has to be pd.Series or pd.DataFrame")
-        if isinstance(table, pd.DataFrame) and table.columns.nlevels > 2:
-            raise ValueError("Only 1 or 2 column levels are supported")
-        index = audformat.utils.to_segmented_index(table.index)
-        utils.assert_index(index)
-
-        y = self.process.process_index(
-            index,
-            preserve_index=False,
-            root=root,
-            cache_root=cache_root,
-            process_func_args=process_func_args,
-        )
-
-        # Assign labels from the original table
-        # to the newly created segments
-        files = []
-        starts = []
-        ends = []
-        labels = []
-        features = {col: [] for col in self.column_names}
-        if isinstance(table, pd.Series):
-            for n, ((file, start, _), series_or_list) in enumerate(y.items()):
-                series = self._reshape_series_or_list(series_or_list)
-                df = self._series_to_frame(series)
-                files.extend([file] * len(df))
-                starts.extend(df.index.get_level_values("start") + start)
-                ends.extend(df.index.get_level_values("end") + start)
-                labels.extend([[table.iloc[n]] * len(df.index)])
-                for col in self.column_names:
-                    features[col].extend(df[col])
-            if len(labels) > 0:
-                labels = np.hstack(labels)
-            else:
-                labels = np.empty((0))
-        else:
-            for n, ((file, start, _), series_or_list) in enumerate(y.items()):
-                series = self._reshape_series_or_list(series_or_list)
-                df = self._series_to_frame(series)
-                files.extend([file] * len(df))
-                starts.extend(df.index.get_level_values("start") + start)
-                ends.extend(df.index.get_level_values("end") + start)
-                if len(df) > 0:  # avoid issues when stacking 0-length dataframes
-                    labels.extend([[table.iloc[n].values] * len(df)])
-                for col in self.column_names:
-                    features[col].extend(df[col])
-            if len(labels) > 0:
-                labels = np.vstack(labels)
-            else:
-                labels = np.empty((0, table.shape[1]))  # avoid issue below
-        index = audformat.segmented_index(files, starts, ends)
-        if len(index) == 0:
-            # Pass no data to ensure consistent dtype for columns
-            result = pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.column_names
-            )
-        else:
-            result = pd.DataFrame(
-                index=index,
-                data=features,
-                columns=self.column_names,
-            )
-
-        if isinstance(table, pd.Series):
-            dtype = table.dtype
-            table = pd.Series(labels, index, name=table.name, dtype=dtype)
-        else:
-            dtypes = [table[col].dtype for col in table.columns]
-            labels = {
-                col: pd.Series(
-                    labels[:, ncol], index=index, dtype=dtypes[ncol]
-                )  # supports also category
-                for ncol, col in enumerate(table.columns)
-            }
-            table = pd.DataFrame(labels, index, columns=table.columns)
-        # In case result has two channels,
-        # it has two column levels
-        # so we have to ensure that the table columns have the same levels
-        # as result.columns
-        if isinstance(table, pd.Series):
-            table = table.to_frame()
-        if result.columns.nlevels > 1 and table.columns.nlevels == 1:
-            # Alternative: add one copy per channel to table
-            # channel_tables = []
-            # for channel in range(self.num_channels):
-            #     channel_table = table.copy()
-            #     channel_table.columns = pd.MultiIndex.from_tuples(
-            #         [(channel, col) for col in table.columns]
-            #     )
-            #     channel_tables.append(channel_table)
-            # table = pd.concat(channel_tables, axis=1)
-
-            # Add empty level to columns
-            table.columns = pd.MultiIndex.from_tuples(
-                [(col, "") for col in table.columns]
-            )
-
-        result = result.join(table, lsuffix=featuresuffix, rsuffix=tablesuffix)
-        return result
 
     def process_signal(
         self,
@@ -733,7 +523,7 @@ class SegmentWithFeature:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series_or_list = self.process.process_signal(
+        series = self.process.process_signal(
             signal,
             sampling_rate,
             file=file,
@@ -741,7 +531,6 @@ class SegmentWithFeature:
             end=end,
             process_func_args=process_func_args,
         ).values[0]
-        series = self._reshape_series_or_list(series_or_list)
         index = series.index
         df = self._series_to_frame(series)
         if start is not None:
@@ -859,48 +648,148 @@ class SegmentWithFeature:
         df = pd.DataFrame(index=index, data=features, columns=self.column_names)
         return df
 
-    def _reshape_series_or_list(self, features):
-        # If features is a list, each list element corresponds to a channel
-        if isinstance(features, list):
-            # Convert all channels' feature values to np.array of correct shape
-            features = [
-                feature.apply(lambda x: self._reshape_numpy_2d(x))
-                for feature in features
-            ]
+    def process_table(
+        self,
+        table: typing.Union[pd.Series, pd.DataFrame],
+        *,
+        root: str = None,
+        cache_root: str = None,
+        process_func_args: typing.Dict[str, typing.Any] = None,
+    ) -> pd.DataFrame:
+        r"""Segment and extract features for files or segments from a table.
 
-            # Create combined index of segments
-            combined_index = reduce(
-                lambda x, y: x.union(y), [feature.index for feature in features]
-            ).sort_values()
+        The labels of the table
+        are reassigned to the new segments.
+        The columns of the table may not overlap
+        with the :attr:`audinterface.SegmentWithFeature.column_names`.
 
-            # Extend all features to shared index
-            features = [
-                feature.reindex(
-                    combined_index, fill_value=np.full(self.num_features, np.nan)
+        If ``cache_root`` is not ``None``,
+        a hash value is created from the index
+        using :func:`audformat.utils.hash` and
+        the result is stored as
+        ``<cache_root>/<hash>.pkl``.
+        When called again with the same index,
+        results will be read from the cached file.
+
+        Args:
+            table: :class:`pandas.Series` or :class:`pandas.DataFrame`
+                with an index conform to audformat_
+            root: root folder to expand relative file paths
+            cache_root: cache folder (see description)
+            process_func_args: (keyword) arguments passed on
+                to the processing function.
+                They will temporarily overwrite
+                the ones stored in
+                :attr:`audinterface.SegmentWithFeature.process.process_func_args`
+            tablesuffix: suffix to use for the table's overlapping columns
+            featuresuffix: suffix to use for the features' overlapping columns
+
+        Returns:
+            :class:`pandas.DataFrame` with segmented index conform to audformat_
+
+        Raises:
+            ValueError: if table is not a :class:`pandas.Series`
+                or a :class:`pandas.DataFrame`
+            ValueError: if the table columns and the extracted feature columns overlap
+            RuntimeError: if sampling rates do not match
+            RuntimeError: if channel selection is invalid
+
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
+
+        """
+        if not isinstance(table, pd.Series) and not isinstance(table, pd.DataFrame):
+            raise ValueError("table has to be pd.Series or pd.DataFrame")
+        if isinstance(table, pd.Series):
+            if table.name in self.column_names:
+                raise ValueError(
+                    "Name of table may not overlap with returned feature names."
                 )
-                for feature in features
-            ]
-
-            # Combine different channels' features into a single series
-            values = [np.vstack(feature.to_list()) for feature in features]
-            values = np.stack(values, axis=1)
-            result = pd.Series(index=combined_index, data=list(values))
-            return result
-        # Otherwise, features is a series
         else:
-            # Each feature value is converted to np.array of correct shape
-            return features.apply(lambda x: self._reshape_numpy_2d(x))
+            if any([col in self.column_names for col in table.columns]):
+                raise ValueError(
+                    "Column names in table may not overlap with returned feature names."
+                )
+        index = audformat.utils.to_segmented_index(table.index)
+        utils.assert_index(index)
 
-    def _reshape_numpy_2d(
+        y = self.process.process_index(
+            index,
+            preserve_index=False,
+            root=root,
+            cache_root=cache_root,
+            process_func_args=process_func_args,
+        )
+
+        # Assign labels from the original table
+        # to the newly created segments
+        files = []
+        starts = []
+        ends = []
+        labels = []
+        features = {col: [] for col in self.column_names}
+        if isinstance(table, pd.Series):
+            for n, ((file, start, _), series) in enumerate(y.items()):
+                df = self._series_to_frame(series)
+                files.extend([file] * len(df))
+                starts.extend(df.index.get_level_values("start") + start)
+                ends.extend(df.index.get_level_values("end") + start)
+                labels.extend([[table.iloc[n]] * len(df.index)])
+                for col in self.column_names:
+                    features[col].extend(df[col])
+            if len(labels) > 0:
+                labels = np.hstack(labels)
+            else:
+                labels = np.empty((0))
+        else:
+            for n, ((file, start, _), series) in enumerate(y.items()):
+                df = self._series_to_frame(series)
+                files.extend([file] * len(df))
+                starts.extend(df.index.get_level_values("start") + start)
+                ends.extend(df.index.get_level_values("end") + start)
+                if len(df) > 0:  # avoid issues when stacking 0-length dataframes
+                    labels.extend([[table.iloc[n].values] * len(df)])
+                for col in self.column_names:
+                    features[col].extend(df[col])
+            if len(labels) > 0:
+                labels = np.vstack(labels)
+            else:
+                labels = np.empty((0, table.shape[1]))  # avoid issue below
+        index = audformat.segmented_index(files, starts, ends)
+        if len(index) == 0:
+            # Pass no data to ensure consistent dtype for columns
+            result = pd.DataFrame(
+                index=audformat.segmented_index(), columns=self.column_names
+            )
+        else:
+            result = pd.DataFrame(
+                index=index,
+                data=features,
+                columns=self.column_names,
+            )
+
+        if isinstance(table, pd.Series):
+            dtype = table.dtype
+            table = pd.Series(labels, index, name=table.name, dtype=dtype)
+        else:
+            dtypes = [table[col].dtype for col in table.columns]
+            labels = {
+                col: pd.Series(
+                    labels[:, ncol], index=index, dtype=dtypes[ncol]
+                )  # supports also category
+                for ncol, col in enumerate(table.columns)
+            }
+            table = pd.DataFrame(labels, index, columns=table.columns)
+
+        result = result.join(table)
+        return result
+
+    def _reshape_numpy_1d(
         self,
         features: np.ndarray,
     ):
-        r"""Reshape to [n_channels, n_features]."""
+        r"""Reshape to [n_features]."""
         features = np.asarray(features)
         features = np.atleast_1d(features)
-
-        if len(features.shape) == 1:
-            features = features.reshape(1, features.shape[0])
         return features
 
     def _series_to_frame(
@@ -914,7 +803,7 @@ class SegmentWithFeature:
                 dtype=object,
             )
         index = y.index
-        data = [self._values_to_frame_order(values) for values in y]
+        data = [self._reshape_numpy_1d(values) for values in y]
         data = np.stack(data)
         df = pd.DataFrame(
             data,
@@ -922,22 +811,6 @@ class SegmentWithFeature:
             columns=self.column_names,
         )
         return df
-
-    def _values_to_frame_order(
-        self,
-        features: np.ndarray,
-    ) -> np.ndarray:
-        r"""Reshape features to the expected column order of output dataframe."""
-        # Assumed formats are:
-        # [n_channels, n_features]
-        # [n_features]
-        features = self._reshape_numpy_2d(features)
-        n_channels, n_features = features.shape
-        # Combine features and channels into one dimension
-        # f1-c1, f2-c1, ..., fN-c1, ..., f1-cM, f2-cM, ..., fN-cM
-        new_shape = n_channels * n_features
-        features = features.reshape(new_shape).T
-        return features
 
     def __call__(
         self,
@@ -970,4 +843,4 @@ class SegmentWithFeature:
             sampling_rate,
         )
 
-        return self._reshape_series_or_list(y)
+        return y.apply(lambda x: self._reshape_numpy_1d(x))

@@ -22,13 +22,8 @@ ENDS = [start + pd.to_timedelta("1s") for start in STARTS]
 INDEX = audinterface.utils.signal_index(STARTS, ENDS)
 
 
-def predefined_process_func(signal, sr, *, mono=True, num_channels=2, num_features=2):
-    if mono:
-        return pd.Series(data=[np.ones((1, num_features))] * len(INDEX), index=INDEX)
-    else:
-        return pd.Series(
-            data=[np.ones((num_channels, num_features))] * len(INDEX), index=INDEX
-        )
+def predefined_process_func(signal, sr, *, num_features=2):
+    return pd.Series(data=[np.ones(num_features)] * len(INDEX), index=INDEX)
 
 
 def segment_non_zeros_with_mean_mono(signal, sampling_rate):
@@ -68,9 +63,9 @@ def segment_with_mean(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     )
     frames = audinterface.utils.sliding_window(
         signal, sampling_rate, win_size, hop_size
-    )
-    frames = frames.transpose(2, 0, 1)
-    means = frames.mean(axis=2, keepdims=True)
+    )[0]
+    frames = frames.transpose(1, 0)
+    means = frames.mean(axis=1, keepdims=True)
     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
     features = list(means)
     return pd.Series(data=features, index=index)
@@ -86,10 +81,10 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     )
     frames = audinterface.utils.sliding_window(
         signal, sampling_rate, win_size, hop_size
-    )
-    frames = frames.transpose(2, 0, 1)
-    means = frames.mean(axis=2)
-    stds = frames.std(axis=2)
+    )[0]
+    frames = frames.transpose(1, 0)
+    means = frames.mean(axis=1)
+    stds = frames.std(axis=1)
     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
     features = list(np.stack((means, stds), axis=-1))
     return pd.Series(data=features, index=index)
@@ -117,7 +112,7 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
                     data=[1] * len(INDEX), index=INDEX
                 ),
             ),
-            pd.Series(data=[np.ones((1, 1))] * len(INDEX), index=INDEX),
+            pd.Series(data=[np.ones((1))] * len(INDEX), index=INDEX),
         ),
         (
             ONES_1D,
@@ -128,7 +123,7 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
                     data=[np.ones(3)] * len(INDEX), index=INDEX
                 ),
             ),
-            pd.Series(data=[np.ones((1, 3))] * len(INDEX), index=INDEX),
+            pd.Series(data=[np.ones((3))] * len(INDEX), index=INDEX),
         ),
         (
             ONES_2D,
@@ -136,11 +131,11 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=lambda x, sr: pd.Series(
-                    data=[np.ones(2)] * len(INDEX), index=INDEX
+                    data=[np.ones(1)] * len(INDEX), index=INDEX
                 ),
                 channels=1,
             ),
-            pd.Series(data=[np.ones((1, 2))] * len(INDEX), index=INDEX),
+            pd.Series(data=[np.ones((1))] * len(INDEX), index=INDEX),
         ),
         (
             ONES_2D,
@@ -148,37 +143,11 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
             audinterface.SegmentWithFeature(
                 feature_names=["f1", "f2", "f3"],
                 process_func=lambda x, sr: pd.Series(
-                    data=[np.ones((2, 3))] * len(INDEX), index=INDEX
+                    data=[np.ones((3))] * len(INDEX), index=INDEX
                 ),
                 channels=range(2),
             ),
-            pd.Series(data=[np.ones((2, 3))] * len(INDEX), index=INDEX),
-        ),
-        (
-            ONES_2D,
-            SAMPLING_RATE,
-            audinterface.SegmentWithFeature(
-                feature_names=["f1", "f2", "f3"],
-                process_func=lambda x, sr: pd.Series(
-                    data=[np.ones(3)] * len(INDEX), index=INDEX
-                ),
-                channels=range(2),
-                process_func_is_mono=True,
-            ),
-            pd.Series(data=[np.ones((2, 3))] * len(INDEX), index=INDEX),
-        ),
-        (
-            ONES_2D,
-            SAMPLING_RATE,
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=range(2),
-            ),
-            pd.Series(
-                data=list(np.array([[[1.0, 0.0]] * 2] * len(INDEX))),
-                index=INDEX,
-            ),
+            pd.Series(data=[np.ones((3))] * len(INDEX), index=INDEX),
         ),
         (
             np.concat((ONES_1D, ZEROS_1D)),
@@ -187,30 +156,25 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
                 feature_names=["mean"],
                 process_func=segment_non_zeros_with_mean_mono,
                 channels=range(2),
-                process_func_is_mono=True,
             ),
             pd.Series(
-                data=[np.array([[1], [np.nan]])],
+                data=[np.array([1])],
                 index=audinterface.utils.signal_index([0], [10]),
             ),
         ),
         (
-            np.concat(
-                [
-                    np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1),
-                    np.concat([ZEROS_1S_1D, ONES_1S_1D] * 5, axis=1),
-                ]
-            ),
+            np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1),
             SAMPLING_RATE,
             audinterface.SegmentWithFeature(
                 feature_names=["mean"],
                 process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-                process_func_is_mono=True,
+                channels=0,
             ),
             pd.Series(
-                data=[np.array([[1], [np.nan]]), np.array([[np.nan], [1]])] * 5,
-                index=audinterface.utils.signal_index(range(10), range(1, 11)),
+                data=[np.array([1])] * 5,
+                index=audinterface.utils.signal_index(
+                    [i * 2 for i in range(5)], [(i * 2) + 1 for i in range(5)]
+                ),
             ),
         ),
     ],
@@ -253,21 +217,6 @@ def test_call(signal, sampling_rate, segment_with_feature, expected):
                 feature_names="mean",
                 process_func=segment_non_zeros_with_mean_mono,
                 channels=range(2),
-                process_func_is_mono=True,
-            ),
-        ),
-        (
-            np.concat(
-                [
-                    np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1),
-                    np.concat([ZEROS_1S_1D, ONES_1S_1D] * 5, axis=1),
-                ]
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-                process_func_is_mono=True,
             ),
         ),
     ],
@@ -291,7 +240,7 @@ def test_file(tmpdir, num_channels, num_features):
     segmentwithfeature = audinterface.SegmentWithFeature(
         feature_names=feature_names,
         process_func=lambda x, sr: pd.Series(
-            data=[np.ones((num_channels, num_features))] * len(INDEX), index=INDEX
+            data=[np.ones(num_features)] * len(INDEX), index=INDEX
         ),
         sampling_rate=None,
         channels=range(num_channels),
@@ -305,13 +254,7 @@ def test_file(tmpdir, num_channels, num_features):
     af.write(path, ONES_2D, SAMPLING_RATE)
 
     # test absolute path
-    if num_channels == 1:
-        feats = {feature: np.ones(len(INDEX)) for feature in feature_names}
-    else:
-        feats = {}
-        for channel in range(num_channels):
-            for feature in feature_names:
-                feats[(channel, feature)] = np.ones(len(INDEX))
+    feats = {feature: np.ones(len(INDEX)) for feature in feature_names}
     result = segmentwithfeature.process_file(path)
     expected_index = audformat.segmented_index(
         files=[path] * len(INDEX),
@@ -353,12 +296,11 @@ def test_file(tmpdir, num_channels, num_features):
 
 @pytest.mark.parametrize("num_features", [1, 3])
 @pytest.mark.parametrize("num_channels", [1, 2])
-@pytest.mark.parametrize("mono", [False, True])
 @pytest.mark.parametrize("num_files", [3])
 @pytest.mark.parametrize("num_workers", [1, 2, None])
 @pytest.mark.parametrize("multiprocessing", [False, True])
 def test_folder(
-    tmpdir, num_features, num_channels, mono, num_files, num_workers, multiprocessing
+    tmpdir, num_features, num_channels, num_files, num_workers, multiprocessing
 ):
     feature_names = [f"o{i}" for i in range(num_features)]
 
@@ -371,10 +313,7 @@ def test_folder(
         num_workers=num_workers,
         multiprocessing=multiprocessing,
         verbose=False,
-        process_func_is_mono=mono,
         process_func_args={
-            "mono": mono,
-            "num_channels": num_channels,
             "num_features": num_features,
         },
     )
@@ -384,13 +323,7 @@ def test_folder(
     for file in files_abs:
         af.write(file, ONES_2D, SAMPLING_RATE)
 
-    if num_channels == 1:
-        feats = {feature: np.ones(len(INDEX) * num_files) for feature in feature_names}
-    else:
-        feats = {}
-        for channel in range(num_channels):
-            for feature in feature_names:
-                feats[(channel, feature)] = np.ones(len(INDEX) * num_files)
+    feats = {feature: np.ones(len(INDEX) * num_files) for feature in feature_names}
 
     # folder with include_root=True
     result = segmentwithfeature.process_folder(path)
@@ -531,17 +464,19 @@ def test_folder_default_process_func(
                 feature_names="mean",
                 process_func=segment_non_zeros_with_mean_mono,
                 channels=range(2),
-                process_func_is_mono=True,
             ),
             pd.DataFrame(
                 index=audformat.segmented_index(
-                    files=["f1.wav", "f1.wav", "f1.wav", "f2.wav", "f2.wav", "f2.wav"],
-                    starts=[0, 1, 2] * 2,
-                    ends=[1, 2, 3] * 2,
+                    files=["f1.wav", "f1.wav", "f2.wav"],
+                    starts=[
+                        0,
+                        2,
+                        1,
+                    ],
+                    ends=[1, 3, 2],
                 ),
                 data={
-                    (0, "mean"): np.array([1.0, np.nan, 1.0, np.nan, 1.0, np.nan]),
-                    (1, "mean"): np.array([np.nan, 1.0, np.nan, 1.0, np.nan, 1.0]),
+                    "mean": np.ones(3),
                 },
             ),
         ),
@@ -641,7 +576,7 @@ def test_process_func_args():
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=lambda x, sr: predefined_process_func(
-                    x, sr, mono=True, num_channels=1, num_features=1
+                    x, sr, num_features=1
                 ),
             ),
             pd.DataFrame(data={"feature": np.ones(len(INDEX))}, index=INDEX),
@@ -652,14 +587,13 @@ def test_process_func_args():
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=lambda x, sr: predefined_process_func(
-                    x, sr, mono=False, num_channels=2, num_features=1
+                    x, sr, num_features=1
                 ),
                 channels=range(2),
             ),
             pd.DataFrame(
                 data={
-                    (0, "feature"): np.ones(len(INDEX)),
-                    (1, "feature"): np.ones(len(INDEX)),
+                    "feature": np.ones(len(INDEX)),
                 },
                 index=INDEX,
             ),
@@ -674,10 +608,8 @@ def test_process_func_args():
             ),
             pd.DataFrame(
                 data={
-                    (0, "mean"): np.ones(10),
-                    (0, "std"): np.zeros(10),
-                    (1, "mean"): np.ones(10),
-                    (1, "std"): np.zeros(10),
+                    "mean": np.ones(10),
+                    "std": np.zeros(10),
                 },
                 index=audinterface.utils.signal_index(
                     starts=range(10), ends=range(1, 11)
@@ -685,39 +617,20 @@ def test_process_func_args():
             ),
         ),
         (
-            np.concat((ONES_1D, ZEROS_1D)),
+            np.concat((np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1), ONES_1D)),
             SAMPLING_RATE,
             audinterface.SegmentWithFeature(
                 feature_names=["mean"],
                 process_func=segment_non_zeros_with_mean_mono,
                 channels=range(2),
-                process_func_is_mono=True,
-            ),
-            pd.DataFrame(
-                data={(0, "mean"): np.ones(1), (1, "mean"): [np.nan]},
-                index=audinterface.utils.signal_index([0], [10]),
-            ),
-        ),
-        (
-            np.concat(
-                [
-                    np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1),
-                    np.concat([ZEROS_1S_1D, ONES_1S_1D] * 5, axis=1),
-                ]
-            ),
-            SAMPLING_RATE,
-            audinterface.SegmentWithFeature(
-                feature_names=["mean"],
-                process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-                process_func_is_mono=True,
             ),
             pd.DataFrame(
                 data={
-                    (0, "mean"): np.array([1.0, np.nan] * 5),
-                    (1, "mean"): np.array([np.nan, 1.0] * 5),
+                    "mean": np.ones(5),
                 },
-                index=audinterface.utils.signal_index(range(10), range(1, 11)),
+                index=audinterface.utils.signal_index(
+                    [i * 2 for i in range(5)], [(i * 2) + 1 for i in range(5)]
+                ),
             ),
         ),
     ],
@@ -755,7 +668,7 @@ def test_signal(signal, sampling_rate, segment_with_feature, expected):
             ),
             pd.DataFrame(index=audinterface.utils.signal_index(), columns=["feature"]),
         ),
-        # segmented index with 1 channel output
+        # segmented index with mean std
         (
             ONES_1S_1D,
             SAMPLING_RATE,
@@ -776,7 +689,7 @@ def test_signal(signal, sampling_rate, segment_with_feature, expected):
                 data={"mean": np.ones(1), "std": np.zeros(1)},
             ),
         ),
-        # signal index with 1 channel output
+        # signal index with mean std
         (
             ONES_1S_1D,
             SAMPLING_RATE,
@@ -792,63 +705,6 @@ def test_signal(signal, sampling_rate, segment_with_feature, expected):
             pd.DataFrame(
                 index=audinterface.utils.signal_index(starts=[0], ends=[1]),
                 data={"mean": np.ones(1), "std": np.zeros(1)},
-            ),
-        ),
-        # 2 channel output with segmented index
-        (
-            np.concat(
-                (
-                    np.concat((ONES_1S_1D, ZEROS_1S_1D, ONES_1S_1D), axis=1),
-                    np.concat((ZEROS_1S_1D, ONES_1S_1D, ZEROS_1S_1D), axis=1),
-                )
-            ),
-            SAMPLING_RATE,
-            audformat.segmented_index(
-                files=["f1.wav", "f1.wav"], starts=[0, 1], ends=[1, 3]
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-                process_func_is_mono=True,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f1.wav", "f1.wav"],
-                    starts=[0, 1, 2],
-                    ends=[1, 2, 3],
-                ),
-                data={
-                    (0, "mean"): np.array([1.0, np.nan, 1.0]),
-                    (1, "mean"): np.array([np.nan, 1.0, np.nan]),
-                },
-            ),
-        ),
-        # 2 channel output with signal index
-        (
-            np.concat(
-                (
-                    np.concat((ONES_1S_1D, ZEROS_1S_1D, ONES_1S_1D), axis=1),
-                    np.concat((ZEROS_1S_1D, ONES_1S_1D, ZEROS_1S_1D), axis=1),
-                )
-            ),
-            SAMPLING_RATE,
-            audinterface.utils.signal_index(starts=[0, 1], ends=[1, 3]),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-                process_func_is_mono=True,
-            ),
-            pd.DataFrame(
-                index=audinterface.utils.signal_index(
-                    starts=[0, 1, 2],
-                    ends=[1, 2, 3],
-                ),
-                data={
-                    (0, "mean"): np.array([1.0, np.nan, 1.0]),
-                    (1, "mean"): np.array([np.nan, 1.0, np.nan]),
-                },
             ),
         ),
     ],
@@ -878,14 +734,35 @@ def test_signal_from_index(
             None,
             marks=pytest.mark.xfail(raises=ValueError),
         ),
-        # incorrect input type (frame with 3 column levels)
+        # overlapping columns Series
         pytest.param(
-            [],
+            [ONES_1D, ONES_1D],
             SAMPLING_RATE,
-            [],
+            ["f1.wav", "f2.wav"],
+            pd.Series(
+                index=audformat.segmented_index(
+                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[pd.NaT, pd.NaT]
+                ),
+                data=np.ones(2),
+                name="feature",
+            ),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        # overlapping columns Dataframe
+        pytest.param(
+            [ONES_1D, ONES_1D],
+            SAMPLING_RATE,
+            ["f1.wav", "f2.wav"],
             pd.DataFrame(
-                index=audformat.segmented_index(),
-                columns=pd.MultiIndex.from_tuples([("a", "b", "c"), ("x", "y", "z")]),
+                index=audformat.segmented_index(
+                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[pd.NaT, pd.NaT]
+                ),
+                data={"feature": np.ones(2)},
             ),
             audinterface.SegmentWithFeature(
                 feature_names="feature",
@@ -972,7 +849,7 @@ def test_signal_from_index(
             ),
             pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
         ),
-        # series table, 1 channel output
+        # series table with output
         (
             [ONES_2D, ONES_2D],
             SAMPLING_RATE,
@@ -1000,7 +877,7 @@ def test_signal_from_index(
                 },
             ),
         ),
-        # dataframe table, 1 channel output
+        # dataframe table with output
         (
             [ONES_1S_1D, ONES_1S_1D],
             SAMPLING_RATE,
@@ -1023,67 +900,7 @@ def test_signal_from_index(
                 data={"mean": np.ones(2), "std": np.zeros(2), "label": range(2)},
             ),
         ),
-        # series table, 2 channel output
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.Series(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data=range(2),
-                name="label",
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=range(2),
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={
-                    (0, "mean"): np.ones(2),
-                    (0, "std"): np.zeros(2),
-                    (1, "mean"): np.ones(2),
-                    (1, "std"): np.zeros(2),
-                    ("label", ""): range(2),
-                },
-            ),
-        ),
-        # dataframe table, 2 channel output
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={"label": range(2)},
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=range(2),
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={
-                    (0, "mean"): np.ones(2),
-                    (0, "std"): np.zeros(2),
-                    (1, "mean"): np.ones(2),
-                    (1, "std"): np.zeros(2),
-                    ("label", ""): range(2),
-                },
-            ),
-        ),
-        # series table with signals of different index length,
-        # 2 channel output
+        # series table with signals of different index length
         (
             [ONES_2D, ONES_2D],
             SAMPLING_RATE,
@@ -1107,15 +924,13 @@ def test_signal_from_index(
                     ends=[1, 1, 2],
                 ),
                 data={
-                    (0, "mean"): np.ones(3),
-                    (0, "std"): np.zeros(3),
-                    (1, "mean"): np.ones(3),
-                    (1, "std"): np.zeros(3),
-                    ("label", ""): [0, 1, 1],
+                    "mean": np.ones(3),
+                    "std": np.zeros(3),
+                    "label": [0, 1, 1],
                 },
             ),
         ),
-        # dataframe table, overlapping segments, 1 channel output
+        # dataframe table, overlapping segments
         (
             [
                 np.concat((ONES_1S_1D, ZEROS_1S_1D), axis=1),
@@ -1215,216 +1030,3 @@ def test_table(
         cache_root=cache_root,
     )
     pd.testing.assert_frame_equal(df, df_cached, atol=1e-4)
-
-
-@pytest.mark.parametrize(
-    "signals, sampling_rate, files, table, "
-    "segment_with_feature, df_expected, tablesuffix, featuresuffix",
-    [
-        # empty series table tablesuffix
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.Series(index=audformat.segmented_index(), name="feature"),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature", "feature_y"]
-            ),
-            "_y",
-            "",
-        ),
-        # empty series table featuresuffix
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.Series(index=audformat.segmented_index(), name="feature"),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature_x", "feature"]
-            ),
-            "",
-            "_x",
-        ),
-        # empty dataframe table tablesuffix
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature", "feature_y"]
-            ),
-            "_y",
-            "",
-        ),
-        # empty dataframe table featuresuffix
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature_x", "feature"]
-            ),
-            "",
-            "_x",
-        ),
-        # 1 channel series table tablesuffix
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.Series(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data=range(2),
-                name="mean",
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=0,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={"mean": np.ones(2), "std": np.zeros(2), "mean_y": range(2)},
-            ),
-            "_y",
-            "",
-        ),
-        # 1 channel dataframe table featuresuffix
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={"mean": range(2)},
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=0,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={"mean_x": np.ones(2), "std": np.zeros(2), "mean": range(2)},
-            ),
-            "",
-            "_x",
-        ),
-        # 2 channel dataframe table tablesuffix
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={(1, "mean"): range(2)},
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=range(2),
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={
-                    (0, "mean"): np.ones(2),
-                    (0, "std"): np.zeros(2),
-                    # overlapping column names are cast to string
-                    # with suffix, even if the suffix is an empty string
-                    ("1", "mean"): np.ones(2),
-                    ("1", "std"): np.zeros(2),
-                    ("1_y", "mean"): range(2),
-                },
-            ),
-            "_y",
-            "",
-        ),
-        # 2 channel dataframe table featuresuffix
-        (
-            [ONES_2D, ONES_2D],
-            SAMPLING_RATE,
-            ["f1.wav", "f2.wav"],
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={(0, "mean"): range(2)},
-            ),
-            audinterface.SegmentWithFeature(
-                feature_names=["mean", "std"],
-                process_func=segment_with_mean_std,
-                channels=range(2),
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(
-                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
-                ),
-                data={
-                    ("0_x", "mean"): np.ones(2),
-                    ("0_x", "std"): np.zeros(2),
-                    (1, "mean"): np.ones(2),
-                    (1, "std"): np.zeros(2),
-                    # overlapping column names are cast to string
-                    # with suffix, even if the suffix is an empty string
-                    ("0", "mean"): range(2),
-                },
-            ),
-            "",
-            "_x",
-        ),
-    ],
-)
-def test_table_overlapping(
-    tmpdir,
-    signals,
-    sampling_rate,
-    files,
-    table,
-    segment_with_feature,
-    df_expected,
-    tablesuffix,
-    featuresuffix,
-):
-    root = str(tmpdir.mkdir("wav"))
-    paths = [os.path.join(root, file) for file in files]
-    for path, signal in zip(paths, signals):
-        af.write(path, signal, sampling_rate)
-
-    # Fail when columns overlap and no suffixes specified
-    with pytest.raises(ValueError):
-        result = segment_with_feature.process_table(table, root=root)
-
-    result = segment_with_feature.process_table(
-        table, root=root, tablesuffix=tablesuffix, featuresuffix=featuresuffix
-    )
-    pd.testing.assert_frame_equal(result, df_expected, check_exact=False, atol=1e-4)
