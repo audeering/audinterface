@@ -252,6 +252,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -313,6 +314,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -381,6 +383,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -440,6 +443,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -518,6 +522,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -588,6 +593,7 @@ class SegmentWithFeature:
             ValueError: if index contains duplicates
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -694,6 +700,7 @@ class SegmentWithFeature:
             ValueError: if the table columns and the extracted feature columns overlap
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
@@ -805,6 +812,10 @@ class SegmentWithFeature:
         r"""Reshape to [n_features]."""
         features = np.asarray(features)
         features = np.atleast_1d(features)
+        if not features.shape == (self.num_features,):
+            raise ValueError(
+                f"The returned features must be reshapable to ({self.num_features})"
+            )
         return features
 
     def _series_to_frame(
@@ -848,6 +859,7 @@ class SegmentWithFeature:
             RuntimeError: if channel selection is invalid
             ValueError: if the process function doesn't return a :class:`pd.Series`
                 with index conform to audformat_
+                and elements of shape ``(num_features)``
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
         """

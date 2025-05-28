@@ -137,6 +137,19 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
             None,
             marks=pytest.mark.xfail(raises=ValueError),
         ),
+        # incorrectly returning series with wrong number of features
+        pytest.param(
+            ONES_1D,
+            SAMPLING_RATE,
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: pd.Series(
+                    data=[np.ones(2)] * len(INDEX), index=INDEX
+                ),
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
         (
             ONES_1D,
             SAMPLING_RATE,
