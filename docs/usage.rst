@@ -451,7 +451,7 @@ For this,
 :class:`audinterface.SegmentWithFeature` can be used.
 This interface returns a :class:`pd.DataFrame`
 with a segmented index conform to audformat_.
-An example for such a processing function
+An example of such a processing function
 would be a speech recognition model
 that also generates time stamps for its results.
 
