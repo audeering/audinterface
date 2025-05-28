@@ -631,8 +631,7 @@ class SegmentWithFeature:
         if len(index) == 0:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(index=index, columns=self.feature_names)
-        df = pd.DataFrame(index=index, data=features, columns=self.feature_names)
-        return df
+        return pd.DataFrame(index=index, data=features, columns=self.feature_names)
 
     def process_table(
         self,
@@ -789,12 +788,7 @@ class SegmentWithFeature:
         index = y.index
         data = [self._reshape_numpy_1d(values) for values in y]
         data = np.stack(data)
-        df = pd.DataFrame(
-            data,
-            index=index,
-            columns=self.feature_names,
-        )
-        return df
+        return pd.DataFrame(data, index=index, columns=self.feature_names)
 
     def __call__(
         self,
