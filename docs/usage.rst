@@ -499,7 +499,7 @@ Similarly to :class:`audinterface.Segment`,
 :class:`audinterface.SegmentWithFeature`
 also has a method
 :meth:`process_table() <audinterface.SegmentWithFeature.process_table>`,
-which can be applied on an already labelled dataset.
+which can be applied to an already labelled dataset.
 
 >>> interface.process_table(table.head(2), root=db.root)
                                                                       word  label
