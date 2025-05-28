@@ -250,6 +250,8 @@ class SegmentWithFeature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -263,6 +265,7 @@ class SegmentWithFeature:
             root=root,
             process_func_args=process_func_args,
         ).values[0]
+        self._check_return_format(series)
         df = self._series_to_frame(series)
         index = audformat.segmented_index(
             files=[file] * len(df),
@@ -308,6 +311,8 @@ class SegmentWithFeature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -324,6 +329,7 @@ class SegmentWithFeature:
         ends = []
         features = {col: [] for col in self.feature_names}
         for (file, start, _), series in y.items():
+            self._check_return_format(series)
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
@@ -373,6 +379,8 @@ class SegmentWithFeature:
             FileNotFoundError: if folder does not exist
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -430,6 +438,8 @@ class SegmentWithFeature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -450,6 +460,7 @@ class SegmentWithFeature:
         ends = []
         features = {col: [] for col in self.feature_names}
         for (file, start, _), series in y.items():
+            self._check_return_format(series)
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
@@ -505,6 +516,8 @@ class SegmentWithFeature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -517,6 +530,7 @@ class SegmentWithFeature:
             end=end,
             process_func_args=process_func_args,
         ).values[0]
+        self._check_return_format(series)
         index = series.index
         df = self._series_to_frame(series)
         if start is not None:
@@ -572,6 +586,8 @@ class SegmentWithFeature:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
             ValueError: if index contains duplicates
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
@@ -676,6 +692,8 @@ class SegmentWithFeature:
             ValueError: if table is not a :class:`pandas.Series`
                 or a :class:`pandas.DataFrame`
             ValueError: if the table columns and the extracted feature columns overlap
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
 
@@ -714,6 +732,7 @@ class SegmentWithFeature:
         features = {col: [] for col in self.feature_names}
         if isinstance(table, pd.Series):
             for n, ((file, start, _), series) in enumerate(y.items()):
+                self._check_return_format(series)
                 df = self._series_to_frame(series)
                 files.extend([file] * len(df))
                 starts.extend(df.index.get_level_values("start") + start)
@@ -727,6 +746,7 @@ class SegmentWithFeature:
                 labels = np.empty((0))
         else:
             for n, ((file, start, _), series) in enumerate(y.items()):
+                self._check_return_format(series)
                 df = self._series_to_frame(series)
                 files.extend([file] * len(df))
                 starts.extend(df.index.get_level_values("start") + start)
@@ -767,6 +787,16 @@ class SegmentWithFeature:
 
         result = result.join(table)
         return result
+
+    def _check_return_format(self, x):
+        if not isinstance(x, pd.Series):
+            raise ValueError(f"A series must be returned, but got {type(x)}")
+        utils.assert_index(x.index)
+        # Disallow filewise index
+        if audformat.is_filewise_index(x.index):
+            raise ValueError(
+                "The returned series must have a signal index or a segmented index"
+            )
 
     def _reshape_numpy_1d(
         self,
@@ -816,11 +846,14 @@ class SegmentWithFeature:
         Raises:
             RuntimeError: if sampling rates do not match
             RuntimeError: if channel selection is invalid
+            ValueError: if the process function doesn't return a :class:`pd.Series`
+                with index conform to audformat_
 
+        .. _audformat: https://audeering.github.io/audformat/data-format.html
         """
         y = self.process(
             signal,
             sampling_rate,
         )
-
+        self._check_return_format(y)
         return y.apply(lambda x: self._reshape_numpy_1d(x))

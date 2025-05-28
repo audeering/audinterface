@@ -94,6 +94,49 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
 @pytest.mark.parametrize(
     "signal, sampling_rate, segment_with_feature, expected",
     [
+        # invalid multiindex return type
+        pytest.param(
+            ONES_1D,
+            SAMPLING_RATE,
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: pd.Series(
+                    data=[1.0],
+                    index=pd.MultiIndex.from_tuples(
+                        [("a", "b")], names=["start", "end"]
+                    ),
+                ),
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        # incorrectly returning dataframe instead of series
+        pytest.param(
+            ONES_1D,
+            SAMPLING_RATE,
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: pd.DataFrame(
+                    data={"feature": []},
+                    index=audinterface.utils.signal_index(),
+                ),
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
+        # incorrectly returning series with filewise index
+        pytest.param(
+            ONES_1D,
+            SAMPLING_RATE,
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: pd.Series(
+                    index=audformat.filewise_index(),
+                ),
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
         (
             ONES_1D,
             SAMPLING_RATE,
