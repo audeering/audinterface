@@ -66,9 +66,8 @@ def segment_with_mean(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     )
     frames = audinterface.utils.sliding_window(
         signal, sampling_rate, win_size, hop_size
-    )[0]
-    frames = frames.transpose(1, 0)
-    means = frames.mean(axis=1, keepdims=True)
+    )
+    means = frames.mean(axis=(0, 1))
     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
     features = list(means)
     return pd.Series(data=features, index=index)
@@ -84,10 +83,9 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     )
     frames = audinterface.utils.sliding_window(
         signal, sampling_rate, win_size, hop_size
-    )[0]
-    frames = frames.transpose(1, 0)
-    means = frames.mean(axis=1)
-    stds = frames.std(axis=1)
+    )
+    means = frames.mean(axis=(0, 1))
+    stds = frames.std(axis=(0, 1))
     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
     features = list(np.stack((means, stds), axis=-1))
     return pd.Series(data=features, index=index)
@@ -902,6 +900,32 @@ def test_signal_from_index(
                     "f2": np.ones(2 * len(REVERSE_INDEX)),
                     "f3": np.ones(2 * len(REVERSE_INDEX)),
                     "label": [0] * len(REVERSE_INDEX) + [1] * len(REVERSE_INDEX),
+                },
+            ),
+        ),
+        (
+            [ONES_2D, ONES_2D],
+            SAMPLING_RATE,
+            ["f1.wav", "f2.wav"],
+            pd.Series(
+                index=audformat.segmented_index(
+                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
+                ),
+                data=range(2),
+                name="label",
+            ),
+            audinterface.SegmentWithFeature(
+                feature_names="mean",
+                process_func=segment_with_mean,
+                channels=0,
+            ),
+            pd.DataFrame(
+                index=audformat.segmented_index(
+                    files=["f1.wav", "f2.wav"], starts=[0, 0], ends=[1, 1]
+                ),
+                data={
+                    "mean": np.ones(2),
+                    "label": range(2),
                 },
             ),
         ),

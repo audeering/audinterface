@@ -120,13 +120,11 @@ class SegmentWithFeature:
         ...     ends = pd.to_timedelta(
         ...         np.arange(win_size, size + (1 / sampling_rate), hop_size), unit="s"
         ...     )
-        ...     # Get windows of shape (samples, frames)
-        ...     frames = utils.sliding_window(signal, sampling_rate, win_size, hop_size)[0]
-        ...     frames = frames.transpose(1, 0)
-        ...     means = frames.mean(axis=1)
-        ...     stds = frames.std(axis=1)
+        ...     # Get windows of shape (channels, samples, frames)
+        ...     frames = utils.sliding_window(signal, sampling_rate, win_size, hop_size)
+        ...     means = frames.mean(axis=(0, 1))
+        ...     stds = frames.std(axis=(0, 1))
         ...     index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
-        ...     # Pass list of arrays with shape (channels, features) to create series
         ...     features = list(np.stack((means, stds), axis=-1))
         ...     return pd.Series(data=features, index=index)
         >>> interface = SegmentWithFeature(
