@@ -259,22 +259,14 @@ class SegmentWithFeature:
         """
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
-        series = self.process.process_file(
+        y = self.process.process_file(
             file,
             start=start,
             end=end,
             root=root,
             process_func_args=process_func_args,
-        ).values[0]
-        self._check_return_format(series)
-        df = self._series_to_frame(series)
-        index = audformat.segmented_index(
-            files=[file] * len(df),
-            starts=df.index.get_level_values("start") + start,
-            ends=df.index.get_level_values("end") + start,
         )
-        df.index = index
-        return df
+        return self._construct_frame_segmented_index(y)
 
     def process_files(
         self,
@@ -326,28 +318,7 @@ class SegmentWithFeature:
             root=root,
             process_func_args=process_func_args,
         )
-        files = []
-        starts = []
-        ends = []
-        features = {col: [] for col in self.feature_names}
-        for (file, start, _), series in y.items():
-            self._check_return_format(series)
-            df = self._series_to_frame(series)
-            files.extend([file] * len(df))
-            starts.extend(df.index.get_level_values("start") + start)
-            ends.extend(df.index.get_level_values("end") + start)
-            for col in self.feature_names:
-                features[col].extend(df[col])
-        if len(files) == 0:
-            # Pass no data to ensure consistent dtype for columns
-            return pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.feature_names
-            )
-        return pd.DataFrame(
-            index=audformat.segmented_index(files, starts, ends),
-            data=features,
-            columns=self.feature_names,
-        )
+        return self._construct_frame_segmented_index(y)
 
     def process_folder(
         self,
@@ -458,29 +429,7 @@ class SegmentWithFeature:
             cache_root=cache_root,
             process_func_args=process_func_args,
         )
-
-        files = []
-        starts = []
-        ends = []
-        features = {col: [] for col in self.feature_names}
-        for (file, start, _), series in y.items():
-            self._check_return_format(series)
-            df = self._series_to_frame(series)
-            files.extend([file] * len(df))
-            starts.extend(df.index.get_level_values("start") + start)
-            ends.extend(df.index.get_level_values("end") + start)
-            for col in self.feature_names:
-                features[col].extend(df[col])
-        if not files:
-            # Pass no data to ensure consistent dtype for columns
-            return pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.feature_names
-            )
-        return pd.DataFrame(
-            index=audformat.segmented_index(files, starts, ends),
-            data=features,
-            columns=self.feature_names,
-        )
+        return self._construct_frame_segmented_index(y)
 
     def process_signal(
         self,
@@ -527,39 +476,18 @@ class SegmentWithFeature:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        series = self.process.process_signal(
+        y = self.process.process_signal(
             signal,
             sampling_rate,
             file=file,
             start=start,
             end=end,
             process_func_args=process_func_args,
-        ).values[0]
-        self._check_return_format(series)
-        index = series.index
-        df = self._series_to_frame(series)
-        if start is not None:
-            start = utils.to_timedelta(start)
-            # Here we change directly the levels,
-            # so we need to use
-            # `index.levels[0]`
-            # instead of
-            # `index.get_level_values('start')`
-            index = index.set_levels(
-                [
-                    index.levels[0] + start,
-                    index.levels[1] + start,
-                ],
-                level=[0, 1],
-            )
-        if file is not None:
-            index = audformat.segmented_index(
-                files=[file] * len(index),
-                starts=index.get_level_values("start"),
-                ends=index.get_level_values("end"),
-            )
-        df.index = index
-        return df
+        )
+        if file is None:
+            return self._construct_frame_signal_index(y)
+        else:
+            return self._construct_frame_segmented_index(y)
 
     def process_signal_from_index(
         self,
@@ -634,7 +562,6 @@ class SegmentWithFeature:
             task_description=f"Process {len(index)} segments",
             maximum_refresh_time=1,
         )
-
         files = []
         starts = []
         ends = []
@@ -738,28 +665,18 @@ class SegmentWithFeature:
         labels = []
         features = {col: [] for col in self.feature_names}
         if isinstance(table, pd.Series):
-            for n, ((file, start, _), series) in enumerate(y.items()):
-                self._check_return_format(series)
-                df = self._series_to_frame(series)
-                files.extend([file] * len(df))
-                starts.extend(df.index.get_level_values("start") + start)
-                ends.extend(df.index.get_level_values("end") + start)
-                labels.extend([[table.iloc[n]] * len(df.index)])
-                for col in self.feature_names:
-                    features[col].extend(df[col])
-            labels = np.hstack(labels) if labels else np.empty((0))
-        else:
-            for n, ((file, start, _), series) in enumerate(y.items()):
-                self._check_return_format(series)
-                df = self._series_to_frame(series)
-                files.extend([file] * len(df))
-                starts.extend(df.index.get_level_values("start") + start)
-                ends.extend(df.index.get_level_values("end") + start)
-                if len(df) > 0:  # avoid issues when stacking 0-length dataframes
-                    labels.extend([[table.iloc[n].values] * len(df)])
-                for col in self.feature_names:
-                    features[col].extend(df[col])
-            labels = np.vstack(labels) if labels else np.empty((0, table.shape[1]))
+            table = table.to_frame()
+        for n, ((file, start, _), series) in enumerate(y.items()):
+            self._check_return_format(series)
+            df = self._series_to_frame(series)
+            files.extend([file] * len(df))
+            starts.extend(df.index.get_level_values("start") + start)
+            ends.extend(df.index.get_level_values("end") + start)
+            if len(df) > 0:  # avoid issues when stacking 0-length dataframes
+                labels.extend([[table.iloc[n].values] * len(df)])
+            for col in self.feature_names:
+                features[col].extend(df[col])
+        labels = np.vstack(labels) if labels else np.empty((0, table.shape[1]))
         index = audformat.segmented_index(files, starts, ends)
         if len(index) == 0:
             # Pass no data to ensure consistent dtype for columns
@@ -773,18 +690,14 @@ class SegmentWithFeature:
                 columns=self.feature_names,
             )
 
-        if isinstance(table, pd.Series):
-            dtype = table.dtype
-            table = pd.Series(labels, index, name=table.name, dtype=dtype)
-        else:
-            dtypes = [table[col].dtype for col in table.columns]
-            labels = {
-                col: pd.Series(
-                    labels[:, ncol], index=index, dtype=dtypes[ncol]
-                )  # supports also category
-                for ncol, col in enumerate(table.columns)
-            }
-            table = pd.DataFrame(labels, index, columns=table.columns)
+        dtypes = [table[col].dtype for col in table.columns]
+        labels = {
+            col: pd.Series(
+                labels[:, ncol], index=index, dtype=dtypes[ncol]
+            )  # supports also category
+            for ncol, col in enumerate(table.columns)
+        }
+        table = pd.DataFrame(labels, index, columns=table.columns)
 
         result = result.join(table)
         return result
@@ -798,6 +711,53 @@ class SegmentWithFeature:
             raise ValueError(
                 "The returned series must have a signal index or a segmented index"
             )
+
+    def _construct_frame_segmented_index(self, y: pd.Series):
+        r"""Construct dataframe with segmented index from process result."""
+        files = []
+        starts = []
+        ends = []
+        features = {col: [] for col in self.feature_names}
+        for (file, start, _), series in y.items():
+            self._check_return_format(series)
+            df = self._series_to_frame(series)
+            files.extend([file] * len(df))
+            starts.extend(df.index.get_level_values("start") + start)
+            ends.extend(df.index.get_level_values("end") + start)
+            for col in self.feature_names:
+                features[col].extend(df[col])
+        if not files:
+            # Pass no data to ensure consistent dtype for columns
+            return pd.DataFrame(
+                index=audformat.segmented_index(), columns=self.feature_names
+            )
+        return pd.DataFrame(
+            index=audformat.segmented_index(files, starts, ends),
+            data=features,
+            columns=self.feature_names,
+        )
+
+    def _construct_frame_signal_index(self, y: pd.Series):
+        r"""Construct dataframe with signal index from process result."""
+        starts = []
+        ends = []
+        features = {col: [] for col in self.feature_names}
+        for (start, _), series in y.items():
+            self._check_return_format(series)
+            df = self._series_to_frame(series)
+            starts.extend(df.index.get_level_values("start") + start)
+            ends.extend(df.index.get_level_values("end") + start)
+            for col in self.feature_names:
+                features[col].extend(df[col])
+        if not starts:
+            # Pass no data to ensure consistent dtype for columns
+            return pd.DataFrame(index=utils.signal_index(), columns=self.feature_names)
+
+        return pd.DataFrame(
+            index=utils.signal_index(starts, ends),
+            data=features,
+            columns=self.feature_names,
+        )
 
     def _reshape_numpy_1d(
         self,

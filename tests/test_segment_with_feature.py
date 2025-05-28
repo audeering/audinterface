@@ -613,11 +613,12 @@ def test_process_func_args():
 
 
 @pytest.mark.parametrize(
-    "signal, sampling_rate, segment_with_feature, expected",
+    "signal, sampling_rate, file, segment_with_feature, expected",
     [
         (
             ONES_1D,
             SAMPLING_RATE,
+            None,
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=None,
@@ -629,6 +630,7 @@ def test_process_func_args():
         (
             ONES_1D,
             SAMPLING_RATE,
+            None,
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=lambda x, sr: predefined_process_func(
@@ -638,8 +640,28 @@ def test_process_func_args():
             pd.DataFrame(data={"feature": np.ones(len(INDEX))}, index=INDEX),
         ),
         (
+            ONES_1D,
+            SAMPLING_RATE,
+            "f1.wav",
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: predefined_process_func(
+                    x, sr, num_features=1
+                ),
+            ),
+            pd.DataFrame(
+                data={"feature": np.ones(len(INDEX))},
+                index=audformat.segmented_index(
+                    files=["f1.wav"] * len(INDEX),
+                    starts=INDEX.get_level_values(0),
+                    ends=INDEX.get_level_values(1),
+                ),
+            ),
+        ),
+        (
             ONES_2D,
             SAMPLING_RATE,
+            None,
             audinterface.SegmentWithFeature(
                 feature_names="feature",
                 process_func=lambda x, sr: predefined_process_func(
@@ -657,6 +679,7 @@ def test_process_func_args():
         (
             ONES_2D,
             SAMPLING_RATE,
+            None,
             audinterface.SegmentWithFeature(
                 feature_names=["mean", "std"],
                 process_func=segment_with_mean_std,
@@ -675,6 +698,7 @@ def test_process_func_args():
         (
             np.concat((np.concat([ONES_1S_1D, ZEROS_1S_1D] * 5, axis=1), ONES_1D)),
             SAMPLING_RATE,
+            None,
             audinterface.SegmentWithFeature(
                 feature_names=["mean"],
                 process_func=segment_non_zeros_with_mean_mono,
@@ -691,8 +715,8 @@ def test_process_func_args():
         ),
     ],
 )
-def test_signal(signal, sampling_rate, segment_with_feature, expected):
-    result = segment_with_feature.process_signal(signal, sampling_rate)
+def test_signal(signal, sampling_rate, file, segment_with_feature, expected):
+    result = segment_with_feature.process_signal(signal, sampling_rate, file=file)
     pd.testing.assert_frame_equal(
         result,
         expected,
