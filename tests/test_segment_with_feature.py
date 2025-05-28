@@ -1089,7 +1089,7 @@ def test_table(
         root=root,
         cache_root=cache_root,
     )
-    if len(paths) > 0:
+    if paths:
         os.remove(paths[0])
 
         # fails because second file does not exist
