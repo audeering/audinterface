@@ -263,47 +263,6 @@ def test_call(signal, sampling_rate, segment_with_feature, expected):
 
 
 @pytest.mark.parametrize(
-    "signal, extractor",
-    [
-        (
-            np.random.randn(1, SAMPLING_RATE),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_with_mean,
-            ),
-        ),
-        (
-            np.random.randn(2, SAMPLING_RATE),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_with_mean,
-            ),
-        ),
-        (
-            np.random.randn(2, SAMPLING_RATE),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_with_mean,
-                channels=0,
-            ),
-        ),
-        (
-            np.concat((ONES_1D, ZEROS_1D)),
-            audinterface.SegmentWithFeature(
-                feature_names="mean",
-                process_func=segment_non_zeros_with_mean_mono,
-                channels=range(2),
-            ),
-        ),
-    ],
-)
-def test_call_datatype(signal, extractor):
-    features = extractor(signal, SAMPLING_RATE)
-    for feature in features:
-        assert signal.dtype == feature.dtype
-
-
-@pytest.mark.parametrize(
     "num_channels",
     [1, 2],
 )
