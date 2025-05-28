@@ -456,7 +456,7 @@ class SegmentWithFeature:
             ends.extend(df.index.get_level_values("end") + start)
             for col in self.feature_names:
                 features[col].extend(df[col])
-        if len(files) == 0:
+        if not files:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(
                 index=audformat.segmented_index(), columns=self.feature_names
