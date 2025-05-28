@@ -747,10 +747,7 @@ class SegmentWithFeature:
                 labels.extend([[table.iloc[n]] * len(df.index)])
                 for col in self.feature_names:
                     features[col].extend(df[col])
-            if len(labels) > 0:
-                labels = np.hstack(labels)
-            else:
-                labels = np.empty((0))
+            labels = np.hstack(labels) if labels else np.empty((0))
         else:
             for n, ((file, start, _), series) in enumerate(y.items()):
                 self._check_return_format(series)
@@ -762,10 +759,7 @@ class SegmentWithFeature:
                     labels.extend([[table.iloc[n].values] * len(df)])
                 for col in self.feature_names:
                     features[col].extend(df[col])
-            if len(labels) > 0:
-                labels = np.vstack(labels)
-            else:
-                labels = np.empty((0, table.shape[1]))  # avoid issue below
+            labels = np.vstack(labels) if labels else np.empty((0, table.shape[1]))
         index = audformat.segmented_index(files, starts, ends)
         if len(index) == 0:
             # Pass no data to ensure consistent dtype for columns
