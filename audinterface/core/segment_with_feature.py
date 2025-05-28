@@ -681,8 +681,6 @@ class SegmentWithFeature:
                 They will temporarily overwrite
                 the ones stored in
                 :attr:`audinterface.SegmentWithFeature.process.process_func_args`
-            tablesuffix: suffix to use for the table's overlapping columns
-            featuresuffix: suffix to use for the features' overlapping columns
 
         Returns:
             :class:`pandas.DataFrame` with segmented index conform to audformat_
