@@ -91,6 +91,11 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     return pd.Series(data=features, index=index)
 
 
+def write_files(paths, signals, sampling_rate):
+    for path, signal in zip(paths, signals):
+        af.write(path, signal, sampling_rate)
+
+
 @pytest.mark.parametrize(
     "signal, sampling_rate, segment_with_feature, expected",
     [
@@ -369,8 +374,8 @@ def test_folder(
     path = str(tmpdir.mkdir("wav"))
     files = [f"file{n}.wav" for n in range(num_files)]
     files_abs = [os.path.join(path, file) for file in files]
-    for file in files_abs:
-        af.write(file, ONES_2D, SAMPLING_RATE)
+    signals = [ONES_2D] * num_files
+    write_files(files_abs, signals, sampling_rate=SAMPLING_RATE)
 
     feats = {feature: np.ones(len(index) * num_files) for feature in feature_names}
 
@@ -431,8 +436,8 @@ def test_folder_default_process_func(
     )
     path = str(tmpdir.mkdir("wav"))
     files = [os.path.join(path, f"file{n}.wav") for n in range(3)]
-    for file in files:
-        af.write(file, ONES_2D, SAMPLING_RATE)
+    signals = [ONES_2D] * len(files)
+    write_files(files, signals, sampling_rate=SAMPLING_RATE)
     result = segmentwithfeature.process_folder(path)
     pd.testing.assert_frame_equal(
         result,
@@ -446,17 +451,6 @@ def test_folder_default_process_func(
 @pytest.mark.parametrize(
     "signals, sampling_rate, files, index, segment_with_feature, df_expected",
     [
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            audformat.segmented_index(files=[], starts=[], ends=[]),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
-        ),
         (
             [ONES_1D, ONES_1D],
             SAMPLING_RATE,
@@ -537,33 +531,17 @@ def test_index(
     root = str(tmpdir.mkdir("wav"))
     cache_root = os.path.join(tmpdir, "cache")
     paths = [os.path.join(root, file) for file in files]
-    for path, signal in zip(paths, signals):
-        af.write(path, signal, sampling_rate)
+    write_files(paths, signals, sampling_rate)
 
     # relative paths
     result = segment_with_feature.process_index(index, root=root)
     pd.testing.assert_frame_equal(result, df_expected, atol=1e-4)
 
     # absolute paths
-    if audformat.is_segmented_index(index):
-        abs_index = audformat.segmented_index(
-            files=[os.path.join(root, file) for file in index.get_level_values(0)],
-            starts=index.get_level_values(1),
-            ends=index.get_level_values(2),
-        )
-    else:
-        abs_index = audformat.filewise_index(
-            files=[os.path.join(root, file) for file in index.get_level_values(0)],
-        )
+    abs_index = audformat.utils.expand_file_path(index, root)
     result = segment_with_feature.process_index(abs_index)
     df_expected_abs = df_expected.copy()
-    df_expected_abs.index = audformat.segmented_index(
-        files=[
-            os.path.join(root, file) for file in df_expected.index.get_level_values(0)
-        ],
-        starts=df_expected.index.get_level_values(1),
-        ends=df_expected.index.get_level_values(2),
-    )
+    df_expected_abs.index = audformat.utils.expand_file_path(df_expected.index, root)
     pd.testing.assert_frame_equal(result, df_expected_abs, check_exact=False, atol=1e-4)
 
     # cache result
@@ -572,20 +550,49 @@ def test_index(
         root=root,
         cache_root=cache_root,
     )
-    if paths:
-        os.remove(paths[0])
 
-        # fails because file does not exist
-        with pytest.raises(RuntimeError):
-            segment_with_feature.process_index(
-                index,
-                root=root,
-            )
+    os.remove(paths[0])
+    # fails because file does not exist
+    with pytest.raises(RuntimeError):
+        segment_with_feature.process_index(
+            index,
+            root=root,
+        )
 
     # loading from cache still works
     df_cached = segment_with_feature.process_index(
         index,
         root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_frame_equal(df, df_cached, atol=1e-4)
+
+
+@pytest.mark.parametrize(
+    "index, segment_with_feature, df_expected",
+    [
+        (
+            audformat.segmented_index(),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
+        ),
+    ],
+)
+def test_index_empty(tmpdir, index, segment_with_feature, df_expected):
+    cache_root = os.path.join(tmpdir, "cache")
+
+    result = segment_with_feature.process_index(index)
+    pd.testing.assert_frame_equal(result, df_expected, atol=1e-4)
+
+    # cache result
+    df = segment_with_feature.process_index(
+        index,
+    )
+    df_cached = segment_with_feature.process_index(
+        index,
         cache_root=cache_root,
     )
     pd.testing.assert_frame_equal(df, df_cached, atol=1e-4)
@@ -824,43 +831,6 @@ def test_signal_from_index(
             marks=pytest.mark.xfail(raises=ValueError),
         ),
         (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.Series(index=audformat.segmented_index(), name="label"),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature", "label"]
-            ),
-        ),
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.DataFrame(index=audformat.segmented_index()),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
-        ),
-        (
-            [],
-            SAMPLING_RATE,
-            [],
-            pd.DataFrame(index=audformat.segmented_index(), columns=["label"]),
-            audinterface.SegmentWithFeature(
-                feature_names="feature",
-                process_func=None,
-            ),
-            pd.DataFrame(
-                index=audformat.segmented_index(), columns=["feature", "label"]
-            ),
-        ),
-        (
             [ONES_1D, ONES_1D],
             SAMPLING_RATE,
             ["f1.wav", "f2.wav"],
@@ -1081,31 +1051,12 @@ def test_table(
     pd.testing.assert_frame_equal(result, df_expected, atol=1e-4)
 
     # absolute paths
-    if audformat.is_segmented_index(table):
-        abs_index = audformat.segmented_index(
-            files=[
-                os.path.join(root, file) for file in table.index.get_level_values(0)
-            ],
-            starts=table.index.get_level_values(1),
-            ends=table.index.get_level_values(2),
-        )
-    else:
-        abs_index = audformat.filewise_index(
-            files=[
-                os.path.join(root, file) for file in table.index.get_level_values(0)
-            ],
-        )
+    abs_index = audformat.utils.expand_file_path(table.index, root)
     abs_table = table.copy()
     abs_table.index = abs_index
     result = segment_with_feature.process_table(abs_table)
     df_expected_abs = df_expected.copy()
-    df_expected_abs.index = audformat.segmented_index(
-        files=[
-            os.path.join(root, file) for file in df_expected.index.get_level_values(0)
-        ],
-        starts=df_expected.index.get_level_values(1),
-        ends=df_expected.index.get_level_values(2),
-    )
+    df_expected_abs.index = audformat.utils.expand_file_path(df_expected.index, root)
     pd.testing.assert_frame_equal(result, df_expected_abs, check_exact=False, atol=1e-4)
 
     # cache result
@@ -1114,20 +1065,71 @@ def test_table(
         root=root,
         cache_root=cache_root,
     )
-    if paths:
-        os.remove(paths[0])
 
-        # fails because second file does not exist
-        with pytest.raises(RuntimeError):
-            segment_with_feature.process_table(
-                table,
-                root=root,
-            )
+    os.remove(paths[0])
+    # fails because second file does not exist
+    with pytest.raises(RuntimeError):
+        segment_with_feature.process_table(
+            table,
+            root=root,
+        )
 
     # loading from cache still works
     df_cached = segment_with_feature.process_table(
         table,
         root=root,
+        cache_root=cache_root,
+    )
+    pd.testing.assert_frame_equal(df, df_cached, atol=1e-4)
+
+
+@pytest.mark.parametrize(
+    "table, segment_with_feature, df_expected",
+    [
+        (
+            pd.Series(index=audformat.segmented_index(), name="label"),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            pd.DataFrame(
+                index=audformat.segmented_index(), columns=["feature", "label"]
+            ),
+        ),
+        (
+            pd.DataFrame(index=audformat.segmented_index()),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
+        ),
+        (
+            pd.DataFrame(index=audformat.segmented_index(), columns=["label"]),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            pd.DataFrame(
+                index=audformat.segmented_index(), columns=["feature", "label"]
+            ),
+        ),
+    ],
+)
+def test_table_empty(tmpdir, table, segment_with_feature, df_expected):
+    cache_root = os.path.join(tmpdir, "cache")
+
+    # relative paths
+    result = segment_with_feature.process_table(table)
+    pd.testing.assert_frame_equal(result, df_expected, atol=1e-4)
+
+    # cache result
+    df = segment_with_feature.process_table(
+        table,
+        cache_root=cache_root,
+    )
+    df_cached = segment_with_feature.process_table(
+        table,
         cache_root=cache_root,
     )
     pd.testing.assert_frame_equal(df, df_cached, atol=1e-4)
