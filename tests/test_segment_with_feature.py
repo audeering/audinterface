@@ -557,7 +557,7 @@ def test_index(
         root=root,
         cache_root=cache_root,
     )
-    if len(paths) > 0:
+    if paths:
         os.remove(paths[0])
 
         # fails because file does not exist
