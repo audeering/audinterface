@@ -182,16 +182,9 @@ class SegmentWithFeature:
         # avoid cycling imports
         from audinterface.core.process import Process
 
-        if mixdown or isinstance(channels, int):
-            num_channels = 1
-        else:
-            num_channels = len(channels)
         feature_names = audeer.to_list(feature_names)
-        column_names = pd.Index(feature_names)
-
         process_func_args = process_func_args or {}
         if process_func is None:
-            process_func_args["num_channels"] = num_channels
             process_func_args["feature_names"] = feature_names
             process_func = empty_series
 
@@ -209,17 +202,12 @@ class SegmentWithFeature:
             multiprocessing=multiprocessing,
             verbose=verbose,
         )
-        self.column_names = column_names
-        r"""Feature column names."""
 
         self.feature_names = feature_names
         r"""Feature names."""
 
         self.name = name
         r"""Name of the feature set."""
-
-        self.num_channels = num_channels
-        r"""Expected number of channels"""
 
         self.num_features = len(feature_names)
         r"""Number of features."""
@@ -334,23 +322,23 @@ class SegmentWithFeature:
         files = []
         starts = []
         ends = []
-        features = {col: [] for col in self.column_names}
+        features = {col: [] for col in self.feature_names}
         for (file, start, _), series in y.items():
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
             ends.extend(df.index.get_level_values("end") + start)
-            for col in self.column_names:
+            for col in self.feature_names:
                 features[col].extend(df[col])
         if len(files) == 0:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.column_names
+                index=audformat.segmented_index(), columns=self.feature_names
             )
         return pd.DataFrame(
             index=audformat.segmented_index(files, starts, ends),
             data=features,
-            columns=self.column_names,
+            columns=self.feature_names,
         )
 
     def process_folder(
@@ -460,23 +448,23 @@ class SegmentWithFeature:
         files = []
         starts = []
         ends = []
-        features = {col: [] for col in self.column_names}
+        features = {col: [] for col in self.feature_names}
         for (file, start, _), series in y.items():
             df = self._series_to_frame(series)
             files.extend([file] * len(df))
             starts.extend(df.index.get_level_values("start") + start)
             ends.extend(df.index.get_level_values("end") + start)
-            for col in self.column_names:
+            for col in self.feature_names:
                 features[col].extend(df[col])
         if len(files) == 0:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.column_names
+                index=audformat.segmented_index(), columns=self.feature_names
             )
         return pd.DataFrame(
             index=audformat.segmented_index(files, starts, ends),
             data=features,
-            columns=self.column_names,
+            columns=self.feature_names,
         )
 
     def process_signal(
@@ -628,13 +616,13 @@ class SegmentWithFeature:
         files = []
         starts = []
         ends = []
-        features = {col: [] for col in self.column_names}
+        features = {col: [] for col in self.feature_names}
         for df in y:
             if has_file_level:
                 files.extend(df.index.get_level_values("file"))
             starts.extend(df.index.get_level_values("start"))
             ends.extend(df.index.get_level_values("end"))
-            for col in self.column_names:
+            for col in self.feature_names:
                 features[col].extend(df[col])
         if has_file_level:
             index = audformat.segmented_index(files, starts, ends)
@@ -642,8 +630,8 @@ class SegmentWithFeature:
             index = utils.signal_index(starts, ends)
         if len(index) == 0:
             # Pass no data to ensure consistent dtype for columns
-            return pd.DataFrame(index=index, columns=self.column_names)
-        df = pd.DataFrame(index=index, data=features, columns=self.column_names)
+            return pd.DataFrame(index=index, columns=self.feature_names)
+        df = pd.DataFrame(index=index, data=features, columns=self.feature_names)
         return df
 
     def process_table(
@@ -659,7 +647,7 @@ class SegmentWithFeature:
         The labels of the table
         are reassigned to the new segments.
         The columns of the table may not overlap
-        with the :attr:`audinterface.SegmentWithFeature.column_names`.
+        with the :attr:`audinterface.SegmentWithFeature.feature_names`.
 
         If ``cache_root`` is not ``None``,
         a hash value is created from the index
@@ -696,12 +684,12 @@ class SegmentWithFeature:
         if not isinstance(table, pd.Series) and not isinstance(table, pd.DataFrame):
             raise ValueError("table has to be pd.Series or pd.DataFrame")
         if isinstance(table, pd.Series):
-            if table.name in self.column_names:
+            if table.name in self.feature_names:
                 raise ValueError(
                     "Name of table may not overlap with returned feature names."
                 )
         else:
-            if any([col in self.column_names for col in table.columns]):
+            if any([col in self.feature_names for col in table.columns]):
                 raise ValueError(
                     "Column names in table may not overlap with returned feature names."
                 )
@@ -722,7 +710,7 @@ class SegmentWithFeature:
         starts = []
         ends = []
         labels = []
-        features = {col: [] for col in self.column_names}
+        features = {col: [] for col in self.feature_names}
         if isinstance(table, pd.Series):
             for n, ((file, start, _), series) in enumerate(y.items()):
                 df = self._series_to_frame(series)
@@ -730,7 +718,7 @@ class SegmentWithFeature:
                 starts.extend(df.index.get_level_values("start") + start)
                 ends.extend(df.index.get_level_values("end") + start)
                 labels.extend([[table.iloc[n]] * len(df.index)])
-                for col in self.column_names:
+                for col in self.feature_names:
                     features[col].extend(df[col])
             if len(labels) > 0:
                 labels = np.hstack(labels)
@@ -744,7 +732,7 @@ class SegmentWithFeature:
                 ends.extend(df.index.get_level_values("end") + start)
                 if len(df) > 0:  # avoid issues when stacking 0-length dataframes
                     labels.extend([[table.iloc[n].values] * len(df)])
-                for col in self.column_names:
+                for col in self.feature_names:
                     features[col].extend(df[col])
             if len(labels) > 0:
                 labels = np.vstack(labels)
@@ -754,13 +742,13 @@ class SegmentWithFeature:
         if len(index) == 0:
             # Pass no data to ensure consistent dtype for columns
             result = pd.DataFrame(
-                index=audformat.segmented_index(), columns=self.column_names
+                index=audformat.segmented_index(), columns=self.feature_names
             )
         else:
             result = pd.DataFrame(
                 index=index,
                 data=features,
-                columns=self.column_names,
+                columns=self.feature_names,
             )
 
         if isinstance(table, pd.Series):
@@ -795,7 +783,7 @@ class SegmentWithFeature:
         if y.empty:
             return pd.DataFrame(
                 index=audformat.segmented_index(),
-                columns=self.column_names,
+                columns=self.feature_names,
                 dtype=object,
             )
         index = y.index
@@ -804,7 +792,7 @@ class SegmentWithFeature:
         df = pd.DataFrame(
             data,
             index=index,
-            columns=self.column_names,
+            columns=self.feature_names,
         )
         return df
 

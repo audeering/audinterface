@@ -391,7 +391,7 @@ def test_folder(
         pd.DataFrame(
             index=audformat.segmented_index(),
             dtype=object,
-            columns=segmentwithfeature.column_names,
+            columns=segmentwithfeature.feature_names,
         ),
     )
 
@@ -423,7 +423,7 @@ def test_folder_default_process_func(
         result,
         pd.DataFrame(
             index=audformat.segmented_index(),
-            columns=segmentwithfeature.column_names,
+            columns=segmentwithfeature.feature_names,
         ),
     )
 
