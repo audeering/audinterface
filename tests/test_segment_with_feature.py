@@ -713,6 +713,44 @@ def test_process_func_args():
                 ),
             ),
         ),
+        # min_signal_dur=2.0
+        (
+            ONES_1S_1D,
+            SAMPLING_RATE,
+            None,
+            audinterface.SegmentWithFeature(
+                feature_names=["n_samples"],
+                process_func=lambda x, sr: pd.Series(
+                    [x.shape[1]], index=audinterface.utils.signal_index([0], [2])
+                ),
+                min_signal_dur=2.0,
+            ),
+            pd.DataFrame(
+                data={
+                    "n_samples": SAMPLING_RATE * 2,
+                },
+                index=audinterface.utils.signal_index([0], [2]),
+            ),
+        ),
+        # max_signal_dur=1.0
+        (
+            ONES_1D,
+            SAMPLING_RATE,
+            None,
+            audinterface.SegmentWithFeature(
+                feature_names=["n_samples"],
+                process_func=lambda x, sr: pd.Series(
+                    [x.shape[1]], index=audinterface.utils.signal_index([0], [1])
+                ),
+                max_signal_dur=1.0,
+            ),
+            pd.DataFrame(
+                data={
+                    "n_samples": SAMPLING_RATE,
+                },
+                index=audinterface.utils.signal_index([0], [1]),
+            ),
+        ),
     ],
 )
 def test_signal(signal, sampling_rate, file, segment_with_feature, expected):
