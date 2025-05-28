@@ -618,6 +618,8 @@ class SegmentWithFeature:
         ends = []
         features = {col: [] for col in self.feature_names}
         for df in y:
+            if df is None:
+                continue
             if has_file_level:
                 files.extend(df.index.get_level_values("file"))
             starts.extend(df.index.get_level_values("start"))

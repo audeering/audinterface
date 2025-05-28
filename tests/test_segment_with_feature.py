@@ -683,6 +683,16 @@ def test_signal(signal, sampling_rate, segment_with_feature, expected):
         (
             ONES_1D,
             SAMPLING_RATE,
+            audformat.segmented_index(),
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=None,
+            ),
+            pd.DataFrame(index=audformat.segmented_index(), columns=["feature"]),
+        ),
+        (
+            ONES_1D,
+            SAMPLING_RATE,
             audformat.segmented_index(files=["f1.wav"], starts=[0], ends=[pd.NaT]),
             audinterface.SegmentWithFeature(
                 feature_names="feature",
