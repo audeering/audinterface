@@ -1,8 +1,0 @@
-audb >=1.11.0
-audeer
-sphinx
-sphinx-apipages >=0.1.2
-sphinx-audeering-theme >=1.2.1
-sphinx-autodoc-typehints
-sphinx-copybutton
-toml
