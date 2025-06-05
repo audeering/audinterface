@@ -43,10 +43,12 @@ jobs:
         sudo apt-get install --no-install-recommends --yes libsndfile1 sox portaudio19-dev
       if: matrix.os == 'ubuntu-latest'
 
+    - name: Select onnxruntime version for Python 3.9
+      run: uv sync --package 'onnxruntime==1.19.2'
+      if: matrix.python-version == '3.9'
+
     - name: Sync Python environment
-      run: |
-        uv sync --package "onnxruntime ==1.19.2"
-        uv sync
+      run: uv sync
 
     - name: Test with pytest
       run: uv run pytest
