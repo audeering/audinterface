@@ -168,7 +168,7 @@ class SegmentWithFeature:
         feature_names: str | Sequence[str],
         *,
         name: str | None = None,
-        params: dict | None = None,
+        params: dict[str, object] | None = None,
         process_func: Callable[..., pd.Series] | None = None,
         process_func_args: dict[str, object] | None = None,
         sampling_rate: int | None = None,
