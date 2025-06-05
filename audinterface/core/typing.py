@@ -1,10 +1,9 @@
-from __future__ import annotations
-
 from collections.abc import Sequence
+from typing import Union
 
 import pandas as pd
 
 
-Timestamp = float | int | str | pd.Timedelta
+Timestamp = Union[float, int, str, pd.Timedelta]
 
-Timestamps = Timestamp | Sequence[Timestamp]
+Timestamps = Union[Timestamp, Sequence[Timestamp]]
