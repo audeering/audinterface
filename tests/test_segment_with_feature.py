@@ -568,11 +568,7 @@ def test_folder_default_process_func(
             pd.DataFrame(
                 index=audformat.segmented_index(
                     files=["f1.wav", "f1.wav", "f2.wav"],
-                    starts=[
-                        0,
-                        2,
-                        1,
-                    ],
+                    starts=[0, 2, 1],
                     ends=[1, 3, 2],
                 ),
                 data={
