@@ -34,3 +34,4 @@ The following classes are provided:
     Process
     ProcessWithContext
     Segment
+    SegmentWithFeature
