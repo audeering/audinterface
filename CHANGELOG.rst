@@ -7,6 +7,13 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.3.0 (2025/06/05)
+--------------------------
+
+* Added: ``audinterface.SegmentWithFeature``
+* Added: support for Python 3.13
+
+
 Version 1.2.3 (2024/12/16)
 --------------------------
 
