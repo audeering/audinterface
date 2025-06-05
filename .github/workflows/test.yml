@@ -44,7 +44,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
 
     - name: Sync Python environment
-      run: uv sync
+      run: |
+        uv sync --package "onnxruntime ==1.19.2"
+        uv sync
 
     - name: Test with pytest
       run: uv run pytest
