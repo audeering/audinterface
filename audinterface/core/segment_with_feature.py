@@ -668,14 +668,17 @@ class SegmentWithFeature:
             table = table.to_frame()
         for n, ((file, start, _), series) in enumerate(y.items()):
             self._check_return_format(series)
-            df = self._series_to_frame(series)
-            files.extend([file] * len(df))
-            starts.extend(df.index.get_level_values("start") + start)
-            ends.extend(df.index.get_level_values("end") + start)
-            if len(df) > 0:  # avoid issues when stacking 0-length dataframes
-                labels.extend([[table.iloc[n].values] * len(df)])
-            for col in self.feature_names:
-                features[col].extend(df[col])
+            if series.empty:
+                continue
+            data = [self._reshape_numpy_1d(values) for values in series]
+            data = np.stack(data).T
+            index_data = series.index.to_numpy()
+            files.extend([file] * len(series))
+            starts.extend([t[0] + start for t in index_data])
+            ends.extend([t[1] + start for t in index_data])
+            for col, val in zip(self.feature_names, data):
+                features[col].extend(val)
+            labels.extend([[table.iloc[n].values] * len(series)])
         labels = np.vstack(labels) if labels else np.empty((0, table.shape[1]))
         index = audformat.segmented_index(files, starts, ends)
         if len(index) == 0:
@@ -720,12 +723,16 @@ class SegmentWithFeature:
         features = {col: [] for col in self.feature_names}
         for (file, start, _), series in y.items():
             self._check_return_format(series)
-            df = self._series_to_frame(series)
-            files.extend([file] * len(df))
-            starts.extend(df.index.get_level_values("start") + start)
-            ends.extend(df.index.get_level_values("end") + start)
-            for col in self.feature_names:
-                features[col].extend(df[col])
+            if series.empty:
+                continue
+            data = [self._reshape_numpy_1d(values) for values in series]
+            data = np.stack(data).T
+            index_data = series.index.to_numpy()
+            files.extend([file] * len(series))
+            starts.extend([t[0] + start for t in index_data])
+            ends.extend([t[1] + start for t in index_data])
+            for col, val in zip(self.feature_names, data):
+                features[col].extend(val)
         if not files:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(
@@ -744,11 +751,15 @@ class SegmentWithFeature:
         features = {col: [] for col in self.feature_names}
         for (start, _), series in y.items():
             self._check_return_format(series)
-            df = self._series_to_frame(series)
-            starts.extend(df.index.get_level_values("start") + start)
-            ends.extend(df.index.get_level_values("end") + start)
-            for col in self.feature_names:
-                features[col].extend(df[col])
+            if series.empty:
+                continue
+            data = [self._reshape_numpy_1d(values) for values in series]
+            data = np.stack(data).T
+            index_data = series.index.to_numpy()
+            starts.extend([t[0] + start for t in index_data])
+            ends.extend([t[1] + start for t in index_data])
+            for col, val in zip(self.feature_names, data):
+                features[col].extend(val)
         if not starts:
             # Pass no data to ensure consistent dtype for columns
             return pd.DataFrame(index=utils.signal_index(), columns=self.feature_names)
@@ -771,21 +782,6 @@ class SegmentWithFeature:
                 f"The returned features must be reshapable to ({self.num_features})"
             )
         return features
-
-    def _series_to_frame(
-        self,
-        y: pd.Series,
-    ) -> pd.DataFrame:
-        if y.empty:
-            return pd.DataFrame(
-                index=audformat.segmented_index(),
-                columns=self.feature_names,
-                dtype=object,
-            )
-        index = y.index
-        data = [self._reshape_numpy_1d(values) for values in y]
-        data = np.stack(data)
-        return pd.DataFrame(data, index=index, columns=self.feature_names)
 
     def __call__(
         self,
