@@ -131,6 +131,17 @@ def write_files(paths, signals, sampling_rate):
             None,
             marks=pytest.mark.xfail(raises=ValueError),
         ),
+        # incorrectly returning index instead of series
+        pytest.param(
+            ONES_1D,
+            SAMPLING_RATE,
+            audinterface.SegmentWithFeature(
+                feature_names="feature",
+                process_func=lambda x, sr: audinterface.utils.signal_index(),
+            ),
+            None,
+            marks=pytest.mark.xfail(raises=ValueError),
+        ),
         # incorrectly returning series with filewise index
         pytest.param(
             ONES_1D,
