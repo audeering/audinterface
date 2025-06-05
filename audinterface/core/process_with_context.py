@@ -118,11 +118,11 @@ class ProcessWithContext:
     def __init__(
         self,
         *,
-        process_func: Callable[..., Sequence[object]] = None,
-        process_func_args: dict[str, object] = None,
-        sampling_rate: int = None,
+        process_func: Callable[..., Sequence[object]] | None = None,
+        process_func_args: dict[str, object] | None = None,
+        sampling_rate: int | None = None,
         resample: bool = False,
-        channels: int | Sequence[int] = None,
+        channels: int | Sequence[int] | None = None,
         mixdown: bool = False,
         verbose: bool = False,
     ):
@@ -162,8 +162,8 @@ class ProcessWithContext:
         self,
         index: pd.Index,
         *,
-        root: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
@@ -237,9 +237,9 @@ class ProcessWithContext:
         index: pd.Index,
         *,
         idx: int = 0,
-        root: str = None,
-        file: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        file: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> object:
         starts_i, ends_i = utils.segments_to_indices(
             signal,
@@ -269,7 +269,7 @@ class ProcessWithContext:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -322,9 +322,9 @@ class ProcessWithContext:
         ends: Sequence[int],
         *,
         idx: int = 0,
-        root: str = None,
-        file: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        file: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> object:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(

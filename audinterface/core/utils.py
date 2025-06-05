@@ -64,9 +64,9 @@ def is_scalar(value: object) -> bool:
 def preprocess_signal(
     signal: np.ndarray,
     sampling_rate: int,
-    expected_rate: int,
+    expected_rate: int | None,
     resample: bool,
-    channels: int | Sequence[int],
+    channels: int | Sequence[int] | None,
     mixdown: bool,
 ) -> tuple[np.ndarray, int]:
     r"""Pre-process signal."""
@@ -98,9 +98,9 @@ def preprocess_signal(
 def read_audio(
     file: str,
     *,
-    start: pd.Timedelta = None,
-    end: pd.Timedelta = None,
-    root: str = None,
+    start: pd.Timedelta | None = None,
+    end: pd.Timedelta | None = None,
+    root: str | None = None,
 ) -> tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
@@ -181,8 +181,8 @@ def segments_to_indices(
 
 
 def signal_index(
-    starts: Timestamps = None,
-    ends: Timestamps = None,
+    starts: Timestamps | None = None,
+    ends: Timestamps | None = None,
 ) -> pd.MultiIndex:
     r"""Create signal index.
 
@@ -386,7 +386,7 @@ def to_array(value: object) -> np.ndarray:
 
 def to_timedelta(
     durations: Timestamps,
-    sampling_rate: int = None,
+    sampling_rate: int | None = None,
 ) -> pd.Timedelta | list[pd.Timedelta]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 

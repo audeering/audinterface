@@ -167,16 +167,16 @@ class SegmentWithFeature:
         self,
         feature_names: str | Sequence[str],
         *,
-        name: str = None,
-        params: dict = None,
-        process_func: Callable[..., pd.Series] = None,
-        process_func_args: dict[str, object] = None,
-        sampling_rate: int = None,
+        name: str | None = None,
+        params: dict | None = None,
+        process_func: Callable[..., pd.Series] | None = None,
+        process_func_args: dict[str, object] | None = None,
+        sampling_rate: int | None = None,
         resample: bool = False,
         channels: int | Sequence[int] = 0,
         mixdown: bool = False,
-        min_signal_dur: Timestamp = None,
-        max_signal_dur: Timestamp = None,
+        min_signal_dur: Timestamp | None = None,
+        max_signal_dur: Timestamp | None = None,
         keep_nat: bool = False,
         num_workers: int | None = 1,
         multiprocessing: bool = False,
@@ -225,10 +225,10 @@ class SegmentWithFeature:
         self,
         file: str,
         *,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        root: str = None,
-        process_func_args: dict[str, object] = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment the content of an audio file and extract features.
 
@@ -275,10 +275,10 @@ class SegmentWithFeature:
         self,
         files: Sequence[str],
         *,
-        starts: Timestamps = None,
-        ends: Timestamps = None,
-        root: str = None,
-        process_func_args: dict[str, object] = None,
+        starts: Timestamps | None = None,
+        ends: Timestamps | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for a list of files.
 
@@ -329,7 +329,7 @@ class SegmentWithFeature:
         *,
         filetype: str = "wav",
         include_root: bool = True,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files in a folder.
 
@@ -385,9 +385,9 @@ class SegmentWithFeature:
         self,
         index: pd.Index,
         *,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        cache_root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files or segments from an index.
 
@@ -439,10 +439,10 @@ class SegmentWithFeature:
         signal: np.ndarray,
         sampling_rate: int,
         *,
-        file: str = None,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        process_func_args: dict[str, object] = None,
+        file: str | None = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for audio signal.
 
@@ -497,7 +497,7 @@ class SegmentWithFeature:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for parts of a signal.
 
@@ -591,9 +591,9 @@ class SegmentWithFeature:
         self,
         table: pd.Series | pd.DataFrame,
         *,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        cache_root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files or segments from a table.
 

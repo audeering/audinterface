@@ -158,18 +158,18 @@ class Process:
     def __init__(
         self,
         *,
-        process_func: Callable[..., object] = None,
-        process_func_args: dict[str, object] = None,
+        process_func: Callable[..., object] | None = None,
+        process_func_args: dict[str, object] | None = None,
         process_func_is_mono: bool = False,
-        sampling_rate: int = None,
+        sampling_rate: int | None = None,
         resample: bool = False,
-        channels: int | Sequence[int] = None,
+        channels: int | Sequence[int] | None = None,
         mixdown: bool = False,
-        win_dur: Timestamp = None,
-        hop_dur: Timestamp = None,
-        min_signal_dur: Timestamp = None,
-        max_signal_dur: Timestamp = None,
-        segment: Segment = None,
+        win_dur: Timestamp | None = None,
+        hop_dur: Timestamp | None = None,
+        min_signal_dur: Timestamp | None = None,
+        max_signal_dur: Timestamp | None = None,
+        segment: Segment | None = None,
         keep_nat: bool = False,
         num_workers: int | None = 1,
         multiprocessing: bool = False,
@@ -244,10 +244,10 @@ class Process:
         file: str,
         *,
         idx: int = 0,
-        root: str = None,
-        start: pd.Timedelta = None,
-        end: pd.Timedelta = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        start: pd.Timedelta | None = None,
+        end: pd.Timedelta | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> tuple[
         list[object],
         list[str],
@@ -303,10 +303,10 @@ class Process:
         self,
         file: str,
         *,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        root: str = None,
-        process_func_args: dict[str, object] = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process the content of an audio file.
 
@@ -363,10 +363,10 @@ class Process:
         self,
         files: Sequence[str],
         *,
-        starts: Timestamps = None,
-        ends: Timestamps = None,
-        root: str = None,
-        process_func_args: dict[str, object] = None,
+        starts: Timestamps | None = None,
+        ends: Timestamps | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process a list of files.
 
@@ -463,7 +463,7 @@ class Process:
         *,
         filetype: str = "wav",
         include_root: bool = True,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process files in a folder.
 
@@ -516,7 +516,7 @@ class Process:
         self,
         index: pd.Index,
         root: str | None,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Like process_index, but does not apply segmentation."""
         if index.empty:
@@ -561,9 +561,9 @@ class Process:
         index: pd.Index,
         *,
         preserve_index: bool = False,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        cache_root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process from an index conform to audformat_.
 
@@ -641,11 +641,11 @@ class Process:
         sampling_rate: int,
         *,
         idx: int = 0,
-        root: str = None,
-        file: str = None,
-        start: pd.Timedelta = None,
-        end: pd.Timedelta = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        file: str | None = None,
+        start: pd.Timedelta | None = None,
+        end: pd.Timedelta | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> tuple[
         list[object],
         list[str],
@@ -721,10 +721,10 @@ class Process:
         signal: np.ndarray,
         sampling_rate: int,
         *,
-        file: str = None,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        process_func_args: dict[str, object] = None,
+        file: str | None = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Process audio signal and return result.
 
@@ -802,7 +802,7 @@ class Process:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Like process_signal_from_index, but does not apply segmentation."""
         if index.empty:
@@ -868,7 +868,7 @@ class Process:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: dict[str, object] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -922,9 +922,9 @@ class Process:
         sampling_rate: int,
         *,
         idx: int = 0,
-        root: str = None,
-        file: str = None,
-        process_func_args: dict[str, object] = None,
+        root: str | None = None,
+        file: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> object:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(
