@@ -1,0 +1,60 @@
+﻿SegmentWithFeature
+==================
+
+.. currentmodule:: audinterface
+
+.. autoclass:: SegmentWithFeature
+
+
+\_\_call\_\_\(\)
+----------------
+.. automethod:: SegmentWithFeature.__call__
+    
+feature\_names
+--------------
+.. autoattribute:: SegmentWithFeature.feature_names
+    
+name
+----
+.. autoattribute:: SegmentWithFeature.name
+    
+num\_features
+-------------
+.. autoattribute:: SegmentWithFeature.num_features
+    
+params
+------
+.. autoattribute:: SegmentWithFeature.params
+    
+process
+-------
+.. autoattribute:: SegmentWithFeature.process
+    
+process\_file\(\)
+-----------------
+.. automethod:: SegmentWithFeature.process_file
+    
+process\_files\(\)
+------------------
+.. automethod:: SegmentWithFeature.process_files
+    
+process\_folder\(\)
+-------------------
+.. automethod:: SegmentWithFeature.process_folder
+    
+process\_index\(\)
+------------------
+.. automethod:: SegmentWithFeature.process_index
+    
+process\_signal\(\)
+-------------------
+.. automethod:: SegmentWithFeature.process_signal
+    
+process\_signal\_from\_index\(\)
+--------------------------------
+.. automethod:: SegmentWithFeature.process_signal_from_index
+    
+process\_table\(\)
+------------------
+.. automethod:: SegmentWithFeature.process_table
+    

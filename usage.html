@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v1.2.3
+                v1.3.1
               </div>
             
           
@@ -99,6 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#feature-interface-for-external-function">Feature interface for external function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#serializable-feature-interface">Serializable feature interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-interface">Segmentation interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#segmentation-with-feature-interface">Segmentation with feature interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#special-processing-function-arguments">Special processing function arguments</a></li>
 </ul>
 </li>
@@ -170,8 +171,8 @@ In the following we load three files from the <a class="reference external" href
 and define a list of files,
 a folder,
 and an index.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audb</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">audb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="n">media</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;wav/03a01Fa.wav&quot;</span><span class="p">,</span>
@@ -196,10 +197,10 @@ and an index.</p>
 value in dB.
 We first define the function
 and create an interface for it using <a class="reference internal" href="api/audinterface.Process.html#audinterface.Process" title="audinterface.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Process</span></code></a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audinterface</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">audinterface</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rms</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">signal</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">rms</span><span class="p">)</span>
@@ -211,7 +212,7 @@ and create an interface for it using <a class="reference internal" href="api/aud
 or <code class="docutils literal notranslate"><span class="pre">process_index()</span></code> methods
 to apply the algorithm
 and return the result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
 <span class="go">file             start   end</span>
 <span class="go">wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901</span>
@@ -242,9 +243,9 @@ and set a window and hop duration.</p>
 <h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span>
@@ -299,7 +300,7 @@ the first channel of an audio signal.
 We can prove this
 by running the previous interface
 on the following multi-channel signal.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audiofile</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">audiofile</span>
 
 <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">audiofile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
@@ -372,7 +373,7 @@ channel by its index.</p>
 <h2>Feature interface for external function<a class="headerlink" href="#feature-interface-for-external-function" title="Permalink to this heading">¶</a></h2>
 <p>If we interface a function from an external library
 that already applies a sliding window,
-we again specfiy the
+we again specify the
 <code class="docutils literal notranslate"><span class="pre">win_dur</span></code> and <code class="docutils literal notranslate"><span class="pre">hop_dur</span></code>
 arguments.
 However,
@@ -385,9 +386,9 @@ for extracting the features in a framewise manner
 and returning the values in the correct shape,
 namely <code class="docutils literal notranslate"><span class="pre">(num_channels,</span> <span class="pre">num_features,</span> <span class="pre">num_frames)</span></code>,
 whereas the first dimension is optionally.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">librosa</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
 
-<span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">win_dur</span><span class="p">,</span> <span class="n">hop_dur</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">win_dur</span><span class="p">,</span> <span class="n">hop_dur</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="p">):</span>
     <span class="n">hop_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hop_dur</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
     <span class="n">win_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">win_dur</span> <span class="o">*</span> <span class="n">sampling_rate</span><span class="p">)</span>
     <span class="n">mfcc</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">mfcc</span><span class="p">(</span>
@@ -435,22 +436,22 @@ whereas the first dimension is optionally.</p>
 of a machine learning model
 it is recommend to provide it in a serializable way
 so it can be <a class="reference external" href="https://audeering.github.io/audonnx/usage.html#export-model">stored as part of the model</a>.
-One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api/opensmile.Smile.html#opensmile.Smile" title="(in opensmile vv2.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
+One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api/opensmile.Smile.html#opensmile.Smile" title="(in opensmile vv2.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
 <p>To create such a feature extractor,
 we create a class that inherits
 from <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
 and <a class="reference external" href="https://audeering.github.io/audobject/api/audobject.Object.html#audobject.Object" title="(in audobject)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">audobject</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">audobject</span>
 
-<span class="k">class</span> <span class="nc">MeanStd</span><span class="p">(</span><span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">,</span> <span class="n">audobject</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeanStd</span><span class="p">(</span><span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">,</span> <span class="n">audobject</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">],</span>
             <span class="n">process_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
 
 <span class="n">fex</span> <span class="o">=</span> <span class="n">MeanStd</span><span class="p">()</span>
@@ -485,10 +486,10 @@ it is recommended to use <a class="reference internal" href="api/audinterface.Se
 which returns a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
 An example for such a processing function
 would be a voice activity detection algorithm.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">auditok</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">auditok</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="k">def</span> <span class="nf">segments</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">segments</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
 
     <span class="c1"># Convert floating point array to 16bit PCM little-endian</span>
     <span class="n">ints</span> <span class="o">=</span> <span class="p">(</span><span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="mi">32767</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
@@ -526,7 +527,7 @@ would be a voice activity detection algorithm.</p>
 </div>
 <p>Sometimes,
 it is required that a table
-(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
+(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
 is segmented
 and the <code class="docutils literal notranslate"><span class="pre">labels</span></code> from the original segments
 should be kept.
@@ -554,6 +555,81 @@ or teacher-student training.</p>
 <span class="go">wav/03a01Nc.wav 0 days 00:00:00.100000 0 days 00:00:01.350000      2</span>
 <span class="go">wav/16b10Wb.wav 0 days 00:00:00.300000 0 days 00:00:01             4</span>
 <span class="go">                0 days 00:00:01.050000 0 days 00:00:02.500000      4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="segmentation-with-feature-interface">
+<h2>Segmentation with feature interface<a class="headerlink" href="#segmentation-with-feature-interface" title="Permalink to this heading">¶</a></h2>
+<p>In some cases,
+a processing function performs
+both segmentation and feature extraction.
+For this,
+<a class="reference internal" href="api/audinterface.SegmentWithFeature.html#audinterface.SegmentWithFeature" title="audinterface.SegmentWithFeature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.SegmentWithFeature</span></code></a> can be used.
+This interface returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>
+with a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
+An example of such a processing function
+would be a speech recognition model
+that also generates timestamps for its results.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">faster_whisper</span><span class="w"> </span><span class="kn">import</span> <span class="n">WhisperModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">model_size</span> <span class="o">=</span> <span class="s2">&quot;tiny&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">word_transcripts</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
+    <span class="n">segments</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span>
+        <span class="n">signal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;transcribe&quot;</span><span class="p">,</span> <span class="n">word_timestamps</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">segment</span><span class="o">.</span><span class="n">words</span><span class="p">:</span>
+            <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="o">.</span><span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">words</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+<span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">SegmentWithFeature</span><span class="p">(</span>
+    <span class="n">feature_names</span><span class="o">=</span><span class="s2">&quot;word&quot;</span><span class="p">,</span> <span class="n">process_func</span><span class="o">=</span><span class="n">word_transcripts</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_file</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                                      word</span>
+<span class="go">file            start                  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.360000          Der</span>
+<span class="go">                0 days 00:00:00.360000 0 days 00:00:00.720000       Lappen</span>
+<span class="go">                0 days 00:00:00.720000 0 days 00:00:00.880000        liegt</span>
+<span class="go">                0 days 00:00:00.880000 0 days 00:00:01.080000          auf</span>
+<span class="go">                0 days 00:00:01.080000 0 days 00:00:01.220000          dem</span>
+<span class="go">                0 days 00:00:01.220000 0 days 00:00:01.820000  Eisschrank.</span>
+</pre></div>
+</div>
+<p>Similarly to <a class="reference internal" href="api/audinterface.Segment.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a>,
+<a class="reference internal" href="api/audinterface.SegmentWithFeature.html#audinterface.SegmentWithFeature" title="audinterface.SegmentWithFeature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.SegmentWithFeature</span></code></a>
+also has a method
+<a class="reference internal" href="api/audinterface.SegmentWithFeature.html#audinterface.SegmentWithFeature.process_table" title="audinterface.SegmentWithFeature.process_table"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_table()</span></code></a>,
+which can be applied to an already labelled dataset.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_table</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<span class="go">                                                                      word  label</span>
+<span class="go">file            start                  end</span>
+<span class="go">wav/03a01Fa.wav 0 days 00:00:00        0 days 00:00:00.360000          Der      0</span>
+<span class="go">                0 days 00:00:00.360000 0 days 00:00:00.720000       Lappen      0</span>
+<span class="go">                0 days 00:00:00.720000 0 days 00:00:00.880000        liegt      0</span>
+<span class="go">                0 days 00:00:00.880000 0 days 00:00:01.080000          auf      0</span>
+<span class="go">                0 days 00:00:01.080000 0 days 00:00:01.220000          dem      0</span>
+<span class="go">                0 days 00:00:01.220000 0 days 00:00:01.820000  Eisschrank.      0</span>
+<span class="go">wav/03a01Nc.wav 0 days 00:00:00        0 days 00:00:00.240000          Der      2</span>
+<span class="go">                0 days 00:00:00.240000 0 days 00:00:00.520000       Lappen      2</span>
+<span class="go">                0 days 00:00:00.520000 0 days 00:00:00.660000        liegt      2</span>
+<span class="go">                0 days 00:00:00.660000 0 days 00:00:00.820000          auf      2</span>
+<span class="go">                0 days 00:00:00.820000 0 days 00:00:00.960000          dem      2</span>
+<span class="go">                0 days 00:00:00.960000 0 days 00:00:01.480000    Eiscrank.      2</span>
 </pre></div>
 </div>
 </div>
@@ -589,7 +665,7 @@ if they are not specified in
 <p>The following processing function
 returns the values of
 <code class="docutils literal notranslate"><span class="pre">&quot;idx&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">special_args</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">special_args</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">idx</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
 <span class="n">interface</span> <span class="o">=</span> <span class="n">audinterface</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process_func</span><span class="o">=</span><span class="n">special_args</span><span class="p">)</span>
@@ -614,7 +690,7 @@ to select the appropriate f0 range.</p>
     <span class="s2">&quot;male&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">180</span><span class="p">],</span>
 <span class="p">}</span>
 
-<span class="k">def</span> <span class="nf">f0</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">gender</span><span class="p">,</span> <span class="n">f0_range</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">f0</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">gender</span><span class="p">,</span> <span class="n">f0_range</span><span class="p">):</span>
     <span class="c1"># extract mean f0 using a gender adapted range</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">yin</span><span class="p">(</span>
         <span class="n">signal</span><span class="p">,</span>
@@ -637,9 +713,9 @@ to select the appropriate f0 range.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">gender</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
 <span class="go">                                                       f0  gender</span>
 <span class="go">file            start  end</span>
-<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250      128.81    male</span>
-<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      111.63    male</span>
-<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   229.09  female</span>
+<span class="go">wav/03a01Fa.wav 0 days 0 days 00:00:01.898250       134.0    male</span>
+<span class="go">wav/03a01Nc.wav 0 days 0 days 00:00:01.611250      113.16    male</span>
+<span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   234.86  female</span>
 </pre></div>
 </div>
 </div>
@@ -668,7 +744,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2024/12/16 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2025/06/05 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -676,7 +752,7 @@ to select the appropriate f0 range.</p>
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2024 audEERING GmbH
+      &copy; 2020-2025 audEERING GmbH
     </p>
   </div> 
 
