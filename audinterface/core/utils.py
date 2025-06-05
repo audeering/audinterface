@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import collections
+from collections.abc import Sequence
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -52,7 +54,7 @@ def assert_index(obj: pd.Index):
         audformat.assert_index(obj)
 
 
-def is_scalar(value: typing.Any) -> bool:
+def is_scalar(value: object) -> bool:
     r"""Check if value is scalar."""
     return (value is not None) and (
         isinstance(value, str) or not hasattr(value, "__len__")
@@ -62,11 +64,11 @@ def is_scalar(value: typing.Any) -> bool:
 def preprocess_signal(
     signal: np.ndarray,
     sampling_rate: int,
-    expected_rate: int,
+    expected_rate: int | None,
     resample: bool,
-    channels: typing.Union[int, typing.Sequence[int]],
+    channels: int | Sequence[int] | None,
     mixdown: bool,
-) -> (np.ndarray, int):
+) -> tuple[np.ndarray, int]:
     r"""Pre-process signal."""
     signal = np.atleast_2d(signal)
 
@@ -96,10 +98,10 @@ def preprocess_signal(
 def read_audio(
     file: str,
     *,
-    start: pd.Timedelta = None,
-    end: pd.Timedelta = None,
-    root: str = None,
-) -> typing.Tuple[np.ndarray, int]:
+    start: pd.Timedelta | None = None,
+    end: pd.Timedelta | None = None,
+    root: str | None = None,
+) -> tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
     Args:
@@ -153,7 +155,7 @@ def segment_to_indices(
     sampling_rate: int,
     start: pd.Timedelta,
     end: pd.Timedelta,
-) -> typing.Tuple[int, int]:
+) -> tuple[int, int]:
     if pd.isna(end):
         end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
     max_i = signal.shape[-1]
@@ -168,7 +170,7 @@ def segments_to_indices(
     signal: np.ndarray,
     sampling_rate: int,
     index: pd.MultiIndex,
-) -> typing.Tuple[typing.Sequence[int], typing.Sequence[int]]:
+) -> tuple[Sequence[int], Sequence[int]]:
     starts_i = [0] * len(index)
     ends_i = [0] * len(index)
     for idx, (start, end) in enumerate(index):
@@ -179,8 +181,8 @@ def segments_to_indices(
 
 
 def signal_index(
-    starts: Timestamps = None,
-    ends: Timestamps = None,
+    starts: Timestamps | None = None,
+    ends: Timestamps | None = None,
 ) -> pd.MultiIndex:
     r"""Create signal index.
 
@@ -372,7 +374,7 @@ def sliding_window(
     return frames
 
 
-def to_array(value: typing.Any) -> np.ndarray:
+def to_array(value: object) -> np.ndarray:
     r"""Convert value to numpy array."""
     if value is not None:
         if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
@@ -384,8 +386,8 @@ def to_array(value: typing.Any) -> np.ndarray:
 
 def to_timedelta(
     durations: Timestamps,
-    sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
+    sampling_rate: int | None = None,
+) -> pd.Timedelta | list[pd.Timedelta]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
     The single duration values

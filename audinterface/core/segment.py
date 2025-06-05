@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+from collections.abc import Callable
+from collections.abc import Sequence
 import errno
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -231,17 +234,17 @@ class Segment:
     def __init__(
         self,
         *,
-        process_func: typing.Callable[..., pd.MultiIndex] = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func: Callable[..., pd.MultiIndex] | None = None,
+        process_func_args: dict[str, object] | None = None,
         invert: bool = False,
-        sampling_rate: int = None,
+        sampling_rate: int | None = None,
         resample: bool = False,
-        channels: typing.Union[int, typing.Sequence[int]] = None,
+        channels: int | Sequence[int] | None = None,
         mixdown: bool = False,
-        min_signal_dur: Timestamp = None,
-        max_signal_dur: Timestamp = None,
+        min_signal_dur: Timestamp | None = None,
+        max_signal_dur: Timestamp | None = None,
         keep_nat: bool = False,
-        num_workers: typing.Optional[int] = 1,
+        num_workers: int | None = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
     ):
@@ -281,10 +284,10 @@ class Segment:
         self,
         file: str,
         *,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment the content of an audio file.
 
@@ -330,12 +333,12 @@ class Segment:
 
     def process_files(
         self,
-        files: typing.Sequence[str],
+        files: Sequence[str],
         *,
-        starts: Timestamps = None,
-        ends: Timestamps = None,
-        root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        starts: Timestamps | None = None,
+        ends: Timestamps | None = None,
+        root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment a list of files.
 
@@ -394,7 +397,7 @@ class Segment:
         *,
         filetype: str = "wav",
         include_root: bool = True,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment files in a folder.
 
@@ -447,9 +450,9 @@ class Segment:
         self,
         index: pd.Index,
         *,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        root: str | None = None,
+        cache_root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment files or segments from an index.
 
@@ -507,12 +510,12 @@ class Segment:
 
     def process_table(
         self,
-        table: typing.Union[pd.Series, pd.DataFrame],
+        table: pd.Series | pd.DataFrame,
         *,
-        root: str = None,
-        cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Union[pd.Series, pd.DataFrame]:
+        root: str | None = None,
+        cache_root: str | None = None,
+        process_func_args: dict[str, object] | None = None,
+    ) -> pd.Series | pd.DataFrame:
         r"""Segment files or segments from a table.
 
         The labels of the table
@@ -613,10 +616,10 @@ class Segment:
         signal: np.ndarray,
         sampling_rate: int,
         *,
-        file: str = None,
-        start: Timestamp = None,
-        end: Timestamp = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        file: str | None = None,
+        start: Timestamp | None = None,
+        end: Timestamp | None = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment audio signal.
 
@@ -687,7 +690,7 @@ class Segment:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] | None = None,
     ) -> pd.Index:
         r"""Segment parts of a signal.
 
