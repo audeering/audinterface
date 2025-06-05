@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+from collections.abc import Callable
+from collections.abc import Sequence
 import errno
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -162,20 +165,20 @@ class SegmentWithFeature:
 
     def __init__(
         self,
-        feature_names: typing.Union[str, typing.Sequence[str]],
+        feature_names: str | Sequence[str],
         *,
         name: str = None,
-        params: typing.Dict = None,
-        process_func: typing.Callable[..., pd.Series] = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        params: dict = None,
+        process_func: Callable[..., pd.Series] = None,
+        process_func_args: dict[str, object] = None,
         sampling_rate: int = None,
         resample: bool = False,
-        channels: typing.Union[int, typing.Sequence[int]] = 0,
+        channels: int | Sequence[int] = 0,
         mixdown: bool = False,
         min_signal_dur: Timestamp = None,
         max_signal_dur: Timestamp = None,
         keep_nat: bool = False,
-        num_workers: typing.Optional[int] = 1,
+        num_workers: int | None = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
     ):
@@ -225,7 +228,7 @@ class SegmentWithFeature:
         start: Timestamp = None,
         end: Timestamp = None,
         root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment the content of an audio file and extract features.
 
@@ -270,12 +273,12 @@ class SegmentWithFeature:
 
     def process_files(
         self,
-        files: typing.Sequence[str],
+        files: Sequence[str],
         *,
         starts: Timestamps = None,
         ends: Timestamps = None,
         root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for a list of files.
 
@@ -326,7 +329,7 @@ class SegmentWithFeature:
         *,
         filetype: str = "wav",
         include_root: bool = True,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files in a folder.
 
@@ -384,7 +387,7 @@ class SegmentWithFeature:
         *,
         root: str = None,
         cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files or segments from an index.
 
@@ -439,7 +442,7 @@ class SegmentWithFeature:
         file: str = None,
         start: Timestamp = None,
         end: Timestamp = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for audio signal.
 
@@ -494,7 +497,7 @@ class SegmentWithFeature:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for parts of a signal.
 
@@ -586,11 +589,11 @@ class SegmentWithFeature:
 
     def process_table(
         self,
-        table: typing.Union[pd.Series, pd.DataFrame],
+        table: pd.Series | pd.DataFrame,
         *,
         root: str = None,
         cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Segment and extract features for files or segments from a table.
 

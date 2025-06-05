@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import collections
+from collections.abc import Callable
+from collections.abc import Sequence
 import inspect
 import itertools
-import typing
 
 import numpy as np
 import pandas as pd
@@ -12,7 +15,7 @@ import audformat
 from audinterface.core import utils
 
 
-def identity(signal, sampling_rate, starts, ends) -> typing.List[np.ndarray]:
+def identity(signal, sampling_rate, starts, ends) -> list[np.ndarray]:
     r"""Default processing function.
 
     This function is used,
@@ -115,11 +118,11 @@ class ProcessWithContext:
     def __init__(
         self,
         *,
-        process_func: typing.Callable[..., typing.Sequence[typing.Any]] = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func: Callable[..., Sequence[object]] = None,
+        process_func_args: dict[str, object] = None,
         sampling_rate: int = None,
         resample: bool = False,
-        channels: typing.Union[int, typing.Sequence[int]] = None,
+        channels: int | Sequence[int] = None,
         mixdown: bool = False,
         verbose: bool = False,
     ):
@@ -160,7 +163,7 @@ class ProcessWithContext:
         index: pd.Index,
         *,
         root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.Series:
         r"""Process from a segmented index conform to audformat_.
 
@@ -236,8 +239,8 @@ class ProcessWithContext:
         idx: int = 0,
         root: str = None,
         file: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Any:
+        process_func_args: dict[str, object] = None,
+    ) -> object:
         starts_i, ends_i = utils.segments_to_indices(
             signal,
             sampling_rate,
@@ -266,7 +269,7 @@ class ProcessWithContext:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.Index,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.Series:
         r"""Split a signal into segments and process each segment.
 
@@ -315,14 +318,14 @@ class ProcessWithContext:
         self,
         signal: np.ndarray,
         sampling_rate: int,
-        starts: typing.Sequence[int],
-        ends: typing.Sequence[int],
+        starts: Sequence[int],
+        ends: Sequence[int],
         *,
         idx: int = 0,
         root: str = None,
         file: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
-    ) -> typing.Any:
+        process_func_args: dict[str, object] = None,
+    ) -> object:
         r"""Call processing function, possibly pass special args."""
         signal, sampling_rate = utils.preprocess_signal(
             signal,
@@ -356,9 +359,9 @@ class ProcessWithContext:
         self,
         signal: np.ndarray,
         sampling_rate: int,
-        starts: typing.Sequence[int],
-        ends: typing.Sequence[int],
-    ) -> typing.Any:
+        starts: Sequence[int],
+        ends: Sequence[int],
+    ) -> object:
         r"""Apply processing to signal.
 
         This function processes the signal **without** transforming the output

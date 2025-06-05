@@ -1,16 +1,10 @@
-import typing
+from __future__ import annotations
+
+from collections.abc import Sequence
 
 import pandas as pd
 
 
-Timestamp = typing.Union[
-    float,
-    int,
-    str,
-    pd.Timedelta,
-]
+Timestamp = float | int | str | pd.Timedelta
 
-Timestamps = typing.Union[
-    Timestamp,
-    typing.Sequence[Timestamp],
-]
+Timestamps = Timestamp | Sequence[Timestamp]

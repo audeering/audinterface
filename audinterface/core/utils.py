@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import collections
+from collections.abc import Sequence
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -52,7 +54,7 @@ def assert_index(obj: pd.Index):
         audformat.assert_index(obj)
 
 
-def is_scalar(value: typing.Any) -> bool:
+def is_scalar(value: object) -> bool:
     r"""Check if value is scalar."""
     return (value is not None) and (
         isinstance(value, str) or not hasattr(value, "__len__")
@@ -64,9 +66,9 @@ def preprocess_signal(
     sampling_rate: int,
     expected_rate: int,
     resample: bool,
-    channels: typing.Union[int, typing.Sequence[int]],
+    channels: int | Sequence[int],
     mixdown: bool,
-) -> (np.ndarray, int):
+) -> tuple[np.ndarray, int]:
     r"""Pre-process signal."""
     signal = np.atleast_2d(signal)
 
@@ -99,7 +101,7 @@ def read_audio(
     start: pd.Timedelta = None,
     end: pd.Timedelta = None,
     root: str = None,
-) -> typing.Tuple[np.ndarray, int]:
+) -> tuple[np.ndarray, int]:
     """Reads (segment of an) audio file.
 
     Args:
@@ -153,7 +155,7 @@ def segment_to_indices(
     sampling_rate: int,
     start: pd.Timedelta,
     end: pd.Timedelta,
-) -> typing.Tuple[int, int]:
+) -> tuple[int, int]:
     if pd.isna(end):
         end = pd.to_timedelta(signal.shape[-1] / sampling_rate, unit="s")
     max_i = signal.shape[-1]
@@ -168,7 +170,7 @@ def segments_to_indices(
     signal: np.ndarray,
     sampling_rate: int,
     index: pd.MultiIndex,
-) -> typing.Tuple[typing.Sequence[int], typing.Sequence[int]]:
+) -> tuple[Sequence[int], Sequence[int]]:
     starts_i = [0] * len(index)
     ends_i = [0] * len(index)
     for idx, (start, end) in enumerate(index):
@@ -372,7 +374,7 @@ def sliding_window(
     return frames
 
 
-def to_array(value: typing.Any) -> np.ndarray:
+def to_array(value: object) -> np.ndarray:
     r"""Convert value to numpy array."""
     if value is not None:
         if isinstance(value, (pd.Series, pd.DataFrame, pd.Index)):
@@ -385,7 +387,7 @@ def to_array(value: typing.Any) -> np.ndarray:
 def to_timedelta(
     durations: Timestamps,
     sampling_rate: int = None,
-) -> typing.Union[pd.Timedelta, typing.List[pd.Timedelta]]:
+) -> pd.Timedelta | list[pd.Timedelta]:
     r"""Convert duration value(s) to :class:`pandas.Timedelta`.
 
     The single duration values

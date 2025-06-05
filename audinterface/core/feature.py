@@ -1,7 +1,10 @@
+from __future__ import annotations
+
+from collections.abc import Callable
+from collections.abc import Sequence
 import errno
 import inspect
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -246,17 +249,17 @@ class Feature:
 
     def __init__(
         self,
-        feature_names: typing.Union[str, typing.Sequence[str]],
+        feature_names: str | Sequence[str],
         *,
         name: str = None,
-        params: typing.Dict = None,
-        process_func: typing.Callable[..., typing.Any] = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        params: dict = None,
+        process_func: Callable[..., object] = None,
+        process_func_args: dict[str, object] = None,
         process_func_is_mono: bool = False,
         process_func_applies_sliding_window: bool = False,
         sampling_rate: int = None,
         resample: bool = False,
-        channels: typing.Union[int, typing.Sequence[int]] = 0,
+        channels: int | Sequence[int] = 0,
         mixdown: bool = False,
         win_dur: Timestamp = None,
         hop_dur: Timestamp = None,
@@ -264,7 +267,7 @@ class Feature:
         max_signal_dur: Timestamp = None,
         segment: Segment = None,
         keep_nat: bool = False,
-        num_workers: typing.Optional[int] = 1,
+        num_workers: int | None = 1,
         multiprocessing: bool = False,
         verbose: bool = False,
     ):
@@ -362,7 +365,7 @@ class Feature:
         start: Timestamp = None,
         end: Timestamp = None,
         root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an audio file.
 
@@ -399,12 +402,12 @@ class Feature:
 
     def process_files(
         self,
-        files: typing.Sequence[str],
+        files: Sequence[str],
         *,
         starts: Timestamps = None,
         ends: Timestamps = None,
         root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Extract features for a list of files.
 
@@ -449,7 +452,7 @@ class Feature:
         *,
         filetype: str = "wav",
         include_root: bool = True,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Extract features from files in a folder.
 
@@ -502,7 +505,7 @@ class Feature:
         preserve_index: bool = False,
         root: str = None,
         cache_root: str = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Extract features from an index conform to audformat_.
 
@@ -575,7 +578,7 @@ class Feature:
         file: str = None,
         start: Timestamp = None,
         end: Timestamp = None,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Extract features for an audio signal.
 
@@ -627,7 +630,7 @@ class Feature:
         signal: np.ndarray,
         sampling_rate: int,
         index: pd.MultiIndex,
-        process_func_args: typing.Dict[str, typing.Any] = None,
+        process_func_args: dict[str, object] = None,
     ) -> pd.DataFrame:
         r"""Split a signal into segments and extract features for each segment.
 
@@ -676,7 +679,7 @@ class Feature:
         """
         return frame.values.T.reshape(self.num_channels, self.num_features, -1)
 
-    def _reshape_3d(self, features: typing.Union[np.ndarray, pd.Series]):
+    def _reshape_3d(self, features: np.ndarray | pd.Series):
         r"""Reshape to [n_channels, n_features, n_frames]."""
         features = np.array(features)
         features = np.atleast_1d(features)
