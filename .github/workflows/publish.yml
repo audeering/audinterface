@@ -40,7 +40,7 @@ jobs:
     - name: Install doc dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install --no-install-recommends --yes libsndfile1 sox
+        sudo apt-get install --no-install-recommends --yes libsndfile1 sox portaudio19-dev
 
     - name: Build documentation
       run: uv run python -m sphinx docs/ docs/_build/ -b html

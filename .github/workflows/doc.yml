@@ -37,7 +37,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes libsndfile1 portaudio19-dev
 
-
     - name: Test building documentation
       run: uv run python -m sphinx docs/ docs/_build/ -b html -W
 
