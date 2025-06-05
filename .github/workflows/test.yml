@@ -44,7 +44,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
 
     - name: Select onnxruntime version for Python 3.9
-      run: uv sync --package 'onnxruntime==1.19.2'
+      run: uv pip install 'onnxruntime==1.19.2'
       if: matrix.python-version == '3.9'
 
     - name: Sync Python environment
