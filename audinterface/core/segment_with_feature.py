@@ -670,7 +670,7 @@ class SegmentWithFeature:
             self._check_return_format(series)
             if series.empty:
                 continue
-            data = [self._reshape_numpy_1d(values) for values in series]
+            data = self._reshape_numpy(series)
             data = np.stack(data).T
             index_data = series.index.to_numpy()
             files.extend([file] * len(series))
@@ -725,7 +725,7 @@ class SegmentWithFeature:
             self._check_return_format(series)
             if series.empty:
                 continue
-            data = [self._reshape_numpy_1d(values) for values in series]
+            data = self._reshape_numpy(series)
             data = np.stack(data).T
             index_data = series.index.to_numpy()
             files.extend([file] * len(series))
@@ -753,7 +753,7 @@ class SegmentWithFeature:
             self._check_return_format(series)
             if series.empty:
                 continue
-            data = [self._reshape_numpy_1d(values) for values in series]
+            data = self._reshape_numpy(series)
             data = np.stack(data).T
             index_data = series.index.to_numpy()
             starts.extend([t[0] + start for t in index_data])
@@ -769,6 +769,23 @@ class SegmentWithFeature:
             data=features,
             columns=self.feature_names,
         )
+
+    def _reshape_numpy(
+        self,
+        features: pd.Series,
+    ):
+        r"""Reshape values in series to numpy array of shape [n_features]."""
+        # Cover case that process function returned a series
+        # with numpy arrays as elements
+        if pd.api.types.is_object_dtype(features):
+            data = [self._reshape_numpy_1d(values) for values in features]
+        else:
+            # Case that the process function returned a series
+            # with elements that are scalar values.
+            # Use to_numpy() directly to preserve dtype of series
+            data = features.to_numpy()
+            data = np.reshape(data, (len(features), self.num_features))
+        return data
 
     def _reshape_numpy_1d(
         self,
