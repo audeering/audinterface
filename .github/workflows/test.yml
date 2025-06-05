@@ -43,13 +43,11 @@ jobs:
         sudo apt-get install --no-install-recommends --yes libsndfile1 sox portaudio19-dev
       if: matrix.os == 'ubuntu-latest'
 
-    - name: Test with pytest for Python 3.9
-      run: uv run --with 'onnxruntime==1.19.2' pytest
-      if: matrix.python-version == '3.9'
+    - name: Sync Python environment
+      run: uv sync
 
     - name: Test with pytest
       run: uv run pytest
-      if: matrix.python-version != '3.9'
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
