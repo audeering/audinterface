@@ -32,10 +32,10 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v5
 
-    - name: Ubuntu - install libsndfile1
+    - name: Ubuntu - install libsndfile1 and portaudio
       run: |
         sudo apt-get update
-        sudo apt-get install --no-install-recommends --yes libsndfile1
+        sudo apt-get install --no-install-recommends --yes libsndfile1 portaudio19-dev
 
 
     - name: Test building documentation
