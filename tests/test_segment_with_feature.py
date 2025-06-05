@@ -45,7 +45,6 @@ def segment_non_zeros_with_mean_mono(signal, sampling_rate):
     split_indices = np.where(np.diff(non_zero_index) != 1)[0]
     frames = np.split(signal_1d[non_zero_index], split_indices + 1)
     frame_lengths = [len(frame) for frame in frames]
-
     end_indices = non_zero_index[split_indices] + 1
     # We need to include the last value of the non-zero index
     # to the end indices, since no split was done there
