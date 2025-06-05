@@ -48,6 +48,30 @@ repository = 'https://github.com/audeering/audinterface/'
 documentation = 'https://audeering.github.io/audinterface/'
 
 
+# ===== Dependency groups =================================================
+[dependency-groups]
+dev = [
+    'audb >=1.11.0',
+    'audeer >=1.21.0',
+    'auditok >=0.3.0',
+    'audobject >=0.7.5',
+    'faster-whisper',  # for usage example with ASR
+    'librosa >=0.11.0',
+    'onnxruntime ==1.19.2 ; python_version == "3.9"',
+    'onnxruntime ; python_version >= "3.10"',
+    'pytest',
+    'pytest-cov',
+    'soxr >=0.4.0b1',  # for numpy 2
+    'sphinx',
+    'sphinx-apipages >=0.1.2',
+    'sphinx-audeering-theme >=1.2.1',
+    'sphinx-autodoc-typehints',
+    'sphinx-copybutton',
+    'sybil',
+    'toml',
+]
+
+
 # ===== BUILD-SYSTEM ======================================================
 #
 # Requirements for building the Python package
