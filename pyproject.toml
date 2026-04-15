@@ -56,7 +56,7 @@ dev = [
     'audobject >=0.7.5',
     'faster-whisper',  # for usage example with ASR
     'librosa >=0.11.0',
-    'onnxruntime ==1.19.2 ; python_version == "3.9"',  # for usage example with ASR
+    'onnxruntime <1.24 ; python_version == "3.10"',  # for usage example with ASR
     'onnxruntime ; python_version >= "3.10"',  # for usage example with ASR
     'pytest',
     'pytest-cov',
