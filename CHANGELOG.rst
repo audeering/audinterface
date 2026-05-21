@@ -7,6 +7,16 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.3.2 (2026/05/21)
+--------------------------
+
+* Added: support for Python 3.14
+* Changed: depend on ``audformat>=1.4.2``
+* Changed: exclude ``tests/`` and ``docs/`` folders from the Python package
+* Fixed: ``audinterface.utils.signal_index()`` under pandas>=3.0
+* Removed: support for Python 3.9
+
+
 Version 1.3.1 (2025/06/05)
 --------------------------
 
