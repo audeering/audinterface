@@ -255,8 +255,8 @@ def signal_index(
 
     index = pd.MultiIndex.from_arrays(
         [
-            pd.TimedeltaIndex(to_timedelta(starts)),
-            pd.TimedeltaIndex(to_timedelta(ends)),
+            pd.TimedeltaIndex(to_timedelta(starts)).as_unit("ns"),
+            pd.TimedeltaIndex(to_timedelta(ends)).as_unit("ns"),
         ],
         names=[
             audformat.define.IndexField.START,
@@ -460,9 +460,10 @@ def to_timedelta(
         # avoid converting Timedelta values to ensure precision
         # https://github.com/audeering/audinterface/pull/137
         if isinstance(durations, pd.Timedelta):
-            return durations
+            # Normalize to nanosecond resolution for pandas >=3.0
+            return durations.as_unit("ns")
 
         durations = duration_in_seconds(durations, sampling_rate)
-        durations = pd.to_timedelta(durations, unit="s")
+        durations = pd.to_timedelta(durations, unit="s").as_unit("ns")
 
     return durations

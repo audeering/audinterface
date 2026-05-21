@@ -174,8 +174,8 @@ def test_read_audio(tmpdir):
             2,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:01")]),
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:02")]),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:01")]).as_unit("ns"),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:02")]).as_unit("ns"),
                 ],
                 names=["start", "end"],
             ),
@@ -190,13 +190,13 @@ def test_read_audio(tmpdir):
                             pd.Timedelta("0 days 00:00:01"),
                             pd.Timedelta("0 days 00:00:02"),
                         ]
-                    ),
+                    ).as_unit("ns"),
                     pd.TimedeltaIndex(
                         [
                             pd.Timedelta("0 days 00:00:03"),
                             pd.Timedelta("0 days 00:00:04"),
                         ]
-                    ),
+                    ).as_unit("ns"),
                 ],
                 names=["start", "end"],
             ),
@@ -206,8 +206,10 @@ def test_read_audio(tmpdir):
             [36],
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:35.511437999")]),
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:36")]),
+                    pd.TimedeltaIndex(
+                        [pd.Timedelta("0 days 00:00:35.511437999")]
+                    ).as_unit("ns"),
+                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:36")]).as_unit("ns"),
                 ],
                 names=["start", "end"],
             ),
