@@ -174,8 +174,12 @@ def test_read_audio(tmpdir):
             2,
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:01")]).as_unit("ns"),
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:02")]).as_unit("ns"),
+                    audinterface.core.utils._to_timedelta_index(
+                        [pd.Timedelta("0 days 00:00:01")]
+                    ),
+                    audinterface.core.utils._to_timedelta_index(
+                        [pd.Timedelta("0 days 00:00:02")]
+                    ),
                 ],
                 names=["start", "end"],
             ),
@@ -185,18 +189,18 @@ def test_read_audio(tmpdir):
             [3, 4],
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex(
+                    audinterface.core.utils._to_timedelta_index(
                         [
                             pd.Timedelta("0 days 00:00:01"),
                             pd.Timedelta("0 days 00:00:02"),
                         ]
-                    ).as_unit("ns"),
-                    pd.TimedeltaIndex(
+                    ),
+                    audinterface.core.utils._to_timedelta_index(
                         [
                             pd.Timedelta("0 days 00:00:03"),
                             pd.Timedelta("0 days 00:00:04"),
                         ]
-                    ).as_unit("ns"),
+                    ),
                 ],
                 names=["start", "end"],
             ),
@@ -206,10 +210,12 @@ def test_read_audio(tmpdir):
             [36],
             pd.MultiIndex.from_arrays(
                 [
-                    pd.TimedeltaIndex(
+                    audinterface.core.utils._to_timedelta_index(
                         [pd.Timedelta("0 days 00:00:35.511437999")]
-                    ).as_unit("ns"),
-                    pd.TimedeltaIndex([pd.Timedelta("0 days 00:00:36")]).as_unit("ns"),
+                    ),
+                    audinterface.core.utils._to_timedelta_index(
+                        [pd.Timedelta("0 days 00:00:36")]
+                    ),
                 ],
                 names=["start", "end"],
             ),
