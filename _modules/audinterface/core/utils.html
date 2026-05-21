@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                v1.3.1
+                v1.3.2
               </div>
             
           
@@ -139,9 +139,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for audinterface.core.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
@@ -236,7 +234,9 @@
     <span class="k">return</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span>
 
 
-<div class="viewcode-block" id="read_audio"><a class="viewcode-back" href="../../../api/audinterface.utils.read_audio.html#audinterface.utils.read_audio">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">read_audio</span><span class="p">(</span>
+<div class="viewcode-block" id="read_audio">
+<a class="viewcode-back" href="../../../api/audinterface.utils.read_audio.html#audinterface.utils.read_audio">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_audio</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">start</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -291,6 +291,7 @@
     <span class="k">return</span> <span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span></div>
 
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">segment_to_indices</span><span class="p">(</span>
     <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -321,7 +322,9 @@
     <span class="k">return</span> <span class="n">starts_i</span><span class="p">,</span> <span class="n">ends_i</span>
 
 
-<div class="viewcode-block" id="signal_index"><a class="viewcode-back" href="../../../api/audinterface.utils.signal_index.html#audinterface.utils.signal_index">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">signal_index</span><span class="p">(</span>
+<div class="viewcode-block" id="signal_index">
+<a class="viewcode-back" href="../../../api/audinterface.utils.signal_index.html#audinterface.utils.signal_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">signal_index</span><span class="p">(</span>
     <span class="n">starts</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ends</span><span class="p">:</span> <span class="n">Timestamps</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">:</span>
@@ -398,8 +401,8 @@
 
     <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">(</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">starts</span><span class="p">)),</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">(</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">ends</span><span class="p">)),</span>
+            <span class="n">_to_timedelta_index</span><span class="p">(</span><span class="n">starts</span><span class="p">),</span>
+            <span class="n">_to_timedelta_index</span><span class="p">(</span><span class="n">ends</span><span class="p">),</span>
         <span class="p">],</span>
         <span class="n">names</span><span class="o">=</span><span class="p">[</span>
             <span class="n">audformat</span><span class="o">.</span><span class="n">define</span><span class="o">.</span><span class="n">IndexField</span><span class="o">.</span><span class="n">START</span><span class="p">,</span>
@@ -411,7 +414,10 @@
     <span class="k">return</span> <span class="n">index</span></div>
 
 
-<div class="viewcode-block" id="sliding_window"><a class="viewcode-back" href="../../../api/audinterface.utils.sliding_window.html#audinterface.utils.sliding_window">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sliding_window</span><span class="p">(</span>
+
+<div class="viewcode-block" id="sliding_window">
+<a class="viewcode-back" href="../../../api/audinterface.utils.sliding_window.html#audinterface.utils.sliding_window">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sliding_window</span><span class="p">(</span>
     <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">win_dur</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
@@ -515,6 +521,7 @@
     <span class="k">return</span> <span class="n">frames</span></div>
 
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">to_array</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert value to numpy array.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -525,7 +532,9 @@
     <span class="k">return</span> <span class="n">value</span>
 
 
-<div class="viewcode-block" id="to_timedelta"><a class="viewcode-back" href="../../../api/audinterface.utils.to_timedelta.html#audinterface.utils.to_timedelta">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">to_timedelta</span><span class="p">(</span>
+<div class="viewcode-block" id="to_timedelta">
+<a class="viewcode-back" href="../../../api/audinterface.utils.to_timedelta.html#audinterface.utils.to_timedelta">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_timedelta</span><span class="p">(</span>
     <span class="n">durations</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">,</span>
     <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">]:</span>
@@ -603,12 +612,32 @@
         <span class="c1"># avoid converting Timedelta values to ensure precision</span>
         <span class="c1"># https://github.com/audeering/audinterface/pull/137</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">durations</span>
+            <span class="c1"># Normalize to nanosecond resolution for pandas &gt;=3.0</span>
+            <span class="k">return</span> <span class="n">durations</span><span class="o">.</span><span class="n">as_unit</span><span class="p">(</span><span class="s2">&quot;ns&quot;</span><span class="p">)</span>
 
         <span class="n">durations</span> <span class="o">=</span> <span class="n">duration_in_seconds</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span>
-        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">durations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">as_unit</span><span class="p">(</span><span class="s2">&quot;ns&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">durations</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_timedelta_index</span><span class="p">(</span>
+    <span class="n">durations</span><span class="p">:</span> <span class="n">Timestamps</span><span class="p">,</span>
+    <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return ``durations`` as ``pd.TimedeltaIndex`` with ``ns`` resolution.</span>
+
+<span class="sd">    Pandas &gt;= 3 introduces variable-resolution</span>
+<span class="sd">    :class:`pandas.Timedelta` values</span>
+<span class="sd">    (``s``, ``ms``, ``us``, ``ns``).</span>
+<span class="sd">    Centralizes the normalization to ``ns`` required</span>
+<span class="sd">    to match the ``timedelta64[ns]`` convention used by</span>
+<span class="sd">    :func:`audformat.segmented_index`</span>
+<span class="sd">    and asserted by :func:`audinterface.core.utils.assert_index`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">(</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">durations</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">))</span><span class="o">.</span><span class="n">as_unit</span><span class="p">(</span><span class="s2">&quot;ns&quot;</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -624,7 +653,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2025/06/05 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2026/05/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -632,7 +661,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2025 audEERING GmbH
+      &copy; 2020-2026 audEERING GmbH
     </p>
   </div> 
 
@@ -656,18 +685,16 @@
     
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=e57ba844"></script>
     
 
   
 
+  <script type="text/javascript" src="../../../_static/js/jquery.js"></script>
   <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">

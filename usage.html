@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Usage &mdash; Documentation</title>
@@ -65,7 +66,7 @@
             
             
               <div class="version">
-                v1.3.1
+                v1.3.2
               </div>
             
           
@@ -150,8 +151,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h1>
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h1>
 <p>The basic idea of <a class="reference internal" href="api/audinterface.html#module-audinterface" title="audinterface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">audinterface</span></code></a> is
 to provide easy and standardized interfaces
 to apply a machine learning model,
@@ -160,7 +161,7 @@ to audio files.
 The only prerequisite is
 the algorithm provides a callable
 that takes at least the signal
-as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
+as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>
 and the sampling rate as input.</p>
 <p>The interface can then apply the algorithm
 on a list of files,
@@ -191,8 +192,8 @@ and an index.</p>
 <span class="n">index</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;emotion&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
 </pre></div>
 </div>
-<div class="section" id="processing-interface">
-<h2>Processing interface<a class="headerlink" href="#processing-interface" title="Permalink to this heading">¶</a></h2>
+<section id="processing-interface">
+<h2>Processing interface<a class="headerlink" href="#processing-interface" title="Link to this heading">¶</a></h2>
 <p>Let’s assume we want to calculate the root mean square (RMS)
 value in dB.
 We first define the function
@@ -212,7 +213,7 @@ and create an interface for it using <a class="reference internal" href="api/aud
 or <code class="docutils literal notranslate"><span class="pre">process_index()</span></code> methods
 to apply the algorithm
 and return the result
-as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
+as a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span><span class="o">.</span><span class="n">process_index</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
 <span class="go">file             start   end</span>
 <span class="go">wav/03a01Fa.wav  0 days  0 days 00:00:01.898250      -21.6901</span>
@@ -238,12 +239,12 @@ and set a window and hop duration.</p>
 <span class="go">dtype: float32</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="feature-interface">
-<h2>Feature interface<a class="headerlink" href="#feature-interface" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="feature-interface">
+<h2>Feature interface<a class="headerlink" href="#feature-interface" title="Link to this heading">¶</a></h2>
 <p>When the result of the processing function has multiple dimensions
 it is recommended to use <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>,
-which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
+which returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>
 and assigns names to the dimensions/features.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">signal</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">signal</span><span class="o">.</span><span class="n">std</span><span class="p">()]</span>
@@ -291,9 +292,9 @@ and single frames are passed on to the processing function.</p>
 <span class="go">                0 days 00:00:01.500000 0 days 00:00:02.500000 -4.4670e-04  0.0955</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="feature-interface-for-multi-channel-input">
-<h2>Feature interface for multi-channel input<a class="headerlink" href="#feature-interface-for-multi-channel-input" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="feature-interface-for-multi-channel-input">
+<h2>Feature interface for multi-channel input<a class="headerlink" href="#feature-interface-for-multi-channel-input" title="Link to this heading">¶</a></h2>
 <p>By default,
 an interface will process
 the first channel of an audio signal.
@@ -368,9 +369,9 @@ channel by its index.</p>
 <span class="go">0 days 00:00:00.500000 0 days 00:00:01.500000  0.4997  0.0670</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="feature-interface-for-external-function">
-<h2>Feature interface for external function<a class="headerlink" href="#feature-interface-for-external-function" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="feature-interface-for-external-function">
+<h2>Feature interface for external function<a class="headerlink" href="#feature-interface-for-external-function" title="Link to this heading">¶</a></h2>
 <p>If we interface a function from an external library
 that already applies a sliding window,
 we again specify the
@@ -423,24 +424,24 @@ whereas the first dimension is optionally.</p>
 <span class="go">wav/16b10Wb.wav 0 days 00:00:02.480000 0 days 00:00:02.500000 -664.6736  ...   1.8637</span>
 <span class="go">                0 days 00:00:02.490000 0 days 00:00:02.510000 -658.9581  ...   9.3450</span>
 <span class="go">                0 days 00:00:02.500000 0 days 00:00:02.520000 -644.1565  ...   7.4110</span>
-<span class="go">                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.5459  ...  17.6454</span>
+<span class="go">                0 days 00:00:02.510000 0 days 00:00:02.530000 -618.5459  ...  17.645...</span>
 <span class="go">                0 days 00:00:02.520000 0 days 00:00:02.540000 -666.8052  ...   3.7111</span>
 
 <span class="go">[605 rows x 13 columns]</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="serializable-feature-interface">
-<h2>Serializable feature interface<a class="headerlink" href="#serializable-feature-interface" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="serializable-feature-interface">
+<h2>Serializable feature interface<a class="headerlink" href="#serializable-feature-interface" title="Link to this heading">¶</a></h2>
 <p>To use a feature extractor as an input transform
 of a machine learning model
 it is recommend to provide it in a serializable way
 so it can be <a class="reference external" href="https://audeering.github.io/audonnx/usage.html#export-model">stored as part of the model</a>.
-One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api/opensmile.Smile.html#opensmile.Smile" title="(in opensmile vv2.5.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
+One example of such a feature extractor is <a class="reference external" href="https://audeering.github.io/opensmile-python/api/opensmile.Smile.html#opensmile.Smile" title="(in opensmile vv2.6.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">opensmile.Smile</span></code></a>.</p>
 <p>To create such a feature extractor,
 we create a class that inherits
 from <a class="reference internal" href="api/audinterface.Feature.html#audinterface.Feature" title="audinterface.Feature"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Feature</span></code></a>
-and <a class="reference external" href="https://audeering.github.io/audobject/api/audobject.Object.html#audobject.Object" title="(in audobject)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
+and <a class="reference external" href="https://audeering.github.io/audobject/api/audobject.Object.html#audobject.Object" title="(in audobject vv0.7.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">audobject.Object</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">audobject</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MeanStd</span><span class="p">(</span><span class="n">audinterface</span><span class="o">.</span><span class="n">Feature</span><span class="p">,</span> <span class="n">audobject</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
@@ -478,9 +479,9 @@ and re-instantiate it from there.</p>
 <span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999 -0.0005  0.0956</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="segmentation-interface">
-<h2>Segmentation interface<a class="headerlink" href="#segmentation-interface" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="segmentation-interface">
+<h2>Segmentation interface<a class="headerlink" href="#segmentation-interface" title="Link to this heading">¶</a></h2>
 <p>When the result of the processing function is an index
 it is recommended to use <a class="reference internal" href="api/audinterface.Segment.html#audinterface.Segment" title="audinterface.Segment"><code class="xref py py-class docutils literal notranslate"><span class="pre">audinterface.Segment</span></code></a>,
 which returns a segmented index conform to <a class="reference external" href="https://audeering.github.io/audformat/">audformat</a>.
@@ -527,7 +528,7 @@ would be a voice activity detection algorithm.</p>
 </div>
 <p>Sometimes,
 it is required that a table
-(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
+(i.e., <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> or :class`pandas.DataFrame`)
 is segmented
 and the <code class="docutils literal notranslate"><span class="pre">labels</span></code> from the original segments
 should be kept.
@@ -557,9 +558,9 @@ or teacher-student training.</p>
 <span class="go">                0 days 00:00:01.050000 0 days 00:00:02.500000      4</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="segmentation-with-feature-interface">
-<h2>Segmentation with feature interface<a class="headerlink" href="#segmentation-with-feature-interface" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="segmentation-with-feature-interface">
+<h2>Segmentation with feature interface<a class="headerlink" href="#segmentation-with-feature-interface" title="Link to this heading">¶</a></h2>
 <p>In some cases,
 a processing function performs
 both segmentation and feature extraction.
@@ -632,19 +633,15 @@ which can be applied to an already labelled dataset.</p>
 <span class="go">                0 days 00:00:00.960000 0 days 00:00:01.480000    Eiscrank.      2</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="special-processing-function-arguments">
-<h2>Special processing function arguments<a class="headerlink" href="#special-processing-function-arguments" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="special-processing-function-arguments">
+<h2>Special processing function arguments<a class="headerlink" href="#special-processing-function-arguments" title="Link to this heading">¶</a></h2>
 <p>There are some special arguments
 to the processing function,
 which will be automatically set
 if they are not specified in
 <code class="docutils literal notranslate"><span class="pre">process_func_args</span></code>:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 38%" />
-<col style="width: 62%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>argument</p></th>
 <th class="head"><p>value</p></th>
@@ -718,8 +715,8 @@ to select the appropriate f0 range.</p>
 <span class="go">wav/16b10Wb.wav 0 days 0 days 00:00:02.522499999   234.86  female</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
@@ -744,7 +741,7 @@ to select the appropriate f0 range.</p>
         
         
         
-          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2025/06/05 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2026/05/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -752,7 +749,7 @@ to select the appropriate f0 range.</p>
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2025 audEERING GmbH
+      &copy; 2020-2026 audEERING GmbH
     </p>
   </div> 
 
@@ -776,18 +773,16 @@ to select the appropriate f0 range.</p>
     
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/clipboard.min.js"></script>
-        <script src="_static/copybutton.js"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=9bcbadda"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=e57ba844"></script>
     
 
   
 
+  <script type="text/javascript" src="_static/js/jquery.js"></script>
   <script type="text/javascript" src="_static/js/theme.js"></script>
 
   <script type="text/javascript">

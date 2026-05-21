@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                v1.3.1
+                v1.3.2
               </div>
             
           
@@ -139,9 +139,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for audinterface.core.process</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">errno</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
@@ -180,7 +178,9 @@
     <span class="k">return</span> <span class="n">signal</span>
 
 
-<div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Process</span><span class="p">:</span>
+<div class="viewcode-block" id="Process">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Process</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Processing interface.</span>
 
 <span class="sd">    Args:</span>
@@ -440,7 +440,9 @@
 
         <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span>
 
-<div class="viewcode-block" id="Process.process_file"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_file">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span>
+<div class="viewcode-block" id="Process.process_file">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -500,7 +502,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Process.process_files"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_files">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_files</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Process.process_files">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_files">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_files</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">files</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
@@ -598,7 +603,10 @@
 
         <span class="k">return</span> <span class="n">y</span></div>
 
-<div class="viewcode-block" id="Process.process_folder"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_folder">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_folder</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Process.process_folder">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_folder">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_folder</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -653,6 +661,7 @@
             <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_index_wo_segment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
@@ -697,7 +706,9 @@
 
         <span class="k">return</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="Process.process_index"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_index">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Process.process_index">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_index</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -775,6 +786,7 @@
             <span class="n">y</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
 
         <span class="k">return</span> <span class="n">y</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_signal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -857,7 +869,9 @@
 
         <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">starts</span><span class="p">),</span> <span class="n">starts</span><span class="p">,</span> <span class="n">ends</span>
 
-<div class="viewcode-block" id="Process.process_signal"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_signal">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_signal</span><span class="p">(</span>
+<div class="viewcode-block" id="Process.process_signal">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_signal">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_signal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -938,6 +952,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
 
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_signal_from_index_wo_segment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -1004,7 +1019,9 @@
 
         <span class="k">return</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="Process.process_signal_from_index"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_signal_from_index">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">process_signal_from_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Process.process_signal_from_index">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.process_signal_from_index">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_signal_from_index</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1056,6 +1073,7 @@
             <span class="n">index</span><span class="p">,</span>
             <span class="n">process_func_args</span><span class="o">=</span><span class="n">process_func_args</span><span class="p">,</span>
         <span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_call</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1120,7 +1138,9 @@
 
         <span class="k">return</span> <span class="n">y</span>
 
-<div class="viewcode-block" id="Process.__call__"><a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.__call__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<div class="viewcode-block" id="Process.__call__">
+<a class="viewcode-back" href="../../../api/audinterface.Process.html#audinterface.Process.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signal</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1145,7 +1165,9 @@
 <span class="sd">            RuntimeError: if channel selection is invalid</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1161,7 +1183,7 @@
         
         
         
-          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2025/06/05 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
+          Built with <a href="https://www.sphinx-doc.org">Sphinx</a> on 2026/05/21 using the <a href="https://github.com/audeering/sphinx-audeering-theme/">audEERING theme</a>
         
     </p>
   </div>
@@ -1169,7 +1191,7 @@
   <div role="contentinfo">
     <p>
         
-      &copy; 2020-2025 audEERING GmbH
+      &copy; 2020-2026 audEERING GmbH
     </p>
   </div> 
 
@@ -1193,18 +1215,16 @@
     
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=e57ba844"></script>
     
 
   
 
+  <script type="text/javascript" src="../../../_static/js/jquery.js"></script>
   <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
