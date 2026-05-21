@@ -255,8 +255,8 @@ def signal_index(
 
     index = pd.MultiIndex.from_arrays(
         [
-            pd.TimedeltaIndex(to_timedelta(starts)),
-            pd.TimedeltaIndex(to_timedelta(ends)),
+            _to_timedelta_index(starts),
+            _to_timedelta_index(ends),
         ],
         names=[
             audformat.define.IndexField.START,
@@ -460,9 +460,28 @@ def to_timedelta(
         # avoid converting Timedelta values to ensure precision
         # https://github.com/audeering/audinterface/pull/137
         if isinstance(durations, pd.Timedelta):
-            return durations
+            # Normalize to nanosecond resolution for pandas >=3.0
+            return durations.as_unit("ns")
 
         durations = duration_in_seconds(durations, sampling_rate)
-        durations = pd.to_timedelta(durations, unit="s")
+        durations = pd.to_timedelta(durations, unit="s").as_unit("ns")
 
     return durations
+
+
+def _to_timedelta_index(
+    durations: Timestamps,
+    sampling_rate: int | None = None,
+) -> pd.TimedeltaIndex:
+    r"""Return ``durations`` as ``pd.TimedeltaIndex`` with ``ns`` resolution.
+
+    Pandas >= 3 introduces variable-resolution
+    :class:`pandas.Timedelta` values
+    (``s``, ``ms``, ``us``, ``ns``).
+    Centralizes the normalization to ``ns`` required
+    to match the ``timedelta64[ns]`` convention used by
+    :func:`audformat.segmented_index`
+    and asserted by :func:`audinterface.core.utils.assert_index`.
+
+    """
+    return pd.TimedeltaIndex(to_timedelta(durations, sampling_rate)).as_unit("ns")

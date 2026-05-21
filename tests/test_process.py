@@ -31,9 +31,10 @@ class SignalObject(audobject.Object):
 
 
 def segment(signal, sampling_rate):
+    duration = audinterface.utils.to_timedelta(signal.shape[1] / sampling_rate)
     return audinterface.utils.signal_index(
         pd.to_timedelta(0),
-        pd.to_timedelta(signal.shape[1] / sampling_rate, unit="s") / 2,
+        duration / 2,
     )
 
 

@@ -55,7 +55,7 @@ def segment_non_zeros_with_mean_mono(signal, sampling_rate):
     ends = [pd.to_timedelta(end / sampling_rate, unit="s") for end in end_indices]
     starts = [pd.to_timedelta(start / sampling_rate, "s") for start in start_indices]
     means = [frame.mean() for frame in frames]
-    index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
+    index = audinterface.utils.signal_index(starts, ends)
     return pd.Series(data=means, dtype=signal.dtype, index=index)
 
 
@@ -71,7 +71,7 @@ def segment_with_mean(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
         signal, sampling_rate, win_size, hop_size
     )
     means = frames.mean(axis=(0, 1))
-    index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
+    index = audinterface.utils.signal_index(starts, ends)
     return pd.Series(data=means, index=index)
 
 
@@ -88,7 +88,7 @@ def segment_with_mean_std(signal, sampling_rate, *, win_size=1.0, hop_size=1.0):
     )
     means = frames.mean(axis=(0, 1))
     stds = frames.std(axis=(0, 1))
-    index = pd.MultiIndex.from_tuples(zip(starts, ends), names=["start", "end"])
+    index = audinterface.utils.signal_index(starts, ends)
     features = list(np.stack((means, stds), axis=-1))
     return pd.Series(data=features, index=index)
 

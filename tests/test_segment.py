@@ -211,9 +211,8 @@ def test_index_and_table(tmpdir, num_workers):
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["a", "b", "c"]})
-    expected_dataframe = pd.DataFrame(
-        table_df.get().values, index=expected, columns=["values", "string"]
-    )
+    expected_dataframe = table_df.get()
+    expected_dataframe.index = expected
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -237,9 +236,8 @@ def test_index_and_table(tmpdir, num_workers):
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["d"]})
-    expected_dataframe = pd.DataFrame(
-        table_df.get().values, index=expected, columns=["values", "string"]
-    )
+    expected_dataframe = table_df.get()
+    expected_dataframe.index = expected
     result = segment.process_table(table_df.get())
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -271,9 +269,8 @@ def test_index_and_table(tmpdir, num_workers):
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["a", "b", "c"]})
-    expected_dataframe = pd.DataFrame(
-        table_df.get().values, index=expected, columns=["values", "string"]
-    )
+    expected_dataframe = table_df.get()
+    expected_dataframe.index = expected
     result = segment.process_table(table_df.get(), root=root)
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
@@ -297,9 +294,8 @@ def test_index_and_table(tmpdir, num_workers):
     table_df = table.copy()
     table_df["string"] = audformat.Column()
     table_df.set({"string": ["d"]})
-    expected_dataframe = pd.DataFrame(
-        table_df.get().values, index=expected, columns=["values", "string"]
-    )
+    expected_dataframe = table_df.get()
+    expected_dataframe.index = expected
     result = segment.process_table(table_df.get(), root=root)
     pd.testing.assert_frame_equal(result, expected_dataframe)
 
