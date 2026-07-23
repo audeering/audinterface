@@ -740,6 +740,9 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
 )
 @pytest.mark.parametrize("preserve_index", [False, True])
 def test_process_index_order(tmpdir, index, durations, preserve_index):
+    # Ensure the returned index is as expected
+    # when the same index but different order have already been cached
+    # https://github.com/audeering/audinterface/issues/203
     cache_root = os.path.join(tmpdir, "cache")
     process = audinterface.Process(
         process_func=None,
@@ -774,10 +777,10 @@ def test_process_index_order(tmpdir, index, durations, preserve_index):
     y_reverse = process.process_index(
         reverse_index, root=root, cache_root=cache_root, preserve_index=preserve_index
     )
+    # Make sure the index is as expected
     if preserve_index or is_segmented_index:
         expected_index = reverse_index
     else:
-        # Make sure the index is as expected
         expected_index = audformat.segmented_index(
             files=files[::-1],
             starts=[0] * len(reverse_index),
