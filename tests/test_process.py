@@ -49,6 +49,20 @@ def signal_modification(signal, sampling_rate, subtract=False):
     return signal
 
 
+def index_durations(index: pd.Index, root: str = None) -> pd.Series:
+    r"""Get series with duration of all index elements."""
+    if len(index) == 0:
+        return pd.Series(index=index)
+    segmented_index = audformat.utils.to_segmented_index(
+        index, allow_nat=False, root=root
+    )
+    starts = segmented_index.get_level_values(audformat.define.IndexField.START)
+    ends = segmented_index.get_level_values(audformat.define.IndexField.END)
+    durations = (ends - starts).to_series()
+    durations.index = index
+    return durations
+
+
 @pytest.mark.parametrize(
     "process_func, segment, signal, sampling_rate, start, end, keep_nat, "
     "channels, mixdown, expected_output",
@@ -390,7 +404,7 @@ def test_process_file(
 
 
 @pytest.mark.parametrize(
-    "process_func, num_files, signal, sampling_rate, starts, ends, " "expected_output",
+    "process_func, num_files, signal, sampling_rate, starts, ends, expected_output",
     [
         (
             signal_duration,
@@ -708,6 +722,81 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         cache_root=cache_root,
     )
     pd.testing.assert_series_equal(y, y_cached)
+
+
+@pytest.mark.parametrize(
+    "index,durations",
+    [
+        (audformat.filewise_index([f"f{i}.wav" for i in range(10)]), [1.0] * 10),
+        (
+            audformat.segmented_index(
+                files=[f"f{i}.wav" for i in range(5)],
+                starts=[0, 0, 1, 1, 2],
+                ends=[1, 1, 2, 2, 3],
+            ),
+            [1.0, 2.0, 3.0, 3.0, 3.0],
+        ),
+    ],
+)
+def test_process_index_order(tmpdir, index, durations):
+    cache_root = os.path.join(tmpdir, "cache")
+    process = audinterface.Process(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        verbose=False,
+    )
+    # Create signals for the index
+    sampling_rate = 8000
+    signals = [
+        np.random.uniform(-1.0, 1.0, (1, int(duration * sampling_rate)))
+        for duration in durations
+    ]
+    root = str(tmpdir.mkdir("wav"))
+    paths = []
+    files = []
+    for i, signal in enumerate(signals):
+        if audformat.is_segmented_index(index):
+            file, _, _ = index[i]
+        else:
+            file = index[i]
+        path = os.path.join(root, file)
+        af.write(path, signal, sampling_rate)
+        paths.append(file)
+        files.append(file)
+
+    # Run process once with caching
+    process.process_index(index, root=root, cache_root=cache_root)
+
+    # Run process again but on reverse index
+    reverse_index = index[::-1]
+    reverse_durations = index_durations(reverse_index, root=root)
+    y_reverse = process.process_index(reverse_index, root=root, cache_root=cache_root)
+
+    # Make sure the index is as expected
+    expected_index = audformat.segmented_index(
+        files=files[::-1],
+        starts=[0] * len(reverse_index),
+        ends=reverse_durations.values,
+    )
+    pd.testing.assert_index_equal(y_reverse.index, expected_index)
+    # Make sure the files contain the expected signals
+    for (path, start, end), value in y_reverse.items():
+        signal, sampling_rate = audinterface.utils.read_audio(
+            path, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(signal, value)
+
+    # Run process again on reverse index but with preserve_index=True
+    y_reverse = process.process_index(
+        reverse_index, root=root, cache_root=cache_root, preserve_index=True
+    )
+    # Make sure the index order is equal to the input order
+    pd.testing.assert_index_equal(y_reverse.index, reverse_index)
+    # Make sure the files contain the expected signals
+    for i, (path, value) in enumerate(y_reverse.items()):
+        signal, sampling_rate = audinterface.utils.read_audio(path, root=root)
+        np.testing.assert_equal(signal, value)
 
 
 def test_process_index_filewise_end_times(tmpdir):
@@ -1138,7 +1227,7 @@ def test_process_signal_from_index(
 
 
 @pytest.mark.parametrize(
-    "process_func, signal, sampling_rate, min_signal_dur, " "max_signal_dur, expected",
+    "process_func, signal, sampling_rate, min_signal_dur, max_signal_dur, expected",
     [
         (
             None,
