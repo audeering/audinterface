@@ -738,7 +738,8 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         ),
     ],
 )
-def test_process_index_order(tmpdir, index, durations):
+@pytest.mark.parametrize("preserve_index", [False, True])
+def test_process_index_order(tmpdir, index, durations, preserve_index):
     cache_root = os.path.join(tmpdir, "cache")
     process = audinterface.Process(
         process_func=None,
@@ -755,8 +756,9 @@ def test_process_index_order(tmpdir, index, durations):
     root = str(tmpdir.mkdir("wav"))
     paths = []
     files = []
+    is_segmented_index = audformat.is_segmented_index(index)
     for i, signal in enumerate(signals):
-        if audformat.is_segmented_index(index):
+        if is_segmented_index:
             file, _, _ = index[i]
         else:
             file = index[i]
@@ -771,31 +773,29 @@ def test_process_index_order(tmpdir, index, durations):
     # Run process again but on reverse index
     reverse_index = index[::-1]
     reverse_durations = index_durations(reverse_index, root=root)
-    y_reverse = process.process_index(reverse_index, root=root, cache_root=cache_root)
-
-    # Make sure the index is as expected
-    expected_index = audformat.segmented_index(
-        files=files[::-1],
-        starts=[0] * len(reverse_index),
-        ends=reverse_durations.values,
+    y_reverse = process.process_index(
+        reverse_index, root=root, cache_root=cache_root, preserve_index=preserve_index
     )
+    if preserve_index or is_segmented_index:
+        expected_index = reverse_index
+    else:
+        # Make sure the index is as expected
+        expected_index = audformat.segmented_index(
+            files=files[::-1],
+            starts=[0] * len(reverse_index),
+            ends=reverse_durations.values,
+        )
     pd.testing.assert_index_equal(y_reverse.index, expected_index)
     # Make sure the files contain the expected signals
-    for (path, start, end), value in y_reverse.items():
+    for idx, value in y_reverse.items():
+        if not preserve_index or is_segmented_index:
+            path, start, end = idx
+        else:
+            path = idx
+            start = end = None
         signal, sampling_rate = audinterface.utils.read_audio(
             path, start=start, end=end, root=root
         )
-        np.testing.assert_equal(signal, value)
-
-    # Run process again on reverse index but with preserve_index=True
-    y_reverse = process.process_index(
-        reverse_index, root=root, cache_root=cache_root, preserve_index=True
-    )
-    # Make sure the index order is equal to the input order
-    pd.testing.assert_index_equal(y_reverse.index, reverse_index)
-    # Make sure the files contain the expected signals
-    for i, (path, value) in enumerate(y_reverse.items()):
-        signal, sampling_rate = audinterface.utils.read_audio(path, root=root)
         np.testing.assert_equal(signal, value)
 
 
