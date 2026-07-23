@@ -754,7 +754,6 @@ def test_process_index_order(tmpdir, index, durations, preserve_index):
         for duration in durations
     ]
     root = str(tmpdir.mkdir("wav"))
-    paths = []
     files = []
     is_segmented_index = audformat.is_segmented_index(index)
     for i, signal in enumerate(signals):
@@ -764,7 +763,6 @@ def test_process_index_order(tmpdir, index, durations, preserve_index):
             file = index[i]
         path = os.path.join(root, file)
         af.write(path, signal, sampling_rate)
-        paths.append(file)
         files.append(file)
 
     # Run process once with caching
