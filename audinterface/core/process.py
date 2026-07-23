@@ -603,7 +603,7 @@ class Process:
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
-            hash = audformat.utils.hash(index)
+            hash = audformat.utils.hash(index, strict=True)
             cache_path = os.path.join(cache_root, f"{hash}.pkl")
 
         if cache_path and os.path.exists(cache_path):
