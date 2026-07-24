@@ -49,6 +49,20 @@ def signal_modification(signal, sampling_rate, subtract=False):
     return signal
 
 
+def index_durations(index: pd.Index, root: str = None) -> pd.Series:
+    r"""Get series with duration of all index elements."""
+    if len(index) == 0:
+        return pd.Series(index=index)
+    segmented_index = audformat.utils.to_segmented_index(
+        index, allow_nat=False, root=root
+    )
+    starts = segmented_index.get_level_values(audformat.define.IndexField.START)
+    ends = segmented_index.get_level_values(audformat.define.IndexField.END)
+    durations = (ends - starts).to_series()
+    durations.index = index
+    return durations
+
+
 @pytest.mark.parametrize(
     "process_func, segment, signal, sampling_rate, start, end, keep_nat, "
     "channels, mixdown, expected_output",
@@ -390,7 +404,7 @@ def test_process_file(
 
 
 @pytest.mark.parametrize(
-    "process_func, num_files, signal, sampling_rate, starts, ends, " "expected_output",
+    "process_func, num_files, signal, sampling_rate, starts, ends, expected_output",
     [
         (
             signal_duration,
@@ -708,6 +722,88 @@ def test_process_index(tmpdir, num_workers, multiprocessing, preserve_index):
         cache_root=cache_root,
     )
     pd.testing.assert_series_equal(y, y_cached)
+
+
+@pytest.mark.parametrize(
+    "index,durations",
+    [
+        (audformat.filewise_index([f"f{i}.wav" for i in range(10)]), [1.0] * 10),
+        (
+            audformat.segmented_index(
+                files=[f"f{i}.wav" for i in range(5)],
+                starts=[0, 0, 1, 1, 2],
+                ends=[1, 1, 2, 2, 3],
+            ),
+            [1.0, 2.0, 3.0, 3.0, 3.0],
+        ),
+    ],
+)
+@pytest.mark.parametrize("preserve_index", [False, True])
+def test_process_index_order(tmpdir, index, durations, preserve_index):
+    # Ensure the returned index is as expected
+    # when the same index but different order have already been cached
+    # https://github.com/audeering/audinterface/issues/203
+    cache_root = os.path.join(tmpdir, "cache")
+    process = audinterface.Process(
+        process_func=None,
+        sampling_rate=None,
+        resample=False,
+        verbose=False,
+    )
+    # Create signals for the index
+    sampling_rate = 8000
+    signals = [
+        np.random.uniform(-1.0, 1.0, (1, int(duration * sampling_rate)))
+        for duration in durations
+    ]
+    root = str(tmpdir.mkdir("wav"))
+    files = []
+    is_segmented_index = audformat.is_segmented_index(index)
+    for i, signal in enumerate(signals):
+        if is_segmented_index:
+            file, _, _ = index[i]
+        else:
+            file = index[i]
+        path = os.path.join(root, file)
+        af.write(path, signal, sampling_rate)
+        files.append(file)
+    segment_durations = index_durations(index, root=root)
+
+    # Run process once with caching
+    process.process_index(index, root=root, cache_root=cache_root)
+
+    # Run process again but on reverse index
+    reverse_index = index[::-1]
+    reverse_durations = segment_durations[::-1]
+    y_reverse = process.process_index(
+        reverse_index, root=root, cache_root=cache_root, preserve_index=preserve_index
+    )
+    # Make sure the index is as expected
+    if preserve_index or is_segmented_index:
+        expected_index = reverse_index
+    else:
+        expected_index = audformat.segmented_index(
+            files=files[::-1],
+            starts=[0] * len(reverse_index),
+            ends=reverse_durations.values,
+        )
+    pd.testing.assert_index_equal(y_reverse.index, expected_index)
+    # Make sure the files contain the expected signals
+    for idx, value in y_reverse.items():
+        if not preserve_index or is_segmented_index:
+            path, start, end = idx
+        else:
+            path = idx
+            start = end = None
+        signal, sampling_rate = audinterface.utils.read_audio(
+            path, start=start, end=end, root=root
+        )
+        np.testing.assert_equal(signal, value)
+
+    # Make sure there is one cache file for the original index
+    # and one file for the reversed index
+    files_in_cache = audeer.list_file_names(cache_root)
+    assert len(files_in_cache) == 2
 
 
 def test_process_index_filewise_end_times(tmpdir):
@@ -1138,7 +1234,7 @@ def test_process_signal_from_index(
 
 
 @pytest.mark.parametrize(
-    "process_func, signal, sampling_rate, min_signal_dur, " "max_signal_dur, expected",
+    "process_func, signal, sampling_rate, min_signal_dur, max_signal_dur, expected",
     [
         (
             None,
