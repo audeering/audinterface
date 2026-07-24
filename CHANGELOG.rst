@@ -7,6 +7,20 @@ The format is based on `Keep a Changelog`_,
 and this project adheres to `Semantic Versioning`_.
 
 
+Version 1.4.0 (2026/07/24)
+--------------------------
+
+* Fixed: use strict index hash for caching results
+  with ``audinterface.Process.process_index()``
+  and ``audinterface.Feature.process_index()``.
+  Before, the same cache was used for indices
+  that only differed in their order,
+  and the returned results could be in an incorrect order
+  when using the cache.
+  This means that caches that were created with an older version
+  will not be reused with this version.
+
+
 Version 1.3.2 (2026/05/21)
 --------------------------
 
