@@ -545,7 +545,7 @@ class Feature:
 
         if cache_root is not None:
             cache_root = audeer.mkdir(cache_root)
-            hash = audformat.utils.hash(index)
+            hash = audformat.utils.hash(index, strict=True)
             cache_path = os.path.join(cache_root, f"{hash}.pkl")
 
         if cache_path and os.path.exists(cache_path):
@@ -731,7 +731,7 @@ class Feature:
                 n_frames = features.shape[1]
             else:
                 raise RuntimeError(
-                    f"Cannot determine feature shape from " f"{features.shape}, ",
+                    f"Cannot determine feature shape from {features.shape}, ",
                     f"when expected shape is "
                     f"({self.num_channels, self.num_features, -1}).",
                 )
@@ -743,17 +743,11 @@ class Feature:
         # assert channels and features have expected length
         if n_channels != self.num_channels:
             raise RuntimeError(
-                f"Number of channels must be"
-                f" {self.num_channels}, "
-                f"not "
-                f"{n_channels}."
+                f"Number of channels must be {self.num_channels}, not {n_channels}."
             )
         if n_features != self.num_features:
             raise RuntimeError(
-                f"Number of features must be "
-                f"{self.num_features}, "
-                f"not "
-                f"{n_features}."
+                f"Number of features must be {self.num_features}, not {n_features}."
             )
 
         # reshape features to (channels,  features, frames)
@@ -857,9 +851,7 @@ class Feature:
         features = features.reshape(new_shape).T
 
         if n_frames > 1 and self.win_dur is None:
-            raise RuntimeError(
-                f"Got " f"{n_frames} " f"frames, but 'win_dur' is not set."
-            )
+            raise RuntimeError(f"Got {n_frames} frames, but 'win_dur' is not set.")
 
         return features
 
