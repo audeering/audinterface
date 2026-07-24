@@ -767,13 +767,14 @@ def test_process_index_order(tmpdir, index, durations, preserve_index):
         path = os.path.join(root, file)
         af.write(path, signal, sampling_rate)
         files.append(file)
+    segment_durations = index_durations(index, root=root)
 
     # Run process once with caching
     process.process_index(index, root=root, cache_root=cache_root)
 
     # Run process again but on reverse index
     reverse_index = index[::-1]
-    reverse_durations = index_durations(reverse_index, root=root)
+    reverse_durations = segment_durations[::-1]
     y_reverse = process.process_index(
         reverse_index, root=root, cache_root=cache_root, preserve_index=preserve_index
     )
@@ -798,6 +799,11 @@ def test_process_index_order(tmpdir, index, durations, preserve_index):
             path, start=start, end=end, root=root
         )
         np.testing.assert_equal(signal, value)
+
+    # Make sure there is one cache file for the original index
+    # and one file for the reversed index
+    files_in_cache = audeer.list_file_names(cache_root)
+    assert len(files_in_cache) == 2
 
 
 def test_process_index_filewise_end_times(tmpdir):
