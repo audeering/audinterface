@@ -659,3 +659,40 @@ def test_signal(signal, sampling_rate, segment_func, start, end, result):
     )
     index = model.process_signal(signal, sampling_rate, start=start, end=end)
     pd.testing.assert_index_equal(index, result)
+
+
+@pytest.mark.parametrize("file", [None, "recording.wav"])
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize(
+    "start, start_ns",
+    [
+        (None, 0),
+        (pd.NaT, 0),
+        (0, 0),
+        (0.25, 250_000_000),
+        ("250ms", 250_000_000),
+        ("2000", 250_000_000),
+        (pd.Timedelta(250_000_123, unit="ns"), 250_000_123),
+    ],
+)
+def test_signal_start_with_nested_callback(start, start_ns, file, nested):
+    def segment_func(signal, sampling_rate):
+        # Keep non-monotonic ends to check that shifting preserves row order.
+        return audinterface.utils.signal_index(["0ms", "100ms"], ["400ms", "200ms"])
+
+    inner = audinterface.Segment(process_func=segment_func)
+    interface = audinterface.Segment(
+        process_func=inner.process_signal if nested else segment_func,
+    )
+
+    result = interface.process_signal(
+        SIGNAL, SAMPLING_RATE, start=start, end=2, file=file
+    )
+
+    starts = pd.to_timedelta([start_ns, start_ns + 100_000_000], unit="ns")
+    ends = pd.to_timedelta([start_ns + 400_000_000, start_ns + 200_000_000], unit="ns")
+    if file is None:
+        expected = pd.MultiIndex.from_arrays([starts, ends], names=["start", "end"])
+    else:
+        expected = audformat.segmented_index([file, file], starts, ends)
+    pd.testing.assert_index_equal(result, expected)

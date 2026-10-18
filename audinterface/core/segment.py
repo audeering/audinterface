@@ -651,28 +651,25 @@ class Segment:
         .. _audformat: https://audeering.github.io/audformat/data-format.html
 
         """
-        index = self.process.process_signal(
+        y = self.process.process_signal(
             signal,
             sampling_rate,
             file=file,
             start=start,
             end=end,
             process_func_args=process_func_args,
-        ).values[0]
+        )
+        index = y.values[0]
         utils.assert_index(index)
         if start is not None:
-            start = utils.to_timedelta(start)
-            # Here we change directly the levels,
-            # so we need to use
-            # `index.levels[0]`
-            # instead of
-            # `index.get_level_values('start')`
+            start = y.index.get_level_values("start")[0]
+            # Shift time levels, preserving row order and any file level.
             index = index.set_levels(
                 [
-                    index.levels[0] + start,
-                    index.levels[1] + start,
+                    index.levels[index.names.index(name)] + start
+                    for name in ["start", "end"]
                 ],
-                level=[0, 1],
+                level=["start", "end"],
             )
         if file is not None:
             index = audformat.segmented_index(
