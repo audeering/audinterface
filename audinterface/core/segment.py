@@ -316,13 +316,15 @@ class Segment:
         """
         if start is None or pd.isna(start):
             start = pd.to_timedelta(0)
-        index = self.process.process_file(
+        y = self.process.process_file(
             file,
             start=start,
             end=end,
             root=root,
             process_func_args=process_func_args,
-        ).values[0]
+        )
+        index = y.values[0]
+        start = y.index.get_level_values("start")[0]
         return audformat.segmented_index(
             files=[file] * len(index),
             starts=index.get_level_values("start") + start,

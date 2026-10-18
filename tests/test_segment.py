@@ -82,6 +82,43 @@ def test_file(tmpdir):
     assert all(result.levels[2] == INDEX.levels[1] + pd.to_timedelta("1s"))
 
 
+@pytest.mark.parametrize("audio", [(3, SAMPLING_RATE)], indirect=True)
+@pytest.mark.parametrize(
+    "start, start_ns",
+    [
+        (None, 0),
+        (pd.NaT, 0),
+        (0, 0),
+        (1, 1_000_000_000),
+        (0.25, 250_000_000),
+        ("250ms", 250_000_000),
+        ("0.25s", 250_000_000),
+        ("2000", 250_000_000),
+        (pd.Timedelta(250, unit="ms"), 250_000_000),
+        (pd.Timedelta(250_000_123, unit="ns"), 250_000_123),
+    ],
+)
+def test_file_start_types(audio, start, start_ns):
+    file, _, sampling_rate = audio
+    segment = audinterface.Segment(
+        process_func=lambda signal, sr: audinterface.utils.signal_index(
+            ["0ms", "50ms"], ["100ms", "200ms"]
+        ),
+        sampling_rate=sampling_rate,
+    )
+
+    result = segment.process_file(file, start=start, end=2)
+
+    expected = audformat.segmented_index(
+        [file, file],
+        starts=pd.to_timedelta([start_ns, start_ns + 50_000_000], unit="ns"),
+        ends=pd.to_timedelta(
+            [start_ns + 100_000_000, start_ns + 200_000_000], unit="ns"
+        ),
+    )
+    pd.testing.assert_index_equal(result, expected)
+
+
 @pytest.mark.parametrize("num_workers", [1, 2, None])
 @pytest.mark.parametrize("multiprocessing", [False, True])
 def test_folder(tmpdir, num_workers, multiprocessing):
